@@ -134,15 +134,15 @@ async function getTransactionsFromDashboard(browser, page, filenameGenerator) {
   await page.waitForSelector('.main-tile');
   let tiles = await page.$$('.main-tile');
   console.log(`Number of credit cards found: ${tiles.length}`);
-  if (tiles.length != config.chase.numCards) {
-    console.log(`Expecting ${config.chase.numCards} card(s).`);
+  if (tiles.length != config.CHASE.numCards) {
+    console.log(`Expecting ${config.CHASE.numCards} card(s).`);
     await browser.close();
     return;
   }
   try {
     await Promise.all([
       page.waitForNavigation(),
-      tiles[config.chase.cardIndex].click(),
+      tiles[config.CHASE.cardIndex].click(),
     ]);
   } catch (e) {
     console.log('Selected the card.');
