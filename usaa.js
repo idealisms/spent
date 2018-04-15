@@ -36,12 +36,7 @@ async function getFrameMatchingUrl(page, urlSubstring) {
 
 async function main(authCode) {
   let filenameGenerator = screenshotFilename();
-  //const browser = await puppeteer.launch({executablePath: '/usr/bin/chromium-browser'});
-  const browser = await puppeteer.launch({
-    headless: false,
-    executablePath: '/mnt/c/Program\ Files\ \(x86\)/Google/Chrome/Application/chrome.exe'
-  });
-
+  const browser = await puppeteer.launch(config.LAUNCH_OPTIONS);
   console.log(await browser.version());
 
   console.log('Loading login page...');

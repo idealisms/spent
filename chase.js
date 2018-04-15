@@ -34,12 +34,13 @@ async function getFrameMatchingUrl(page, urlSubstring) {
 
 (async() => {
   let filenameGenerator = screenshotFilename();
-  const browser = await puppeteer.launch({
-    executablePath: '/usr/bin/chromium-browser',
+  let launchOptions = Object.assign({
     // Use a profile directory so we don't have to do 2-factor
     // authentication every time.
     userDataDir: './user-data/chase'
-  });
+  }, config.LAUNCH_OPTIONS);
+
+  const browser = await puppeteer.launch(launchOptions);
 
   console.log(await browser.version());
 
