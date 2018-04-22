@@ -39,13 +39,22 @@ const EXCLUDE_TAGS = [
   'taxes',
 ];
 
+function shouldExclude(transaction: ITransaction): boolean {
+  for (let tag of transaction.tags) {
+    if (EXCLUDE_TAGS.indexOf(tag) !== -1) {
+      return true;
+    }
+  }
+  return false;
+}
+
 type ITransactionProps = {
   transaction: ITransaction,
 };
 class Transaction extends React.Component<ITransactionProps, object> {
   public render(): React.ReactElement<object> {
     return (
-      <div>{this.props.transaction.date} {this.props.transaction.amount_cents} {this.props.transaction.description}</div>
+      <div>{this.props.transaction.date} {this.props.transaction.amount_cents / 100.0} {this.props.transaction.description}</div>
     );
   }
 }
@@ -58,48 +67,43 @@ type IDailyGraphProps = {
 };
 class DailyGraph extends React.Component<IDailyGraphProps, object> {
   public render(): React.ReactElement<object> {
-    let dailyTotals: { [s: string]: number; } = {};
-    for (let m = moment(this.props.startDate); m.isSameOrBefore(moment(this.props.endDate)); m = m.add(1, 'days')) {
-      dailyTotals[m.format('YYYY-MM-DD')] = 0;
-    }
+    let data: [string, number][] = [];
 
-    for (let transaction of this.props.transactions) {
-      if (this.shouldExclude(transaction)) {
-        continue;
+    if (this.props.transactions.length) {
+      let dailyTotals: { [s: string]: number; } = {};
+      for (let m = moment(this.props.startDate); m.isSameOrBefore(moment(this.props.endDate)); m = m.add(1, 'days')) {
+        dailyTotals[m.format('YYYY-MM-DD')] = 0;
       }
 
-      dailyTotals[transaction.date] += transaction.amount_cents;
-    }
+      for (let transaction of this.props.transactions) {
+        if (shouldExclude(transaction)) {
+          continue;
+        }
 
-    let runningTotals: { [s: string]: number; } = {};
-    let currentTotal = 0;
-    for (let m = moment(this.props.startDate); m.isSameOrBefore(moment(this.props.endDate)); m = m.add(1, 'days')) {
-      let currentDate = m.format('YYYY-MM-DD');
-      currentTotal += dailyTotals[currentDate] - this.props.dailyBudgetCents;
-      runningTotals[currentDate] = currentTotal;
+        dailyTotals[transaction.date] += transaction.amount_cents;
+      }
+
+      let currentTotal = 0;
+      for (let m = moment(this.props.startDate); m.isSameOrBefore(moment(this.props.endDate)); m = m.add(1, 'days')) {
+        let currentDate = m.format('YYYY-MM-DD');
+        currentTotal += dailyTotals[currentDate] - this.props.dailyBudgetCents;
+        data.push([currentDate, currentTotal / 100.0]);
+      }
+    } else {
+      data.push([moment().format('YYYY-MM-DD'), 0]);
     }
-    console.log(runningTotals);
 
     return (
       <Chart
-          chartType='ScatterChart'
-          data={[['Age', 'Weight'], [8, 12], [4, 5.55], [10, 14]]}
-          options={{}}
-          graph_id='ScatterChart'
+          chartType='LineChart'
+          columns={[{'label': 'Date', 'type': 'string'}, {'label':'Dollars', 'type':'number'}]}
+          rows={data}
+          options={{'hAxis': {'title': 'Date'}, 'vAxis': {'title': 'Dollars'}}}
+          graph_id='daily-spend-chart'
           width='100%'
           height='400px'
-          legend_toggle
         />
     );
-  }
-
-  protected shouldExclude(transaction: ITransaction): boolean {
-    for (let tag of transaction.tags) {
-      if (EXCLUDE_TAGS.indexOf(tag) !== -1) {
-        return true;
-      }
-    }
-    return false;
   }
 }
 
@@ -126,7 +130,7 @@ class Daily extends React.Component<RouteComponentProps<object>, IDailyState> {
     let filteredTransactions = this.state.transactions.filter(t => {
       let [fullYear, month, day] = t.date.split('-');
       let transactionDate = new Date(parseInt(fullYear, 10), parseInt(month, 10) - 1, parseInt(day, 10));
-      return this.state.startDate <= transactionDate && transactionDate <= this.state.endDate;
+      return this.state.startDate <= transactionDate && transactionDate <= this.state.endDate && !shouldExclude(t);
     });
     let rows = filteredTransactions.map(t => {
         return (
