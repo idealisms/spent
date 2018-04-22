@@ -78,6 +78,10 @@ module.exports = (options) => ({
       'jsnext:main',
       'main',
     ],
+    // https://github.com/moment/moment/issues/2979
+    alias: {
+      moment$: 'moment/moment.js',
+    }
   }, options.resolve),
 
   devtool: options.devtool,

@@ -1,4 +1,5 @@
 import * as React from 'react';
+import * as moment from 'moment';
 import {RouteComponentProps} from 'react-router';
 import DatePicker from 'material-ui/DatePicker';
 import RaisedButton from 'material-ui/RaisedButton';
@@ -20,6 +21,24 @@ interface ITransaction {
   source?: string;
 }
 
+const EXCLUDE_TAGS = [
+  'bank transfer',
+  'credit card',
+  'exclude',
+  'hoa',
+  'home sale',
+  'insurance',
+  'investment',
+  'medical',
+  'mortgage',
+  'new house',
+  'paycheck',
+  'rent',
+  'settlement',
+  'stock',
+  'taxes',
+];
+
 type ITransactionProps = {
   transaction: ITransaction,
 };
@@ -33,9 +52,34 @@ class Transaction extends React.Component<ITransactionProps, object> {
 
 type IDailyGraphProps = {
   transactions: ITransaction[],
+  startDate: Date,
+  endDate: Date,
+  dailyBudgetCents: number,
 };
 class DailyGraph extends React.Component<IDailyGraphProps, object> {
   public render(): React.ReactElement<object> {
+    let dailyTotals: { [s: string]: number; } = {};
+    for (let m = moment(this.props.startDate); m.isSameOrBefore(moment(this.props.endDate)); m = m.add(1, 'days')) {
+      dailyTotals[m.format('YYYY-MM-DD')] = 0;
+    }
+
+    for (let transaction of this.props.transactions) {
+      if (this.shouldExclude(transaction)) {
+        continue;
+      }
+
+      dailyTotals[transaction.date] += transaction.amount_cents;
+    }
+
+    let runningTotals: { [s: string]: number; } = {};
+    let currentTotal = 0;
+    for (let m = moment(this.props.startDate); m.isSameOrBefore(moment(this.props.endDate)); m = m.add(1, 'days')) {
+      let currentDate = m.format('YYYY-MM-DD');
+      currentTotal += dailyTotals[currentDate] - this.props.dailyBudgetCents;
+      runningTotals[currentDate] = currentTotal;
+    }
+    console.log(runningTotals);
+
     return (
       <Chart
           chartType='ScatterChart'
@@ -48,12 +92,22 @@ class DailyGraph extends React.Component<IDailyGraphProps, object> {
         />
     );
   }
+
+  protected shouldExclude(transaction: ITransaction): boolean {
+    for (let tag of transaction.tags) {
+      if (EXCLUDE_TAGS.indexOf(tag) !== -1) {
+        return true;
+      }
+    }
+    return false;
+  }
 }
 
 type IDailyState = {
   transactions: ITransaction[],
   startDate: Date,
   endDate: Date,
+  dailyBudgetCents: number,
 };
 class Daily extends React.Component<RouteComponentProps<object>, IDailyState> {
 
@@ -61,8 +115,10 @@ class Daily extends React.Component<RouteComponentProps<object>, IDailyState> {
     super(props, context);
     this.state = {
       transactions: [],
+      // March 3, 2018 (months are 0 indexed).
       startDate: new Date(2018, 2, 3),
-      endDate: new Date(),
+      endDate: moment().hours(0).minutes(0).seconds(0).milliseconds(0).toDate(),
+      dailyBudgetCents: 10402,
     };
   }
 
@@ -86,7 +142,12 @@ class Daily extends React.Component<RouteComponentProps<object>, IDailyState> {
           style={{minWidth: '200px'}}
           onClick={this.handleClickImport}>Import from Dropbox</RaisedButton>
 
-        <DailyGraph transactions={filteredTransactions} />
+        <DailyGraph
+          transactions={filteredTransactions}
+          startDate={this.state.startDate}
+          endDate={this.state.endDate}
+          dailyBudgetCents={this.state.dailyBudgetCents}
+          />
 
         <div id='controls'>
           <DatePicker
@@ -106,7 +167,8 @@ class Daily extends React.Component<RouteComponentProps<object>, IDailyState> {
           $<TextField
             hintText='Default: 104.02'
             floatingLabelText='Daily Budget'
-            defaultValue='104.02'
+            defaultValue={this.state.dailyBudgetCents / 100.0}
+            onChange={this.handleChangeDailyBudget}
           />
         </div>
         {rows}
@@ -123,6 +185,12 @@ class Daily extends React.Component<RouteComponentProps<object>, IDailyState> {
   public handleChangeEndDate = (event: Event, date: Date): void => {
     this.setState({
       endDate: date,
+    });
+  }
+
+  public handleChangeDailyBudget = (event: any, budget: string): void => {
+    this.setState({
+      dailyBudgetCents: parseInt('' + parseFloat(budget) * 100, 10),
     });
   }
 
