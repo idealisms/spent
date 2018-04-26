@@ -142,19 +142,34 @@ async function getTransactionsFromDashboard(browser, page, filenameGenerator) {
   }
   try {
     await Promise.all([
-      page.waitForNavigation(),
+      page.waitForNavigation({'waitUntil': 'networkidle0'}),
       tiles[config.CHASE.cardIndex].click(),
     ]);
   } catch (e) {
     console.log('Selected the card.');
   }
 
-  await page.waitForSelector('#downloadActivityIcon');
+  await page.waitForSelector('#iconButton-transactionTypeOptions');
+  await page.click('#iconButton-transactionTypeOptions');
   await page.screenshot({path: filenameGenerator.next().value});
-  await page.click('#downloadActivityIcon');
+  let transactionLinks = await page.$$('#ul-list-container-transactionTypeOptions a');
+  console.log(`Found ${transactionLinks.length} menu item(s)`);
+  let allTransactionsLink = transactionLinks[transactionLinks.length - 3];
 
-  await page.waitForSelector('#header-styledSelect1');
+  try {
+    await Promise.all([
+      page.waitForNavigation({'waitUntil': 'networkidle0'}),
+      allTransactionsLink.click(),
+    ]);
+  } catch (e) {
+    console.log('Showed all transactions.');
+  }
   await page.screenshot({path: filenameGenerator.next().value});
+
+  await page.waitForSelector('#downloadActivityIcon');
+  await page.click('#downloadActivityIcon');
+  await page.screenshot({path: filenameGenerator.next().value});
+  await page.waitForSelector('#header-styledSelect1');
   await page.click('#header-styledSelect1');
   await page.waitForSelector('#ul-list-container-styledSelect1 > li:last-child > a');
   await page.click('#ul-list-container-styledSelect1 > li:last-child > a');
