@@ -19,6 +19,7 @@ interface ITransaction {
   amount_cents: number;
   transactions: Array<ITransaction>;
   source?: string;
+  // notes?: string;  // TODO
 }
 
 const EXCLUDE_TAGS = [
@@ -124,6 +125,7 @@ class Daily extends React.Component<RouteComponentProps<object>, IDailyState> {
       endDate: moment().hours(0).minutes(0).seconds(0).milliseconds(0).toDate(),
       dailyBudgetCents: 10402,
     };
+    this.loadFromDropbox();
   }
 
   public render(): React.ReactElement<object> {
@@ -144,7 +146,7 @@ class Daily extends React.Component<RouteComponentProps<object>, IDailyState> {
         <RaisedButton
           primary={true}
           style={{minWidth: '200px'}}
-          onClick={this.handleClickImport}>Import from Dropbox</RaisedButton>
+          onClick={this.loadFromDropbox}>Import from Dropbox</RaisedButton>
 
         <DailyGraph
           transactions={filteredTransactions}
@@ -155,6 +157,8 @@ class Daily extends React.Component<RouteComponentProps<object>, IDailyState> {
 
         <div id='controls'>
           <DatePicker
+            id='start-date'
+            ref='start-date'
             style={{display: 'inline-block'}}
             autoOk={true}
             floatingLabelText='Start date'
@@ -162,6 +166,8 @@ class Daily extends React.Component<RouteComponentProps<object>, IDailyState> {
             onChange={this.handleChangeStartDate}
           />
           <DatePicker
+            id='end-date'
+            ref='end-date'
             style={{display: 'inline-block', marginLeft: '24px', marginRight: '24px'}}
             autoOk={true}
             floatingLabelText='End date'
@@ -198,7 +204,7 @@ class Daily extends React.Component<RouteComponentProps<object>, IDailyState> {
     });
   }
 
-  public handleClickImport = (): void => {
+  public loadFromDropbox = (): void => {
     let filesDownloadArg = {
       path: '/transactions.json',
     };
@@ -208,10 +214,17 @@ class Daily extends React.Component<RouteComponentProps<object>, IDailyState> {
         .then(file => {
             let fr = new FileReader();
             fr.addEventListener('load', ev => {
-                daily.setState({
-                  transactions: JSON.parse(fr.result),
+                let transactions: ITransaction[] = JSON.parse(fr.result);
+                let state: any = { transactions: transactions };
+                if (transactions[0]) {
+                  console.log(transactions[0].date);
+                  state.endDate = moment(transactions[0].date).toDate();
+                }
+                let endDate = daily.refs['end-date'] as DatePicker;
+                endDate.setState({
+                  date: moment(transactions[0].date).toDate(),
                 });
-                // onSuccess(this);
+                daily.setState(state);
             });
             fr.addEventListener('error', ev => {
                 console.log(ev);
