@@ -54,9 +54,32 @@ type ITransactionProps = {
 };
 class Transaction extends React.Component<ITransactionProps, object> {
   public render(): React.ReactElement<object> {
+    let isCredit = this.props.transaction.amount_cents < 0;
     return (
-      <div>{this.props.transaction.date} {this.props.transaction.amount_cents / 100.0} {this.props.transaction.description}</div>
+      <div className='row'>
+        <div className='date'>{this.props.transaction.date}</div>
+        <div className={'amount' + (isCredit ? ' credit' : '')}>{this.formatAmount(this.props.transaction.amount_cents)}</div>
+        <div className='description'>{this.props.transaction.description}</div>
+      </div>
     );
+  }
+
+  public formatAmount(amountCentsNumber: number): string {
+    let isNegative = amountCentsNumber < 0;
+    let amountCents = Math.abs(amountCentsNumber).toString();
+    let digits = amountCents.length;
+    let dollars = amountCents.substr(0, digits - 2);
+    let numCommas = parseInt(
+        ((dollars.length - 1) / 3).toString(), 10);
+    for (let c = numCommas * 3; c > 0; c -= 3) {
+        dollars = dollars.substr(0, dollars.length - c) + ',' +
+            dollars.substr(dollars.length - c);
+    }
+    let amount = dollars + '.' + amountCents.substr(digits - 2);
+    if (isNegative) {
+        amount = '(' + amount + ')';
+    }
+    return amount;
   }
 }
 
@@ -101,7 +124,7 @@ class DailyGraph extends React.Component<IDailyGraphProps, object> {
           rows={data}
           options={{'hAxis': {'title': 'Date'}, 'vAxis': {'title': 'Dollars'}}}
           graph_id='daily-spend-chart'
-          width='100%'
+          width='auto'
           height='400px'
         />
     );
@@ -141,12 +164,14 @@ class Daily extends React.Component<RouteComponentProps<object>, IDailyState> {
       });
 
     return (
-      <div>
-        <h1>Daily</h1>
-        <RaisedButton
+      <div id='page-daily'>
+        <div className='header'>
+          <h1>Daily</h1>
+        </div>
+        {/* <RaisedButton
           primary={true}
           style={{minWidth: '200px'}}
-          onClick={this.loadFromDropbox}>Import from Dropbox</RaisedButton>
+          onClick={this.loadFromDropbox}>Import from Dropbox</RaisedButton> */}
 
         <DailyGraph
           transactions={filteredTransactions}
@@ -181,7 +206,9 @@ class Daily extends React.Component<RouteComponentProps<object>, IDailyState> {
             onChange={this.handleChangeDailyBudget}
           />
         </div>
-        {rows}
+        <div id='transactions'>
+          {rows}
+        </div>
       </div>
     );
   }

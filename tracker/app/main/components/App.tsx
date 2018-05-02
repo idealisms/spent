@@ -15,17 +15,15 @@ const NoMatch = () => (
 export class App extends React.Component<object, object> {
   public render(): React.ReactElement<App> {
 
+    // {/* <MenuBar title='Title'/> */}
     return (
-        <div>
-          {/* <MenuBar title='Title'/> */}
-          <Switch>
-            <Route exact path={HomePage} component={Home} />
-            <Route exact path={DailyPage} component={Daily} />
-            <Route exact path={CounterListPage} component={CounterList} />
-            <Route component={NoMatch}/>
-          </Switch>
-        </div>
-    );
+        <Switch>
+          <Route exact path={HomePage} component={Home} />
+          <Route exact path={DailyPage} component={Daily} />
+          <Route exact path={CounterListPage} component={CounterList} />
+          <Route component={NoMatch}/>
+        </Switch>
+      );
   }
 }
 

@@ -1,0 +1,52 @@
+html, body, #app, #page-daily {
+	height: 100%;
+}
+body {
+  margin: 0;
+}
+#page-daily {
+  display: flex;
+	flex-direction: column;
+}
+#page-daily > .header, #page-daily > #daily-spend-chart, #page-daily > #controls {
+  flex: none;
+  padding: 0 16px;
+}
+
+#page-daily > #transactions {
+  flex: 1;
+  overflow: auto;
+}
+#transactions {
+  border-top: 1px solid lightgrey;
+  line-height: 46px;
+}
+#transactions .row > * {
+  display: inline-block;
+}
+
+#transactions .row {
+  border-bottom: 1px solid lightgrey;
+  height: 47px;
+}
+
+#transactions .row > .date {
+  white-space: nowrap;
+  font-size: 70%;
+  margin-left: 16px;
+}
+
+#transactions .row > .amount {
+  white-space: nowrap;
+  text-align: right;
+  width: 96px;
+  margin-left: 16px;
+}
+#transactions .row > .amount.credit {
+  color: green;
+}
+
+#transactions .row > .description {
+  white-space: nowrap;
+  margin-left: 16px;
+}
