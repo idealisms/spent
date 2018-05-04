@@ -33,7 +33,7 @@ function formatDate(date) {
 
   console.log('Loading login page...');
   const page = await browser.newPage();
-  await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/65.0.3325.181 Safari/537.36');
+  await page.setUserAgent(config.LAUNCH_OPTIONS.userAgent);
   await page.setViewport({
     'width': 1024,
     'height': 600

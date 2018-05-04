@@ -41,6 +41,7 @@ async function main(authCode) {
 
   console.log('Loading login page...');
   const page = await browser.newPage();
+  await page.setUserAgent(config.LAUNCH_OPTIONS.userAgent);
   await page.goto('https://www.usaa.com/');
   await page.waitForSelector('#usaa-my-profile');
   await page.screenshot({path: filenameGenerator.next().value});
