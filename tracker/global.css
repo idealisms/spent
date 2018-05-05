@@ -13,6 +13,10 @@ body {
   padding: 0 16px;
 }
 
+#page-daily > .header {
+  margin: 0;
+}
+
 #page-daily > #transactions {
   flex: 1;
   overflow: auto;
