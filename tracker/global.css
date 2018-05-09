@@ -13,7 +13,7 @@ body {
   padding: 0 16px;
 }
 
-#page-daily > .header {
+#page-daily > .header > h1 {
   margin: 0;
 }
 
@@ -48,6 +48,15 @@ body {
 }
 #transactions .row > .amount.credit {
   color: green;
+}
+
+#transactions .row > .category {
+  display: inline-flex;
+  flex-direction: column;
+  justify-content: center;
+  height: 47px;
+  vertical-align: top;
+  margin-left: 16px;
 }
 
 #transactions .row > .description {

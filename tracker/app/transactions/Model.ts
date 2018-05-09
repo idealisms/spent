@@ -1,3 +1,21 @@
+export enum Category {
+  Car,
+  Cash,
+  Clothes,
+  Entertainment,
+  Food,
+  Gift,
+  HomeImprovement,
+  HomeAndElectronics,
+  Medical,
+  PersonalCare,
+  RecurringExpenses,
+  Transit,
+  TravelExpenses,
+
+  Other,
+}
+
 export interface ITransaction {
   id: string;
   description: string;
