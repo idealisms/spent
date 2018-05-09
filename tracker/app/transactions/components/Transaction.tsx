@@ -40,8 +40,11 @@ export class Transaction extends React.Component<ITransactionProps, object> {
   public render(): React.ReactElement<object> {
     let isCredit = this.props.transaction.amount_cents < 0;
     let categoryClassName = 'error';
+    let categoryName = 'error';
     try {
-      categoryClassName = this.categoryToMaterialClassName(this.getCategory());
+      let category = this.getCategory();
+      categoryClassName = this.categoryToMaterialClassName(category);
+      categoryName = Category[category];
     } catch(e) {
       console.log(e);
     }
@@ -49,7 +52,7 @@ export class Transaction extends React.Component<ITransactionProps, object> {
       <div className='row'>
         <div className='date'>{this.props.transaction.date}</div>
         <div className={'amount' + (isCredit ? ' credit' : '')}>{this.formatAmount()}</div>
-        <div className='category'><i className='material-icons'>{categoryClassName}</i></div>
+        <div className='category'><i className='material-icons' title={categoryName}>{categoryClassName}</i></div>
         <div className='description'>{this.props.transaction.description}</div>
       </div>
     );
