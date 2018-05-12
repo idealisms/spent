@@ -170,7 +170,6 @@ class Daily extends React.Component<RouteComponentProps<object>, IDailyState> {
                 let transactions: ITransaction[] = JSON.parse(fr.result);
                 let state: any = { transactions: transactions };
                 if (transactions[0]) {
-                  console.log(transactions[0].date);
                   state.endDate = moment(transactions[0].date).toDate();
                 }
                 let endDate = daily.refs['end-date'] as DatePicker;
