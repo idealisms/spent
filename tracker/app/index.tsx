@@ -1,15 +1,14 @@
+import { createHashHistory } from 'history';
+import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
-import {Store} from 'redux';
-import {Provider} from 'react-redux';
-import {createHashHistory}  from 'history';
-import {ConnectedRouter} from 'react-router-redux';
-
-
-import {App, IAppState} from './main';
-
-import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
+import { Provider } from 'react-redux';
+import { ConnectedRouter } from 'react-router-redux';
+import { Store } from 'redux';
+import './global.css';
+import { App, IAppState } from './main';
 import muiTheme from './muiTheme';
+
 
 declare const require: (name: String) => any;
 

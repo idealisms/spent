@@ -55,7 +55,10 @@ module.exports = (options) => ({
       debug: false,
       options: {
         resolve: {
-          extensions: ['.ts', '.tsx', '.js']
+          extensions: ['.ts', '.tsx', '.js', '.css'],
+          modulesDirectories: [
+            'node_modules'
+          ]
         }
       }
     })
