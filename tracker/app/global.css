@@ -13,13 +13,20 @@ body {
   padding: 0 16px;
 }
 
+#page-daily > .header > h1 {
+  margin: 0;
+}
+
 #page-daily > #daily-spend-chart {
   flex: 0 1 400px;
   max-height: 50%;
 }
 
-#page-daily > .header > h1 {
-  margin: 0;
+#page-daily > #controls {
+  display: flex;
+}
+#page-daily > #controls > div > div {
+  width: auto !important;
 }
 
 #page-daily > #transactions {
@@ -31,10 +38,10 @@ body {
   line-height: 46px;
 }
 #transactions .row > * {
-  display: inline-block;
 }
 
 #transactions .row {
+  display: flex;
   border-bottom: 1px solid lightgrey;
   height: 47px;
 }
@@ -43,13 +50,14 @@ body {
   white-space: nowrap;
   font-size: 70%;
   margin-left: 16px;
+  flex: none;
 }
 
 #transactions .row > .amount {
   white-space: nowrap;
   text-align: right;
-  width: 80px;
   margin-left: 16px;
+  flex: 0 0 80px;
 }
 #transactions .row > .amount.credit {
   color: green;
@@ -58,11 +66,13 @@ body {
 #transactions .row > .category {
   margin-left: 16px;
   font-size: 24px;
-  width: 32px;
   text-align: center;
+  flex: 0 0 32px;
 }
 
 #transactions .row > .description {
   white-space: nowrap;
   margin-left: 16px;
+  flex: 1 1 auto;
+  overflow: auto;
 }

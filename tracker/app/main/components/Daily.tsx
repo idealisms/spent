@@ -109,7 +109,6 @@ class Daily extends React.Component<RouteComponentProps<object>, IDailyState> {
           <DatePicker
             id='start-date'
             ref='start-date'
-            style={{display: 'inline-block'}}
             autoOk={true}
             floatingLabelText='Start date'
             defaultDate={this.state.startDate}
@@ -118,18 +117,20 @@ class Daily extends React.Component<RouteComponentProps<object>, IDailyState> {
           <DatePicker
             id='end-date'
             ref='end-date'
-            style={{display: 'inline-block', marginLeft: '24px', marginRight: '24px'}}
+            style={{marginLeft: '24px', marginRight: '24px'}}
             autoOk={true}
             floatingLabelText='End date'
             defaultDate={this.state.endDate}
             onChange={this.handleChangeEndDate}
           />
-          $<TextField
-            hintText='Default: 104.02'
-            floatingLabelText='Daily Budget'
-            defaultValue={this.state.dailyBudgetCents / 100.0}
-            onChange={this.handleChangeDailyBudget}
-          />
+          <div style={{whiteSpace: 'nowrap'}}>
+            $<TextField
+              hintText='Default: 104.02'
+              floatingLabelText='Daily Budget'
+              defaultValue={this.state.dailyBudgetCents / 100.0}
+              onChange={this.handleChangeDailyBudget}
+            />
+          </div>
         </div>
         <div id='transactions'>
           {rows}
