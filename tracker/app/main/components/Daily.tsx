@@ -50,7 +50,7 @@ class DailyGraph extends React.Component<IDailyGraphProps, object> {
           options={{'hAxis': {'title': 'Date'}, 'vAxis': {'title': 'Dollars'}}}
           graph_id='daily-spend-chart'
           width='auto'
-          height='400px'
+          height='auto'
         />
     );
   }

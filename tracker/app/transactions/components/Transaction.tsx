@@ -40,10 +40,12 @@ export class Transaction extends React.Component<ITransactionProps, object> {
   public render(): React.ReactElement<object> {
     let isCredit = this.props.transaction.amount_cents < 0;
     let categoryClassName = 'error';
+    let categoryEmoji = '🙅';
     let categoryName = 'error';
     try {
       let category = this.getCategory();
       categoryClassName = this.categoryToMaterialClassName(category);
+      categoryEmoji = this.categoryToEmoji(category);
       categoryName = Category[category];
     } catch(e) {
       console.log(e);
@@ -52,7 +54,7 @@ export class Transaction extends React.Component<ITransactionProps, object> {
       <div className='row'>
         <div className='date'>{this.props.transaction.date}</div>
         <div className={'amount' + (isCredit ? ' credit' : '')}>{this.formatAmount()}</div>
-        <div className='category'><i className='material-icons' title={categoryName}>{categoryClassName}</i></div>
+        <div className='category' title={categoryName}>{categoryEmoji}</div>
         <div className='description'>{this.props.transaction.description}</div>
       </div>
     );
@@ -96,6 +98,10 @@ export class Transaction extends React.Component<ITransactionProps, object> {
     return Category.Other;
   }
 
+  // Tried using material icons instead of emoji. I don't like them as much,
+  // but they are consistent across platforms. Here's the example HTML to
+  // use them:
+  // <div className='category'><i className='material-icons' title={categoryName}>{categoryClassName}</i></div>
   protected categoryToMaterialClassName(category: Category): string {
     switch (category) {
       case Category.Car:
@@ -128,6 +134,41 @@ export class Transaction extends React.Component<ITransactionProps, object> {
         return 'help_outline';
       default:
         return 'monetization_on';
+    }
+  }
+
+  protected categoryToEmoji(category: Category): string {
+    switch (category) {
+      case Category.Car:
+        return '🚗';
+      case Category.Cash:
+        return '🏧';
+      case Category.Clothes:
+        return '👚';
+      case Category.Entertainment:
+        return '🎟️';
+      case Category.Food:
+        return '🍽';
+      case Category.Gift:
+        return '🎁';
+      case Category.HomeImprovement:
+        return '🛠️';
+      case Category.HomeAndElectronics:
+        return '🛍️';
+      case Category.Medical:
+        return '👩‍⚕️';
+      case Category.PersonalCare:
+        return '💆‍';
+      case Category.RecurringExpenses:
+        return '🔁';
+      case Category.Transit:
+        return '🚇';
+      case Category.TravelExpenses:
+        return '🛫';
+      case Category.Other:
+        return '❓';
+      default:
+        return '💲';
     }
   }
 }

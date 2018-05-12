@@ -13,6 +13,11 @@ body {
   padding: 0 16px;
 }
 
+#page-daily > #daily-spend-chart {
+  flex: 0 1 400px;
+  max-height: 50%;
+}
+
 #page-daily > .header > h1 {
   margin: 0;
 }
@@ -43,7 +48,7 @@ body {
 #transactions .row > .amount {
   white-space: nowrap;
   text-align: right;
-  width: 96px;
+  width: 80px;
   margin-left: 16px;
 }
 #transactions .row > .amount.credit {
@@ -51,12 +56,10 @@ body {
 }
 
 #transactions .row > .category {
-  display: inline-flex;
-  flex-direction: column;
-  justify-content: center;
-  height: 47px;
-  vertical-align: top;
   margin-left: 16px;
+  font-size: 24px;
+  width: 32px;
+  text-align: center;
 }
 
 #transactions .row > .description {
