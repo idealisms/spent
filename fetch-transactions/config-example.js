@@ -12,8 +12,8 @@ exports.BARCLAY = {
 exports.CHASE = {
   username: 'username',
   password: 'password',
-  numCards: 1,
-  cardIndex: 0
+  _comment: 'There should be one card identifier for each Chase card.',
+  cardIdentifiers: ['#redeemRewards-link-wrapper', '#requestRewardsBalance-link-wrapper']
 };
 
 exports.USAA = {

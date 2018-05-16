@@ -69,7 +69,8 @@ async function getFrameMatchingUrl(page, urlSubstring) {
   console.log('Logging in...');
   try {
     await Promise.all([
-      page.waitForNavigation({'waitUntil': 'networkidle0'}),
+      // FIXME: Switch to waitForSelector.
+      page.waitForSelector('#signin-button', {'hidden': true}),
       loginFrame.click('#signin-button'),
     ]);
   } catch (e) {
@@ -134,67 +135,78 @@ async function getTransactionsFromDashboard(browser, page, filenameGenerator) {
   await page.waitForSelector('.main-tile');
   let tiles = await page.$$('.main-tile');
   console.log(`Number of credit cards found: ${tiles.length}`);
-  if (tiles.length != config.CHASE.numCards) {
-    console.log(`Expecting ${config.CHASE.numCards} card(s).`);
+  if (tiles.length != config.CHASE.cardIdentifiers.length) {
+    console.log(`Expecting ${config.CHASE.cardIdentifiers.length} card(s).`);
     await browser.close();
     return;
   }
-  try {
-    await Promise.all([
-      page.waitForNavigation({'waitUntil': 'networkidle0'}),
-      tiles[config.CHASE.cardIndex].click(),
-    ]);
-  } catch (e) {
-    console.log('Selected the card.');
+
+  for (let cardIndex in config.CHASE.cardIdentifiers) {
+    try {
+      await Promise.all([
+        page.waitForSelector(config.CHASE.cardIdentifiers[cardIndex]),
+        tiles[cardIndex].click(),
+      ]);
+    } catch (e) {
+      console.log('Selected the card.');
+    }
+
+    await page.waitForSelector('#iconButton-transactionTypeOptions');
+    await page.click('#iconButton-transactionTypeOptions');
+    await page.screenshot({path: filenameGenerator.next().value});
+    let transactionLinks = await page.$$('#ul-list-container-transactionTypeOptions a');
+    console.log(`Found ${transactionLinks.length} menu item(s)`);
+    let allTransactionsLink = transactionLinks[transactionLinks.length - 3];
+
+    try {
+      await Promise.all([
+        page.waitForSelector('#header-transactionTypeOptions[value="All transactions"]'),
+        allTransactionsLink.click(),
+      ]);
+    } catch (e) {
+      console.log('Showed all transactions.');
+    }
+    await page.screenshot({path: filenameGenerator.next().value});
+
+    await page.waitForSelector('#downloadActivityIcon');
+    await page.click('#downloadActivityIcon');
+    await page.screenshot({path: filenameGenerator.next().value});
+    await page.waitForSelector('#header-styledSelect1');
+    await page.click('#header-styledSelect1');
+    await page.waitForSelector('#ul-list-container-styledSelect1 > li:last-child > a');
+    await page.click('#ul-list-container-styledSelect1 > li:last-child > a');
+    await page.waitForSelector('#input-accountActivityFromDate-input-field');
+
+    // Get the last 7 days of transactions.
+    const ONE_DAY_MS = 24 * 60 * 60 * 1000;
+    let startTime = new Date(Date.now() - (7 * ONE_DAY_MS));
+    startTime = new Date(startTime.getFullYear(), startTime.getMonth(), startTime.getDate());
+
+    await page.type('#input-accountActivityFromDate-input-field', formatDate(startTime));
+    await page.type('#input-accountActivityToDate-input-field', formatDate(new Date()));
+    await page.screenshot({path: filenameGenerator.next().value});
+
+    console.log('Downloading transactions...')
+    try {
+      await page._client.send('Page.setDownloadBehavior', {behavior: 'allow', downloadPath: './downloads/'});
+      await page.click('#download');  // Blur the input field to activate the download button.
+      await Promise.all([
+        page.waitForSelector('#backToAccounts'),
+        page.click('#download'),
+      ]);
+    } catch (e) {
+    }
+    await page.screenshot({path: filenameGenerator.next().value});
+
+    try {
+      await Promise.all([
+        page.waitForSelector('#widget-grid', {'visible': true}),
+        page.click('#backToAccounts'),
+      ]);
+    } catch (e) {
+    }
   }
 
-  await page.waitForSelector('#iconButton-transactionTypeOptions');
-  await page.click('#iconButton-transactionTypeOptions');
-  await page.screenshot({path: filenameGenerator.next().value});
-  let transactionLinks = await page.$$('#ul-list-container-transactionTypeOptions a');
-  console.log(`Found ${transactionLinks.length} menu item(s)`);
-  let allTransactionsLink = transactionLinks[transactionLinks.length - 3];
-
-  try {
-    await Promise.all([
-      page.waitForNavigation({'waitUntil': 'networkidle0'}),
-      allTransactionsLink.click(),
-    ]);
-  } catch (e) {
-    console.log('Showed all transactions.');
-  }
-  await page.screenshot({path: filenameGenerator.next().value});
-
-  await page.waitForSelector('#downloadActivityIcon');
-  await page.click('#downloadActivityIcon');
-  await page.screenshot({path: filenameGenerator.next().value});
-  await page.waitForSelector('#header-styledSelect1');
-  await page.click('#header-styledSelect1');
-  await page.waitForSelector('#ul-list-container-styledSelect1 > li:last-child > a');
-  await page.click('#ul-list-container-styledSelect1 > li:last-child > a');
-  await page.waitForSelector('#input-accountActivityFromDate-input-field');
-
-  // Get the last 7 days of transactions.
-  const ONE_DAY_MS = 24 * 60 * 60 * 1000;
-  let startTime = new Date(Date.now() - (7 * ONE_DAY_MS));
-  startTime = new Date(startTime.getFullYear(), startTime.getMonth(), startTime.getDate());
-
-  await page.type('#input-accountActivityFromDate-input-field', formatDate(startTime));
-  await page.type('#input-accountActivityToDate-input-field', formatDate(new Date()));
-  await page.screenshot({path: filenameGenerator.next().value});
-
-  console.log('Downloading transactions...')
-  try {
-    await page._client.send('Page.setDownloadBehavior', {behavior: 'allow', downloadPath: './downloads/'});
-    await page.click('#download');  // Blur the input field to activate the download button.
-    await Promise.all([
-      // This will timeout, we're just giving time for the download to finish.
-      page.waitForNavigation(),
-      page.click('#download'),
-    ]);
-  } catch (e) {
-  }
-  await page.screenshot({path: filenameGenerator.next().value});
 
   console.log('Success!');
   await browser.close();
