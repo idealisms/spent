@@ -1,6 +1,6 @@
 import { ITransaction } from './Model';
 
-const EXCLUDE_TAGS = [
+export const DAILY_EXCLUDE_TAGS = new Set([
   'bank transfer',
   'credit card',
   'exclude',
@@ -16,11 +16,11 @@ const EXCLUDE_TAGS = [
   'settlement',
   'stock',
   'taxes',
-];
+]);
 
-export function shouldExclude(transaction: ITransaction): boolean {
+export function shouldExclude(transaction: ITransaction, excludeTags: Set<string>): boolean {
   for (let tag of transaction.tags) {
-    if (EXCLUDE_TAGS.indexOf(tag) !== -1) {
+    if (excludeTags.has(tag)) {
       return true;
     }
   }

@@ -1,76 +1,72 @@
-html, body, #app, #page-daily {
+html, body, #app, #page-daily, #page-categories {
 	height: 100%;
 }
 body {
   margin: 0;
 }
-#page-daily {
+#page-daily, #page-categories {
   display: flex;
 	flex-direction: column;
 }
-#page-daily > .header, #page-daily > #daily-spend-chart, #page-daily > #controls {
+.header, .chart, .controls {
   flex: none;
   padding: 0 16px;
 }
 
-#page-daily > .header > h1 {
+.header > h1 {
   margin: 0;
 }
 
-#page-daily > #daily-spend-chart {
+#page-daily > .chart {
   flex: 0 1 400px;
   max-height: 50%;
 }
 
-#page-daily > #controls {
+.controls {
   display: flex;
 }
-#page-daily > #controls > div > div {
+.controls > div > div {
   width: auto !important;
 }
 
-#page-daily > #transactions {
+.transactions {
   flex: 1;
   overflow: auto;
-}
-#transactions {
   border-top: 1px solid lightgrey;
   line-height: 46px;
 }
-#transactions .row > * {
-}
 
-#transactions .row {
+.transactions .row {
   display: flex;
   border-bottom: 1px solid lightgrey;
   height: 47px;
 }
 
-#transactions .row > .date {
+.transactions .row > .date {
   white-space: nowrap;
   font-size: 70%;
   margin-left: 16px;
   flex: none;
 }
 
-#transactions .row > .amount {
+.transactions .row > .amount {
   white-space: nowrap;
   text-align: right;
   margin-left: 16px;
   flex: 0 0 80px;
 }
-#transactions .row > .amount.credit {
+.transactions .row > .amount.credit {
   color: green;
 }
 
-#transactions .row > .category {
+.transactions .row > .category {
   margin-left: 16px;
   font-size: 24px;
   text-align: center;
   flex: 0 0 32px;
 }
 
-#transactions .row > .description {
+.transactions .row > .description {
   white-space: nowrap;
   margin-left: 16px;
   flex: 1 1 auto;

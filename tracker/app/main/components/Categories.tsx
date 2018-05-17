@@ -1,79 +1,25 @@
 import { Dropbox } from 'dropbox';
 import DatePicker from 'material-ui/DatePicker';
-import TextField from 'material-ui/TextField';
 import * as moment from 'moment';
 import * as React from 'react';
-import { Chart } from 'react-google-charts';
 import { RouteComponentProps } from 'react-router';
 import { ACCESS_TOKEN } from '../../config';
-import { DAILY_EXCLUDE_TAGS, ITransaction, Transaction, shouldExclude } from '../../transactions';
-
-type IDailyGraphProps = {
-  transactions: ITransaction[],
-  startDate: Date,
-  endDate: Date,
-  dailyBudgetCents: number,
-};
-class DailyGraph extends React.Component<IDailyGraphProps, object> {
-  public render(): React.ReactElement<object> {
-    let data: [string, number][] = [];
-
-    if (this.props.transactions.length) {
-      let dailyTotals: { [s: string]: number; } = {};
-      for (let m = moment(this.props.startDate); m.isSameOrBefore(moment(this.props.endDate)); m = m.add(1, 'days')) {
-        dailyTotals[m.format('YYYY-MM-DD')] = 0;
-      }
-
-      for (let transaction of this.props.transactions) {
-        if (shouldExclude(transaction, DAILY_EXCLUDE_TAGS)) {
-          continue;
-        }
-
-        dailyTotals[transaction.date] += transaction.amount_cents;
-      }
-
-      let currentTotal = 0;
-      for (let m = moment(this.props.startDate); m.isSameOrBefore(moment(this.props.endDate)); m = m.add(1, 'days')) {
-        let currentDate = m.format('YYYY-MM-DD');
-        currentTotal += dailyTotals[currentDate] - this.props.dailyBudgetCents;
-        data.push([currentDate, currentTotal / 100.0]);
-      }
-    } else {
-      data.push([moment().format('YYYY-MM-DD'), 0]);
-    }
-
-    return (
-      <div className='chart'>
-        <Chart
-            chartType='LineChart'
-            columns={[{'label': 'Date', 'type': 'string'}, {'label':'Dollars', 'type':'number'}]}
-            rows={data}
-            options={{'hAxis': {'title': 'Date'}, 'vAxis': {'title': 'Dollars'}, 'legend': 'none'}}
-            graph_id='daily-spend-chart'
-            width='auto'
-            height='100%'
-          />
-      </div>
-    );
-  }
-}
+import { ITransaction, Transaction } from '../../transactions';
 
 type IDailyState = {
   transactions: ITransaction[],
   startDate: Date,
   endDate: Date,
-  dailyBudgetCents: number,
 };
-class Daily extends React.Component<RouteComponentProps<object>, IDailyState> {
+class Categories extends React.Component<RouteComponentProps<object>, IDailyState> {
 
   constructor(props:any, context:any) {
     super(props, context);
     this.state = {
       transactions: [],
-      // March 3, 2018 (months are 0 indexed).
-      startDate: new Date(2018, 2, 3),
+      // Months are 0 indexed.
+      startDate: new Date(2012, 0, 1),
       endDate: moment().hours(0).minutes(0).seconds(0).milliseconds(0).toDate(),
-      dailyBudgetCents: 10402,
     };
     this.loadFromDropbox();
   }
@@ -82,9 +28,7 @@ class Daily extends React.Component<RouteComponentProps<object>, IDailyState> {
     let filteredTransactions = this.state.transactions.filter(t => {
       let [fullYear, month, day] = t.date.split('-');
       let transactionDate = new Date(parseInt(fullYear, 10), parseInt(month, 10) - 1, parseInt(day, 10));
-      return this.state.startDate <= transactionDate
-          && transactionDate <= this.state.endDate
-          && !shouldExclude(t, DAILY_EXCLUDE_TAGS);
+      return this.state.startDate <= transactionDate && transactionDate <= this.state.endDate;
     });
     let rows = filteredTransactions.map(t => {
         return (
@@ -93,17 +37,17 @@ class Daily extends React.Component<RouteComponentProps<object>, IDailyState> {
       });
 
     return (
-      <div id='page-daily'>
+      <div id='page-categories'>
         <div className='header'>
-          <h1>Daily</h1>
+          <h1>Categories</h1>
         </div>
 
-        <DailyGraph
+        {/* <DailyGraph
           transactions={filteredTransactions}
           startDate={this.state.startDate}
           endDate={this.state.endDate}
           dailyBudgetCents={this.state.dailyBudgetCents}
-          />
+          /> */}
 
         <div className='controls'>
           <DatePicker
@@ -123,14 +67,6 @@ class Daily extends React.Component<RouteComponentProps<object>, IDailyState> {
             defaultDate={this.state.endDate}
             onChange={this.handleChangeEndDate}
           />
-          <div style={{whiteSpace: 'nowrap'}}>
-            $<TextField
-              hintText='Default: 104.02'
-              floatingLabelText='Daily Budget'
-              defaultValue={this.state.dailyBudgetCents / 100.0}
-              onChange={this.handleChangeDailyBudget}
-            />
-          </div>
         </div>
         <div className='transactions'>
           {rows}
@@ -148,12 +84,6 @@ class Daily extends React.Component<RouteComponentProps<object>, IDailyState> {
   public handleChangeEndDate = (event: Event, date: Date): void => {
     this.setState({
       endDate: date,
-    });
-  }
-
-  public handleChangeDailyBudget = (event: any, budget: string): void => {
-    this.setState({
-      dailyBudgetCents: parseInt('' + parseFloat(budget) * 100, 10),
     });
   }
 
@@ -192,4 +122,4 @@ class Daily extends React.Component<RouteComponentProps<object>, IDailyState> {
   }
 }
 
-export default Daily;
+export default Categories;
