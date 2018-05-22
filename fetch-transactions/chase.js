@@ -142,6 +142,10 @@ async function getTransactionsFromDashboard(browser, page, filenameGenerator) {
   }
 
   for (let cardIndex in config.CHASE.cardIdentifiers) {
+    if (cardIndex > 0) {
+      await page.waitForSelector('.main-tile');
+      tiles = await page.$$('.main-tile');
+    }
     try {
       await Promise.all([
         page.waitForSelector(config.CHASE.cardIdentifiers[cardIndex]),
