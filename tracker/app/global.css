@@ -8,18 +8,27 @@ body {
   display: flex;
 	flex-direction: column;
 }
-.header, .chart, .controls {
+.app-bar {
+  flex: none;
+}
+.app-drawer-header {
+  padding: 16px;
+  display: flex;
+  align-items: center;
+}
+.app-drawer-header > .user-icon {
+  font-size: 32px;
+  width: 56px;
+}
+
+.chart, .controls {
   flex: none;
   padding: 0 16px;
 }
 
-.header > h1 {
-  margin: 0;
-}
-
 #page-daily > .chart {
   flex: 0 1 400px;
-  max-height: 50%;
+  max-height: calc(50% - 64px);
 }
 
 .controls {

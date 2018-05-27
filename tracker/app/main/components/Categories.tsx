@@ -5,6 +5,7 @@ import * as React from 'react';
 import { RouteComponentProps } from 'react-router';
 import { ACCESS_TOKEN } from '../../config';
 import { ITransaction, Transaction } from '../../transactions';
+import MenuBar from './MenuBar';
 
 type IDailyState = {
   transactions: ITransaction[],
@@ -38,9 +39,7 @@ class Categories extends React.Component<RouteComponentProps<object>, IDailyStat
 
     return (
       <div id='page-categories'>
-        <div className='header'>
-          <h1>Categories</h1>
-        </div>
+        <MenuBar title='Categories'/>
 
         {/* <DailyGraph
           transactions={filteredTransactions}

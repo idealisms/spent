@@ -7,6 +7,7 @@ import { Chart } from 'react-google-charts';
 import { RouteComponentProps } from 'react-router';
 import { ACCESS_TOKEN } from '../../config';
 import { DAILY_EXCLUDE_TAGS, ITransaction, Transaction, shouldExclude } from '../../transactions';
+import MenuBar from './MenuBar';
 
 type IDailyGraphProps = {
   transactions: ITransaction[],
@@ -94,9 +95,7 @@ class Daily extends React.Component<RouteComponentProps<object>, IDailyState> {
 
     return (
       <div id='page-daily'>
-        <div className='header'>
-          <h1>Daily</h1>
-        </div>
+        <MenuBar title='Daily'/>
 
         <DailyGraph
           transactions={filteredTransactions}
