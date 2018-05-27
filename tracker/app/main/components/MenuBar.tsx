@@ -66,7 +66,7 @@ class MenuBar extends React.Component<IMenuBarProps, IMenuBarReactState> {
               backgroundColor: muiTheme!.palette!.primary1Color,
               color: muiTheme!.palette!.alternateTextColor}}>
             <div className='user-icon'>📈</div>
-            <div className='name'>Spend Tracker</div>
+            <div className='name'>Spent</div>
           </div>
           <MenuItem
               name='Daily'
