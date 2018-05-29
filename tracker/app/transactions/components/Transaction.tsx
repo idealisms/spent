@@ -13,9 +13,9 @@ export class Transaction extends React.Component<ITransactionProps, object> {
     'shoes': Category.Clothes,
     'books': Category.Entertainment,
     'entertainment': Category.Entertainment,
-    'food': Category.Food,
     'gift': Category.Gift,
     'donation': Category.Gift,
+    'grocery': Category.Grocery,
     'home improvement': Category.HomeImprovement,
     'art supplies': Category.HomeAndElectronics,
     'art': Category.HomeAndElectronics,
@@ -30,6 +30,7 @@ export class Transaction extends React.Component<ITransactionProps, object> {
     'phone service': Category.RecurringExpenses,
     'internet': Category.RecurringExpenses,
     'membership fee': Category.RecurringExpenses,
+    'restaurant': Category.Restaurant,
     'transit': Category.Transit,
     'taxi': Category.Transit,
     'flight': Category.TravelExpenses,
@@ -39,12 +40,10 @@ export class Transaction extends React.Component<ITransactionProps, object> {
 
   public render(): React.ReactElement<object> {
     let isCredit = this.props.transaction.amount_cents < 0;
-    let categoryClassName = 'error';
     let categoryEmoji = '🙅';
     let categoryName = 'error';
     try {
       let category = this.getCategory();
-      categoryClassName = this.categoryToMaterialClassName(category);
       categoryEmoji = this.categoryToEmoji(category);
       categoryName = Category[category];
     } catch(e) {
@@ -98,45 +97,6 @@ export class Transaction extends React.Component<ITransactionProps, object> {
     return Category.Other;
   }
 
-  // Tried using material icons instead of emoji. I don't like them as much,
-  // but they are consistent across platforms. Here's the example HTML to
-  // use them:
-  // <div className='category'><i className='material-icons' title={categoryName}>{categoryClassName}</i></div>
-  protected categoryToMaterialClassName(category: Category): string {
-    switch (category) {
-      case Category.Car:
-        return 'directions_car';
-      case Category.Cash:
-        return 'atm';
-      case Category.Clothes:
-        return 'store';
-      case Category.Entertainment:
-        return 'local_movies';
-      case Category.Food:
-        return 'restaurant';
-      case Category.Gift:
-        return 'card_giftcard';
-      case Category.HomeImprovement:
-        return 'home';
-      case Category.HomeAndElectronics:
-        return 'shopping_cart';
-      case Category.Medical:
-        return 'local_hospital';
-      case Category.PersonalCare:
-        return 'spa';
-      case Category.RecurringExpenses:
-        return 'repeat';
-      case Category.Transit:
-        return 'directions_transit';
-      case Category.TravelExpenses:
-        return 'flight_takeoff';
-      case Category.Other:
-        return 'help_outline';
-      default:
-        return 'monetization_on';
-    }
-  }
-
   protected categoryToEmoji(category: Category): string {
     switch (category) {
       case Category.Car:
@@ -147,10 +107,10 @@ export class Transaction extends React.Component<ITransactionProps, object> {
         return '👚';
       case Category.Entertainment:
         return '🎟️';
-      case Category.Food:
-        return '🍽';
       case Category.Gift:
         return '🎁';
+      case Category.Grocery:
+        return '🛒';
       case Category.HomeImprovement:
         return '🛠️';
       case Category.HomeAndElectronics:
@@ -161,6 +121,8 @@ export class Transaction extends React.Component<ITransactionProps, object> {
         return '💆‍';
       case Category.RecurringExpenses:
         return '🔁';
+      case Category.Restaurant:
+        return '🍽';
       case Category.Transit:
         return '🚇';
       case Category.TravelExpenses:
