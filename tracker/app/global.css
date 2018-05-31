@@ -81,3 +81,11 @@ body {
   flex: 1 1 auto;
   overflow: auto;
 }
+
+.transactions .row > .description > span {
+  background-color: #ddd;
+  border-radius: 4px;
+  padding: 4px 8px;
+  margin-left: 8px;
+  color: #666;
+}

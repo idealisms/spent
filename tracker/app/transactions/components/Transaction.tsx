@@ -49,12 +49,15 @@ export class Transaction extends React.Component<ITransactionProps, object> {
     } catch(e) {
       console.log(e);
     }
+    // Use a zero width space (\u200B) so double clicking a tag only
+    // selects the tag and not the words around it.
+    let tags = this.props.transaction.tags.map(tag => ['\u200B', <span key={tag}>{tag}</span>]);
     return (
       <div className='row'>
         <div className='date'>{this.props.transaction.date}</div>
         <div className={'amount' + (isCredit ? ' credit' : '')}>{this.formatAmount()}</div>
         <div className='category' title={categoryName}>{categoryEmoji}</div>
-        <div className='description'>{this.props.transaction.description}</div>
+        <div className='description'>{this.props.transaction.description}{tags}</div>
       </div>
     );
   }
