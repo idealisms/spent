@@ -3,6 +3,8 @@ import { Category, ITransaction } from '../Model';
 
 type ITransactionProps = {
   transaction: ITransaction,
+  isSelected?: boolean,
+  onClick?: any,
 };
 export class Transaction extends React.Component<ITransactionProps, object> {
   private TAG_TO_CATEGORY: { [s: string]: Category; } = {
@@ -53,10 +55,14 @@ export class Transaction extends React.Component<ITransactionProps, object> {
     // selects the tag and not the words around it.
     let tags = this.props.transaction.tags.map(tag => ['\u200B', <span key={tag}>{tag}</span>]);
     return (
-      <div className='row'>
+      <div className={'row' + (this.props.isSelected ? ' selected' : '')}>
         <div className='date'>{this.props.transaction.date}</div>
         <div className={'amount' + (isCredit ? ' credit' : '')}>{this.formatAmount()}</div>
-        <div className='category' title={categoryName}>{categoryEmoji}</div>
+        <div
+            className='category'
+            title={categoryName}
+            onClick={this.props.onClick ? () => this.props.onClick(this.props.transaction) : undefined}
+            >{this.props.isSelected ? <i className='material-icons'>check_box</i> : categoryEmoji}</div>
         <div className='description'>{this.props.transaction.description}{tags}</div>
       </div>
     );

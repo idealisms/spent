@@ -7,20 +7,23 @@ import { ACCESS_TOKEN } from '../../config';
 import { ITransaction, Transaction } from '../../transactions';
 import MenuBar from './MenuBar';
 
-type IDailyState = {
+type ICategoriesState = {
   transactions: ITransaction[],
   startDate: Date,
   endDate: Date,
+  selectedTransactions: Set<string>,
 };
-class Categories extends React.Component<RouteComponentProps<object>, IDailyState> {
+class Categories extends React.Component<RouteComponentProps<object>, ICategoriesState> {
 
   constructor(props:any, context:any) {
     super(props, context);
     this.state = {
       transactions: [],
       // Months are 0 indexed.
-      startDate: new Date(2012, 0, 1),
+      // startDate: new Date(2012, 0, 1),
+      startDate: new Date(2018, 0, 1),
       endDate: moment().hours(0).minutes(0).seconds(0).milliseconds(0).toDate(),
+      selectedTransactions: new Set(),
     };
     this.loadFromDropbox();
   }
@@ -33,7 +36,11 @@ class Categories extends React.Component<RouteComponentProps<object>, IDailyStat
     });
     let rows = filteredTransactions.map(t => {
         return (
-          <Transaction transaction={t} key={t.id}/>
+          <Transaction
+              key={t.id}
+              transaction={t}
+              isSelected={this.state.selectedTransactions.has(t.id)}
+              onClick={(clicked: ITransaction) => this.handleTransactionClick(clicked)}/>
         );
       });
 
@@ -74,15 +81,27 @@ class Categories extends React.Component<RouteComponentProps<object>, IDailyStat
     );
   }
 
-  public handleChangeStartDate = (event: Event, date: Date): void => {
+  public handleChangeStartDate(event: Event, date: Date): void {
     this.setState({
       startDate: date,
     });
   }
 
-  public handleChangeEndDate = (event: Event, date: Date): void => {
+  public handleChangeEndDate(event: Event, date: Date): void {
     this.setState({
       endDate: date,
+    });
+  }
+
+  public handleTransactionClick(t: ITransaction): void {
+    let selectedTransactions = new Set(this.state.selectedTransactions.values());
+    if (selectedTransactions.has(t.id)) {
+      selectedTransactions.delete(t.id);
+    } else {
+      selectedTransactions.add(t.id);
+    }
+    this.setState({
+      selectedTransactions: selectedTransactions,
     });
   }
 

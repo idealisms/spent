@@ -50,6 +50,9 @@ body {
   border-bottom: 1px solid lightgrey;
   height: 47px;
 }
+.transactions .row.selected {
+  background-color: #eee;
+}
 
 .transactions .row > .date {
   white-space: nowrap;
@@ -73,6 +76,12 @@ body {
   font-size: 24px;
   text-align: center;
   flex: 0 0 32px;
+  width: 32px;
+  cursor: pointer;
+}
+.transactions .row.selected > .category {
+  margin-top: 4px;
+  color: #757575;
 }
 
 .transactions .row > .description {
