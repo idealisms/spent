@@ -85,7 +85,7 @@ async function main(authCode) {
 
   // Get the last 7 days of transactions.
   const ONE_DAY_MS = 24 * 60 * 60 * 1000;
-  let startTime = new Date(Date.now() - (7 * ONE_DAY_MS));
+  let startTime = new Date(Date.now() - (21 * ONE_DAY_MS));
   startTime = new Date(startTime.getFullYear(), startTime.getMonth(), startTime.getDate());
 
   await page.type('#exportFromDate', formatDate(startTime));
