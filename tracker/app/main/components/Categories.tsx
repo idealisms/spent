@@ -40,13 +40,17 @@ class Categories extends React.Component<RouteComponentProps<object>, ICategorie
               key={t.id}
               transaction={t}
               isSelected={this.state.selectedTransactions.has(t.id)}
-              onClick={(clicked: ITransaction) => this.handleTransactionClick(clicked)}/>
+              onCategoryClick={(clicked: ITransaction) => this.handleTransactionClick(clicked)}/>
         );
       });
 
     return (
       <div id='page-categories'>
-        <MenuBar title='Categories'/>
+        <MenuBar
+            title='Categories'
+            selectedTransactions={this.state.selectedTransactions}
+            onSelectedBackClick={() => this.handleClearSelections()}
+             />
 
         {/* <DailyGraph
           transactions={filteredTransactions}
@@ -102,6 +106,12 @@ class Categories extends React.Component<RouteComponentProps<object>, ICategorie
     }
     this.setState({
       selectedTransactions: selectedTransactions,
+    });
+  }
+
+  public handleClearSelections(): void {
+    this.setState({
+      selectedTransactions: new Set(),
     });
   }
 

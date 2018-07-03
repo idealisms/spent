@@ -1,18 +1,33 @@
 import { Location, LocationDescriptor, LocationState } from 'history';
-import MuiAppBar from 'material-ui/AppBar';
-import MuiDrawer from 'material-ui/Drawer';
+import AppBar from 'material-ui/AppBar';
+import Drawer from 'material-ui/Drawer';
 import FontIcon from 'material-ui/FontIcon';
+import IconButton from 'material-ui/IconButton';
 import MuiMenuItem from 'material-ui/MenuItem';
 import { colors } from 'material-ui/styles';
+import ActionDelete from 'material-ui/svg-icons/action/delete';
+import CommunicationCallMerge from 'material-ui/svg-icons/communication/call-merge';
+import CommunicationCallSplit from 'material-ui/svg-icons/communication/call-split';
+import FileCloudDone from 'material-ui/svg-icons/file/cloud-done';
+import ImageEdit from 'material-ui/svg-icons/image/edit';
+import NavigationArrowBack from 'material-ui/svg-icons/navigation/arrow-back';
+import NavigationMenu from 'material-ui/svg-icons/navigation/menu';
 import * as React from 'react';
-import { Dispatch, connect } from 'react-redux';
-import { RouterAction, push } from 'react-router-redux';
+import { connect, Dispatch } from 'react-redux';
+import { push, RouterAction } from 'react-router-redux';
 import muiTheme from '../../muiTheme';
 import { IAppState } from '../Model';
 import { CategoriesPage, DailyPage } from './RoutePaths';
 
 interface IMenuBarOwnProps {
   title: string;
+  selectedTransactions?: Set<string>;
+  hasChanges?: boolean;
+  onSelectedBackClick?: () => void;
+  onSelectedEditClick?: () => void;
+  onSelectedDeleteClick?: () => void;
+  onSelectedMergeClick?: () => void;
+  onSelectedSplitClick?: () => void;
 }
 interface IMenuBarStateProps {
   location: Location | null;
@@ -57,10 +72,41 @@ class MenuBar extends React.Component<IMenuBarProps, IMenuBarReactState> {
       );
     };
 
+    let numSelectedTransactions = this.props.selectedTransactions ? this.props.selectedTransactions.size : 0;
+    let title = this.props.title;
+    let className = '';
+    if (numSelectedTransactions === 1) {
+      title = '1 item';
+      className = 'has-selected-items one-item';
+    } else if (numSelectedTransactions > 1) {
+      title = numSelectedTransactions + ' items';
+      className = 'has-selected-items multiple-items';
+    }
+
     return (
       <div className='app-bar'>
-        <MuiAppBar onLeftIconButtonClick={this.handleToggle} title={this.props.title} />
-        <MuiDrawer docked={false} width={250} open={this.state.open}
+        <AppBar
+            iconElementLeft={<IconButton>{numSelectedTransactions
+                ? <NavigationArrowBack onClick={this.props.onSelectedBackClick}/>
+                : <NavigationMenu />}
+              </IconButton>}
+            onLeftIconButtonClick={numSelectedTransactions ? undefined : this.handleToggle}
+            title={title}
+            iconElementRight={numSelectedTransactions
+              ?
+                <span>
+                  <IconButton disabled={numSelectedTransactions > 1}><ImageEdit/></IconButton>
+                  <IconButton disabled={numSelectedTransactions === 1}><CommunicationCallMerge /></IconButton>
+                  <IconButton disabled={numSelectedTransactions === 1}><CommunicationCallSplit /></IconButton>
+                  <IconButton><ActionDelete /></IconButton>
+                </span>
+              :
+                <span>
+                  <IconButton disabled={true}><FileCloudDone /></IconButton>
+                </span>}
+            className={className}
+            />
+        <Drawer docked={false} width={250} open={this.state.open}
                    onRequestChange={(open) => this.setState({open})}>
           <div className='app-drawer-header' style={{
               backgroundColor: muiTheme!.palette!.primary1Color,
@@ -78,7 +124,7 @@ class MenuBar extends React.Component<IMenuBarProps, IMenuBarReactState> {
               path={CategoriesPage}
               leftIconName='category'
           />
-        </MuiDrawer>
+        </Drawer>
       </div>
     );
   }

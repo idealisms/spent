@@ -4,7 +4,7 @@ import { Category, ITransaction } from '../Model';
 type ITransactionProps = {
   transaction: ITransaction,
   isSelected?: boolean,
-  onClick?: any,
+  onCategoryClick?: (transaction: ITransaction) => void,
 };
 export class Transaction extends React.Component<ITransactionProps, object> {
   private TAG_TO_CATEGORY: { [s: string]: Category; } = {
@@ -61,7 +61,7 @@ export class Transaction extends React.Component<ITransactionProps, object> {
         <div
             className='category'
             title={categoryName}
-            onClick={this.props.onClick ? () => this.props.onClick(this.props.transaction) : undefined}
+            onClick={this.props.onCategoryClick ? () => this.props.onCategoryClick!(this.props.transaction) : undefined}
             >{this.props.isSelected ? <i className='material-icons'>check_box</i> : categoryEmoji}</div>
         <div className='description'>{this.props.transaction.description}{tags}</div>
       </div>
