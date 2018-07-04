@@ -41,12 +41,15 @@ async function getFrameMatchingUrl(page, urlSubstring) {
   }, config.LAUNCH_OPTIONS);
 
   const browser = await puppeteer.launch(launchOptions);
-
   console.log(await browser.version());
 
   console.log('Loading login page...');
   const page = await browser.newPage();
   await page.setUserAgent(config.LAUNCH_OPTIONS.userAgent);
+  await page.setViewport({
+    'width': 840,
+    'height': 600
+  });
   await page.goto('https://www.chase.com/');
 
   console.log('Click Sign in...');
