@@ -28,3 +28,13 @@ export interface ITransaction {
   source?: string;
   // notes?: string;  // TODO
 }
+
+export const EMPTY_TRANSACTION: ITransaction = {
+  id: '',
+  description: '',
+  original_line: '',
+  date: '',
+  tags: [],
+  amount_cents: 0,
+  transactions: [],
+};

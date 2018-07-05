@@ -11,7 +11,7 @@ type ICategoriesState = {
   transactions: ITransaction[],
   startDate: Date,
   endDate: Date,
-  selectedTransactions: Set<string>,
+  selectedTransactions: Map<string, ITransaction>,
 };
 class Categories extends React.Component<RouteComponentProps<object>, ICategoriesState> {
 
@@ -23,7 +23,7 @@ class Categories extends React.Component<RouteComponentProps<object>, ICategorie
       // startDate: new Date(2012, 0, 1),
       startDate: new Date(2018, 0, 1),
       endDate: moment().hours(0).minutes(0).seconds(0).milliseconds(0).toDate(),
-      selectedTransactions: new Set(),
+      selectedTransactions: new Map(),
     };
     this.loadFromDropbox();
   }
@@ -40,7 +40,8 @@ class Categories extends React.Component<RouteComponentProps<object>, ICategorie
               key={t.id}
               transaction={t}
               isSelected={this.state.selectedTransactions.has(t.id)}
-              onCategoryClick={(clicked: ITransaction) => this.handleTransactionClick(clicked)}/>
+              onCategoryClick={(clicked: ITransaction) => this.handleTransactionClick(clicked)}
+              />
         );
       });
 
@@ -50,6 +51,7 @@ class Categories extends React.Component<RouteComponentProps<object>, ICategorie
             title='Categories'
             selectedTransactions={this.state.selectedTransactions}
             onSelectedBackClick={() => this.handleClearSelections()}
+            // onSelectedEditSaveClick={}
              />
 
         {/* <DailyGraph
@@ -98,11 +100,11 @@ class Categories extends React.Component<RouteComponentProps<object>, ICategorie
   }
 
   public handleTransactionClick(t: ITransaction): void {
-    let selectedTransactions = new Set(this.state.selectedTransactions.values());
+    let selectedTransactions = new Map(this.state.selectedTransactions.entries());
     if (selectedTransactions.has(t.id)) {
       selectedTransactions.delete(t.id);
     } else {
-      selectedTransactions.add(t.id);
+      selectedTransactions.set(t.id, t);
     }
     this.setState({
       selectedTransactions: selectedTransactions,
@@ -111,7 +113,7 @@ class Categories extends React.Component<RouteComponentProps<object>, ICategorie
 
   public handleClearSelections(): void {
     this.setState({
-      selectedTransactions: new Set(),
+      selectedTransactions: new Map(),
     });
   }
 

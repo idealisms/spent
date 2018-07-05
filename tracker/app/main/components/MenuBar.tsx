@@ -16,15 +16,17 @@ import * as React from 'react';
 import { connect, Dispatch } from 'react-redux';
 import { push, RouterAction } from 'react-router-redux';
 import muiTheme from '../../muiTheme';
+import { EditTransactionDialog, ITransaction } from '../../transactions';
 import { IAppState } from '../Model';
 import { CategoriesPage, DailyPage } from './RoutePaths';
 
+
 interface IMenuBarOwnProps {
   title: string;
-  selectedTransactions?: Set<string>;
+  selectedTransactions?: Map<string, ITransaction>;
   hasChanges?: boolean;
   onSelectedBackClick?: () => void;
-  onSelectedEditClick?: () => void;
+  onSelectedEditSaveClick?: () => void;
   onSelectedDeleteClick?: () => void;
   onSelectedMergeClick?: () => void;
   onSelectedSplitClick?: () => void;
@@ -38,14 +40,18 @@ interface IMenuBarDispatchProps {
 type IMenuBarProps = IMenuBarOwnProps & IMenuBarStateProps & IMenuBarDispatchProps;
 
 interface IMenuBarReactState {
-  open: boolean;
+  isDrawerOpen: boolean;
+  isEditDialogOpen: boolean;
 }
 
 class MenuBar extends React.Component<IMenuBarProps, IMenuBarReactState> {
 
   constructor(props:IMenuBarProps, context:any) {
     super(props, context);
-    this.state = {open: false};
+    this.state = {
+      isDrawerOpen: false,
+      isEditDialogOpen: false,
+    };
   }
 
   public render():JSX.Element {
@@ -95,10 +101,17 @@ class MenuBar extends React.Component<IMenuBarProps, IMenuBarReactState> {
             iconElementRight={numSelectedTransactions
               ?
                 <span>
-                  <IconButton disabled={numSelectedTransactions > 1}><ImageEdit/></IconButton>
-                  <IconButton disabled={numSelectedTransactions === 1}><CommunicationCallMerge /></IconButton>
-                  <IconButton disabled={numSelectedTransactions === 1}><CommunicationCallSplit /></IconButton>
-                  <IconButton><ActionDelete /></IconButton>
+                  <IconButton
+                      disabled={numSelectedTransactions > 1}
+                      onClick={() => this.handleShowEditDialog()}><ImageEdit/></IconButton>
+                  <IconButton
+                      disabled={numSelectedTransactions === 1}
+                      onClick={this.props.onSelectedMergeClick}><CommunicationCallMerge /></IconButton>
+                  <IconButton
+                      disabled={numSelectedTransactions === 1}
+                      onClick={this.props.onSelectedSplitClick}><CommunicationCallSplit /></IconButton>
+                  <IconButton
+                      onClick={this.props.onSelectedDeleteClick}><ActionDelete /></IconButton>
                 </span>
               :
                 <span>
@@ -106,8 +119,8 @@ class MenuBar extends React.Component<IMenuBarProps, IMenuBarReactState> {
                 </span>}
             className={className}
             />
-        <Drawer docked={false} width={250} open={this.state.open}
-                   onRequestChange={(open) => this.setState({open})}>
+        <Drawer docked={false} width={250} open={this.state.isDrawerOpen}
+                   onRequestChange={(isDrawerOpen) => this.setState({isDrawerOpen})}>
           <div className='app-drawer-header' style={{
               backgroundColor: muiTheme!.palette!.primary1Color,
               color: muiTheme!.palette!.alternateTextColor}}>
@@ -125,16 +138,33 @@ class MenuBar extends React.Component<IMenuBarProps, IMenuBarReactState> {
               leftIconName='category'
           />
         </Drawer>
+        <EditTransactionDialog
+            transaction={numSelectedTransactions === 1 ? this.props.selectedTransactions!.values().next().value : undefined}
+            isOpen={this.state.isEditDialogOpen}
+            onClose={() => this.setState({isEditDialogOpen: false})}
+            onSaveChanges={this.handleSaveTransactionChanges}
+            />
       </div>
     );
   }
 
-  private handleToggle = () => this.setState({open: !this.state.open});
+  private handleShowEditDialog(): void {
+    this.setState({
+      isEditDialogOpen: true,
+    });
+  }
+
+  private handleSaveTransactionChanges(transaction: ITransaction): void {
+    console.log('save');
+    console.log(transaction);
+  }
+
+  private handleToggle = () => this.setState({isDrawerOpen: !this.state.isDrawerOpen});
 
   private handleNavigate = (path:string) => {
     return () => {
       this.props.navigateTo(path);
-      this.setState({open: false});
+      this.setState({isDrawerOpen: false});
     };
   }
 }
