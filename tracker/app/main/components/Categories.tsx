@@ -51,7 +51,7 @@ class Categories extends React.Component<RouteComponentProps<object>, ICategorie
             title='Categories'
             selectedTransactions={this.state.selectedTransactions}
             onSelectedBackClick={() => this.handleClearSelections()}
-            // onSelectedEditSaveClick={}
+            onSelectedEditSaveClick={(transaction: ITransaction) => this.handleUpdateTransaction(transaction)}
              />
 
         {/* <DailyGraph
@@ -87,19 +87,19 @@ class Categories extends React.Component<RouteComponentProps<object>, ICategorie
     );
   }
 
-  public handleChangeStartDate(event: Event, date: Date): void {
+  private handleChangeStartDate(event: Event, date: Date): void {
     this.setState({
       startDate: date,
     });
   }
 
-  public handleChangeEndDate(event: Event, date: Date): void {
+  private handleChangeEndDate(event: Event, date: Date): void {
     this.setState({
       endDate: date,
     });
   }
 
-  public handleTransactionClick(t: ITransaction): void {
+  private handleTransactionClick(t: ITransaction): void {
     let selectedTransactions = new Map(this.state.selectedTransactions.entries());
     if (selectedTransactions.has(t.id)) {
       selectedTransactions.delete(t.id);
@@ -111,13 +111,27 @@ class Categories extends React.Component<RouteComponentProps<object>, ICategorie
     });
   }
 
-  public handleClearSelections(): void {
+  private handleUpdateTransaction(transaction: ITransaction): void {
+    for (let t of this.state.transactions) {
+      if (t.id == transaction.id) {
+        t.notes = transaction.notes;
+        t.tags = transaction.tags;
+        break;
+      }
+    }
+    this.setState({
+      transactions: this.state.transactions,
+      selectedTransactions: new Map(),
+    });
+  }
+
+  private handleClearSelections(): void {
     this.setState({
       selectedTransactions: new Map(),
     });
   }
 
-  public loadFromDropbox = (): void => {
+  private loadFromDropbox = (): void => {
     let filesDownloadArg = {
       path: '/transactions.json',
     };

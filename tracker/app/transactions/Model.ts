@@ -26,7 +26,7 @@ export interface ITransaction {
   amount_cents: number;
   transactions: Array<ITransaction>;
   source?: string;
-  // notes?: string;  // TODO
+  notes?: string;
 }
 
 export const EMPTY_TRANSACTION: ITransaction = {

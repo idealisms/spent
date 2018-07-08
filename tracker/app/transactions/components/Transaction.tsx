@@ -1,5 +1,6 @@
 import * as React from 'react';
 import { Category, ITransaction } from '../Model';
+import { formatAmount } from '../Module';
 
 type ITransactionProps = {
   transaction: ITransaction,
@@ -69,22 +70,7 @@ export class Transaction extends React.Component<ITransactionProps, object> {
   }
 
   protected formatAmount(): string {
-    let amountCentsNumber = this.props.transaction.amount_cents;
-    let isNegative = amountCentsNumber < 0;
-    let amountCents = Math.abs(amountCentsNumber).toString();
-    let digits = amountCents.length;
-    let dollars = amountCents.substr(0, digits - 2);
-    let numCommas = parseInt(
-        ((dollars.length - 1) / 3).toString(), 10);
-    for (let c = numCommas * 3; c > 0; c -= 3) {
-        dollars = dollars.substr(0, dollars.length - c) + ',' +
-            dollars.substr(dollars.length - c);
-    }
-    let amount = dollars + '.' + amountCents.substr(digits - 2);
-    if (isNegative) {
-        amount = '(' + amount + ')';
-    }
-    return amount;
+    return formatAmount(this.props.transaction);
   }
 
   protected getCategory(): Category {

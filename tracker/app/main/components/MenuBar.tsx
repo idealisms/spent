@@ -26,7 +26,7 @@ interface IMenuBarOwnProps {
   selectedTransactions?: Map<string, ITransaction>;
   hasChanges?: boolean;
   onSelectedBackClick?: () => void;
-  onSelectedEditSaveClick?: () => void;
+  onSelectedEditSaveClick?: (transaction: ITransaction) => void;
   onSelectedDeleteClick?: () => void;
   onSelectedMergeClick?: () => void;
   onSelectedSplitClick?: () => void;
@@ -138,25 +138,24 @@ class MenuBar extends React.Component<IMenuBarProps, IMenuBarReactState> {
               leftIconName='category'
           />
         </Drawer>
-        <EditTransactionDialog
-            transaction={numSelectedTransactions === 1 ? this.props.selectedTransactions!.values().next().value : undefined}
-            isOpen={this.state.isEditDialogOpen}
-            onClose={() => this.setState({isEditDialogOpen: false})}
-            onSaveChanges={this.handleSaveTransactionChanges}
-            />
+        {this.state.isEditDialogOpen && this.props.onSelectedEditSaveClick ?
+          <EditTransactionDialog
+              transaction={this.props.selectedTransactions!.values().next().value}
+              isOpen={true}
+              onClose={() => this.setState({isEditDialogOpen: false})}
+              onSaveChanges={this.props.onSelectedEditSaveClick}
+          /> : undefined}
       </div>
     );
   }
 
   private handleShowEditDialog(): void {
+    if (!this.props.selectedTransactions || this.props.selectedTransactions.size !== 1) {
+      return;
+    }
     this.setState({
       isEditDialogOpen: true,
     });
-  }
-
-  private handleSaveTransactionChanges(transaction: ITransaction): void {
-    console.log('save');
-    console.log(transaction);
   }
 
   private handleToggle = () => this.setState({isDrawerOpen: !this.state.isDrawerOpen});
