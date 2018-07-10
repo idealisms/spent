@@ -69,7 +69,11 @@ export class Transaction extends React.Component<ITransactionProps, object> {
             title={categoryName}
             onClick={this.props.onCategoryClick ? () => this.props.onCategoryClick!(this.props.transaction) : undefined}
             >{this.props.isSelected ? <i className='material-icons'>check_box</i> : categoryEmoji}</div>
-        <div className='description'>{this.props.transaction.description}{tags}</div>
+        <div className='description'>
+          {this.props.transaction.description}
+          {this.props.transaction.notes ? <span className='notes'> - {this.props.transaction.notes}</span> : ''}
+          {tags}
+        </div>
       </div>
     );
   }

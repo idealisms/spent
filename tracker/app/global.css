@@ -106,7 +106,12 @@ body {
   overflow: auto;
 }
 
-.transactions .row > .description > span {
+.transactions .row > .description > .notes {
+  color: rgba(0, 0, 0, .6);
+}
+
+/* spans are around tags. */
+.transactions .row > .description > span:not(.notes) {
   background-color: #ddd;
   border-radius: 4px;
   padding: 4px 8px;
