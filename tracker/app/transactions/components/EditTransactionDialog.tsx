@@ -32,10 +32,10 @@ export class EditTransactionDialog extends React.Component<IEditTransactionDialo
         primary={true}
         onClick={this.props.onClose}
       />,
+      // TODO: Disable button unless there are changes.
       <FlatButton
         label='Save'
         primary={true}
-        keyboardFocused={true}
         onClick={() => this.handleSave() }
       />,
     ];

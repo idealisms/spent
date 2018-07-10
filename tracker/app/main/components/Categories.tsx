@@ -1,17 +1,18 @@
-import { Dropbox } from 'dropbox';
+import * as Dropbox from 'dropbox';
 import DatePicker from 'material-ui/DatePicker';
 import * as moment from 'moment';
 import * as React from 'react';
 import { RouteComponentProps } from 'react-router';
 import { ACCESS_TOKEN } from '../../config';
 import { ITransaction, Transaction } from '../../transactions';
-import MenuBar from './MenuBar';
+import MenuBar, { CloudState } from './MenuBar';
 
 type ICategoriesState = {
   transactions: ITransaction[],
   startDate: Date,
   endDate: Date,
   selectedTransactions: Map<string, ITransaction>,
+  cloudState: CloudState,
 };
 class Categories extends React.Component<RouteComponentProps<object>, ICategoriesState> {
 
@@ -24,6 +25,7 @@ class Categories extends React.Component<RouteComponentProps<object>, ICategorie
       startDate: new Date(2018, 0, 1),
       endDate: moment().hours(0).minutes(0).seconds(0).milliseconds(0).toDate(),
       selectedTransactions: new Map(),
+      cloudState: CloudState.Done,
     };
     this.loadFromDropbox();
   }
@@ -50,6 +52,8 @@ class Categories extends React.Component<RouteComponentProps<object>, ICategorie
         <MenuBar
             title='Categories'
             selectedTransactions={this.state.selectedTransactions}
+            cloudState={this.state.cloudState}
+            onSaveTransactionsClick={() => this.handleSaveTransactions()}
             onSelectedBackClick={() => this.handleClearSelections()}
             onSelectedEditSaveClick={(transaction: ITransaction) => this.handleUpdateTransaction(transaction)}
              />
@@ -122,7 +126,30 @@ class Categories extends React.Component<RouteComponentProps<object>, ICategorie
     this.setState({
       transactions: this.state.transactions,
       selectedTransactions: new Map(),
+      cloudState: CloudState.Modified,
     });
+  }
+
+  private handleSaveTransactions(): void {
+    this.setState({cloudState: CloudState.Uploading});
+    let filesCommitInfo = {
+        contents: JSON.stringify(this.state.transactions),
+        path: '/transactions.json',
+        mode: {'.tag': 'overwrite'} as DropboxTypes.files.WriteModeOverwrite,
+        autorename: false,
+        mute: false,
+    };
+    let dbx = new Dropbox.Dropbox({ accessToken: ACCESS_TOKEN });
+    dbx.filesUpload(filesCommitInfo)
+        .then(metadata => {
+            console.log('wrote to dropbox');
+            console.log(metadata);
+            this.setState({cloudState: CloudState.Done});
+        }).catch(error => {
+            console.log('error');
+            console.log(error);
+            this.setState({cloudState: CloudState.Modified});
+        });
   }
 
   private handleClearSelections(): void {
@@ -135,7 +162,7 @@ class Categories extends React.Component<RouteComponentProps<object>, ICategorie
     let filesDownloadArg = {
       path: '/transactions.json',
     };
-    let dbx = new Dropbox({ accessToken: ACCESS_TOKEN });
+    let dbx = new Dropbox.Dropbox({ accessToken: ACCESS_TOKEN });
     let daily = this;
     dbx.filesDownload(filesDownloadArg)
         .then(file => {

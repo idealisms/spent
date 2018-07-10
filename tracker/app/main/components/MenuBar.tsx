@@ -1,5 +1,6 @@
 import { Location, LocationDescriptor, LocationState } from 'history';
 import AppBar from 'material-ui/AppBar';
+import CircularProgress from 'material-ui/CircularProgress';
 import Drawer from 'material-ui/Drawer';
 import FontIcon from 'material-ui/FontIcon';
 import IconButton from 'material-ui/IconButton';
@@ -9,6 +10,7 @@ import ActionDelete from 'material-ui/svg-icons/action/delete';
 import CommunicationCallMerge from 'material-ui/svg-icons/communication/call-merge';
 import CommunicationCallSplit from 'material-ui/svg-icons/communication/call-split';
 import FileCloudDone from 'material-ui/svg-icons/file/cloud-done';
+import FileCloudUpload from 'material-ui/svg-icons/file/cloud-upload';
 import ImageEdit from 'material-ui/svg-icons/image/edit';
 import NavigationArrowBack from 'material-ui/svg-icons/navigation/arrow-back';
 import NavigationMenu from 'material-ui/svg-icons/navigation/menu';
@@ -20,11 +22,17 @@ import { EditTransactionDialog, ITransaction } from '../../transactions';
 import { IAppState } from '../Model';
 import { CategoriesPage, DailyPage } from './RoutePaths';
 
+export enum CloudState {
+  Done = 1,
+  Modified = 2,
+  Uploading = 3,
+}
 
 interface IMenuBarOwnProps {
   title: string;
   selectedTransactions?: Map<string, ITransaction>;
-  hasChanges?: boolean;
+  cloudState?: CloudState;
+  onSaveTransactionsClick?: () => void;
   onSelectedBackClick?: () => void;
   onSelectedEditSaveClick?: (transaction: ITransaction) => void;
   onSelectedDeleteClick?: () => void;
@@ -89,6 +97,31 @@ class MenuBar extends React.Component<IMenuBarProps, IMenuBarReactState> {
       className = 'has-selected-items multiple-items';
     }
 
+    let iconElementRight = numSelectedTransactions
+        ? <span>
+            <IconButton
+                disabled={numSelectedTransactions > 1}
+                onClick={() => this.handleShowEditDialog()}><ImageEdit/></IconButton>
+            <IconButton
+                disabled={numSelectedTransactions === 1}
+                onClick={this.props.onSelectedMergeClick}><CommunicationCallMerge /></IconButton>
+            <IconButton
+                disabled={numSelectedTransactions === 1}
+                onClick={this.props.onSelectedSplitClick}><CommunicationCallSplit /></IconButton>
+            <IconButton
+                onClick={this.props.onSelectedDeleteClick}><ActionDelete /></IconButton>
+          </span>
+        : (this.props.cloudState ?
+            <span>
+              <IconButton
+                  disabled={this.props.cloudState != CloudState.Modified}
+                  onClick={this.props.onSaveTransactionsClick}>{
+                this.props.cloudState == CloudState.Modified ? <FileCloudUpload /> :
+                    (this.props.cloudState == CloudState.Uploading
+                        ? <CircularProgress size={24} thickness={3} color='#fff'/> : <FileCloudDone />)
+              }</IconButton>
+            </span> : undefined);
+
     return (
       <div className='app-bar'>
         <AppBar
@@ -98,25 +131,7 @@ class MenuBar extends React.Component<IMenuBarProps, IMenuBarReactState> {
               </IconButton>}
             onLeftIconButtonClick={numSelectedTransactions ? undefined : this.handleToggle}
             title={title}
-            iconElementRight={numSelectedTransactions
-              ?
-                <span>
-                  <IconButton
-                      disabled={numSelectedTransactions > 1}
-                      onClick={() => this.handleShowEditDialog()}><ImageEdit/></IconButton>
-                  <IconButton
-                      disabled={numSelectedTransactions === 1}
-                      onClick={this.props.onSelectedMergeClick}><CommunicationCallMerge /></IconButton>
-                  <IconButton
-                      disabled={numSelectedTransactions === 1}
-                      onClick={this.props.onSelectedSplitClick}><CommunicationCallSplit /></IconButton>
-                  <IconButton
-                      onClick={this.props.onSelectedDeleteClick}><ActionDelete /></IconButton>
-                </span>
-              :
-                <span>
-                  <IconButton disabled={true}><FileCloudDone /></IconButton>
-                </span>}
+            iconElementRight={iconElementRight}
             className={className}
             />
         <Drawer docked={false} width={250} open={this.state.isDrawerOpen}
