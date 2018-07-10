@@ -7,12 +7,14 @@ export enum Category {
   Grocery,
   HomeImprovement,
   HomeAndElectronics,
+  Income,
   Medical,
   PersonalCare,
   RecurringExpenses,
   Restaurant,
   Transit,
   TravelExpenses,
+  Vitamins,
 
   Other,
 }

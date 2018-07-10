@@ -27,6 +27,10 @@ export class Transaction extends React.Component<ITransactionProps, object> {
     'furniture': Category.HomeAndElectronics,
     'household goods': Category.HomeAndElectronics,
     'plants': Category.HomeAndElectronics,
+    'credit card reward': Category.Income,
+    'dividend': Category.Income,
+    'income': Category.Income,
+    'interest': Category.Income,
     'medical': Category.Medical,
     'personal care': Category.PersonalCare,
     'utility': Category.RecurringExpenses,
@@ -39,6 +43,7 @@ export class Transaction extends React.Component<ITransactionProps, object> {
     'flight': Category.TravelExpenses,
     'lodging': Category.TravelExpenses,
     'rail': Category.TravelExpenses,
+    'vitamins': Category.Vitamins,
   };
 
   public render(): React.ReactElement<object> {
@@ -110,6 +115,8 @@ export class Transaction extends React.Component<ITransactionProps, object> {
         return '🛠️';
       case Category.HomeAndElectronics:
         return '🛍️';
+      case Category.Income:
+        return '🤑';
       case Category.Medical:
         return '👩‍⚕️';
       case Category.PersonalCare:
@@ -122,6 +129,8 @@ export class Transaction extends React.Component<ITransactionProps, object> {
         return '🚇';
       case Category.TravelExpenses:
         return '🛫';
+      case Category.Vitamins:
+        return '💊';
       case Category.Other:
         return '❓';
       default:
