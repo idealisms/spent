@@ -53,6 +53,11 @@ body {
   width: auto !important;
 }
 
+.loading-container {
+  border-top: 1px solid lightgrey;
+  text-align: center;
+  padding-top: 24px;
+}
 .transactions {
   flex: 1;
   overflow: auto;

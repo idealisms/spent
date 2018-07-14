@@ -1,4 +1,5 @@
 import * as Dropbox from 'dropbox';
+import { CircularProgress } from 'material-ui';
 import DatePicker from 'material-ui/DatePicker';
 import * as moment from 'moment';
 import * as React from 'react';
@@ -84,9 +85,9 @@ class Categories extends React.Component<RouteComponentProps<object>, ICategorie
             onChange={this.handleChangeEndDate}
           />
         </div>
-        <div className='transactions'>
-          {rows}
-        </div>
+        {this.state.transactions.length
+            ? <div className='transactions'>{rows}</div>
+            : <div className='loading-container'><CircularProgress size={40} /></div>}
       </div>
     );
   }
