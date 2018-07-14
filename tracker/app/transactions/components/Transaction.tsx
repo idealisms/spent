@@ -65,7 +65,7 @@ export class Transaction extends React.Component<ITransactionProps, object> {
         <div className='date'>{this.props.transaction.date}</div>
         <div className={'amount' + (isCredit ? ' credit' : '')}>{this.formatAmount()}</div>
         <div
-            className='category'
+            className={'category' + (this.props.onCategoryClick ? ' editable' : '')}
             title={categoryName}
             onClick={this.props.onCategoryClick ? () => this.props.onCategoryClick!(this.props.transaction) : undefined}
             >{this.props.isSelected ? <i className='material-icons'>check_box</i> : categoryEmoji}</div>

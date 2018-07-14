@@ -92,6 +92,8 @@ body {
   text-align: center;
   flex: 0 0 32px;
   width: 32px;
+}
+.transactions .row > .category.editable {
   cursor: pointer;
 }
 .transactions .row.selected > .category {
