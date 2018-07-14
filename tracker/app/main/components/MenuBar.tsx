@@ -35,9 +35,9 @@ interface IMenuBarOwnProps {
   onSaveTransactionsClick?: () => void;
   onSelectedBackClick?: () => void;
   onSelectedEditSaveClick?: (transaction: ITransaction) => void;
-  onSelectedDeleteClick?: () => void;
-  onSelectedMergeClick?: () => void;
-  onSelectedSplitClick?: () => void;
+  onSelectedMergeClick?: (transactions: Map<string, ITransaction>) => void;
+  onSelectedDeleteClick?: (transactions: Map<string, ITransaction>) => void;
+  onSelectedSplitClick?: (transaction: ITransaction) => void;
 }
 interface IMenuBarStateProps {
   location: Location | null;
@@ -104,12 +104,13 @@ class MenuBar extends React.Component<IMenuBarProps, IMenuBarReactState> {
                 onClick={() => this.handleShowEditDialog()}><ImageEdit/></IconButton>
             <IconButton
                 disabled={numSelectedTransactions === 1}
-                onClick={this.props.onSelectedMergeClick}><CommunicationCallMerge /></IconButton>
+                onClick={() => this.props.onSelectedMergeClick!(this.props.selectedTransactions!)}><CommunicationCallMerge /></IconButton>
             <IconButton
-                disabled={numSelectedTransactions === 1}
-                onClick={this.props.onSelectedSplitClick}><CommunicationCallSplit /></IconButton>
+                disabled={numSelectedTransactions > 1}
+                onClick={() => this.props.onSelectedSplitClick!(
+                    this.props.selectedTransactions!.values().next().value)}><CommunicationCallSplit /></IconButton>
             <IconButton
-                onClick={this.props.onSelectedDeleteClick}><ActionDelete /></IconButton>
+                onClick={() => this.props.onSelectedDeleteClick!(this.props.selectedTransactions!)}><ActionDelete /></IconButton>
           </span>
         : (this.props.cloudState ?
             <span>

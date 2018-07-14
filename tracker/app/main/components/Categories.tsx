@@ -9,6 +9,7 @@ import MenuBar, { CloudState } from './MenuBar';
 
 type ICategoriesState = {
   transactions: ITransaction[],
+  visibleTransactions: ITransaction[],
   startDate: Date,
   endDate: Date,
   selectedTransactions: Map<string, ITransaction>,
@@ -20,6 +21,7 @@ class Categories extends React.Component<RouteComponentProps<object>, ICategorie
     super(props, context);
     this.state = {
       transactions: [],
+      visibleTransactions: [],
       // Months are 0 indexed.
       // startDate: new Date(2012, 0, 1),
       startDate: new Date(2018, 0, 1),
@@ -31,12 +33,7 @@ class Categories extends React.Component<RouteComponentProps<object>, ICategorie
   }
 
   public render(): React.ReactElement<object> {
-    let filteredTransactions = this.state.transactions.filter(t => {
-      let [fullYear, month, day] = t.date.split('-');
-      let transactionDate = new Date(parseInt(fullYear, 10), parseInt(month, 10) - 1, parseInt(day, 10));
-      return this.state.startDate <= transactionDate && transactionDate <= this.state.endDate;
-    });
-    let rows = filteredTransactions.map(t => {
+    let rows = this.state.visibleTransactions.map(t => {
         return (
           <Transaction
               key={t.id}
@@ -56,7 +53,10 @@ class Categories extends React.Component<RouteComponentProps<object>, ICategorie
             onSaveTransactionsClick={() => this.handleSaveTransactions()}
             onSelectedBackClick={() => this.handleClearSelections()}
             onSelectedEditSaveClick={(transaction: ITransaction) => this.handleUpdateTransaction(transaction)}
-             />
+            onSelectedMergeClick={(transactions: Map<string, ITransaction>) => this.handleMergeTransactions(transactions)}
+            onSelectedDeleteClick={(transactions: Map<string, ITransaction>) => this.handleDeleteTransactions(transactions)}
+            onSelectedSplitClick={(transaction: ITransaction) => this.handleSplitTransaction(transaction)}
+        />
 
         {/* <DailyGraph
           transactions={filteredTransactions}
@@ -123,11 +123,33 @@ class Categories extends React.Component<RouteComponentProps<object>, ICategorie
         break;
       }
     }
+    // Shouldn't need to update visible transactions since edits don't
+    // create or remove transactions.
     this.setState({
       transactions: this.state.transactions,
       selectedTransactions: new Map(),
       cloudState: CloudState.Modified,
     });
+  }
+
+  private handleMergeTransactions(transactions: Map<string, ITransaction>): void {
+    console.log('merge');
+  }
+
+  private handleDeleteTransactions(transactionsToDelete: Map<string, ITransaction>): void {
+    let transactionsToKeep = this.state.transactions.filter((t: ITransaction) => {
+      return !transactionsToDelete.has(t.id);
+    });
+    this.setState({
+      transactions: transactionsToKeep,
+      visibleTransactions: this.filterTransactions(transactionsToKeep),
+      selectedTransactions: new Map(),
+      cloudState: CloudState.Modified,
+    });
+  }
+
+  private handleSplitTransaction(transaction: ITransaction): void {
+    console.log('split');
   }
 
   private handleSaveTransactions(): void {
@@ -169,14 +191,18 @@ class Categories extends React.Component<RouteComponentProps<object>, ICategorie
             let fr = new FileReader();
             fr.addEventListener('load', ev => {
                 let transactions: ITransaction[] = JSON.parse(fr.result);
-                let state: any = { transactions: transactions };
-                if (transactions[0]) {
-                  state.endDate = moment(transactions[0].date).toDate();
-                }
                 let endDate = daily.refs['end-date'] as DatePicker;
                 endDate.setState({
                   date: moment(transactions[0].date).toDate(),
                 });
+
+                let state: any = {
+                  transactions: transactions,
+                  visibleTransactions: this.filterTransactions(transactions),
+                };
+                if (transactions[0]) {
+                  state.endDate = moment(transactions[0].date).toDate();
+                }
                 daily.setState(state);
             });
             fr.addEventListener('error', ev => {
@@ -189,7 +215,14 @@ class Categories extends React.Component<RouteComponentProps<object>, ICategorie
         }).catch(error => {
             console.log(error);
         });
+  }
 
+  private filterTransactions(transactions: ITransaction[]): ITransaction[] {
+    return transactions.filter(t => {
+      let [fullYear, month, day] = t.date.split('-');
+      let transactionDate = new Date(parseInt(fullYear, 10), parseInt(month, 10) - 1, parseInt(day, 10));
+      return this.state.startDate <= transactionDate && transactionDate <= this.state.endDate;
+    });
   }
 }
 
