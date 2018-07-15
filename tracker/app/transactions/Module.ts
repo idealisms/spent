@@ -10,12 +10,15 @@ export const DAILY_EXCLUDE_TAGS = new Set([
   'investment',
   'medical',
   'mortgage',
+  'netflix',
   'new house',
   'paycheck',
+  'phone service',
   'rent',
   'settlement',
   'stock',
   'taxes',
+  'utility',
 ]);
 
 // TODO: Move these functions into a util file.
