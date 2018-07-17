@@ -3,7 +3,7 @@ import FlatButton from 'material-ui/FlatButton';
 import TextField from 'material-ui/TextField';
 import * as React from 'react';
 import { ITransaction } from '../Model';
-import { formatAmount } from '../Module';
+import { formatAmount } from '../utils';
 
 type IEditTransactionDialogProps = {
   transaction: ITransaction,

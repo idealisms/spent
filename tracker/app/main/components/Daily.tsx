@@ -6,7 +6,7 @@ import * as React from 'react';
 import { Chart } from 'react-google-charts';
 import { RouteComponentProps } from 'react-router';
 import { ACCESS_TOKEN } from '../../config';
-import { DAILY_EXCLUDE_TAGS, ITransaction, Transaction, shouldExclude } from '../../transactions';
+import { DAILY_EXCLUDE_TAGS, ITransaction, shouldExclude, Transaction } from '../../transactions';
 import MenuBar from './MenuBar';
 
 type IDailyGraphProps = {
