@@ -18,7 +18,7 @@ import * as React from 'react';
 import { connect, Dispatch } from 'react-redux';
 import { push, RouterAction } from 'react-router-redux';
 import muiTheme from '../../muiTheme';
-import { EditTransactionDialog, ITransaction } from '../../transactions';
+import { EditTransactionDialog, ITransaction, MergeTransactionDialog } from '../../transactions';
 import { IAppState } from '../Model';
 import { CategoriesPage, DailyPage } from './RoutePaths';
 
@@ -35,7 +35,7 @@ interface IMenuBarOwnProps {
   onSaveTransactionsClick?: () => void;
   onSelectedBackClick?: () => void;
   onSelectedEditSaveClick?: (transaction: ITransaction) => void;
-  onSelectedMergeClick?: (transactions: Map<string, ITransaction>) => void;
+  onSelectedMergeSaveClick?: (transaction: ITransaction) => void;
   onSelectedDeleteClick?: (transactions: Map<string, ITransaction>) => void;
   onSelectedSplitClick?: (transaction: ITransaction) => void;
 }
@@ -50,6 +50,7 @@ type IMenuBarProps = IMenuBarOwnProps & IMenuBarStateProps & IMenuBarDispatchPro
 interface IMenuBarReactState {
   isDrawerOpen: boolean;
   isEditDialogOpen: boolean;
+  isMergeDialogOpen: boolean;
 }
 
 class MenuBar extends React.Component<IMenuBarProps, IMenuBarReactState> {
@@ -59,6 +60,7 @@ class MenuBar extends React.Component<IMenuBarProps, IMenuBarReactState> {
     this.state = {
       isDrawerOpen: false,
       isEditDialogOpen: false,
+      isMergeDialogOpen: false,
     };
   }
 
@@ -86,7 +88,9 @@ class MenuBar extends React.Component<IMenuBarProps, IMenuBarReactState> {
       );
     };
 
-    let numSelectedTransactions = this.props.selectedTransactions ? this.props.selectedTransactions.size : 0;
+    let selectedTransactionsArray = this.props.selectedTransactions ? [...this.props.selectedTransactions.values()] : [];
+
+    let numSelectedTransactions = selectedTransactionsArray.length;
     let title = this.props.title;
     let className = '';
     if (numSelectedTransactions === 1) {
@@ -101,16 +105,20 @@ class MenuBar extends React.Component<IMenuBarProps, IMenuBarReactState> {
         ? <span>
             <IconButton
                 disabled={numSelectedTransactions > 1}
-                onClick={() => this.handleShowEditDialog()}><ImageEdit/></IconButton>
+                onClick={() => this.handleShowEditDialog()}
+                tooltip='Edit'><ImageEdit/></IconButton>
             <IconButton
                 disabled={numSelectedTransactions === 1}
-                onClick={() => this.props.onSelectedMergeClick!(this.props.selectedTransactions!)}><CommunicationCallMerge /></IconButton>
+                onClick={() => this.handleShowMergeDialog()}
+                tooltip='Merge'><CommunicationCallMerge /></IconButton>
             <IconButton
                 disabled={numSelectedTransactions > 1}
                 onClick={() => this.props.onSelectedSplitClick!(
-                    this.props.selectedTransactions!.values().next().value)}><CommunicationCallSplit /></IconButton>
+                    selectedTransactionsArray[0])}
+                tooltip='Split'><CommunicationCallSplit /></IconButton>
             <IconButton
-                onClick={() => this.props.onSelectedDeleteClick!(this.props.selectedTransactions!)}><ActionDelete /></IconButton>
+                onClick={() => this.props.onSelectedDeleteClick!(this.props.selectedTransactions!)}
+                tooltip='Delete'><ActionDelete /></IconButton>
           </span>
         : (this.props.cloudState ?
             <span>
@@ -161,16 +169,32 @@ class MenuBar extends React.Component<IMenuBarProps, IMenuBarReactState> {
               onClose={() => this.setState({isEditDialogOpen: false})}
               onSaveChanges={this.props.onSelectedEditSaveClick}
           /> : undefined}
+        {this.state.isMergeDialogOpen && this.props.onSelectedMergeSaveClick ?
+          <MergeTransactionDialog
+              transactions={selectedTransactionsArray}
+              isOpen={true}
+              onClose={() => this.setState({isMergeDialogOpen: false})}
+              onSaveChanges={this.props.onSelectedMergeSaveClick}
+          /> : undefined}
       </div>
     );
   }
 
   private handleShowEditDialog(): void {
-    if (!this.props.selectedTransactions || this.props.selectedTransactions.size !== 1) {
+    if (!this.props.selectedTransactions || this.props.selectedTransactions.size != 1) {
       return;
     }
     this.setState({
       isEditDialogOpen: true,
+    });
+  }
+
+  private handleShowMergeDialog(): void {
+    if (!this.props.selectedTransactions || this.props.selectedTransactions.size < 2) {
+      return;
+    }
+    this.setState({
+      isMergeDialogOpen: true,
     });
   }
 

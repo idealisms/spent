@@ -105,3 +105,20 @@ export function categoryToEmoji(category: Category): string {
       return '💲';
   }
 }
+
+export function generateUUID(): string {
+  // From https://stackoverflow.com/a/8472700
+  let buf = new Uint16Array(10);
+  crypto.getRandomValues(buf);
+  let S4 = function(num: number): string {
+      let ret = num.toString(16);
+      while (ret.length < 4) {
+          ret = '0' + ret;
+      }
+      return ret;
+  };
+
+  // We can't use buf.map because it returns another Uint16Array, but
+  // we want an array of hex strings.
+  return Array.from(buf).map(S4).join('');
+}

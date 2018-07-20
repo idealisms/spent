@@ -5,7 +5,7 @@ import * as moment from 'moment';
 import * as React from 'react';
 import { RouteComponentProps } from 'react-router';
 import { ACCESS_TOKEN } from '../../config';
-import { ITransaction, Transaction } from '../../transactions';
+import { compareTransactions, generateUUID, ITransaction, Transaction } from '../../transactions';
 import MenuBar, { CloudState } from './MenuBar';
 
 type ICategoriesState = {
@@ -54,7 +54,7 @@ class Categories extends React.Component<RouteComponentProps<object>, ICategorie
             onSaveTransactionsClick={() => this.handleSaveTransactions()}
             onSelectedBackClick={() => this.handleClearSelections()}
             onSelectedEditSaveClick={(transaction: ITransaction) => this.handleUpdateTransaction(transaction)}
-            onSelectedMergeClick={(transactions: Map<string, ITransaction>) => this.handleMergeTransactions(transactions)}
+            onSelectedMergeSaveClick={(transaction: ITransaction) => this.handleMergeSelectedTransactions(transaction)}
             onSelectedDeleteClick={(transactions: Map<string, ITransaction>) => this.handleDeleteTransactions(transactions)}
             onSelectedSplitClick={(transaction: ITransaction) => this.handleSplitTransaction(transaction)}
         />
@@ -133,8 +133,39 @@ class Categories extends React.Component<RouteComponentProps<object>, ICategorie
     });
   }
 
-  private handleMergeTransactions(transactions: Map<string, ITransaction>): void {
-    console.log('merge');
+  private handleMergeSelectedTransactions(transaction: ITransaction): void {
+    let fromTransactions = this.state.selectedTransactions;
+    fromTransactions.delete(transaction.id);
+    let transactionsToKeep: ITransaction[] = [];
+    for (let t of this.state.transactions) {
+      if (fromTransactions.has(t.id)) {
+        continue;
+      } else if (t.id == transaction.id) {
+        t = Object.assign({}, transaction);
+        t.id = generateUUID();
+        t.transactions = [...transaction.transactions];
+        if (transaction.transactions && transaction.transactions.length == 0) {
+          t.transactions.push(transaction);
+        }
+
+        for (let fromTransaction of fromTransactions.values()) {
+          t.amount_cents += fromTransaction.amount_cents;
+          if (fromTransaction.transactions && fromTransaction.transactions.length > 0) {
+            t.transactions.push(...fromTransaction.transactions);
+          } else {
+            t.transactions.push(fromTransaction);
+          }
+        }
+        console.log(t);
+      }
+      transactionsToKeep.push(t);
+    }
+    this.setState({
+      transactions: transactionsToKeep,
+      visibleTransactions: this.filterTransactions(transactionsToKeep),
+      selectedTransactions: new Map(),
+      cloudState: CloudState.Modified,
+    });
   }
 
   private handleDeleteTransactions(transactionsToDelete: Map<string, ITransaction>): void {
@@ -192,6 +223,7 @@ class Categories extends React.Component<RouteComponentProps<object>, ICategorie
             let fr = new FileReader();
             fr.addEventListener('load', ev => {
                 let transactions: ITransaction[] = JSON.parse(fr.result);
+                transactions.sort(compareTransactions);
                 let endDate = daily.refs['end-date'] as DatePicker;
                 endDate.setState({
                   date: moment(transactions[0].date).toDate(),

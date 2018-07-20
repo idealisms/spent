@@ -125,3 +125,20 @@ body {
   margin-left: 8px;
   color: #666;
 }
+
+.merge-radio-button > div {
+  align-items: center;
+}
+.merge-radio-button .transactions {
+  border-top: none;
+}
+.merge-radio-button .transactions .row {
+  border-bottom: none;
+}
+.merge-radio-button .transactions .row > .amount {
+  margin-left: 0;
+  flex: 0 0 52px;
+}
+.merge-radio-button .transactions .row > .description {
+  overflow: hidden;
+}
