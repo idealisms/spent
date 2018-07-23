@@ -58,14 +58,24 @@ export class EditTransactionDialog extends React.Component<IEditTransactionDialo
             defaultValue={this.state.tagsValue}
             style={{width: '100%'}}
             onChange={(event) => this.setState({tagsValue: (event.target as HTMLInputElement).value})}
+            onKeyPress={(e) => { this.handleKeyPress(e); }}
         /><br />
         <TextField
             floatingLabelText='Notes'
             defaultValue={this.state.notesValue}
             style={{width: '100%'}}
+            autoFocus={true}
             onChange={(event) => this.setState({notesValue: (event.target as HTMLInputElement).value})}
+            onKeyPress={(e) => { this.handleKeyPress(e); }}
         />
       </Dialog>;
+  }
+
+  private handleKeyPress(e: React.KeyboardEvent<{}>): void {
+    // charCode 13 is the Enter key.
+    if (e.charCode == 13) {
+      this.handleSave();
+    }
   }
 
   private handleSave(): void {
