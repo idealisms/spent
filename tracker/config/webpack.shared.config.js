@@ -1,5 +1,6 @@
 const path = require('path');
 const webpack = require('webpack');
+const FaviconsWebpackPlugin = require('favicons-webpack-plugin');
 
 module.exports = (options) => ({
   entry: options.entry,
@@ -33,7 +34,7 @@ module.exports = (options) => ({
       include: options.srcs,
       loaders: [
         'file-loader',
-        'image-webpack?{progressive:true, optimizationLevel: 7, interlaced: false, pngquant:{quality: "65-90", speed: 4}}',
+        // 'image-webpack-loader?{progressive:true, optimizationLevel: 7, interlaced: false, pngquant:{quality: "65-90", speed: 4}}',
       ],
     }, {
       test: /\.html$/,
@@ -51,6 +52,7 @@ module.exports = (options) => ({
   },
   plugins: options.plugins.concat([
     new webpack.NamedModulesPlugin(),
+    new FaviconsWebpackPlugin('favicon.png'),
     new webpack.LoaderOptionsPlugin({
       debug: false,
       options: {
