@@ -76,7 +76,6 @@ export class MergeTransactionDialog extends React.Component<IMergeTransactionDia
     return <Dialog
           className='merge-transaction-dialog'
           title='Choose transaction to merge into'
-          contentStyle={{width: 'calc(100% - 64px)', maxWidth: '420px'}}
           actions={actions}
           modal={false}
           open={this.props.isOpen}

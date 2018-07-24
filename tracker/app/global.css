@@ -131,14 +131,17 @@ body {
 }
 .merge-radio-button .transactions {
   border-top: none;
+  overflow: visible;
 }
 .merge-radio-button .transactions .row {
   border-bottom: none;
 }
 .merge-radio-button .transactions .row > .amount {
   margin-left: 0;
-  flex: 0 0 52px;
+  flex: 0 0 73px;
 }
 .merge-radio-button .transactions .row > .description {
   overflow: hidden;
+  flex: 1 0 auto;
+  padding-right: 24px;
 }
