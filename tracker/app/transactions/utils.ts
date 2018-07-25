@@ -18,12 +18,15 @@ export function formatAmount(transaction: ITransaction): string {
   let numCommas = parseInt(
       ((dollars.length - 1) / 3).toString(), 10);
   for (let c = numCommas * 3; c > 0; c -= 3) {
-      dollars = dollars.substr(0, dollars.length - c) + ',' +
-          dollars.substr(dollars.length - c);
+      dollars = `${dollars.substr(0, dollars.length - c)},${dollars.substr(dollars.length - c)}`;
   }
-  let amount = dollars + '.' + amountCents.substr(digits - 2);
+  let centsString = amountCents.substr(digits - 2);
+  if (centsString.length == 1) {
+    centsString = `0${centsString}`;
+  }
+  let amount = `${dollars}.${centsString}`;
   if (isNegative) {
-      amount = '(' + amount + ')';
+      amount = `(${amount})`;
   }
   return amount;
 }
