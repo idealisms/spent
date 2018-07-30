@@ -56,7 +56,7 @@ class Categories extends React.Component<RouteComponentProps<object>, ICategorie
             onSelectedEditSaveClick={(transaction: ITransaction) => this.handleUpdateTransaction(transaction)}
             onSelectedMergeSaveClick={(transaction: ITransaction) => this.handleMergeSelectedTransactions(transaction)}
             onSelectedDeleteClick={(transactions: Map<string, ITransaction>) => this.handleDeleteTransactions(transactions)}
-            onSelectedSplitClick={(transaction: ITransaction) => this.handleSplitTransaction(transaction)}
+            onSelectedSplitSaveClick={(transactions: Map<string, ITransaction>) => this.handleSplitTransaction(transactions)}
         />
 
         {/* <DailyGraph
@@ -136,6 +136,7 @@ class Categories extends React.Component<RouteComponentProps<object>, ICategorie
   private handleMergeSelectedTransactions(transaction: ITransaction): void {
     let fromTransactions = this.state.selectedTransactions;
     fromTransactions.delete(transaction.id);
+    let selectedTransactions = new Map();
     let transactionsToKeep: ITransaction[] = [];
     for (let t of this.state.transactions) {
       if (fromTransactions.has(t.id)) {
@@ -156,6 +157,7 @@ class Categories extends React.Component<RouteComponentProps<object>, ICategorie
             t.transactions.push(fromTransaction);
           }
         }
+        selectedTransactions.set(t.id, t);
         console.log(t);
       }
       transactionsToKeep.push(t);
@@ -163,7 +165,7 @@ class Categories extends React.Component<RouteComponentProps<object>, ICategorie
     this.setState({
       transactions: transactionsToKeep,
       visibleTransactions: this.filterTransactions(transactionsToKeep),
-      selectedTransactions: new Map(),
+      selectedTransactions,
       cloudState: CloudState.Modified,
     });
   }
@@ -180,8 +182,22 @@ class Categories extends React.Component<RouteComponentProps<object>, ICategorie
     });
   }
 
-  private handleSplitTransaction(transaction: ITransaction): void {
-    console.log('split');
+  private handleSplitTransaction(newTransactions: Map<string, ITransaction>): void {
+    let transactionsToKeep = this.state.transactions.filter((t: ITransaction) => {
+      return !this.state.selectedTransactions.has(t.id);
+    });
+    let selectedTransactions = new Map();
+    for (let transaction of newTransactions.values()) {
+      transactionsToKeep.push(transaction);
+      selectedTransactions.set(transaction.id, transaction);
+    }
+    transactionsToKeep.sort(compareTransactions);
+    this.setState({
+      transactions: transactionsToKeep,
+      visibleTransactions: this.filterTransactions(transactionsToKeep),
+      selectedTransactions,
+      cloudState: CloudState.Modified,
+    });
   }
 
   private handleSaveTransactions(): void {

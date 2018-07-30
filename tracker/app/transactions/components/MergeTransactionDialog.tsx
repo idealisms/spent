@@ -7,7 +7,6 @@ import { categoryToEmoji, compareTransactions, formatAmount, getCategory } from 
 
 type IMergeTransactionDialogProps = {
   transactions: ITransaction[],
-  isOpen: boolean,
   onClose: () => void,
   onSaveChanges: (transaction: ITransaction) => void,
 };
@@ -64,7 +63,6 @@ export class MergeTransactionDialog extends React.Component<IMergeTransactionDia
             </div>
           </div>;
       rows.push(
-          //   <span className='date'>{transaction.date}</span>
           <RadioButton
               key={'radio-' + transaction.id}
               value={transaction.id}
@@ -78,7 +76,7 @@ export class MergeTransactionDialog extends React.Component<IMergeTransactionDia
           title='Choose transaction to merge into'
           actions={actions}
           modal={false}
-          open={this.props.isOpen}
+          open={true}
           onRequestClose={this.props.onClose}
           autoScrollBodyContent={true}>
         <RadioButtonGroup

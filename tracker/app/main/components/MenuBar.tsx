@@ -18,7 +18,7 @@ import * as React from 'react';
 import { connect, Dispatch } from 'react-redux';
 import { push, RouterAction } from 'react-router-redux';
 import muiTheme from '../../muiTheme';
-import { EditTransactionDialog, ITransaction, MergeTransactionDialog } from '../../transactions';
+import { EditTransactionDialog, ITransaction, MergeTransactionDialog, SplitTransactionDialog } from '../../transactions';
 import { IAppState } from '../Model';
 import { CategoriesPage, DailyPage } from './RoutePaths';
 
@@ -37,7 +37,7 @@ interface IMenuBarOwnProps {
   onSelectedEditSaveClick?: (transaction: ITransaction) => void;
   onSelectedMergeSaveClick?: (transaction: ITransaction) => void;
   onSelectedDeleteClick?: (transactions: Map<string, ITransaction>) => void;
-  onSelectedSplitClick?: (transaction: ITransaction) => void;
+  onSelectedSplitSaveClick?: (transactions: Map<string, ITransaction>) => void;
 }
 interface IMenuBarStateProps {
   location: Location | null;
@@ -51,6 +51,7 @@ interface IMenuBarReactState {
   isDrawerOpen: boolean;
   isEditDialogOpen: boolean;
   isMergeDialogOpen: boolean;
+  isSplitDialogOpen: boolean;
 }
 
 class MenuBar extends React.Component<IMenuBarProps, IMenuBarReactState> {
@@ -61,6 +62,7 @@ class MenuBar extends React.Component<IMenuBarProps, IMenuBarReactState> {
       isDrawerOpen: false,
       isEditDialogOpen: false,
       isMergeDialogOpen: false,
+      isSplitDialogOpen: false,
     };
   }
 
@@ -113,8 +115,7 @@ class MenuBar extends React.Component<IMenuBarProps, IMenuBarReactState> {
                 tooltip='Merge'><CommunicationCallMerge /></IconButton>
             <IconButton
                 disabled={numSelectedTransactions > 1}
-                onClick={() => this.props.onSelectedSplitClick!(
-                    selectedTransactionsArray[0])}
+                onClick={() => this.handleShowSplitDialog()}
                 tooltip='Split'><CommunicationCallSplit /></IconButton>
             <IconButton
                 onClick={() => this.props.onSelectedDeleteClick!(this.props.selectedTransactions!)}
@@ -165,16 +166,20 @@ class MenuBar extends React.Component<IMenuBarProps, IMenuBarReactState> {
         {this.state.isEditDialogOpen && this.props.onSelectedEditSaveClick ?
           <EditTransactionDialog
               transaction={this.props.selectedTransactions!.values().next().value}
-              isOpen={true}
               onClose={() => this.setState({isEditDialogOpen: false})}
               onSaveChanges={this.props.onSelectedEditSaveClick}
           /> : undefined}
         {this.state.isMergeDialogOpen && this.props.onSelectedMergeSaveClick ?
           <MergeTransactionDialog
               transactions={selectedTransactionsArray}
-              isOpen={true}
               onClose={() => this.setState({isMergeDialogOpen: false})}
               onSaveChanges={this.props.onSelectedMergeSaveClick}
+          /> : undefined}
+        {this.state.isSplitDialogOpen && this.props.onSelectedSplitSaveClick ?
+          <SplitTransactionDialog
+              transaction={this.props.selectedTransactions!.values().next().value}
+              onClose={() => this.setState({isSplitDialogOpen: false})}
+              onSaveChanges={this.props.onSelectedSplitSaveClick}
           /> : undefined}
       </div>
     );
@@ -195,6 +200,15 @@ class MenuBar extends React.Component<IMenuBarProps, IMenuBarReactState> {
     }
     this.setState({
       isMergeDialogOpen: true,
+    });
+  }
+
+  private handleShowSplitDialog(): void {
+    if (!this.props.selectedTransactions || this.props.selectedTransactions.size != 1) {
+      return;
+    }
+    this.setState({
+      isSplitDialogOpen: true,
     });
   }
 

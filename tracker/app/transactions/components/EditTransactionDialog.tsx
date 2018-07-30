@@ -7,7 +7,6 @@ import { formatAmount } from '../utils';
 
 type IEditTransactionDialogProps = {
   transaction: ITransaction,
-  isOpen: boolean,
   onClose: () => void,
   onSaveChanges: (transaction: ITransaction) => void,
 };
@@ -47,7 +46,7 @@ export class EditTransactionDialog extends React.Component<IEditTransactionDialo
           contentStyle={{width: 'calc(100% - 64px)', maxWidth: '360px'}}
           actions={actions}
           modal={false}
-          open={this.props.isOpen}
+          open={true}
           onRequestClose={this.props.onClose}
           autoScrollBodyContent={true}>
         <span className='amount'>{formatAmount(transaction)}</span>&nbsp;
@@ -58,7 +57,7 @@ export class EditTransactionDialog extends React.Component<IEditTransactionDialo
             defaultValue={this.state.tagsValue}
             style={{width: '100%'}}
             onChange={(event) => this.setState({tagsValue: (event.target as HTMLInputElement).value})}
-            onKeyPress={(e) => { this.handleKeyPress(e); }}
+            onKeyPress={(e) => this.handleKeyPress(e)}
         /><br />
         <TextField
             floatingLabelText='Notes'
