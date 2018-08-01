@@ -1,0 +1,17 @@
+{
+  "version": "2.3.2",
+  "compilerOptions": {
+    "module": "commonjs",
+    "target": "es2018",
+    "jsx": "react",
+    "sourceMap": false,
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "strictNullChecks": true,
+    "noUnusedLocals": true,
+    "outDir": "."
+  },
+  "exclude": [
+    "node_modules",
+  ]
+}

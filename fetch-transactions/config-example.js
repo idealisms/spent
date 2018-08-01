@@ -20,3 +20,5 @@ exports.USAA = {
   username: 'username',
   pin: '1234'
 }
+
+exports.DROPBOX_ACCESS_TOKEN = 'zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz';
