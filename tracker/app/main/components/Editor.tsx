@@ -8,7 +8,7 @@ import { ACCESS_TOKEN } from '../../config';
 import { compareTransactions, generateUUID, ITransaction, Transaction } from '../../transactions';
 import MenuBar, { CloudState } from './MenuBar';
 
-type ICategoriesState = {
+type IEditorState = {
   transactions: ITransaction[],
   visibleTransactions: ITransaction[],
   startDate: Date,
@@ -16,7 +16,7 @@ type ICategoriesState = {
   selectedTransactions: Map<string, ITransaction>,
   cloudState: CloudState,
 };
-class Categories extends React.Component<RouteComponentProps<object>, ICategoriesState> {
+class Editor extends React.Component<RouteComponentProps<object>, IEditorState> {
 
   constructor(props:any, context:any) {
     super(props, context);
@@ -46,9 +46,9 @@ class Categories extends React.Component<RouteComponentProps<object>, ICategorie
       });
 
     return (
-      <div id='page-categories'>
+      <div id='page-editor'>
         <MenuBar
-            title='Categories'
+            title='Editor'
             selectedTransactions={this.state.selectedTransactions}
             cloudState={this.state.cloudState}
             onSaveTransactionsClick={() => this.handleSaveTransactions()}
@@ -275,4 +275,4 @@ class Categories extends React.Component<RouteComponentProps<object>, ICategorie
   }
 }
 
-export default Categories;
+export default Editor;

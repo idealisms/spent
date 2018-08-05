@@ -20,7 +20,7 @@ import { push, RouterAction } from 'react-router-redux';
 import muiTheme from '../../muiTheme';
 import { EditTransactionDialog, ITransaction, MergeTransactionDialog, SplitTransactionDialog } from '../../transactions';
 import { IAppState } from '../Model';
-import { CategoriesPage, DailyPage } from './RoutePaths';
+import { DailyPage, EditorPage } from './RoutePaths';
 
 export enum CloudState {
   Done = 1,
@@ -158,9 +158,9 @@ class MenuBar extends React.Component<IMenuBarProps, IMenuBarReactState> {
               leftIconName='timeline'
           />
           <MenuItem
-              name='Categories'
-              path={CategoriesPage}
-              leftIconName='category'
+              name='Editor'
+              path={EditorPage}
+              leftIconName='editor'
           />
         </Drawer>
         {this.state.isEditDialogOpen && this.props.onSelectedEditSaveClick ?

@@ -1,10 +1,10 @@
-html, body, #app, #page-daily, #page-categories {
+html, body, #app, #page-daily, #page-editor {
 	height: 100%;
 }
 body {
   margin: 0;
 }
-#page-daily, #page-categories {
+#page-daily, #page-editor {
   display: flex;
 	flex-direction: column;
 }

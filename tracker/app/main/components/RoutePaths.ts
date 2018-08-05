@@ -2,5 +2,5 @@
 
 export const HomePage = '/';
 export const DailyPage = '/daily';
-export const CategoriesPage = '/categories';
+export const EditorPage = '/editor';
 export const CounterListPage = '/counters';
