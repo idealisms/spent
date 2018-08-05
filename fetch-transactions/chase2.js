@@ -8,7 +8,7 @@ function* screenshotFilename() {
   while (true) {
     ++index;
     let fileNumber = index < 10 ? '0' + index : '' + index;
-    yield `screenshots/${fileNumber}.png`;
+    yield `screenshots/chase2-${fileNumber}.png`;
   }
 }
 
