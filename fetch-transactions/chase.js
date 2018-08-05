@@ -78,6 +78,12 @@ async function getFrameMatchingUrl(page, urlSubstring) {
   await page.screenshot({path: filenameGenerator.next().value});
   await page.waitForSelector('#body', {'visible': true});
   await page.screenshot({path: filenameGenerator.next().value});
+  try {
+    await page.waitForSelector('.cardArtLogo');
+  } catch (e) {
+    console.log('Timeout waiting for .cardArtLogo.');
+  }
+  await page.screenshot({path: filenameGenerator.next().value});
 
   loginFrame = await getFrameMatchingUrl(page, 'logon/recognizeUser/instructions');
 
