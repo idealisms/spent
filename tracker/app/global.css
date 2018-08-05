@@ -145,3 +145,18 @@ body {
   flex: 1 0 auto;
   padding-right: 24px;
 }
+
+@media (max-height: 380px) {
+  .edit-transaction-dialog {
+    margin-top: -48px;
+  }
+  .edit-transaction-dialog > div, .edit-transaction-content > div {
+    height: 100%;
+  }
+  .edit-transaction-content {
+    height: calc(100% - 48px);
+  }
+  .edit-transaction-body {
+    max-height: calc(100% - 76px - 52px) !important;
+  }
+}

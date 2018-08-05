@@ -42,6 +42,8 @@ export class EditTransactionDialog extends React.Component<IEditTransactionDialo
     let transaction: ITransaction = this.props.transaction;
     return <Dialog
           className='edit-transaction-dialog'
+          contentClassName='edit-transaction-content'
+          bodyClassName='edit-transaction-body'
           title='Edit Transaction'
           contentStyle={{width: 'calc(100% - 64px)', maxWidth: '360px'}}
           actions={actions}

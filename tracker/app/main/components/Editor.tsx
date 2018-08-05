@@ -23,9 +23,7 @@ class Editor extends React.Component<RouteComponentProps<object>, IEditorState> 
     this.state = {
       transactions: [],
       visibleTransactions: [],
-      // Months are 0 indexed.
-      // startDate: new Date(2012, 0, 1),
-      startDate: new Date(2018, 0, 1),
+      startDate: moment().subtract(3, 'months').toDate(),
       endDate: moment().hours(0).minutes(0).seconds(0).milliseconds(0).toDate(),
       selectedTransactions: new Map(),
       cloudState: CloudState.Done,
@@ -239,7 +237,6 @@ class Editor extends React.Component<RouteComponentProps<object>, IEditorState> 
             let fr = new FileReader();
             fr.addEventListener('load', ev => {
                 let transactions: ITransaction[] = JSON.parse(fr.result);
-                transactions.sort(compareTransactions);
                 let endDate = daily.refs['end-date'] as DatePicker;
                 endDate.setState({
                   date: moment(transactions[0].date).toDate(),
