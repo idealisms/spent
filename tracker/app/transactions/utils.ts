@@ -14,7 +14,7 @@ export function formatAmount(transaction: ITransaction): string {
   let isNegative = amountCentsNumber < 0;
   let amountCents = Math.abs(amountCentsNumber).toString();
   let digits = amountCents.length;
-  let dollars = amountCents.substr(0, digits - 2);
+  let dollars = amountCents.substr(0, digits - 2) || '0';
   let numCommas = parseInt(
       ((dollars.length - 1) / 3).toString(), 10);
   for (let c = numCommas * 3; c > 0; c -= 3) {
@@ -109,10 +109,10 @@ export function categoryToEmoji(category: Category): string {
   }
 }
 
-export function generateUUID(): string {
+export function generateUUID(crypto_: Crypto = crypto): string {
   // From https://stackoverflow.com/a/8472700
   let buf = new Uint16Array(10);
-  crypto.getRandomValues(buf);
+  crypto_.getRandomValues(buf);
   let S4 = function(num: number): string {
       let ret = num.toString(16);
       while (ret.length < 4) {
