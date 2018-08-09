@@ -1,11 +1,10 @@
 
 import * as React from 'react';
 import { Switch } from 'react-router';
-import { Route } from 'react-router-dom';
+import { Redirect, Route } from 'react-router-dom';
 import { CounterList } from '../../counterlist';
 import Daily from './Daily';
 import Editor from './Editor';
-import Home from './Home';
 import { CounterListPage, DailyPage, EditorPage, HomePage } from './RoutePaths';
 
 const NoMatch = () => (
@@ -18,7 +17,9 @@ export class App extends React.Component<object, object> {
     // {/*  */}
     return (
         <Switch>
-          <Route exact path={HomePage} component={Home} />
+          <Route exact path={HomePage}>
+            <Redirect to={DailyPage} />
+          </Route>
           <Route exact path={DailyPage} component={Daily} />
           <Route exact path={EditorPage} component={Editor} />
           <Route exact path={CounterListPage} component={CounterList} />
