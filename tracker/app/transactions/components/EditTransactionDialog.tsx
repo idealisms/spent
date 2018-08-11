@@ -58,6 +58,7 @@ export class EditTransactionDialog extends React.Component<IEditTransactionDialo
             floatingLabelText='Tags (comma separated)'
             defaultValue={this.state.tagsValue}
             style={{width: '100%'}}
+            autoFocus={!this.state.tagsValue}
             onChange={(event) => this.setState({tagsValue: (event.target as HTMLInputElement).value})}
             onKeyPress={(e) => this.handleKeyPress(e)}
         /><br />
@@ -65,7 +66,7 @@ export class EditTransactionDialog extends React.Component<IEditTransactionDialo
             floatingLabelText='Notes'
             defaultValue={this.state.notesValue}
             style={{width: '100%'}}
-            autoFocus={true}
+            autoFocus={!!this.state.tagsValue}
             onChange={(event) => this.setState({notesValue: (event.target as HTMLInputElement).value})}
             onKeyPress={(e) => { this.handleKeyPress(e); }}
         />
