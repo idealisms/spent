@@ -4,6 +4,7 @@ import TextField from 'material-ui/TextField';
 import * as moment from 'moment';
 import * as React from 'react';
 import { Chart } from 'react-google-charts';
+import Measure from 'react-measure';
 import { RouteComponentProps } from 'react-router';
 import { ACCESS_TOKEN } from '../../config';
 import { DAILY_EXCLUDE_TAGS, ITransaction, shouldExclude, Transaction } from '../../transactions';
@@ -15,7 +16,24 @@ type IDailyGraphProps = {
   endDate: Date,
   dailyBudgetCents: number,
 };
-class DailyGraph extends React.Component<IDailyGraphProps, object> {
+type IDailyGraphState = {
+  dimensions: {
+    width: number,
+    height: number,
+  },
+};
+class DailyGraph extends React.Component<IDailyGraphProps, IDailyGraphState> {
+
+  constructor(props:IDailyGraphProps, context:any) {
+    super(props, context);
+    this.state = {
+      dimensions: {
+        width: -1,
+        height: -1,
+      },
+    };
+  }
+
   public render(): React.ReactElement<object> {
     let data: [string, number][] = [];
 
@@ -42,19 +60,40 @@ class DailyGraph extends React.Component<IDailyGraphProps, object> {
     } else {
       data.push([moment().format('YYYY-MM-DD'), 0]);
     }
+    if (this.state.dimensions.width != -1) {
+      // Limit the number of graph points based on how much space we have.
+      let maxToShow = Math.max(Math.round(this.state.dimensions.width / 10), 31);
+      if (maxToShow < data.length) {
+        data = data.slice(data.length - maxToShow);
+      }
+    }
 
     return (
-      <div className='chart'>
-        <Chart
-            chartType='LineChart'
-            columns={[{'label': 'Date', 'type': 'string'}, {'label':'Dollars', 'type':'number'}]}
-            rows={data}
-            options={{'hAxis': {'title': 'Date'}, 'vAxis': {'title': 'Dollars'}, 'legend': 'none'}}
-            graph_id='daily-spend-chart'
-            width='auto'
-            height='100%'
-          />
-      </div>
+      <Measure
+        bounds
+        onResize={(contentRect) => {
+          this.setState({
+            dimensions: {
+              width: contentRect!.bounds!.width,
+              height: contentRect!.bounds!.height,
+            },
+          });
+        }}
+      >
+        {({ measureRef }) =>
+          <div ref={measureRef} className='chart'>
+            <Chart
+                chartType='LineChart'
+                columns={[{'label': 'Date', 'type': 'string'}, {'label':'Dollars', 'type':'number'}]}
+                rows={data}
+                options={{'hAxis': {'title': 'Date'}, 'vAxis': {'title': 'Dollars'}, 'legend': 'none'}}
+                graph_id='daily-spend-chart'
+                width='auto'
+                height='100%'
+              />
+          </div>
+        }
+      </Measure>
     );
   }
 }
