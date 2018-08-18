@@ -70,6 +70,8 @@ export function getCategory(transaction: ITransaction): Category {
 
 export function categoryToEmoji(category: Category): string {
   switch (category) {
+    case Category.Bank:
+      return '🏦';
     case Category.Car:
       return '🚗';
     case Category.Cash:
@@ -82,12 +84,16 @@ export function categoryToEmoji(category: Category): string {
       return '🎁';
     case Category.Grocery:
       return '🛒';
+    case Category.Home:
+      return '🏠';
     case Category.HomeImprovement:
       return '🛠️';
     case Category.HomeAndElectronics:
       return '🛍️';
     case Category.Income:
       return '🤑';
+    case Category.Insurance:
+      return '🛡️';
     case Category.Medical:
       return '👩‍⚕️';
     case Category.PersonalCare:
@@ -96,6 +102,8 @@ export function categoryToEmoji(category: Category): string {
       return '🔁';
     case Category.Restaurant:
       return '🍽';
+    case Category.Taxes:
+      return '💸';
     case Category.Transit:
       return '🚇';
     case Category.TravelExpenses:
