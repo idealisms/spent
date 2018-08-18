@@ -3,12 +3,12 @@ const readline = require('readline');
 
 const config = require('./config.js');
 
-function* screenshotFilename() {
+function* screenshotFilename(filenamePrefix) {
   let index = 0;
   while (true) {
     ++index;
     let fileNumber = index < 10 ? '0' + index : '' + index;
-    yield `screenshots/chase-${fileNumber}.png`;
+    yield `screenshots/${filenamePrefix}-${fileNumber}.png`;
   }
 }
 
@@ -33,11 +33,16 @@ async function getFrameMatchingUrl(page, urlSubstring) {
 }
 
 (async() => {
-  let filenameGenerator = screenshotFilename();
+  let configKey = process.argv[2] || 'chase';
+  console.log(`Using config: ${configKey.toUpperCase()}.`);
+
+  let filenameGenerator = screenshotFilename(configKey);
+  let CONFIG = config[configKey.toUpperCase()];
+
   let launchOptions = Object.assign({
     // Use a profile directory so we don't have to do 2-factor
     // authentication every time.
-    userDataDir: './user-data/chase'
+    userDataDir: `./user-data/${configKey}`
   }, config.LAUNCH_OPTIONS);
 
   const browser = await puppeteer.launch(launchOptions);
@@ -47,6 +52,10 @@ async function getFrameMatchingUrl(page, urlSubstring) {
   console.log('Loading login page...');
   const page = await browser.newPage();
   await page.setUserAgent(config.LAUNCH_OPTIONS.userAgent);
+  await page.setViewport({
+    'width': 840,
+    'height': 600
+  });
   await page.goto('https://www.chase.com/');
 
   console.log('Click Sign in...');
@@ -61,9 +70,9 @@ async function getFrameMatchingUrl(page, urlSubstring) {
   let loginFrame = await getFrameMatchingUrl(page, '?fromOrigin');
 
   await loginFrame.waitForSelector('#userId-input-field');
-  await loginFrame.type('#userId-input-field', config.CHASE.username);
+  await loginFrame.type('#userId-input-field', CONFIG.username);
   await loginFrame.focus('#password-input-field');
-  await loginFrame.type('#password-input-field', config.CHASE.password);
+  await loginFrame.type('#password-input-field', CONFIG.password);
   await page.screenshot({path: filenameGenerator.next().value});
 
   console.log('Logging in...');
@@ -115,7 +124,7 @@ async function getFrameMatchingUrl(page, urlSubstring) {
       (async() => {
         console.log('Entering auth code to website...');
         await loginFrame.type('#otpcode_input-input-field', authCode);
-        await loginFrame.type('#password_input-input-field', config.CHASE.password);
+        await loginFrame.type('#password_input-input-field', CONFIG.password);
         await page.screenshot({path: filenameGenerator.next().value});
 
         try {
@@ -128,35 +137,34 @@ async function getFrameMatchingUrl(page, urlSubstring) {
         }
         await page.screenshot({path: filenameGenerator.next().value});
 
-        await getTransactionsFromDashboard(browser, page, filenameGenerator);
+        await getTransactionsFromDashboard(CONFIG, browser, page, filenameGenerator);
       })();
     });
   } else {
     console.log('No 2-factor auth.');
-    await getTransactionsFromDashboard(browser, page, filenameGenerator);
+    await getTransactionsFromDashboard(CONFIG, browser, page, filenameGenerator);
   }
 })();
 
-async function getTransactionsFromDashboard(browser, page, filenameGenerator) {
-
+async function getTransactionsFromDashboard(CONFIG, browser, page, filenameGenerator) {
   console.log('Waiting for account info to load...');
   await page.waitForSelector('.main-tile');
   let tiles = await page.$$('.main-tile');
   console.log(`Number of credit cards found: ${tiles.length}`);
-  if (tiles.length != config.CHASE.cardIdentifiers.length) {
-    console.log(`Expecting ${config.CHASE.cardIdentifiers.length} card(s).`);
+  if (tiles.length != CONFIG.cardIdentifiers.length) {
+    console.log(`Expecting ${CONFIG.cardIdentifiers.length} card(s).`);
     await browser.close();
     return;
   }
 
-  for (let cardIndex in config.CHASE.cardIdentifiers) {
+  for (let cardIndex in CONFIG.cardIdentifiers) {
     if (cardIndex > 0) {
       await page.waitForSelector('.main-tile');
       tiles = await page.$$('.main-tile');
     }
     try {
       await Promise.all([
-        page.waitForSelector(config.CHASE.cardIdentifiers[cardIndex]),
+        page.waitForSelector(CONFIG.cardIdentifiers[cardIndex]),
         tiles[cardIndex].click(),
       ]);
     } catch (e) {
@@ -180,10 +188,17 @@ async function getTransactionsFromDashboard(browser, page, filenameGenerator) {
     }
     await page.screenshot({path: filenameGenerator.next().value});
 
+    await page.waitForSelector('#activityTableHeader');
     await page.waitForSelector('#downloadActivityIcon');
     await page.click('#downloadActivityIcon');
     await page.screenshot({path: filenameGenerator.next().value});
-    await page.waitForSelector('#header-styledSelect1');
+
+    try {
+      await page.waitForSelector('#header-styledSelect1');
+    } catch (e) {
+      console.log('No transactions, skipping card.');
+      continue;
+    }
     await page.click('#header-styledSelect1');
     await page.waitForSelector('#ul-list-container-styledSelect1 > li:last-child > a');
     await page.click('#ul-list-container-styledSelect1 > li:last-child > a');
@@ -206,6 +221,7 @@ async function getTransactionsFromDashboard(browser, page, filenameGenerator) {
         page.waitForSelector('#backToAccounts'),
         page.click('#download'),
       ]);
+      console.log('✅')
     } catch (e) {
     }
     await page.screenshot({path: filenameGenerator.next().value});
@@ -219,7 +235,6 @@ async function getTransactionsFromDashboard(browser, page, filenameGenerator) {
     }
   }
 
-
-  console.log('Success!');
+  console.log('All done!');
   await browser.close();
 }
