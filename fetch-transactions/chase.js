@@ -78,19 +78,22 @@ async function getFrameMatchingUrl(page, urlSubstring) {
   console.log('Logging in...');
   try {
     await Promise.all([
-      // FIXME: Switch to waitForSelector.
-      page.waitForSelector('#signin-button', {'hidden': true}),
       loginFrame.click('#signin-button'),
+      page.waitForSelector('#signin-button', {'hidden': true}),
     ]);
   } catch (e) {
   }
   await page.screenshot({path: filenameGenerator.next().value});
-  await page.waitForSelector('#body', {'visible': true});
+  try {
+    await page.waitForSelector('#body', {'visible': true});
+  } catch (e) {
+    console.log('Timeout waiting for #body (maybe 2-factor).');
+  }
   await page.screenshot({path: filenameGenerator.next().value});
   try {
     await page.waitForSelector('.cardArtLogo');
   } catch (e) {
-    console.log('Timeout waiting for .cardArtLogo.');
+    console.log('Timeout waiting for .cardArtLogo (maybe 2-factor).');
   }
   await page.screenshot({path: filenameGenerator.next().value});
 
