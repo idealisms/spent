@@ -236,7 +236,7 @@ class Editor extends React.Component<RouteComponentProps<object>, IEditorState> 
         .then(file => {
             let fr = new FileReader();
             fr.addEventListener('load', ev => {
-                let transactions: ITransaction[] = JSON.parse(fr.result);
+                let transactions: ITransaction[] = JSON.parse(fr.result as string);
                 let endDate = daily.refs['end-date'] as DatePicker;
                 endDate.setState({
                   date: moment(transactions[0].date).toDate(),

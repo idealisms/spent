@@ -205,7 +205,7 @@ class Daily extends React.Component<RouteComponentProps<object>, IDailyState> {
         .then(file => {
             let fr = new FileReader();
             fr.addEventListener('load', ev => {
-                let transactions: ITransaction[] = JSON.parse(fr.result);
+                let transactions: ITransaction[] = JSON.parse(fr.result as string);
                 let state: any = { transactions: transactions };
                 if (transactions[0]) {
                   state.endDate = moment(transactions[0].date).toDate();
