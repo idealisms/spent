@@ -71,6 +71,7 @@ export const TAG_TO_CATEGORY: { [s: string]: Category; } = {
 export const DAILY_EXCLUDE_TAGS = new Set([
   'bank transfer',
   'credit card',
+  'domain name',
   'exclude',
   'hoa',
   'home sale',
