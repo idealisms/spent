@@ -48,6 +48,7 @@ body {
 
 .controls {
   display: flex;
+  padding-bottom: 16px;
 }
 .controls > div > div {
   width: auto !important;

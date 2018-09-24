@@ -1,6 +1,5 @@
+import TextField from '@material-ui/core/TextField';
 import { Dropbox } from 'dropbox';
-import DatePicker from 'material-ui/DatePicker';
-import TextField from 'material-ui/TextField';
 import * as moment from 'moment';
 import * as React from 'react';
 import { Chart } from 'react-google-charts';
@@ -120,6 +119,7 @@ class Daily extends React.Component<RouteComponentProps<object>, IDailyState> {
 
   public render(): React.ReactElement<object> {
     let filteredTransactions = this.state.transactions.filter(t => {
+      // TODO: Would it be faster to use moment(t.date).toDate()?
       let [fullYear, month, day] = t.date.split('-');
       let transactionDate = new Date(parseInt(fullYear, 10), parseInt(month, 10) - 1, parseInt(day, 10));
       return this.state.startDate <= transactionDate
@@ -144,27 +144,28 @@ class Daily extends React.Component<RouteComponentProps<object>, IDailyState> {
           />
 
         <div className='controls'>
-          <DatePicker
+          <TextField
             className='start-date'
-            ref='start-date'
-            autoOk={true}
-            floatingLabelText='Start date'
-            defaultDate={this.state.startDate}
+            type='date'
+            label='Start date'
+            value={moment(this.state.startDate).format('YYYY-MM-DD')}
             onChange={this.handleChangeStartDate}
           />
-          <DatePicker
+          {/* The type='date' component is a bit janky. Consider using an
+              add-on component: https://material-ui.com/demos/pickers/ */}
+          <TextField
             className='end-date'
-            ref='end-date'
+            type='date'
             style={{marginLeft: '24px', marginRight: '24px'}}
-            autoOk={true}
-            floatingLabelText='End date'
-            defaultDate={this.state.endDate}
+            label='End date'
+            value={moment(this.state.endDate).format('YYYY-MM-DD')}
             onChange={this.handleChangeEndDate}
           />
           <div style={{whiteSpace: 'nowrap'}}>
             $<TextField
-              hintText='Default: 104.02'
-              floatingLabelText='Daily Budget'
+              placeholder='Default: 104.02'
+              label='Daily Budget'
+              style={{verticalAlign: 'baseline'}}
               defaultValue={this.state.dailyBudgetCents / 100.0}
               onChange={this.handleChangeDailyBudget}
             />
@@ -177,21 +178,23 @@ class Daily extends React.Component<RouteComponentProps<object>, IDailyState> {
     );
   }
 
-  public handleChangeStartDate = (event: Event, date: Date): void => {
+  public handleChangeStartDate = (event: React.ChangeEvent<{}>): void => {
+    let dateStr = (event.target as HTMLInputElement).value;
     this.setState({
-      startDate: date,
+      startDate: moment(dateStr).toDate(),
     });
   }
 
-  public handleChangeEndDate = (event: Event, date: Date): void => {
+  public handleChangeEndDate = (event: React.ChangeEvent<{}>): void => {
+    let dateStr = (event.target as HTMLInputElement).value;
     this.setState({
-      endDate: date,
+      endDate: moment(dateStr).toDate(),
     });
   }
 
-  public handleChangeDailyBudget = (event: any, budget: string): void => {
+  public handleChangeDailyBudget = (event: React.ChangeEvent<{}>): void => {
     this.setState({
-      dailyBudgetCents: parseInt('' + parseFloat(budget) * 100, 10),
+      dailyBudgetCents: parseInt('' + parseFloat((event.target as HTMLInputElement).value) * 100, 10),
     });
   }
 
@@ -210,10 +213,6 @@ class Daily extends React.Component<RouteComponentProps<object>, IDailyState> {
                 if (transactions[0]) {
                   state.endDate = moment(transactions[0].date).toDate();
                 }
-                let endDate = daily.refs['end-date'] as DatePicker;
-                endDate.setState({
-                  date: moment(transactions[0].date).toDate(),
-                });
                 daily.setState(state);
             });
             fr.addEventListener('error', ev => {

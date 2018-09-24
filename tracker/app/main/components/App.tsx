@@ -14,7 +14,6 @@ const NoMatch = () => (
 export class App extends React.Component<object, object> {
   public render(): React.ReactElement<App> {
 
-    // {/*  */}
     return (
         <Switch>
           <Route exact path={HomePage}>

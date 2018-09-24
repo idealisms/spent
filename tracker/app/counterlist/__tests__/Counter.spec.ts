@@ -1,18 +1,15 @@
-import * as React from 'react';
+import { mount, ReactWrapper } from 'enzyme';
 import * as PropTypes from 'prop-types';
+import * as React from 'react';
+import { Store } from 'react-redux';
+import { createRenderer, ShallowRenderer } from 'react-test-renderer/shallow';
+import { createStore } from 'redux';
+import { IAppState } from '../../main/Model';
+import { rootReducer } from '../../main/Module';
+import { muiTheme } from '../../muiTheme';
 import Counter from '../components/Counter';
-import {createRenderer, ShallowRenderer} from 'react-test-renderer/shallow';
 
 
-import {IAppState} from '../../main/Model';
-import {mount, ReactWrapper} from 'enzyme';
-import muiTheme from '../../muiTheme';
-
-
-
-import {Store} from 'react-redux';
-import {createStore} from 'redux';
-import {rootReducer} from '../../main/Module';
 
 const mountWithContext = (node:any):ReactWrapper<any, any> => mount(node, {
   context: { muiTheme: muiTheme },

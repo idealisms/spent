@@ -17,7 +17,7 @@ import NavigationMenu from 'material-ui/svg-icons/navigation/menu';
 import * as React from 'react';
 import { connect, Dispatch } from 'react-redux';
 import { push, RouterAction } from 'react-router-redux';
-import muiTheme from '../../muiTheme';
+import { muiTheme } from '../../muiTheme';
 import { EditTransactionDialog, ITransaction, MergeTransactionDialog, SplitTransactionDialog } from '../../transactions';
 import { IAppState } from '../Model';
 import { DailyPage, EditorPage } from './RoutePaths';

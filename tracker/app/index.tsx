@@ -1,5 +1,6 @@
+import { MuiThemeProvider } from '@material-ui/core/styles';
 import { createHashHistory } from 'history';
-import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
+import { MuiThemeProvider as V0MuiThemeProvider } from 'material-ui/styles';
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 import { Provider } from 'react-redux';
@@ -7,7 +8,7 @@ import { ConnectedRouter } from 'react-router-redux';
 import { Store } from 'redux';
 import './global.css';
 import { App, IAppState } from './main';
-import muiTheme from './muiTheme';
+import { muiTheme, theme } from './muiTheme';
 
 
 declare const require: (name: String) => any;
@@ -22,10 +23,12 @@ const store: Store<IAppState> = (process.env.NODE_ENV !== 'production')
 
 ReactDOM.render(
     <Provider store={store}>
-      <MuiThemeProvider muiTheme={muiTheme}>
-        <ConnectedRouter store={store} history={history}>
-          <App/>
-        </ConnectedRouter>
+      <MuiThemeProvider theme={theme}>
+        <V0MuiThemeProvider muiTheme={muiTheme}>
+          <ConnectedRouter store={store} history={history}>
+            <App/>
+          </ConnectedRouter>
+        </V0MuiThemeProvider>
       </MuiThemeProvider>
     </Provider>,
     document.getElementById('app'),

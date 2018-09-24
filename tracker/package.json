@@ -16,7 +16,7 @@
   "bugs": {
     "url": ""
   },
-  "homepage": "",
+  "homepage": "https://github.com/idealisms/spent/",
   "jest": {
     "moduleFileExtensions": [
       "ts",
@@ -70,6 +70,7 @@
     "webpack-hot-middleware": "^2.18.0"
   },
   "dependencies": {
+    "@material-ui/core": "^3.1.1",
     "@types/google.visualization": "^0.0.41",
     "@types/react-measure": "^2.0.4",
     "awesome-typescript-loader": "^3.1.3",
