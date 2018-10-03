@@ -53,6 +53,9 @@ body {
 .controls > div > div {
   width: auto !important;
 }
+#page-editor .controls {
+  padding-top: 16px;
+}
 
 .loading-container {
   border-top: 1px solid lightgrey;

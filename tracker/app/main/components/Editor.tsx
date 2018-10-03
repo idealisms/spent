@@ -1,6 +1,6 @@
+import TextField from '@material-ui/core/TextField';
 import * as Dropbox from 'dropbox';
 import { CircularProgress } from 'material-ui';
-import DatePicker from 'material-ui/DatePicker';
 import * as moment from 'moment';
 import * as React from 'react';
 import { RouteComponentProps } from 'react-router';
@@ -49,7 +49,7 @@ class Editor extends React.Component<RouteComponentProps<object>, IEditorState> 
             title='Editor'
             selectedTransactions={this.state.selectedTransactions}
             cloudState={this.state.cloudState}
-            onSaveTransactionsClick={() => this.handleSaveTransactions()}
+            onSaveTransactionsClick={this.handleSaveTransactions}
             onSelectedBackClick={() => this.handleClearSelections()}
             onSelectedEditSaveClick={(transaction: ITransaction) => this.handleUpdateTransaction(transaction)}
             onSelectedMergeSaveClick={(transaction: ITransaction) => this.handleMergeSelectedTransactions(transaction)}
@@ -65,21 +65,19 @@ class Editor extends React.Component<RouteComponentProps<object>, IEditorState> 
           /> */}
 
         <div className='controls'>
-          <DatePicker
+          <TextField
             className='start-date'
-            ref='start-date'
-            autoOk={true}
-            floatingLabelText='Start date'
-            defaultDate={this.state.startDate}
+            type='date'
+            label='Start date'
+            value={moment(this.state.startDate).format('YYYY-MM-DD')}
             onChange={this.handleChangeStartDate}
           />
-          <DatePicker
+          <TextField
             className='end-date'
-            ref='end-date'
+            type='date'
             style={{marginLeft: '24px', marginRight: '24px'}}
-            autoOk={true}
-            floatingLabelText='End date'
-            defaultDate={this.state.endDate}
+            label='End date'
+            value={moment(this.state.endDate).format('YYYY-MM-DD')}
             onChange={this.handleChangeEndDate}
           />
         </div>
@@ -90,15 +88,21 @@ class Editor extends React.Component<RouteComponentProps<object>, IEditorState> 
     );
   }
 
-  private handleChangeStartDate(event: Event, date: Date): void {
+  public handleChangeStartDate = (event: React.ChangeEvent<{}>): void => {
+    let dateStr = (event.target as HTMLInputElement).value;
+    let startDate = moment(dateStr).toDate();
     this.setState({
-      startDate: date,
+      startDate: startDate,
+      visibleTransactions: this.filterTransactions(this.state.transactions, startDate),
     });
   }
 
-  private handleChangeEndDate(event: Event, date: Date): void {
+  public handleChangeEndDate = (event: React.ChangeEvent<{}>): void => {
+    let dateStr = (event.target as HTMLInputElement).value;
+    let endDate = moment(dateStr).toDate();
     this.setState({
-      endDate: date,
+      endDate: endDate,
+      visibleTransactions: this.filterTransactions(this.state.transactions, undefined, endDate),
     });
   }
 
@@ -198,7 +202,7 @@ class Editor extends React.Component<RouteComponentProps<object>, IEditorState> 
     });
   }
 
-  private handleSaveTransactions(): void {
+  private handleSaveTransactions = (): void => {
     this.setState({cloudState: CloudState.Uploading});
     let filesCommitInfo = {
         contents: JSON.stringify(this.state.transactions),
@@ -237,10 +241,10 @@ class Editor extends React.Component<RouteComponentProps<object>, IEditorState> 
             let fr = new FileReader();
             fr.addEventListener('load', ev => {
                 let transactions: ITransaction[] = JSON.parse(fr.result as string);
-                let endDate = daily.refs['end-date'] as DatePicker;
-                endDate.setState({
-                  date: moment(transactions[0].date).toDate(),
-                });
+                // let endDate = daily.refs['end-date'] as DatePicker;
+                // endDate.setState({
+                //   date: moment(transactions[0].date).toDate(),
+                // });
 
                 let state: any = {
                   transactions: transactions,
@@ -263,11 +267,12 @@ class Editor extends React.Component<RouteComponentProps<object>, IEditorState> 
         });
   }
 
-  private filterTransactions(transactions: ITransaction[]): ITransaction[] {
+  private filterTransactions(transactions: ITransaction[], startDate?: Date, endDate?: Date ): ITransaction[] {
     return transactions.filter(t => {
+      // Manually creating a date is much faster than using moment() to parse the date.
       let [fullYear, month, day] = t.date.split('-');
       let transactionDate = new Date(parseInt(fullYear, 10), parseInt(month, 10) - 1, parseInt(day, 10));
-      return this.state.startDate <= transactionDate && transactionDate <= this.state.endDate;
+      return (startDate || this.state.startDate) <= transactionDate && transactionDate <= (endDate || this.state.endDate);
     });
   }
 }

@@ -144,6 +144,8 @@ class Daily extends React.Component<RouteComponentProps<object>, IDailyState> {
           />
 
         <div className='controls'>
+          {/* The type='date' component is a bit janky. Consider using an
+              add-on component: https://material-ui.com/demos/pickers/ */}
           <TextField
             className='start-date'
             type='date'
@@ -151,8 +153,6 @@ class Daily extends React.Component<RouteComponentProps<object>, IDailyState> {
             value={moment(this.state.startDate).format('YYYY-MM-DD')}
             onChange={this.handleChangeStartDate}
           />
-          {/* The type='date' component is a bit janky. Consider using an
-              add-on component: https://material-ui.com/demos/pickers/ */}
           <TextField
             className='end-date'
             type='date'
