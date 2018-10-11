@@ -197,12 +197,13 @@ async function getTransactionsFromDashboard(CONFIG, browser, page, filenameGener
     await page.screenshot({path: filenameGenerator.next().value});
 
     try {
-      await page.waitForSelector('#header-styledSelect1');
+      await page.waitForSelector('#header-styledSelect1[value="Current display, including filters"]');
     } catch (e) {
       console.log('No transactions, skipping card.');
       continue;
     }
     await page.click('#header-styledSelect1');
+    await page.screenshot({path: filenameGenerator.next().value});
     await page.waitForSelector('#ul-list-container-styledSelect1 > li:last-child > a');
     await page.click('#ul-list-container-styledSelect1 > li:last-child > a');
     await page.waitForSelector('#input-accountActivityFromDate-input-field');
