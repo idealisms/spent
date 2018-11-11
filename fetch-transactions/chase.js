@@ -225,8 +225,9 @@ async function getTransactionsFromDashboard(CONFIG, browser, page, filenameGener
         page.waitForSelector('#backToAccounts'),
         page.click('#download'),
       ]);
-      console.log('✅')
+      console.log('✅');
     } catch (e) {
+      console.log('❌');
     }
     await page.screenshot({path: filenameGenerator.next().value});
 
@@ -240,5 +241,8 @@ async function getTransactionsFromDashboard(CONFIG, browser, page, filenameGener
   }
 
   console.log('All done!');
-  await browser.close();
+  try {
+    await browser.close();
+  } catch (e) {
+  }
 }
