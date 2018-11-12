@@ -21,6 +21,18 @@ function formatDate(date) {
   return pad(date.getMonth() + 1) + '/' + pad(date.getDate()) + '/' + fullYear.substr(2);
 }
 
+async function getFrameMatchingUrl(page, urlSubstring) {
+  for (let frame of page.frames()) {
+    let title = await frame.title();
+    let fullUrl = await frame.evaluate('window.location.href');
+    console.log(`  ${title}: ${fullUrl}`);
+    if (fullUrl.indexOf(urlSubstring) != -1) {
+      return frame;
+    }
+  }
+  return null;
+}
+
 (async() => {
   let filenameGenerator = screenshotFilename();
   let launchOptions = Object.assign({
@@ -38,17 +50,21 @@ function formatDate(date) {
     'width': 1024,
     'height': 600
   });
-  await page.goto('https://www.barclaycardus.com/servicing/authenticate/home');
+  await page.goto('https://cards.barclaycardus.com/');
   await page.screenshot({path: filenameGenerator.next().value});
 
+  console.log('Finding login frame...');
+  let loginFrame = await getFrameMatchingUrl(page, 'https://www.barclaycardus.com/servicing/authenticate/home');
+
   console.log('Logging in...');
-  await page.type('#username', config.BARCLAY.username);
-  await page.type('#password', config.BARCLAY.password);
+  await loginFrame.waitForSelector('#username');
+  await loginFrame.type('#username', config.BARCLAY.username);
+  await loginFrame.type('#password', config.BARCLAY.password);
   await page.screenshot({path: filenameGenerator.next().value});
 
   let [response] = await Promise.all([
     page.waitForNavigation(),
-    page.click('#loginButton'),
+    loginFrame.click('#loginButton'),
   ]);
   console.log(response.url());
   await page.screenshot({path: filenameGenerator.next().value});

@@ -171,7 +171,6 @@ async function getTransactionsFromDashboard(CONFIG, browser, page, filenameGener
         tiles[cardIndex].click(),
       ]);
     } catch (e) {
-      console.log('Selected the card.');
     }
 
     await page.waitForSelector('#iconButton-transactionTypeOptions');
@@ -197,7 +196,7 @@ async function getTransactionsFromDashboard(CONFIG, browser, page, filenameGener
     await page.screenshot({path: filenameGenerator.next().value});
 
     try {
-      await page.waitForSelector('#header-styledSelect1[value="Current display, including filters"]');
+      await page.waitForSelector('#header-styledSelect1[value="Current display"]');
     } catch (e) {
       console.log('No transactions, skipping card.');
       continue;
