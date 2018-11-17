@@ -5,7 +5,7 @@ import * as moment from 'moment';
 import * as React from 'react';
 import { RouteComponentProps } from 'react-router';
 import { ACCESS_TOKEN } from '../../config';
-import { compareTransactions, generateUUID, ITransaction, Transaction } from '../../transactions';
+import { compareTransactions, filterTransactionsByDate, generateUUID, ITransaction, Transaction } from '../../transactions';
 import MenuBar, { CloudState } from './MenuBar';
 
 type IEditorState = {
@@ -267,13 +267,8 @@ class Editor extends React.Component<RouteComponentProps<object>, IEditorState> 
         });
   }
 
-  private filterTransactions(transactions: ITransaction[], startDate?: Date, endDate?: Date ): ITransaction[] {
-    return transactions.filter(t => {
-      // Manually creating a date is much faster than using moment() to parse the date.
-      let [fullYear, month, day] = t.date.split('-');
-      let transactionDate = new Date(parseInt(fullYear, 10), parseInt(month, 10) - 1, parseInt(day, 10));
-      return (startDate || this.state.startDate) <= transactionDate && transactionDate <= (endDate || this.state.endDate);
-    });
+  private filterTransactions(transactions: ITransaction[], startDate?: Date, endDate?: Date): ITransaction[] {
+    return filterTransactionsByDate(transactions, startDate || this.state.startDate, endDate || this.state.endDate);
   }
 }
 

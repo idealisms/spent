@@ -1,8 +1,8 @@
 // import * as React from 'react';
 // import {createRenderer, ShallowRenderer} from 'react-test-renderer/shallow';
+import * as fs from 'fs';
 import { ITransaction } from '../Model';
 import * as utils from '../utils';
-
 
 describe('Home', () => {
   beforeEach(() => {
@@ -55,5 +55,44 @@ describe('Home', () => {
         arr[i] = Math.pow(i + 1, 4);
       }
     }} as Crypto)).toBe('0001001000510100027105100961100019a12710');
+  });
+
+  it ('filterTransactionsByDate test', () => {
+    let transactions = JSON.parse(fs.readFileSync('./app/transactions/__test__/transactions-dates-only.json').toString());
+    // March 1 to Apr 30.
+    let filtered = utils.filterTransactionsByDate(transactions, new Date(2018, 2, 1), new Date(2018, 3, 30));
+    expect(filtered.length).toBe(156 + 140);
+
+    // Oct 1 to the future.
+    filtered = utils.filterTransactionsByDate(transactions, new Date(2018, 9, 1), new Date(2050, 0, 1));
+    expect(filtered.length).toBe(71);
+
+    // All transactions.
+    filtered = utils.filterTransactionsByDate(transactions, new Date(2010, 0, 1), new Date(2050, 0, 1));
+    expect(filtered.length).toBe(7991);
+
+    // Single date.
+    filtered = utils.filterTransactionsByDate(transactions, new Date(2018, 7, 5), new Date(2018, 7, 5));
+    expect(filtered.length).toBe(1);
+
+    // Start date doesn't exist.
+    filtered = utils.filterTransactionsByDate(transactions, new Date(2018, 6, 11), new Date(2018, 6, 12));
+    expect(filtered.length).toBe(6);
+
+    // End date doesn't exist.
+    filtered = utils.filterTransactionsByDate(transactions, new Date(2018, 6, 10), new Date(2018, 6, 11));
+    expect(filtered.length).toBe(4);
+
+    // Start and end date don't exist.
+    filtered = utils.filterTransactionsByDate(transactions, new Date(2018, 6, 11), new Date(2018, 6, 22));
+    expect(filtered.length).toBe(39);
+
+    // No transactions.
+    filtered = utils.filterTransactionsByDate(transactions, new Date(2018, 6, 22), new Date(2018, 6, 22));
+    expect(filtered.length).toBe(0);
+
+    // Start date is after end date.
+    filtered = utils.filterTransactionsByDate(transactions, new Date(2050, 0, 1), new Date(2010, 0, 1));
+    expect(filtered.length).toBe(0);
   });
 });

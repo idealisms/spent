@@ -31,7 +31,8 @@
       "./config/test.setup.js"
     ],
     "setupTestFrameworkScriptFile": "./config/test.setup.ts",
-    "testRegex": "/*.spec.(ts|tsx|js)$"
+    "testRegex": "/*.spec.(ts|tsx|js)$",
+    "testURL": "http://www.example.com/"
   },
   "devDependencies": {
     "@types/enzyme": "^3.1.6",

@@ -1,4 +1,5 @@
 import { Category, ITransaction, TAG_TO_CATEGORY } from './Model';
+import moment = require('moment');
 
 export function shouldExclude(transaction: ITransaction, excludeTags: Set<string>): boolean {
   for (let tag of transaction.tags) {
@@ -132,4 +133,49 @@ export function generateUUID(crypto_: Crypto = crypto): string {
   // We can't use buf.map because it returns another Uint16Array, but
   // we want an array of hex strings.
   return Array.from(buf).map(S4).join('');
+}
+
+function searchByDate(transactions: ITransaction[], date: string, isStart: boolean): number {
+  let hi = 0;
+  let lo = transactions.length - 1;
+  while (lo > hi) {
+    let mid = Math.floor((lo + hi) / 2);
+    let transactionDate = transactions[mid].date;
+    if (transactionDate == date) {
+      let scanDirection = isStart ? 1 : -1;
+      while (mid + scanDirection >= 0 && mid + scanDirection <= transactions.length - 1
+          && transactions[mid + scanDirection].date == transactionDate) {
+        mid += scanDirection;
+      }
+      return mid;
+    } else if (transactionDate < date) {
+      lo = lo == mid ? mid - 1 : mid;
+    } else {
+      hi = hi == mid ? mid + 1 : mid;
+    }
+  }
+  if (isStart) {
+    while (lo > 0 && transactions[lo].date < date) {
+      lo -= 1;
+    }
+  } else {
+    while (lo < transactions.length - 1 && transactions[lo].date > date) {
+      lo += 1;
+    }
+  }
+  return lo;
+}
+
+// Returns transactions between the two provided dates (inclusive). This assumes the
+// transactions are sorted from most recent to oldest.
+export function filterTransactionsByDate(transactions: ITransaction[], startDate: Date, endDate: Date): ITransaction[] {
+  // 20-30ms for filter with conversion to Date objects.
+  // 3-4ms for filter with string comparisons.
+  // 2-4ms with binary search.
+  let startDateString = moment(startDate).format('YYYY-MM-DD');
+  let endDateString = moment(endDate).format('YYYY-MM-DD');
+
+  let startIndex = searchByDate(transactions, startDateString, true);
+  let endIndex = searchByDate(transactions, endDateString, false);
+  return transactions.slice(endIndex, startIndex + 1);
 }
