@@ -56,15 +56,19 @@ async function getFrameMatchingUrl(page, urlSubstring) {
     'width': 840,
     'height': 600
   });
-  await page.goto('https://www.chase.com/');
+  await page.goto('https://www.chase.com/', {'waitUntil': 'networkidle0'});
 
   console.log('Click Sign in...');
-  let [response] = await Promise.all([
-    page.waitForNavigation({'waitUntil': 'networkidle0'}),
-    page.click('.btn.signInBtn'),
-  ]);
-  console.log(response.url());
+  page.waitForSelector('.btn.signInBtn'),
   await page.screenshot({path: filenameGenerator.next().value});
+  await Promise.all([
+    page.waitForNavigation({
+        'waitUntil': 'networkidle0',
+        'timeout': 60000}),
+    page.click('.btn.signInBtn')
+  ]);
+  await page.screenshot({path: filenameGenerator.next().value});
+  await page.waitForSelector('#logonDialog');
 
   console.log('Finding login frame ...');
   let loginFrame = await getFrameMatchingUrl(page, '?fromOrigin');
@@ -167,7 +171,9 @@ async function getTransactionsFromDashboard(CONFIG, browser, page, filenameGener
     }
     try {
       await Promise.all([
-        page.waitForSelector(CONFIG.cardIdentifiers[cardIndex]),
+        page.waitForSelector(
+            CONFIG.cardIdentifiers[cardIndex],
+            {'timeout': 20000}),
         tiles[cardIndex].click(),
       ]);
     } catch (e) {
@@ -205,15 +211,15 @@ async function getTransactionsFromDashboard(CONFIG, browser, page, filenameGener
     await page.screenshot({path: filenameGenerator.next().value});
     await page.waitForSelector('#ul-list-container-styledSelect1 > li:last-child > a');
     await page.click('#ul-list-container-styledSelect1 > li:last-child > a');
-    await page.waitForSelector('#input-accountActivityFromDate-input-field');
+    await page.waitForSelector('#input-accountActivityFromDate-validate-input-field');
 
     // Get the last 7 days of transactions.
     const ONE_DAY_MS = 24 * 60 * 60 * 1000;
     let startTime = new Date(Date.now() - (7 * ONE_DAY_MS));
     startTime = new Date(startTime.getFullYear(), startTime.getMonth(), startTime.getDate());
 
-    await page.type('#input-accountActivityFromDate-input-field', formatDate(startTime));
-    await page.type('#input-accountActivityToDate-input-field', formatDate(new Date()));
+    await page.type('#input-accountActivityFromDate-validate-input-field', formatDate(startTime));
+    await page.type('#input-accountActivityToDate-validate-input-field', formatDate(new Date()));
     await page.screenshot({path: filenameGenerator.next().value});
 
     console.log('Downloading transactions...')
