@@ -44,26 +44,27 @@ function loadNewTransactions(pathToMerge: string): ITransaction[][] {
 
     let csvContents = fs.readFileSync(`${pathToMerge}/${filename}`).toString();
     console.log(`Reading ${filename}.`);
-    newTransactions.push(importCSV(csvContents));
+    newTransactions.push(importCSV(csvContents, filename));
   }
   return newTransactions;
 }
 
 function mergeTransactions(transactions: ITransaction[], newTransactions: ITransaction[]) {
   // Don't import a transaction if it already exists.
-  let existingTransactions: Set<string> = new Set();
+  let existingTransactions: Map<string, string> = new Map();
   for (let t of transactions) {
-      existingTransactions.add(t.original_line);
+      existingTransactions[t.original_line] = t.source || 'unknown';
       if (t.transactions) {
           for (let mergedTransaction of t.transactions) {
-              existingTransactions.add(mergedTransaction.original_line);
+              existingTransactions[mergedTransaction.original_line] = mergedTransaction.source || 'unknown';
           }
       }
   }
 
   let numImported = 0;
   for (let t of newTransactions) {
-      if (existingTransactions.has(t.original_line)) {
+      let source = existingTransactions[t.original_line];
+      if (source && ['unknown', 'chase', t.source].indexOf(source) != -1) {
           continue;
       }
       transactions.push(t);
@@ -73,9 +74,9 @@ function mergeTransactions(transactions: ITransaction[], newTransactions: ITrans
   return transactions;
 }
 
-function importCSV(fileAsString: string) {
+function importCSV(fileAsString: string, filename: string) {
   let ret: ITransaction[] = [];
-  let rows = normalizeIntoRows(fileAsString);
+  let rows = normalizeIntoRows(fileAsString, filename);
   for (let row of rows) {
       ret.push({
           id: generateUUID(),
@@ -93,7 +94,7 @@ function importCSV(fileAsString: string) {
 
 // Takes the input CSV file and converts it into an array of
 // [desc, date, amount, source, original line].
-function normalizeIntoRows(fileAsString): [string, string, number, string, string][] {
+function normalizeIntoRows(fileAsString: string, filename:string): [string, string, number, string, string][] {
   let rows = fileAsString.replace(/\r/g, '').split('\n') as string[];
   rows = rows.filter(line => {
       line = line.replace(/ /g, '');
@@ -106,7 +107,7 @@ function normalizeIntoRows(fileAsString): [string, string, number, string, strin
       return normalizeUSAA(rows);
   } else if (rows[0].startsWith('Type,Trans Date,')) {
       // Skip the header row.
-      return normalizeChase(rows.slice(1));
+      return normalizeChase(rows.slice(1), filename);
   } else if (rows[0] == 'Barclays Bank Delaware') {
       return normalizeBarclay(rows.slice(4));
   } else {
@@ -128,7 +129,9 @@ function normalizeUSAA(rows: string[]): [string, string, number, string, string]
   return ret;
 }
 
-function normalizeChase(rows: string[]): [string, string, number, string, string][] {
+function normalizeChase(rows: string[], filename: string): [string, string, number, string, string][] {
+  let match = filename.match(/Chase(\d+)/);
+  let cardId = match ? match[1] : '0000';
   let ret: [string, string, number, string, string][] = [];
   for (let row of rows) {
       if (row.endsWith(',')) {
@@ -147,7 +150,7 @@ function normalizeChase(rows: string[]): [string, string, number, string, string
           console.log(tokens);
           break;
       }
-      ret.push([tokens[3], tokens[1], amount, 'chase', row]);
+      ret.push([tokens[3], tokens[1], amount, 'chase' + cardId, row]);
   }
   return ret;
 }
