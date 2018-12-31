@@ -1,6 +1,6 @@
+import TextField from '@material-ui/core/TextField';
 import Dialog from 'material-ui/Dialog';
 import FlatButton from 'material-ui/FlatButton';
-import TextField from 'material-ui/TextField';
 import * as React from 'react';
 import { ITransaction } from '../Model';
 import { formatAmount } from '../utils';
@@ -51,11 +51,14 @@ export class EditTransactionDialog extends React.Component<IEditTransactionDialo
           open={true}
           onRequestClose={this.props.onClose}
           autoScrollBodyContent={true}>
-        <span className='amount'>{formatAmount(transaction)}</span>&nbsp;
-        <span className='transaction'>{transaction.description}</span><br />
+        <div className='transaction'>
+          <span className='amount'>{formatAmount(transaction)}</span>&nbsp;
+          <span className='transaction'>{transaction.description}</span>
+        </div>
         <TextField
-            hintText='e.g. food, restaurant'
-            floatingLabelText='Tags (comma separated)'
+            placeholder='e.g. food, restaurant'
+            label='Tags (comma separated)'
+            className='textfield'
             defaultValue={this.state.tagsValue}
             style={{width: '100%'}}
             autoFocus={!this.state.tagsValue}
@@ -63,7 +66,8 @@ export class EditTransactionDialog extends React.Component<IEditTransactionDialo
             onKeyPress={(e) => this.handleKeyPress(e)}
         /><br />
         <TextField
-            floatingLabelText='Notes'
+            label='Notes'
+            className='textfield'
             defaultValue={this.state.notesValue}
             style={{width: '100%'}}
             autoFocus={!!this.state.tagsValue}

@@ -1,6 +1,7 @@
+import { withStyles } from '@material-ui/core/styles';
+import TextField from '@material-ui/core/TextField';
 import Dialog from 'material-ui/Dialog';
 import FlatButton from 'material-ui/FlatButton';
-import TextField from 'material-ui/TextField';
 import * as React from 'react';
 import { Category, ITransaction } from '../Model';
 import { categoryToEmoji, compareTransactions, generateUUID, getCategory } from '../utils';
@@ -18,6 +19,14 @@ type ISplitTransactionDialogState = {
   wasMerged: boolean,
   isEditing: boolean,
 };
+
+const AmountTextField = withStyles({
+  root: {
+    '& input': {
+      textAlign: 'right',
+    },
+  },
+})(TextField);
 
 export class SplitTransactionDialog extends React.Component<ISplitTransactionDialogProps, ISplitTransactionDialogState> {
 
@@ -95,10 +104,9 @@ export class SplitTransactionDialog extends React.Component<ISplitTransactionDia
       rows.push(
         <div className='row' key={`split-${transaction.id}`}>
           <div>$</div>
-          <TextField
+          <AmountTextField
             className='amount'
             value={transaction.amountString}
-            inputStyle={{textAlign: 'right'}}
             name={transaction.id}
             onChange={(event) => this.handleChange(event.target as HTMLInputElement)}
             onBlur={(event) => this.handleBlur(event.target as HTMLInputElement)}

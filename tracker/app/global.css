@@ -150,6 +150,18 @@ body {
   padding-right: 24px;
 }
 
+.edit-transaction-dialog .transaction {
+  line-height: 32px;
+}
+.edit-transaction-dialog .textfield {
+  margin-top: 16px;
+}
+
+.split-transaction-dialog .amount {
+  /* This fixes the vertical alignment of the input. */
+  padding-top: 8px;
+}
+
 @media (max-height: 380px) {
   .edit-transaction-dialog {
     margin-top: -48px;
