@@ -162,6 +162,21 @@ body {
   padding-top: 8px;
 }
 
+#json-categories {
+  min-height: 360px;
+  max-height: 600px;
+}
+.sankey-trees {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+}
+.sankey-trees > div {
+  flex: 1 0 auto;
+  margin: 16px;
+  min-width: 300px;
+}
+
 @media (max-height: 380px) {
   .edit-transaction-dialog {
     margin-top: -48px;

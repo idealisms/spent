@@ -53,8 +53,8 @@ export function compareTransactions(lhs: ITransaction, rhs: ITransaction): numbe
 export function getCategory(transaction: ITransaction): Category {
   let categories: Category[] = [];
   for (let tag of transaction.tags) {
-    if (tag in TAG_TO_CATEGORY) {
-      let category = TAG_TO_CATEGORY[tag];
+    let category = TAG_TO_CATEGORY.get(tag);
+    if (category != undefined) {
       if (categories.indexOf(category) === -1) {
         categories.push(category);
       }
