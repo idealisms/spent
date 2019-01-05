@@ -49,20 +49,13 @@ class Editor extends React.Component<RouteComponentProps<object>, IEditorState> 
             title='Editor'
             selectedTransactions={this.state.selectedTransactions}
             cloudState={this.state.cloudState}
-            onSaveTransactionsClick={this.handleSaveTransactions}
+            onSaveClick={this.handleSaveTransactions}
             onSelectedBackClick={() => this.handleClearSelections()}
             onSelectedEditSaveClick={(transaction: ITransaction) => this.handleUpdateTransaction(transaction)}
             onSelectedMergeSaveClick={(transaction: ITransaction) => this.handleMergeSelectedTransactions(transaction)}
             onSelectedDeleteClick={(transactions: Map<string, ITransaction>) => this.handleDeleteTransactions(transactions)}
             onSelectedSplitSaveClick={(transactions: Map<string, ITransaction>) => this.handleSplitTransaction(transactions)}
         />
-
-        {/* <DailyGraph
-          transactions={filteredTransactions}
-          startDate={this.state.startDate}
-          endDate={this.state.endDate}
-          dailyBudgetCents={this.state.dailyBudgetCents}
-          /> */}
 
         <div className='controls'>
           <TextField

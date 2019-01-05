@@ -32,7 +32,7 @@ interface IMenuBarOwnProps {
   title: string;
   selectedTransactions?: Map<string, ITransaction>;
   cloudState?: CloudState;
-  onSaveTransactionsClick?: () => void;
+  onSaveClick?: () => void;
   onSelectedBackClick?: () => void;
   onSelectedEditSaveClick?: (transaction: ITransaction) => void;
   onSelectedMergeSaveClick?: (transaction: ITransaction) => void;
@@ -125,7 +125,7 @@ class MenuBar extends React.Component<IMenuBarProps, IMenuBarReactState> {
             <span>
               <IconButton
                   disabled={this.props.cloudState != CloudState.Modified}
-                  onClick={this.props.onSaveTransactionsClick}>{
+                  onClick={this.props.onSaveClick}>{
                 this.props.cloudState == CloudState.Modified ? <FileCloudUpload /> :
                     (this.props.cloudState == CloudState.Uploading
                         ? <CircularProgress size={24} thickness={3} color='#fff'/> : <FileCloudDone />)

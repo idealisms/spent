@@ -1,11 +1,11 @@
 import TextField from '@material-ui/core/TextField';
-import { Dropbox } from 'dropbox';
+import * as Dropbox from 'dropbox';
 import * as moment from 'moment';
 import * as React from 'react';
 import { RouteComponentProps } from 'react-router';
 import { ACCESS_TOKEN } from '../../config';
 import { Category, filterTransactionsByDate, ITransaction, TAG_TO_CATEGORY, Transaction } from '../../transactions';
-import MenuBar from './MenuBar';
+import MenuBar, { CloudState } from './MenuBar';
 
 type SankeyNode = {
   title: string,
@@ -17,6 +17,8 @@ type ISankeyMakerState = {
   startDate: Date,
   endDate: Date,
   categories: SankeyNode[],
+  categoriesPretty: string,
+  cloudState: CloudState,
 };
 class SankeyMaker extends React.Component<RouteComponentProps<object>, ISankeyMakerState> {
 
@@ -25,21 +27,13 @@ class SankeyMaker extends React.Component<RouteComponentProps<object>, ISankeyMa
     let startDate = moment().year(moment().year() - 1).month(0).date(1).toDate();
     let endDate = moment().year(moment().year() - 1).month(11).date(31).toDate();
 
-    let lookup = new Map<string, SankeyNode>();
-    TAG_TO_CATEGORY.forEach((category, tag) => {
-      let categoryName = Category[category];
-      let node = lookup.get(categoryName) || {title: categoryName, tags: [], subcategories: []};
-      node.tags.push(tag);
-      lookup.set(categoryName, node);
-    });
-    let categories: SankeyNode[] = [];
-    lookup.forEach(node => categories.push(node));
-
     this.state = {
       transactions: [],
       startDate: startDate,
       endDate: endDate,
-      categories: categories,
+      categories: [],
+      categoriesPretty: 'loading...',
+      cloudState: CloudState.Done,
     };
     this.loadFromDropbox();
   }
@@ -54,7 +48,11 @@ class SankeyMaker extends React.Component<RouteComponentProps<object>, ISankeyMa
 
     return (
       <div id='page-sankey-maker'>
-        <MenuBar title='Sankey Maker'/>
+        <MenuBar
+          title='Sankey Maker'
+          cloudState={this.state.cloudState}
+          onSaveClick={this.handleSaveSankeyJson}
+        />
 
         <div className='controls'>
           {/* The type='date' component is a bit janky. Consider using an
@@ -82,7 +80,8 @@ class SankeyMaker extends React.Component<RouteComponentProps<object>, ISankeyMa
             placeholder='e.g., {}'
             multiline
             variant='outlined'
-            value={JSON.stringify(this.state.categories, null, 2)}
+            value={this.state.categoriesPretty}
+            onChange={this.handleChangeSankeyJson}
           />
           <div id='rendered-tree'>
               Hello World!
@@ -109,13 +108,46 @@ class SankeyMaker extends React.Component<RouteComponentProps<object>, ISankeyMa
     });
   }
 
-  public loadFromDropbox = (): void => {
-    let filesDownloadArg = {
-      path: '/transactions.json',
+  public handleChangeSankeyJson = (event: React.ChangeEvent<{}>): void => {
+    let categoriesPretty = (event.target as HTMLTextAreaElement).value;
+    let state = {
+      cloudState: CloudState.Modified,
+      categoriesPretty: categoriesPretty,
+      categories: this.state.categories,
     };
-    let dbx = new Dropbox({ accessToken: ACCESS_TOKEN });
+    try {
+      state.categories = JSON.parse(categoriesPretty);
+    } catch (e) {
+      // If there's a parse error, don't update categories.
+    }
+    this.setState(state);
+  }
+  public handleSaveSankeyJson = (): void => {
+    this.setState({cloudState: CloudState.Uploading});
+    let filesCommitInfo = {
+        contents: JSON.stringify({sankeyCategories: this.state.categories}),
+        path: '/settings.json',
+        mode: {'.tag': 'overwrite'} as DropboxTypes.files.WriteModeOverwrite,
+        autorename: false,
+        mute: false,
+    };
+    let dbx = new Dropbox.Dropbox({ accessToken: ACCESS_TOKEN });
+    dbx.filesUpload(filesCommitInfo)
+        .then(metadata => {
+            console.log('wrote to dropbox');
+            console.log(metadata);
+            this.setState({cloudState: CloudState.Done});
+        }).catch(error => {
+            console.log('error');
+            console.log(error);
+            this.setState({cloudState: CloudState.Modified});
+        });
+  }
+
+  public loadFromDropbox = (): void => {
+    let dbx = new Dropbox.Dropbox({ accessToken: ACCESS_TOKEN });
     let sankeyMaker = this;
-    dbx.filesDownload(filesDownloadArg)
+    dbx.filesDownload({path: '/transactions.json'})
         .then(file => {
             let fr = new FileReader();
             fr.addEventListener('load', ev => {
@@ -134,6 +166,41 @@ class SankeyMaker extends React.Component<RouteComponentProps<object>, ISankeyMa
             console.log(error);
         });
 
+    dbx.filesDownload({path: '/settings.json'})
+        .then(file => {
+          let fr = new FileReader();
+          fr.addEventListener('load', ev => {
+              let settings = JSON.parse(fr.result as string);
+              let categories = settings.sankeyCategories;
+              sankeyMaker.setState({
+                categories: categories,
+                categoriesPretty: JSON.stringify(categories, null, 2),
+              });
+          });
+          fr.addEventListener('error', ev => {
+              console.log(ev);
+          });
+          fr.readAsText((file as any).fileBlob);
+        }).catch(error => {
+          console.info(`settings.json download failed, ignoring. ${error}`);
+          sankeyMaker.loadDefaultCategories();
+        });
+  }
+  private loadDefaultCategories(): void {
+    let lookup = new Map<string, SankeyNode>();
+    TAG_TO_CATEGORY.forEach((category, tag) => {
+      let categoryName = Category[category];
+      let node = lookup.get(categoryName) || {title: categoryName, tags: [], subcategories: []};
+      node.tags.push(tag);
+      lookup.set(categoryName, node);
+    });
+    let categories: SankeyNode[] = [];
+    lookup.forEach(node => categories.push(node));
+
+    this.setState({
+      categories: categories,
+      categoriesPretty: JSON.stringify(categories, null, 2),
+    });
   }
 }
 
