@@ -13,13 +13,6 @@ module.exports = require('./webpack.shared.config')({
   },
 
   plugins: [
-    new webpack.optimize.CommonsChunkPlugin({
-      name: 'vendor',
-      children: true,
-      minChunks: 2,
-      async: true,
-    }),
-
     new HtmlWebpackPlugin({
       template: './index.html',
       minify: {
