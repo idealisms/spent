@@ -4,13 +4,19 @@ import * as moment from 'moment';
 import * as React from 'react';
 import { RouteComponentProps } from 'react-router';
 import { ACCESS_TOKEN } from '../../config';
-import { Category, filterTransactionsByDate, ITransaction, TAG_TO_CATEGORY, Transaction } from '../../transactions';
+import { Category, filterTransactionsByDate, formatAmountNumber, ITransaction, TAG_TO_CATEGORY, Transaction } from '../../transactions';
 import MenuBar, { CloudState } from './MenuBar';
 
 type SankeyNode = {
   title: string,
   tags: string[],
   subcategories: SankeyNode[],
+};
+type SankeyRenderNode = {
+  sankeyNode: SankeyNode,
+  amountCents: number,
+  transactions: ITransaction[],
+  subcategories: SankeyRenderNode[],
 };
 type ISankeyMakerState = {
   transactions: ITransaction[],
@@ -39,8 +45,10 @@ class SankeyMaker extends React.Component<RouteComponentProps<object>, ISankeyMa
   }
 
   public render(): React.ReactElement<object> {
-    let filteredTransactions = filterTransactionsByDate(this.state.transactions, this.state.startDate, this.state.endDate);
-    let rows = filteredTransactions.map(t => {
+    let filteredTransactions = filterTransactionsByDate(
+        this.state.transactions, this.state.startDate, this.state.endDate);
+    let [unmatchedTransactions, renderedTree] = this.buildTree(filteredTransactions);
+    let rows = unmatchedTransactions.map(t => {
         return (
           <Transaction transaction={t} key={t.id}/>
         );
@@ -84,7 +92,7 @@ class SankeyMaker extends React.Component<RouteComponentProps<object>, ISankeyMa
             onChange={this.handleChangeSankeyJson}
           />
           <div id='rendered-tree'>
-              Hello World!
+              {renderedTree}
           </div>
         </div>
         <div className='transactions'>
@@ -168,25 +176,26 @@ class SankeyMaker extends React.Component<RouteComponentProps<object>, ISankeyMa
 
     dbx.filesDownload({path: '/settings.json'})
         .then(file => {
-          let fr = new FileReader();
-          fr.addEventListener('load', ev => {
-              let settings = JSON.parse(fr.result as string);
-              let categories = settings.sankeyCategories;
-              sankeyMaker.setState({
-                categories: categories,
-                categoriesPretty: JSON.stringify(categories, null, 2),
-              });
-          });
-          fr.addEventListener('error', ev => {
-              console.log(ev);
-          });
-          fr.readAsText((file as any).fileBlob);
+            let fr = new FileReader();
+            fr.addEventListener('load', ev => {
+                let settings = JSON.parse(fr.result as string);
+                let categories = settings.sankeyCategories;
+                let categoriesPretty = JSON.stringify(categories, null, 2);
+                sankeyMaker.setState({
+                  categories: categories,
+                  categoriesPretty: categoriesPretty,
+                });
+            });
+            fr.addEventListener('error', ev => {
+                console.log(ev);
+            });
+            fr.readAsText((file as any).fileBlob);
         }).catch(error => {
-          console.info(`settings.json download failed, ignoring. ${error}`);
-          sankeyMaker.loadDefaultCategories();
+            console.info(`settings.json download failed, ignoring. ${error}`);
+            sankeyMaker.loadDefaultCategories();
         });
   }
-  private loadDefaultCategories(): void {
+  private loadDefaultCategories = (): void => {
     let lookup = new Map<string, SankeyNode>();
     TAG_TO_CATEGORY.forEach((category, tag) => {
       let categoryName = Category[category];
@@ -201,6 +210,111 @@ class SankeyMaker extends React.Component<RouteComponentProps<object>, ISankeyMa
       categories: categories,
       categoriesPretty: JSON.stringify(categories, null, 2),
     });
+  }
+
+  // Builds the preview tree to be rendered.
+  private buildTree = (transactions: ITransaction[]): [ITransaction[], JSX.Element[]] => {
+    if (!this.state.categories.length) {
+      return [[], [<div key='loading'>Loading...</div>]];
+    }
+
+    let startTime = window.performance.now();
+    let output: JSX.Element[] = [];
+    const buildRenderTree = (sankeyNodes: SankeyNode[]): SankeyRenderNode[] => {
+      let renderNodes: SankeyRenderNode[] = [];
+      for (let sankeyNode of sankeyNodes) {
+        let sankeyRenderNode: SankeyRenderNode = {
+          sankeyNode: sankeyNode,
+          amountCents: 0,
+          transactions: [],
+          subcategories: buildRenderTree(sankeyNode.subcategories),
+        };
+        renderNodes.push(sankeyRenderNode);
+      }
+      return renderNodes;
+    };
+    let sankeyRenderNodes = buildRenderTree(this.state.categories);
+
+    let tagToRootSankeyRenderNode: Map<string, SankeyRenderNode> = new Map();
+    for (let renderNode of sankeyRenderNodes) {
+      for (let tag of renderNode.sankeyNode.tags) {
+        if (tagToRootSankeyRenderNode.has(tag)) {
+          return [[], [<div key={tagToRootSankeyRenderNode.get(tag)!.sankeyNode.title + tag}>
+              Error, tag appears twice.
+              {tag} in {tagToRootSankeyRenderNode.get(tag)!.sankeyNode.title}
+              and {renderNode.sankeyNode.title}.</div>]];
+        }
+        tagToRootSankeyRenderNode.set(tag, renderNode);
+      }
+    }
+
+    const addTransactionToRenderNode = (transaction: ITransaction, node: SankeyRenderNode): void => {
+      node.transactions.push(transaction);
+      node.amountCents += transaction.amount_cents;
+      let subnodes = [];
+      for (let subnode of node.subcategories) {
+        for (let tag of subnode.sankeyNode.tags) {
+          if (transaction.tags.indexOf(tag) != -1) {
+            subnodes.push(subnode);
+            break;
+          }
+        }
+      }
+      if (subnodes.length > 1) {
+        output.push(<div key={transaction.id}>
+            Multiple subnodes of {node.sankeyNode.title}: {transaction.description} ({transaction.tags.join(', ')})</div>);
+      } else if (subnodes.length == 1) {
+        addTransactionToRenderNode(transaction, subnodes[0]);
+      }
+    };
+
+    let unmatchedTransactions: ITransaction[] = [];
+    let multipleCategoriesTransactions: ITransaction[] = [];
+    for (let transaction of transactions) {
+      let renderNodes = [];
+      for (let tag of transaction.tags) {
+        let node = tagToRootSankeyRenderNode.get(tag);
+        if (node && renderNodes.indexOf(node) == -1) {
+          renderNodes.push(node);
+        }
+      }
+      if (renderNodes.length == 0) {
+        unmatchedTransactions.push(transaction);
+      } else if (renderNodes.length > 1) {
+        multipleCategoriesTransactions.push(transaction);
+      } else {
+        addTransactionToRenderNode(transaction, renderNodes[0]);
+      }
+    }
+
+    // console.log(sankeyRenderNodes);
+
+    let buildTime = window.performance.now();
+    const buildDom = (renderNodes: SankeyRenderNode[], depth: number, outputDom: JSX.Element[]): void => {
+      renderNodes.sort((lhs, rhs) => {
+        if (lhs.amountCents == rhs.amountCents) {
+          return 0;
+        }
+        return lhs.amountCents > rhs.amountCents ? -1 : 1;
+      });
+      for (let renderNode of renderNodes) {
+        outputDom.push(
+            <div
+                key={`${renderNode.sankeyNode.title}-${renderNode.amountCents}`}
+                className='row'
+                style={{marginLeft: (depth * 32) + 'px'}}>
+              <span className='amount'>${formatAmountNumber(renderNode.amountCents)}</span>
+              {renderNode.sankeyNode.title} from {renderNode.transactions.length} transaction(s)
+            </div>);
+        buildDom(renderNode.subcategories, depth + 1, outputDom);
+      }
+    };
+    buildDom(sankeyRenderNodes, 0, output);
+
+    let domTime = window.performance.now();
+    output.push(<div key='debug0' className='info'>Build time: {(buildTime - startTime).toFixed(2)}ms</div>);
+    output.push(<div key='debug1' className='info'>DOM time: {(domTime - buildTime).toFixed(2)}ms</div>);
+    return [unmatchedTransactions, output];
   }
 }
 

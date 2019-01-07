@@ -11,7 +11,10 @@ export function shouldExclude(transaction: ITransaction, excludeTags: Set<string
 }
 
 export function formatAmount(transaction: ITransaction): string {
-  let amountCentsNumber = transaction.amount_cents;
+  return formatAmountNumber(transaction.amount_cents);
+}
+
+export function formatAmountNumber(amountCentsNumber: number): string {
   let isNegative = amountCentsNumber < 0;
   let amountCents = Math.abs(amountCentsNumber).toString();
   let digits = amountCents.length;
