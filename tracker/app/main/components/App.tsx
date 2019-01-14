@@ -4,8 +4,8 @@ import { Switch } from 'react-router';
 import { Redirect, Route } from 'react-router-dom';
 import Daily from './Daily';
 import Editor from './Editor';
-import { DailyPage, EditorPage, HomePage, SankeyMakerPage } from './RoutePaths';
-import SankeyMaker from './SankeyMaker';
+import Report from './Report';
+import { DailyPage, EditorPage, HomePage, ReportPage } from './RoutePaths';
 
 const NoMatch = () => (
   <h1 style={{color:'red'}}>Page not found!</h1>
@@ -21,7 +21,7 @@ export class App extends React.Component<object, object> {
           </Route>
           <Route exact path={DailyPage} component={Daily} />
           <Route exact path={EditorPage} component={Editor} />
-          <Route exact path={SankeyMakerPage} component={SankeyMaker} />
+          <Route exact path={ReportPage} component={Report} />
           <Route component={NoMatch}/>
         </Switch>
       );

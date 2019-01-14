@@ -20,7 +20,7 @@ import { push, RouterAction } from 'react-router-redux';
 import { muiTheme } from '../../muiTheme';
 import { EditTransactionDialog, ITransaction, MergeTransactionDialog, SplitTransactionDialog } from '../../transactions';
 import { IAppState } from '../Model';
-import { DailyPage, EditorPage, SankeyMakerPage } from './RoutePaths';
+import { DailyPage, EditorPage, ReportPage } from './RoutePaths';
 
 export enum CloudState {
   Done = 1,
@@ -163,8 +163,8 @@ class MenuBar extends React.Component<IMenuBarProps, IMenuBarReactState> {
               leftIconName='editor'
           />
           <MenuItem
-              name='Sankey Maker'
-              path={SankeyMakerPage}
+              name='Report'
+              path={ReportPage}
               leftIconName='pie_chart'
           />
         </Drawer>

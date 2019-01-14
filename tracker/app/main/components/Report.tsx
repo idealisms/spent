@@ -7,26 +7,26 @@ import { ACCESS_TOKEN } from '../../config';
 import { Category, filterTransactionsByDate, formatAmountNumber, ITransaction, TAG_TO_CATEGORY, Transaction } from '../../transactions';
 import MenuBar, { CloudState } from './MenuBar';
 
-type SankeyNode = {
+type ReportNode = {
   title: string,
   tags: string[],
-  subcategories: SankeyNode[],
+  subcategories: ReportNode[],
 };
-type SankeyRenderNode = {
-  sankeyNode: SankeyNode,
+type ReportRenderNode = {
+  ReportNode: ReportNode,
   amountCents: number,
   transactions: ITransaction[],
-  subcategories: SankeyRenderNode[],
+  subcategories: ReportRenderNode[],
 };
-type ISankeyMakerState = {
+type IReportState = {
   transactions: ITransaction[],
   startDate: Date,
   endDate: Date,
-  categories: SankeyNode[],
+  categories: ReportNode[],
   categoriesPretty: string,
   cloudState: CloudState,
 };
-class SankeyMaker extends React.Component<RouteComponentProps<object>, ISankeyMakerState> {
+class Report extends React.Component<RouteComponentProps<object>, IReportState> {
 
   constructor(props:any, context:any) {
     super(props, context);
@@ -55,11 +55,11 @@ class SankeyMaker extends React.Component<RouteComponentProps<object>, ISankeyMa
       });
 
     return (
-      <div id='page-sankey-maker'>
+      <div id='page-report'>
         <MenuBar
-          title='Sankey Maker'
+          title='Report'
           cloudState={this.state.cloudState}
-          onSaveClick={this.handleSaveSankeyJson}
+          onSaveClick={this.handleSaveReportJson}
         />
 
         <div className='controls'>
@@ -81,7 +81,7 @@ class SankeyMaker extends React.Component<RouteComponentProps<object>, ISankeyMa
             onChange={this.handleChangeEndDate}
           />
         </div>
-        <div className='sankey-trees'>
+        <div className='report-trees'>
           <TextField
             id='json-categories'
             label='categories'
@@ -89,7 +89,7 @@ class SankeyMaker extends React.Component<RouteComponentProps<object>, ISankeyMa
             multiline
             variant='outlined'
             value={this.state.categoriesPretty}
-            onChange={this.handleChangeSankeyJson}
+            onChange={this.handleChangeReportJson}
           />
           <div id='rendered-tree'>
               {renderedTree}
@@ -116,7 +116,7 @@ class SankeyMaker extends React.Component<RouteComponentProps<object>, ISankeyMa
     });
   }
 
-  public handleChangeSankeyJson = (event: React.ChangeEvent<{}>): void => {
+  public handleChangeReportJson = (event: React.ChangeEvent<{}>): void => {
     let categoriesPretty = (event.target as HTMLTextAreaElement).value;
     let state = {
       cloudState: CloudState.Modified,
@@ -130,10 +130,10 @@ class SankeyMaker extends React.Component<RouteComponentProps<object>, ISankeyMa
     }
     this.setState(state);
   }
-  public handleSaveSankeyJson = (): void => {
+  public handleSaveReportJson = (): void => {
     this.setState({cloudState: CloudState.Uploading});
     let filesCommitInfo = {
-        contents: JSON.stringify({sankeyCategories: this.state.categories}),
+        contents: JSON.stringify({reportCategories: this.state.categories}),
         path: '/settings.json',
         mode: {'.tag': 'overwrite'} as DropboxTypes.files.WriteModeOverwrite,
         autorename: false,
@@ -154,14 +154,14 @@ class SankeyMaker extends React.Component<RouteComponentProps<object>, ISankeyMa
 
   public loadFromDropbox = (): void => {
     let dbx = new Dropbox.Dropbox({ accessToken: ACCESS_TOKEN });
-    let sankeyMaker = this;
+    let report = this;
     dbx.filesDownload({path: '/transactions.json'})
         .then(file => {
             let fr = new FileReader();
             fr.addEventListener('load', ev => {
                 let transactions: ITransaction[] = JSON.parse(fr.result as string);
                 let state: any = { transactions: transactions };
-                sankeyMaker.setState(state);
+                report.setState(state);
             });
             fr.addEventListener('error', ev => {
                 console.log(ev);
@@ -179,12 +179,17 @@ class SankeyMaker extends React.Component<RouteComponentProps<object>, ISankeyMa
             let fr = new FileReader();
             fr.addEventListener('load', ev => {
                 let settings = JSON.parse(fr.result as string);
-                let categories = settings.sankeyCategories;
-                let categoriesPretty = JSON.stringify(categories, null, 2);
-                sankeyMaker.setState({
-                  categories: categories,
-                  categoriesPretty: categoriesPretty,
-                });
+                let categories = settings.reportCategories;
+                if (categories) {
+                  let categoriesPretty = JSON.stringify(categories, null, 2);
+                  report.setState({
+                    categories: categories,
+                    categoriesPretty: categoriesPretty,
+                  });
+                } else {
+                  console.info('reportCategories not found in settings.json');
+                  report.loadDefaultCategories();
+                }
             });
             fr.addEventListener('error', ev => {
                 console.log(ev);
@@ -192,18 +197,18 @@ class SankeyMaker extends React.Component<RouteComponentProps<object>, ISankeyMa
             fr.readAsText((file as any).fileBlob);
         }).catch(error => {
             console.info(`settings.json download failed, ignoring. ${error}`);
-            sankeyMaker.loadDefaultCategories();
+            report.loadDefaultCategories();
         });
   }
   private loadDefaultCategories = (): void => {
-    let lookup = new Map<string, SankeyNode>();
+    let lookup = new Map<string, ReportNode>();
     TAG_TO_CATEGORY.forEach((category, tag) => {
       let categoryName = Category[category];
       let node = lookup.get(categoryName) || {title: categoryName, tags: [], subcategories: []};
       node.tags.push(tag);
       lookup.set(categoryName, node);
     });
-    let categories: SankeyNode[] = [];
+    let categories: ReportNode[] = [];
     lookup.forEach(node => categories.push(node));
 
     this.setState({
@@ -220,40 +225,40 @@ class SankeyMaker extends React.Component<RouteComponentProps<object>, ISankeyMa
 
     let startTime = window.performance.now();
     let output: JSX.Element[] = [];
-    const buildRenderTree = (sankeyNodes: SankeyNode[]): SankeyRenderNode[] => {
-      let renderNodes: SankeyRenderNode[] = [];
-      for (let sankeyNode of sankeyNodes) {
-        let sankeyRenderNode: SankeyRenderNode = {
-          sankeyNode: sankeyNode,
+    const buildRenderTree = (ReportNodes: ReportNode[]): ReportRenderNode[] => {
+      let renderNodes: ReportRenderNode[] = [];
+      for (let reportNode of ReportNodes) {
+        let reportRenderNode: ReportRenderNode = {
+          ReportNode: reportNode,
           amountCents: 0,
           transactions: [],
-          subcategories: buildRenderTree(sankeyNode.subcategories),
+          subcategories: buildRenderTree(reportNode.subcategories),
         };
-        renderNodes.push(sankeyRenderNode);
+        renderNodes.push(reportRenderNode);
       }
       return renderNodes;
     };
-    let sankeyRenderNodes = buildRenderTree(this.state.categories);
+    let ReportRenderNodes = buildRenderTree(this.state.categories);
 
-    let tagToRootSankeyRenderNode: Map<string, SankeyRenderNode> = new Map();
-    for (let renderNode of sankeyRenderNodes) {
-      for (let tag of renderNode.sankeyNode.tags) {
-        if (tagToRootSankeyRenderNode.has(tag)) {
-          return [[], [<div key={tagToRootSankeyRenderNode.get(tag)!.sankeyNode.title + tag}>
+    let tagToRootReportRenderNode: Map<string, ReportRenderNode> = new Map();
+    for (let renderNode of ReportRenderNodes) {
+      for (let tag of renderNode.ReportNode.tags) {
+        if (tagToRootReportRenderNode.has(tag)) {
+          return [[], [<div key={tagToRootReportRenderNode.get(tag)!.ReportNode.title + tag}>
               Error, tag appears twice.
-              {tag} in {tagToRootSankeyRenderNode.get(tag)!.sankeyNode.title}
-              and {renderNode.sankeyNode.title}.</div>]];
+              {tag} in {tagToRootReportRenderNode.get(tag)!.ReportNode.title}
+              and {renderNode.ReportNode.title}.</div>]];
         }
-        tagToRootSankeyRenderNode.set(tag, renderNode);
+        tagToRootReportRenderNode.set(tag, renderNode);
       }
     }
 
-    const addTransactionToRenderNode = (transaction: ITransaction, node: SankeyRenderNode): void => {
+    const addTransactionToRenderNode = (transaction: ITransaction, node: ReportRenderNode): void => {
       node.transactions.push(transaction);
       node.amountCents += transaction.amount_cents;
       let subnodes = [];
       for (let subnode of node.subcategories) {
-        for (let tag of subnode.sankeyNode.tags) {
+        for (let tag of subnode.ReportNode.tags) {
           if (transaction.tags.indexOf(tag) != -1) {
             subnodes.push(subnode);
             break;
@@ -262,7 +267,7 @@ class SankeyMaker extends React.Component<RouteComponentProps<object>, ISankeyMa
       }
       if (subnodes.length > 1) {
         output.push(<div key={transaction.id}>
-            Multiple subnodes of {node.sankeyNode.title}: {transaction.description} ({transaction.tags.join(', ')})</div>);
+            Multiple subnodes of {node.ReportNode.title}: {transaction.description} ({transaction.tags.join(', ')})</div>);
       } else if (subnodes.length == 1) {
         addTransactionToRenderNode(transaction, subnodes[0]);
       }
@@ -273,7 +278,7 @@ class SankeyMaker extends React.Component<RouteComponentProps<object>, ISankeyMa
     for (let transaction of transactions) {
       let renderNodes = [];
       for (let tag of transaction.tags) {
-        let node = tagToRootSankeyRenderNode.get(tag);
+        let node = tagToRootReportRenderNode.get(tag);
         if (node && renderNodes.indexOf(node) == -1) {
           renderNodes.push(node);
         }
@@ -287,10 +292,10 @@ class SankeyMaker extends React.Component<RouteComponentProps<object>, ISankeyMa
       }
     }
 
-    // console.log(sankeyRenderNodes);
+    // console.log(ReportRenderNodes);
 
     let buildTime = window.performance.now();
-    const buildDom = (renderNodes: SankeyRenderNode[], depth: number, outputDom: JSX.Element[]): void => {
+    const buildDom = (renderNodes: ReportRenderNode[], depth: number, outputDom: JSX.Element[]): void => {
       renderNodes.sort((lhs, rhs) => {
         if (lhs.amountCents == rhs.amountCents) {
           return 0;
@@ -300,16 +305,16 @@ class SankeyMaker extends React.Component<RouteComponentProps<object>, ISankeyMa
       for (let renderNode of renderNodes) {
         outputDom.push(
             <div
-                key={`${renderNode.sankeyNode.title}-${renderNode.amountCents}`}
+                key={`${renderNode.ReportNode.title}-${renderNode.amountCents}`}
                 className='row'
                 style={{marginLeft: (depth * 32) + 'px'}}>
               <span className='amount'>${formatAmountNumber(renderNode.amountCents)}</span>
-              {renderNode.sankeyNode.title} from {renderNode.transactions.length} transaction(s)
+              {renderNode.ReportNode.title} from {renderNode.transactions.length} transaction(s)
             </div>);
         buildDom(renderNode.subcategories, depth + 1, outputDom);
       }
     };
-    buildDom(sankeyRenderNodes, 0, output);
+    buildDom(ReportRenderNodes, 0, output);
 
     let domTime = window.performance.now();
     output.push(<div key='debug0' className='info'>Build time: {(buildTime - startTime).toFixed(2)}ms</div>);
@@ -318,4 +323,4 @@ class SankeyMaker extends React.Component<RouteComponentProps<object>, ISankeyMa
   }
 }
 
-export default SankeyMaker;
+export default Report;
