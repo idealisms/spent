@@ -34,7 +34,7 @@ export class SplitTransactionDialog extends React.Component<ISplitTransactionDia
     super(props, context);
     let transactions: ISplitTransactionRow[] = [];
     let wasMerged = false;
-    if (props.transaction.transactions.length > 1) {
+    if ((props.transaction.transactions || []).length > 1) {
       transactions = [...props.transaction.transactions];
       transactions.sort(compareTransactions);
       wasMerged = true;
