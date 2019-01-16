@@ -1,5 +1,7 @@
+import * as MomentUtils from '@date-io/moment';
 import { MuiThemeProvider } from '@material-ui/core/styles';
 import { createHashHistory } from 'history';
+import { MuiPickersUtilsProvider } from 'material-ui-pickers';
 import { MuiThemeProvider as V0MuiThemeProvider } from 'material-ui/styles';
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
@@ -26,7 +28,9 @@ ReactDOM.render(
       <MuiThemeProvider theme={theme}>
         <V0MuiThemeProvider muiTheme={muiTheme}>
           <ConnectedRouter store={store} history={history}>
-            <App/>
+            <MuiPickersUtilsProvider utils={MomentUtils}>
+              <App/>
+            </MuiPickersUtilsProvider>
           </ConnectedRouter>
         </V0MuiThemeProvider>
       </MuiThemeProvider>

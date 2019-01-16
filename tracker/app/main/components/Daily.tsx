@@ -1,5 +1,6 @@
 import TextField from '@material-ui/core/TextField';
 import { Dropbox } from 'dropbox';
+import { InlineDatePicker } from 'material-ui-pickers';
 import * as moment from 'moment';
 import * as React from 'react';
 import { Chart } from 'react-google-charts';
@@ -132,6 +133,13 @@ class Daily extends React.Component<RouteComponentProps<object>, IDailyState> {
         );
       });
 
+    let minDate = moment(this.state.startDate).toDate();
+    let maxDate = moment(this.state.endDate).toDate();
+    if (this.state.transactions.length > 0) {
+      minDate = moment(this.state.transactions.slice(-1)[0].date).toDate();
+      maxDate = moment(this.state.transactions[0].date).toDate();
+    }
+
     return (
       <div id='page-daily'>
         <MenuBar title='Daily'/>
@@ -144,22 +152,25 @@ class Daily extends React.Component<RouteComponentProps<object>, IDailyState> {
           />
 
         <div className='controls'>
-          {/* The type='date' component is a bit janky. Consider using an
-              add-on component: https://material-ui.com/demos/pickers/ */}
-          <TextField
-            className='start-date'
-            type='date'
+          <InlineDatePicker
+            keyboard
             label='Start date'
-            value={moment(this.state.startDate).format('YYYY-MM-DD')}
+            minDate={minDate}
+            maxDate={maxDate}
+            value={this.state.startDate}
             onChange={this.handleChangeStartDate}
+            format='YYYY-MM-DD'
+            mask={[/\d/, /\d/, /\d/, /\d/, '-', /\d/, /\d/, '-', /\d/, /\d/]}
           />
-          <TextField
-            className='end-date'
-            type='date'
-            style={{marginLeft: '24px', marginRight: '24px'}}
+          <InlineDatePicker
+            keyboard
             label='End date'
-            value={moment(this.state.endDate).format('YYYY-MM-DD')}
+            minDate={minDate}
+            maxDate={maxDate}
+            value={this.state.endDate}
             onChange={this.handleChangeEndDate}
+            format='YYYY-MM-DD'
+            mask={[/\d/, /\d/, /\d/, /\d/, '-', /\d/, /\d/, '-', /\d/, /\d/]}
           />
           <div style={{whiteSpace: 'nowrap'}}>
             $<TextField
@@ -178,17 +189,15 @@ class Daily extends React.Component<RouteComponentProps<object>, IDailyState> {
     );
   }
 
-  public handleChangeStartDate = (event: React.ChangeEvent<{}>): void => {
-    let dateStr = (event.target as HTMLInputElement).value;
+  public handleChangeStartDate = (m: moment.Moment): void => {
     this.setState({
-      startDate: moment(dateStr).toDate(),
+      startDate: m.toDate(),
     });
   }
 
-  public handleChangeEndDate = (event: React.ChangeEvent<{}>): void => {
-    let dateStr = (event.target as HTMLInputElement).value;
+  public handleChangeEndDate = (m: moment.Moment): void => {
     this.setState({
-      endDate: moment(dateStr).toDate(),
+      endDate: m.toDate(),
     });
   }
 

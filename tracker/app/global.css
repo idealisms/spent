@@ -45,13 +45,16 @@ body {
   flex: 0 1 400px;
   max-height: calc(50% - 64px);
 }
+#page-daily .controls > :nth-child(2) {
+  margin: 0 24px;
+}
+#page-daily .controls > :nth-child(3) {
+  flex-shrink: 1.5;
+}
 
 .controls {
   display: flex;
   padding-bottom: 16px;
-}
-.controls > div > div {
-  width: auto !important;
 }
 #page-editor .controls {
   padding-top: 16px;
@@ -211,5 +214,14 @@ body {
   }
   .edit-transaction-body {
     max-height: calc(100% - 76px - 52px) !important;
+  }
+}
+
+@media (max-width: 420px) {
+  #page-daily .controls > :nth-child(2) {
+    margin: 0 8px;
+  }
+  #page-daily .controls button {
+    padding: 0;
   }
 }

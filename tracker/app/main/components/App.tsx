@@ -1,4 +1,3 @@
-
 import * as React from 'react';
 import { Switch } from 'react-router';
 import { Redirect, Route } from 'react-router-dom';

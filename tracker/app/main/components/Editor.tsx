@@ -1,6 +1,6 @@
-import TextField from '@material-ui/core/TextField';
 import * as Dropbox from 'dropbox';
 import { CircularProgress } from 'material-ui';
+import { InlineDatePicker } from 'material-ui-pickers';
 import * as moment from 'moment';
 import * as React from 'react';
 import { RouteComponentProps } from 'react-router';
@@ -43,6 +43,13 @@ class Editor extends React.Component<RouteComponentProps<object>, IEditorState> 
         );
       });
 
+    let minDate = moment(this.state.startDate).toDate();
+    let maxDate = moment(this.state.endDate).toDate();
+    if (this.state.transactions.length > 0) {
+      minDate = moment(this.state.transactions.slice(-1)[0].date).toDate();
+      maxDate = moment(this.state.transactions[0].date).toDate();
+    }
+
     return (
       <div id='page-editor'>
         <MenuBar
@@ -58,41 +65,44 @@ class Editor extends React.Component<RouteComponentProps<object>, IEditorState> 
         />
 
         <div className='controls'>
-          <TextField
-            className='start-date'
-            type='date'
+          <InlineDatePicker
+            keyboard
             label='Start date'
-            value={moment(this.state.startDate).format('YYYY-MM-DD')}
+            minDate={minDate}
+            maxDate={maxDate}
+            value={this.state.startDate}
             onChange={this.handleChangeStartDate}
+            format='YYYY-MM-DD'
+            mask={[/\d/, /\d/, /\d/, /\d/, '-', /\d/, /\d/, '-', /\d/, /\d/]}
           />
-          <TextField
-            className='end-date'
-            type='date'
-            style={{marginLeft: '24px', marginRight: '24px'}}
+          <InlineDatePicker
+            keyboard
             label='End date'
-            value={moment(this.state.endDate).format('YYYY-MM-DD')}
+            minDate={minDate}
+            maxDate={maxDate}
+            value={this.state.endDate}
+            style={{marginLeft: '24px'}}
             onChange={this.handleChangeEndDate}
+            format='YYYY-MM-DD'
+            mask={[/\d/, /\d/, /\d/, /\d/, '-', /\d/, /\d/, '-', /\d/, /\d/]}
           />
         </div>
         {this.state.transactions.length
             ? <div className='transactions'>{rows}</div>
             : <div className='loading-container'><CircularProgress size={40} /></div>}
-      </div>
-    );
+    </div>);
   }
 
-  public handleChangeStartDate = (event: React.ChangeEvent<{}>): void => {
-    let dateStr = (event.target as HTMLInputElement).value;
-    let startDate = moment(dateStr).toDate();
+  public handleChangeStartDate = (m: moment.Moment): void => {
+    let startDate = m.toDate();
     this.setState({
       startDate: startDate,
       visibleTransactions: this.filterTransactions(this.state.transactions, startDate),
     });
   }
 
-  public handleChangeEndDate = (event: React.ChangeEvent<{}>): void => {
-    let dateStr = (event.target as HTMLInputElement).value;
-    let endDate = moment(dateStr).toDate();
+  public handleChangeEndDate = (m: moment.Moment): void => {
+    let endDate = m.toDate();
     this.setState({
       endDate: endDate,
       visibleTransactions: this.filterTransactions(this.state.transactions, undefined, endDate),
