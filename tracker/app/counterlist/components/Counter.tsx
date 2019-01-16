@@ -1,16 +1,16 @@
-import * as React from 'react';
+import * as _ from 'lodash';
 import MuiFloatingActionButton from 'material-ui/FloatingActionButton';
-import MuiIncreaseIcon from 'material-ui/svg-icons/content/add';
-import MuiDecreaseIcon from 'material-ui/svg-icons/content/remove';
 import MuiGridList from 'material-ui/GridList/GridList';
 import MuiGridTile from 'material-ui/GridList/GridTile';
+import MuiIncreaseIcon from 'material-ui/svg-icons/content/add';
+import MuiDecreaseIcon from 'material-ui/svg-icons/content/remove';
 import MuiTextField from 'material-ui/TextField';
-import * as _ from 'lodash';
+import * as React from 'react';
+import { connect } from 'react-redux';
+import { IAppState } from '../../main';
+import { ICounter } from '../Model';
+import { changeCounterName, decrementCounter, incrementCounter, removeCounter } from '../Module';
 
-import {ICounter} from '../Model';
-import {incrementCounter, decrementCounter, removeCounter, changeCounterName} from '../Module';
-import {IAppState} from '../../main';
-import {connect} from 'react-redux';
 
 interface ICounterOwnProps {
   id: number;
@@ -115,7 +115,7 @@ class Counter extends React.Component<ICounterProps, ICounterReactState> {
     }
   }
 
-  private handleBlur = (e:React.FormEvent<HTMLInputElement>) => {
+  private handleBlur = (e:React.FocusEvent<HTMLInputElement>) => {
     if (this.state.name && this.props.name !== this.state.name) {
       this.props.onChangeName(this.props.id, this.state.name);
     }

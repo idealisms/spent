@@ -9,7 +9,8 @@
     "strict": true,
     "strictNullChecks": true,
     "noUnusedLocals": true,
-    "outDir": "build"
+    "outDir": "build",
+    "allowSyntheticDefaultImports": true
   },
   "exclude": [
     "build",
