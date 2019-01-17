@@ -56,7 +56,7 @@ body {
   display: flex;
   padding-bottom: 16px;
 }
-#page-editor .controls {
+#page-editor .controls, #page-report .controls {
   padding-top: 16px;
 }
 
