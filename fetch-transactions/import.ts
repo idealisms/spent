@@ -51,22 +51,38 @@ function loadNewTransactions(pathToMerge: string): ITransaction[][] {
 
 function mergeTransactions(transactions: ITransaction[], newTransactions: ITransaction[]) {
   // Don't import a transaction if it already exists.
-  let existingTransactions: Map<string, string> = new Map();
+  let existingTransactions: Map<string, Set<string>> = new Map();
   for (let t of transactions) {
-      existingTransactions[t.original_line] = t.source || 'unknown';
-      if (t.transactions) {
-          for (let mergedTransaction of t.transactions) {
-              existingTransactions[mergedTransaction.original_line] = mergedTransaction.source || 'unknown';
-          }
+    if (!existingTransactions.has(t.original_line)) {
+      existingTransactions.set(t.original_line, new Set());
+    }
+    let source = t.source || 'unknown';
+    if (source.startsWith('split:')) {
+      source = 'split';
+    }
+    existingTransactions.get(t.original_line)!.add(source);
+    if (t.transactions) {
+      for (let mergedTransaction of t.transactions) {
+        if (!existingTransactions.has(mergedTransaction.original_line)) {
+          existingTransactions.set(mergedTransaction.original_line, new Set());
+        }
+        let source = mergedTransaction.source || 'unknown';
+        if (source.startsWith('split:')) {
+          source = 'split';
+        }
+        existingTransactions.get(mergedTransaction.original_line)!.add(source);
       }
+    }
   }
 
   let numImported = 0;
   for (let t of newTransactions) {
-      let source = existingTransactions[t.original_line];
-      if (source && ['unknown', 'chase', t.source].indexOf(source) != -1) {
-          continue;
+      let sourceSet = existingTransactions.get(t.original_line);
+      if (sourceSet && (sourceSet.has('unknown') || sourceSet.has('split') || sourceSet.has('chase') ||
+          sourceSet.has(t.source || 'unknown'))) {
+        continue;
       }
+      //console.log(`merging ${t.original_line} : ${t.source} : ${[...existingTransactions[t.original_line]].join(',')}`);
       transactions.push(t);
       ++numImported;
   }
