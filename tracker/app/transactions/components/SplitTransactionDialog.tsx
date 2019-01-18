@@ -1,7 +1,10 @@
+import Button from '@material-ui/core/Button';
+import Dialog from '@material-ui/core/Dialog';
+import DialogActions from '@material-ui/core/DialogActions';
+import DialogContent from '@material-ui/core/DialogContent';
+import DialogTitle from '@material-ui/core/DialogTitle';
 import { withStyles } from '@material-ui/core/styles';
 import TextField from '@material-ui/core/TextField';
-import Dialog from 'material-ui/Dialog';
-import FlatButton from 'material-ui/FlatButton';
 import * as React from 'react';
 import { Category, ITransaction } from '../Model';
 import { categoryToEmoji, compareTransactions, generateUUID, getCategory } from '../utils';
@@ -22,6 +25,8 @@ type ISplitTransactionDialogState = {
 
 const AmountTextField = withStyles({
   root: {
+    // This fixes the vertical alignment of the input.
+    paddingTop: '8px',
     '& input': {
       textAlign: 'right',
     },
@@ -77,19 +82,6 @@ export class SplitTransactionDialog extends React.Component<ISplitTransactionDia
     let totalAmountCents = 0;
     this.state.transactions.map((t) => totalAmountCents += t.amount_cents);
 
-    const actions = [
-      <FlatButton
-        label='Cancel'
-        primary={true}
-        onClick={this.props.onClose}
-      />,
-      <FlatButton
-        label='Split'
-        primary={true}
-        disabled={this.state.isEditing || (totalAmountCents != this.props.transaction.amount_cents)}
-        onClick={() => this.handleSplit() }
-      />,
-    ];
     let rows: JSX.Element[] = [];
     for (let transaction of this.state.transactions) {
       let categoryEmoji = '🙅';
@@ -120,17 +112,23 @@ export class SplitTransactionDialog extends React.Component<ISplitTransactionDia
     }
 
     return <Dialog
-          className='split-transaction-dialog'
-          title='Choose transaction to split into'
-          actions={actions}
-          modal={false}
           open={true}
-          onRequestClose={this.props.onClose}
-          autoScrollBodyContent={true}
-          bodyStyle={{color: '#000'}}>
-        <div className='transactions split'>
+          onClose={this.props.onClose}
+          scroll='paper'
+          >
+        <DialogTitle>{'Choose transaction to split into'}</DialogTitle>
+        <DialogContent className='transactions' style={{padding: 0, margin: '0 24px 24px'}}>
           {rows}
-        </div>
+        </DialogContent>
+        <DialogActions>
+          <Button color='primary' onClick={this.props.onClose}>Cancel</Button>
+          <Button
+              color='primary'
+              disabled={this.state.isEditing || (totalAmountCents != this.props.transaction.amount_cents)}
+              onClick={() => this.handleSplit() }>
+            Split
+          </Button>
+        </DialogActions>
       </Dialog>;
   }
 

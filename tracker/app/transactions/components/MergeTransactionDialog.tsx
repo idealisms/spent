@@ -1,6 +1,11 @@
-import Dialog from 'material-ui/Dialog';
-import FlatButton from 'material-ui/FlatButton';
-import { RadioButton, RadioButtonGroup } from 'material-ui/RadioButton';
+import Button from '@material-ui/core/Button';
+import Dialog from '@material-ui/core/Dialog';
+import DialogActions from '@material-ui/core/DialogActions';
+import DialogContent from '@material-ui/core/DialogContent';
+import DialogTitle from '@material-ui/core/DialogTitle';
+import FormControlLabel from '@material-ui/core/FormControlLabel';
+import Radio from '@material-ui/core/Radio';
+import RadioGroup from '@material-ui/core/RadioGroup';
 import * as React from 'react';
 import { Category, ITransaction } from '../Model';
 import { categoryToEmoji, compareTransactions, formatAmount, getCategory } from '../utils';
@@ -26,19 +31,6 @@ export class MergeTransactionDialog extends React.Component<IMergeTransactionDia
   }
 
   public render(): React.ReactElement<object> {
-    const actions = [
-      <FlatButton
-        label='Cancel'
-        primary={true}
-        onClick={this.props.onClose}
-      />,
-      <FlatButton
-        label='Merge'
-        primary={true}
-        disabled={!this.state.selectedTransactionId}
-        onClick={() => this.handleMerge() }
-      />,
-    ];
     let rows: JSX.Element[] = [];
     for (let transaction of this.state.transactions) {
       let isCredit = transaction.amount_cents < 0;
@@ -63,27 +55,36 @@ export class MergeTransactionDialog extends React.Component<IMergeTransactionDia
             </div>
           </div>;
       rows.push(
-          <RadioButton
+          <FormControlLabel
               key={'radio-' + transaction.id}
               value={transaction.id}
               label={label}
-              className={'merge-radio-button'} />,
+              control={<Radio color='primary'/>}
+              className='merge-radio-button' />,
       );
     }
 
     return <Dialog
-          className='merge-transaction-dialog'
-          title='Choose transaction to merge into'
-          actions={actions}
-          modal={false}
-          open={true}
-          onRequestClose={this.props.onClose}
-          autoScrollBodyContent={true}>
-        <RadioButtonGroup
+            open={true}
+            onClose={this.props.onClose}
+            scroll='paper'>
+        <DialogTitle>{'Choose transaction to merge into'}</DialogTitle>
+        <DialogContent>
+        <RadioGroup
             name='merge-group'
             onChange={(event: any, transactionId: string) => this.handleChangeSelection(transactionId)}>
           {rows}
-        </RadioButtonGroup>
+        </RadioGroup>
+        </DialogContent>
+        <DialogActions>
+          <Button color='primary' onClick={this.props.onClose}>Cancel</Button>
+          <Button
+              color='primary'
+              disabled={!this.state.selectedTransactionId}
+              onClick={() => this.handleMerge() }>
+            Merge
+          </Button>
+        </DialogActions>
       </Dialog>;
   }
 

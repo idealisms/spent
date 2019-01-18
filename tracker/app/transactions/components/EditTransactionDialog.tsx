@@ -1,6 +1,10 @@
+import Button from '@material-ui/core/Button';
+import Dialog from '@material-ui/core/Dialog';
+import DialogActions from '@material-ui/core/DialogActions';
+import DialogContent from '@material-ui/core/DialogContent';
+import DialogTitle from '@material-ui/core/DialogTitle';
+import { withStyles } from '@material-ui/core/styles';
 import TextField from '@material-ui/core/TextField';
-import Dialog from 'material-ui/Dialog';
-import FlatButton from 'material-ui/FlatButton';
 import * as React from 'react';
 import { ITransaction } from '../Model';
 import { formatAmount } from '../utils';
@@ -14,6 +18,26 @@ type IEditTransactionDialogState = {
   tagsValue: string,
   notesValue: string,
 };
+
+const StyledDialog = withStyles({
+  root: {
+    '@media (max-height: 380px)': {
+      marginTop: '-40px',
+      marginBottom: '-40px',
+    },
+    '& .transaction': {
+      lineHeight: '32px',
+    },
+    '& .textfield': {
+      marginTop: '16px',
+    },
+  },
+  paper: {
+    width: 'calc(100% - 64px)',
+    maxWidth: '360px',
+  },
+})(Dialog);
+
 export class EditTransactionDialog extends React.Component<IEditTransactionDialogProps, IEditTransactionDialogState> {
 
   constructor(props: IEditTransactionDialogProps, context: any) {
@@ -25,56 +49,44 @@ export class EditTransactionDialog extends React.Component<IEditTransactionDialo
   }
 
   public render(): React.ReactElement<object> {
-    const actions = [
-      <FlatButton
-        label='Cancel'
-        primary={true}
-        onClick={this.props.onClose}
-      />,
-      // TODO: Disable button unless there are changes.
-      <FlatButton
-        label='Save'
-        primary={true}
-        onClick={() => this.handleSave() }
-      />,
-    ];
-
     let transaction: ITransaction = this.props.transaction;
-    return <Dialog
-          className='edit-transaction-dialog'
-          contentClassName='edit-transaction-content'
-          bodyClassName='edit-transaction-body'
-          title='Edit Transaction'
-          contentStyle={{width: 'calc(100% - 64px)', maxWidth: '360px'}}
-          actions={actions}
-          modal={false}
-          open={true}
-          onRequestClose={this.props.onClose}
-          autoScrollBodyContent={true}>
-        <div className='transaction'>
-          <span className='amount'>{formatAmount(transaction)}</span>&nbsp;
-          <span className='transaction'>{transaction.description}</span>
-        </div>
-        <TextField
-            placeholder='e.g. food, restaurant'
-            label='Tags (comma separated)'
-            className='textfield'
-            defaultValue={this.state.tagsValue}
-            style={{width: '100%'}}
-            autoFocus={!this.state.tagsValue}
-            onChange={(event) => this.setState({tagsValue: (event.target as HTMLInputElement).value})}
-            onKeyPress={(e) => this.handleKeyPress(e)}
-        /><br />
-        <TextField
-            label='Notes'
-            className='textfield'
-            defaultValue={this.state.notesValue}
-            style={{width: '100%'}}
-            autoFocus={!!this.state.tagsValue}
-            onChange={(event) => this.setState({notesValue: (event.target as HTMLInputElement).value})}
-            onKeyPress={(e) => { this.handleKeyPress(e); }}
-        />
-      </Dialog>;
+    return <StyledDialog
+            open={true}
+            onClose={this.props.onClose}
+            scroll='paper'
+            >
+        <DialogTitle>{'Edit Transaction'}</DialogTitle>
+        <DialogContent>
+          <div className='transaction'>
+            <span className='amount'>{formatAmount(transaction)}</span>&nbsp;
+            <span className='transaction'>{transaction.description}</span>
+          </div>
+          <TextField
+              placeholder='e.g. food, restaurant'
+              label='Tags (comma separated)'
+              className='textfield'
+              defaultValue={this.state.tagsValue}
+              style={{width: '100%'}}
+              autoFocus={!this.state.tagsValue}
+              onChange={(event) => this.setState({tagsValue: (event.target as HTMLInputElement).value})}
+              onKeyPress={(e) => this.handleKeyPress(e)}
+          /><br />
+          <TextField
+              label='Notes'
+              className='textfield'
+              defaultValue={this.state.notesValue}
+              style={{width: '100%'}}
+              autoFocus={!!this.state.tagsValue}
+              onChange={(event) => this.setState({notesValue: (event.target as HTMLInputElement).value})}
+              onKeyPress={(e) => { this.handleKeyPress(e); }}
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button color='primary' onClick={this.props.onClose}>Cancel</Button>
+          {/* TODO: Disable button unless there are changes. */}
+          <Button color='primary' onClick={() => this.handleSave() }>Save</Button>
+        </DialogActions>
+      </StyledDialog>;
   }
 
   private handleKeyPress(e: React.KeyboardEvent<{}>): void {

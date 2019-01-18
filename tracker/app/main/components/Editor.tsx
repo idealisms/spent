@@ -1,5 +1,5 @@
+import CircularProgress from '@material-ui/core/CircularProgress';
 import * as Dropbox from 'dropbox';
-import { CircularProgress } from 'material-ui';
 import { InlineDatePicker } from 'material-ui-pickers';
 import * as moment from 'moment';
 import * as React from 'react';
@@ -89,7 +89,7 @@ class Editor extends React.Component<RouteComponentProps<object>, IEditorState> 
         </div>
         {this.state.transactions.length
             ? <div className='transactions'>{rows}</div>
-            : <div className='loading-container'><CircularProgress size={40} /></div>}
+            : <div className='loading-container'><CircularProgress /></div>}
     </div>);
   }
 
