@@ -28,7 +28,9 @@ export const muiTheme: MuiTheme = getMuiTheme({
 
 export const theme: Theme = createMuiTheme({
     palette: {
-        primary: green,
+        primary: {
+            main: green['800'],
+        },
         secondary: purple,
         error: red,
         // Used by `getContrastText()` to maximize the contrast between the background and

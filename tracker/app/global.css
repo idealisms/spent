@@ -23,9 +23,6 @@ body {
 .app-bar .has-selected-items h1 {
   color: #616161 !important;
 }
-.app-bar svg {
-  fill: #fff !important;
-}
 .app-drawer-header {
   padding: 16px;
   display: flex;
