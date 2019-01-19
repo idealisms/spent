@@ -54,7 +54,7 @@ async function getFrameMatchingUrl(page, urlSubstring) {
   await page.setUserAgent(config.LAUNCH_OPTIONS.userAgent);
   await page.setViewport({
     'width': 840,
-    'height': 600
+    'height': 800
   });
   await page.goto('https://www.chase.com/', {'waitUntil': 'networkidle0'});
 
@@ -179,16 +179,16 @@ async function getTransactionsFromDashboard(CONFIG, browser, page, filenameGener
     } catch (e) {
     }
 
-    await page.waitForSelector('#iconButton-transactionTypeOptions');
-    await page.click('#iconButton-transactionTypeOptions');
+    await page.waitForSelector('#header-transactionTypeOptions');
+    await page.click('#header-transactionTypeOptions');
     await page.screenshot({path: filenameGenerator.next().value});
-    let transactionLinks = await page.$$('#ul-list-container-transactionTypeOptions a');
+    let transactionLinks = await page.$$('#transactionTypeOptions .list > li > a');
     console.log(`Found ${transactionLinks.length} menu item(s)`);
-    let allTransactionsLink = transactionLinks[transactionLinks.length - 3];
+    let allTransactionsLink = transactionLinks[transactionLinks.length - 2];
 
     try {
       await Promise.all([
-        page.waitForSelector('#header-transactionTypeOptions[value="All transactions"]'),
+        page.waitForSelector('#header-transactionTypeOptions[aria-label="SHOWING: All transactions"]'),
         allTransactionsLink.click(),
       ]);
     } catch (e) {
@@ -196,21 +196,27 @@ async function getTransactionsFromDashboard(CONFIG, browser, page, filenameGener
     }
     await page.screenshot({path: filenameGenerator.next().value});
 
-    await page.waitForSelector('#activityTableHeader');
-    await page.waitForSelector('#downloadActivityIcon');
-    await page.click('#downloadActivityIcon');
+    await page.waitForSelector('#activityTable tbody');
+    await page.focus('#downloadActivityIcon');
     await page.screenshot({path: filenameGenerator.next().value});
 
     try {
-      await page.waitForSelector('#header-styledSelect1[value="Current display"]');
+      await Promise.all([
+        page.waitForSelector('#header-currentDisplayOption[aria-label="Activity: Current display"]'),
+        page.click('#downloadActivityIcon'),
+      ]);
+      await page.screenshot({path: filenameGenerator.next().value});
     } catch (e) {
       console.log('No transactions, skipping card.');
+      await page.screenshot({path: filenameGenerator.next().value});
+
       continue;
     }
-    await page.click('#header-styledSelect1');
+    // Open the drop down to select custom date range.
+    await page.click('#header-currentDisplayOption');
     await page.screenshot({path: filenameGenerator.next().value});
-    await page.waitForSelector('#ul-list-container-styledSelect1 > li:last-child > a');
-    await page.click('#ul-list-container-styledSelect1 > li:last-child > a');
+    await page.waitForSelector('#currentDisplayOption .list > li:last-child > a');
+    await page.click('#currentDisplayOption .list > li:last-child > a');
     await page.waitForSelector('#input-accountActivityFromDate-validate-input-field');
 
     // Get the last 7 days of transactions.
