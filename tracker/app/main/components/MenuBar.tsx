@@ -1,5 +1,12 @@
+import { createStyles, WithStyles } from '@material-ui/core';
+import CircularProgress from '@material-ui/core/CircularProgress';
+import Drawer from '@material-ui/core/Drawer';
 import IconButton from '@material-ui/core/IconButton';
-import { withStyles } from '@material-ui/core/styles';
+import List from '@material-ui/core/List';
+import ListItem from '@material-ui/core/ListItem';
+import ListItemIcon from '@material-ui/core/ListItemIcon';
+import ListItemText from '@material-ui/core/ListItemText';
+import { Theme, withStyles } from '@material-ui/core/styles';
 import Tooltip from '@material-ui/core/Tooltip';
 import ArrowBackIcon from '@material-ui/icons/ArrowBack';
 import CallMergeIcon from '@material-ui/icons/CallMerge';
@@ -13,10 +20,6 @@ import MenuIcon from '@material-ui/icons/Menu';
 import TimelineIcon from '@material-ui/icons/Timeline';
 import { Location, LocationDescriptor, LocationState } from 'history';
 import AppBar from 'material-ui/AppBar';
-import CircularProgress from 'material-ui/CircularProgress';
-import Drawer from 'material-ui/Drawer';
-import MuiMenuItem from 'material-ui/MenuItem';
-import { colors } from 'material-ui/styles';
 import * as React from 'react';
 import { connect, Dispatch } from 'react-redux';
 import { push, RouterAction } from 'react-router-redux';
@@ -31,21 +34,25 @@ export enum CloudState {
   Uploading = 3,
 }
 
-const WhiteIconButton = withStyles({
-  root: {
-    '& svg': {
-      fill: '#fff',
-    },
+const styles = (theme: Theme) => createStyles({
+  drawerPaper: {
+    width: '250px',
   },
-})(IconButton);
-
-const RepositionTooltip = withStyles({
   tooltip: {
     marginLeft: '36px',
   },
-})(Tooltip);
+  whiteIconButton: {
+    '& svg': {
+      fill: '#fff',
+      color: '#fff',
+    },
+  },
+  drawerItemText: {
+    fontWeight: 500,
+  },
+});
 
-interface IMenuBarOwnProps {
+interface IMenuBarOwnProps extends WithStyles<typeof styles> {
   title: string;
   selectedTransactions?: Map<string, ITransaction>;
   cloudState?: CloudState;
@@ -71,9 +78,10 @@ interface IMenuBarReactState {
   isSplitDialogOpen: boolean;
 }
 
-class MenuBar extends React.Component<IMenuBarProps, IMenuBarReactState> {
+const MenuBar = withStyles(styles)(
+class extends React.Component<IMenuBarProps, IMenuBarReactState> {
 
-  constructor(props:IMenuBarProps, context:any) {
+  constructor(props: IMenuBarProps, context?: any) {
     super(props, context);
     this.state = {
       isDrawerOpen: false,
@@ -84,28 +92,7 @@ class MenuBar extends React.Component<IMenuBarProps, IMenuBarReactState> {
   }
 
   public render(): JSX.Element {
-    const MenuItem = (props: {name: string, path: string, leftIcon: React.ReactElement<any>}): React.ReactElement<MuiMenuItem> => {
-      let selected = this.props.location!.pathname === props.path;
-      let focusState = selected ? 'focused' : 'none';
-      let style: React.CSSProperties = {
-        fontWeight: 500,
-      };
-      if (selected) {
-        style.color = muiTheme!.palette!.primary2Color;
-        style.backgroundColor = colors.grey100;
-      }
-      return (
-          <MuiMenuItem
-              onClick={this.handleNavigate(props.path)}
-              leftIcon={props.leftIcon}
-              focusState={focusState}
-              style={style}
-              >
-            {props.name}
-          </MuiMenuItem>
-      );
-    };
-
+    let classes = this.props.classes;
     let selectedTransactionsArray = this.props.selectedTransactions ? [...this.props.selectedTransactions.values()] : [];
 
     let numSelectedTransactions = selectedTransactionsArray.length;
@@ -121,21 +108,21 @@ class MenuBar extends React.Component<IMenuBarProps, IMenuBarReactState> {
 
     let iconElementRight = numSelectedTransactions
         ? <span>
-            <RepositionTooltip title='Edit'><span><IconButton
+            <Tooltip classes={{tooltip: classes.tooltip}} title='Edit'><span><IconButton
                 disabled={numSelectedTransactions > 1}
                 onClick={() => this.handleShowEditDialog()}
                 ><EditIcon /></IconButton></span>
-            </RepositionTooltip>
-            <RepositionTooltip title='Merge'><span><IconButton
+            </Tooltip>
+            <Tooltip classes={{tooltip: classes.tooltip}} title='Merge'><span><IconButton
                 disabled={numSelectedTransactions === 1}
                 onClick={() => this.handleShowMergeDialog()}
                 ><CallMergeIcon /></IconButton></span>
-            </RepositionTooltip>
-            <RepositionTooltip title='Split'><span><IconButton
+            </Tooltip>
+            <Tooltip classes={{tooltip: classes.tooltip}} title='Split'><span><IconButton
                 disabled={numSelectedTransactions > 1}
                 onClick={() => this.handleShowSplitDialog()}
                 ><CallSplitIcon /></IconButton></span>
-            </RepositionTooltip>
+            </Tooltip>
             <Tooltip title='Delete' placement='bottom-end'><IconButton
                 onClick={() => this.props.onSelectedDeleteClick!(this.props.selectedTransactions!)}
                 ><DeleteIcon /></IconButton>
@@ -143,50 +130,67 @@ class MenuBar extends React.Component<IMenuBarProps, IMenuBarReactState> {
           </span>
         : (this.props.cloudState ?
             <span>
-              <WhiteIconButton
+              <IconButton
+                  classes={{root: classes.whiteIconButton}}
                   disabled={this.props.cloudState != CloudState.Modified}
                   onClick={this.props.onSaveClick}>{
                 this.props.cloudState == CloudState.Modified ? <CloudUploadIcon /> :
                     (this.props.cloudState == CloudState.Uploading
-                        ? <CircularProgress size={24} thickness={3} color='#fff'/>
+                        ? <CircularProgress size={24} thickness={4} />
                         : <CloudDoneIcon />)
-              }</WhiteIconButton>
+              }</IconButton>
             </span> : undefined);
 
     return (
       <div className='app-bar'>
         <AppBar
-            iconElementLeft={<WhiteIconButton onClick={this.props.onSelectedBackClick}>
-                    {numSelectedTransactions ? <ArrowBackIcon/> : <MenuIcon />}
-                </WhiteIconButton>}
-            onLeftIconButtonClick={numSelectedTransactions ? undefined : this.handleToggle}
+            iconElementLeft={<IconButton classes={{root: classes.whiteIconButton}} onClick={() => {
+                  if (numSelectedTransactions && this.props.onSelectedBackClick) {
+                    this.props.onSelectedBackClick();
+                  } else {
+                    this.handleToggle();
+                  }
+                }}>
+                  {numSelectedTransactions ? <ArrowBackIcon/> : <MenuIcon />}
+                </IconButton>}
             title={title}
             iconElementRight={iconElementRight}
             className={className}
             />
-        <Drawer docked={false} width={250} open={this.state.isDrawerOpen}
-                   onRequestChange={(isDrawerOpen) => this.setState({isDrawerOpen})}>
+        <Drawer classes={{paper: classes.drawerPaper}}  open={this.state.isDrawerOpen}
+            onClose={() => this.setState({isDrawerOpen: false})}>
           <div className='app-drawer-header' style={{
               backgroundColor: muiTheme!.palette!.primary1Color,
               color: muiTheme!.palette!.alternateTextColor}}>
             <div className='user-icon'>📈</div>
             <div className='name'>Spent</div>
           </div>
-          <MenuItem
-              name='Daily'
-              path={DailyPage}
-              leftIcon={<TimelineIcon color='primary' />}
-          />
-          <MenuItem
-              name='Editor'
-              path={EditorPage}
-              leftIcon={<EditIcon color='primary' />}
-          />
-          <MenuItem
-              name='Report'
-              path={ReportPage}
-              leftIcon={<CategoryIcon color='primary' />}
-          />
+          <List>
+            <ListItem
+                key='Daily'
+                button
+                selected={this.props.location!.pathname === DailyPage}
+                onClick={() => this.handleNavigate(DailyPage)}>
+              <ListItemIcon><TimelineIcon color='primary' /></ListItemIcon>
+              <ListItemText classes={{primary: classes.drawerItemText}} primary='Daily' />
+            </ListItem>
+            <ListItem
+                key='Editor'
+                button
+                selected={this.props.location!.pathname === EditorPage}
+                onClick={() => this.handleNavigate(EditorPage)}>
+              <ListItemIcon><EditIcon color='primary' /></ListItemIcon>
+              <ListItemText classes={{primary: classes.drawerItemText}} primary='Editor' />
+            </ListItem>
+            <ListItem
+                key='Report'
+                button
+                selected={this.props.location!.pathname === ReportPage}
+                onClick={() => this.handleNavigate(ReportPage)}>
+              <ListItemIcon><CategoryIcon color='primary' /></ListItemIcon>
+              <ListItemText classes={{primary: classes.drawerItemText}} primary='Report' />
+            </ListItem>
+          </List>
         </Drawer>
         {this.state.isEditDialogOpen && this.props.onSelectedEditSaveClick ?
           <EditTransactionDialog
@@ -237,15 +241,15 @@ class MenuBar extends React.Component<IMenuBarProps, IMenuBarReactState> {
     });
   }
 
-  private handleToggle = () => this.setState({isDrawerOpen: !this.state.isDrawerOpen});
-
-  private handleNavigate = (path:string) => {
-    return () => {
-      this.props.navigateTo(path);
-      this.setState({isDrawerOpen: false});
-    };
+  private handleToggle = () => {
+    this.setState({isDrawerOpen: !this.state.isDrawerOpen});
   }
-}
+
+  private handleNavigate = (path: string) => {
+    this.props.navigateTo(path);
+    this.setState({isDrawerOpen: false});
+  }
+});
 
 const mapStateToProps = (state: IAppState):IMenuBarStateProps => {
   return {

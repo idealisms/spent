@@ -1,3 +1,4 @@
+import CheckBoxIcon from '@material-ui/icons/CheckBox';
 import * as React from 'react';
 import { Category, ITransaction } from '../Model';
 import { categoryToEmoji, formatAmount, getCategory } from '../utils';
@@ -31,7 +32,7 @@ export class Transaction extends React.Component<ITransactionProps, object> {
             className={'category' + (this.props.onCategoryClick ? ' editable' : '')}
             title={categoryName}
             onClick={this.props.onCategoryClick ? () => this.props.onCategoryClick!(this.props.transaction) : undefined}
-            >{this.props.isSelected ? <i className='material-icons'>check_box</i> : categoryEmoji}</div>
+            >{this.props.isSelected ? <CheckBoxIcon /> : categoryEmoji}</div>
         <div className='description'>
           {this.props.transaction.description}
           {this.props.transaction.notes ? <span className='notes'> - {this.props.transaction.notes}</span> : ''}
