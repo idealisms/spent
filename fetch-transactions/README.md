@@ -2,6 +2,8 @@
 
 This is a set of Node.js scripts using [Puppeteer](https://github.com/GoogleChrome/puppeteer/) to sign in to bank accounts and download bank transactions.
 
+There is also a set of python scripts using [ofxclient](https://github.com/captin411/ofxclient) for downloading transactions from Chase.
+
 This is an alternative to using something like Mint for budgeting.
 
 
@@ -16,3 +18,19 @@ wget https://launchpad.net/~chromium-team/+archive/ubuntu/beta/+build/14381587/+
 ```
 
 I found this in the issue tracker: https://github.com/GoogleChrome/puppeteer/issues/550.
+
+
+## Python setup
+
+From the parent directory:
+```sh
+python3 -m venv fetch-transactions
+cd fetch-transactions
+source bin/activate
+```
+
+Then install the dependencies:
+```sh
+pip install ofxclient
+pip install dropbox
+```

@@ -22,7 +22,6 @@ function* screenshotFilename() {
 }
 
 async function getFrameMatchingUrl(page, urlSubstring) {
-  console.log('getFrameMatchingUrl');
   for (let frame of page.frames()) {
     let title = await frame.title();
     let fullUrl = await frame.evaluate('window.location.href');
@@ -42,22 +41,39 @@ async function main(authCode) {
   console.log('Loading login page...');
   const page = await browser.newPage();
   await page.setUserAgent(config.LAUNCH_OPTIONS.userAgent);
+  // await page.goto('https://www.usaa.com/');
   await page.goto('https://www.usaa.com/');
-  await page.waitForSelector('#usaa-my-profile');
+  await page.waitForSelector('a.profileWidget-button--logon');
+  await page.screenshot({path: filenameGenerator.next().value});
+  await page.click('a.profileWidget-button--logon');
+  // await page.goto('https://www.usaa.com/inet/ent_logon/Logon');
+  // await page.waitForSelector('#usaa-my-profile');
+  await page.waitForSelector('#usaaNum');
   await page.screenshot({path: filenameGenerator.next().value});
 
-  console.log('Logging in...');
-  await page.click('#usaa-my-profile');
-  await page.type('#usaaNum', config.USAA.username);
-  await page.type('#usaaPass', config.USAA.pin + authCode);
+  console.log('Typing login info');
+  // await page.click('#usaa-my-profile');
+  await page.type('#j_usaaNum', config.USAA.username);
+  await page.type('#j_usaaPass', config.USAA.pin + authCode);
   await page.screenshot({path: filenameGenerator.next().value});
 
+  console.log('Clicking Log On...');
   let [response] = await Promise.all([
-    page.waitForNavigation({timeout: 60000}),
-    page.click('#login'),
+    page.waitForNavigation({waitUntil: 'load', timeout: 60000}),
+    page.click('.ent-logon-jump-button'),
   ]);
-  console.log(response.url());
+  if (response) {
+    console.log(response.url());
+  }
   await page.screenshot({path: filenameGenerator.next().value});
+
+  // try {
+  //   console.log('waiting 10s for another nav');
+  //   await page.waitForNavigation({timeout: 10000});
+  //   console.log('nav happened');
+  // } catch (e) {
+  //   console.log('timeout, no nav');
+  // }
 
   let frame = await getFrameMatchingUrl(page, '/EntManageAccounts?');
   if (!frame) {

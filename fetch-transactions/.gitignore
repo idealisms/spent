@@ -4,5 +4,11 @@ node_modules
 screenshots
 user-data
 
+# python venv
+bin
+lib
+share
+pyvenv.cfg
+
 config.js
 import.js
