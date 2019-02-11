@@ -8,30 +8,6 @@ body {
   display: flex;
 	flex-direction: column;
 }
-.app-bar {
-  flex: none;
-}
-.app-bar .has-selected-items {
-  background-color: #fff !important;
-}
-.app-bar .has-selected-items svg {
-  fill: #616161 !important;
-}
-.app-bar .has-selected-items button[disabled] svg {
-  fill: rgba(0, 0, 0, .3) !important;
-}
-.app-bar .has-selected-items h1 {
-  color: #616161 !important;
-}
-.app-drawer-header {
-  padding: 16px;
-  display: flex;
-  align-items: center;
-}
-.app-drawer-header > .user-icon {
-  font-size: 32px;
-  width: 56px;
-}
 
 .chart, .controls {
   flex: none;

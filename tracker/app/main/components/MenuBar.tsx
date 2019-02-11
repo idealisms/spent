@@ -1,4 +1,5 @@
 import { createStyles, WithStyles } from '@material-ui/core';
+import AppBar from '@material-ui/core/AppBar';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import Drawer from '@material-ui/core/Drawer';
 import IconButton from '@material-ui/core/IconButton';
@@ -7,7 +8,9 @@ import ListItem from '@material-ui/core/ListItem';
 import ListItemIcon from '@material-ui/core/ListItemIcon';
 import ListItemText from '@material-ui/core/ListItemText';
 import { Theme, withStyles } from '@material-ui/core/styles';
+import Toolbar from '@material-ui/core/Toolbar';
 import Tooltip from '@material-ui/core/Tooltip';
+import Typography from '@material-ui/core/Typography';
 import ArrowBackIcon from '@material-ui/icons/ArrowBack';
 import CallMergeIcon from '@material-ui/icons/CallMerge';
 import CallSplitIcon from '@material-ui/icons/CallSplit';
@@ -19,11 +22,9 @@ import EditIcon from '@material-ui/icons/Edit';
 import MenuIcon from '@material-ui/icons/Menu';
 import TimelineIcon from '@material-ui/icons/Timeline';
 import { Location, LocationDescriptor, LocationState } from 'history';
-import AppBar from 'material-ui/AppBar';
 import * as React from 'react';
 import { connect, Dispatch } from 'react-redux';
 import { push, RouterAction } from 'react-router-redux';
-import { muiTheme } from '../../muiTheme';
 import { EditTransactionDialog, ITransaction, MergeTransactionDialog, SplitTransactionDialog } from '../../transactions';
 import { IAppState } from '../Model';
 import { DailyPage, EditorPage, ReportPage } from './RoutePaths';
@@ -49,6 +50,30 @@ const styles = (theme: Theme) => createStyles({
   },
   drawerItemText: {
     fontWeight: 500,
+  },
+  flexNone: {
+    flex: 'none',
+  },
+  grow: {
+    flexGrow: 1,
+  },
+  appBar: {
+    color: '#fff',
+  },
+  appBarSelected: {
+    backgroundColor: '#fff',
+    color: 'rgba(0, 0, 0, .54)',
+  },
+  drawerHeader: {
+    padding: '16px',
+    display: 'flex',
+    alignItems: 'center',
+    backgroundColor: 'green',
+    color: '#fff',
+  },
+  drawerHeaderIcon: {
+    fontSize: '32px',
+    width: '56px',
   },
 });
 
@@ -97,14 +122,25 @@ class extends React.Component<IMenuBarProps, IMenuBarReactState> {
 
     let numSelectedTransactions = selectedTransactionsArray.length;
     let title = this.props.title;
-    let className = '';
     if (numSelectedTransactions === 1) {
       title = '1 item';
-      className = 'has-selected-items one-item';
     } else if (numSelectedTransactions > 1) {
       title = numSelectedTransactions + ' items';
-      className = 'has-selected-items multiple-items';
     }
+
+    let iconElementLeft = numSelectedTransactions
+        ? <IconButton onClick={() => {
+              if (this.props.onSelectedBackClick) {
+                this.props.onSelectedBackClick();
+              }
+          }}>
+            <ArrowBackIcon />
+          </IconButton>
+        : <IconButton classes={{root: classes.whiteIconButton}} onClick={() => {
+            this.handleToggle();
+          }}>
+            <MenuIcon />
+          </IconButton>;
 
     let iconElementRight = numSelectedTransactions
         ? <span>
@@ -142,28 +178,22 @@ class extends React.Component<IMenuBarProps, IMenuBarReactState> {
             </span> : undefined);
 
     return (
-      <div className='app-bar'>
-        <AppBar
-            iconElementLeft={<IconButton classes={{root: classes.whiteIconButton}} onClick={() => {
-                  if (numSelectedTransactions && this.props.onSelectedBackClick) {
-                    this.props.onSelectedBackClick();
-                  } else {
-                    this.handleToggle();
-                  }
-                }}>
-                  {numSelectedTransactions ? <ArrowBackIcon/> : <MenuIcon />}
-                </IconButton>}
-            title={title}
-            iconElementRight={iconElementRight}
-            className={className}
-            />
+      <div className={classes.flexNone}>
+        <AppBar position='fixed'
+            classes={{root: numSelectedTransactions ? classes.appBarSelected
+                                                    : classes.appBar}}>
+          <Toolbar>
+            {iconElementLeft}
+            <Typography variant='h6' classes={{root: classes.grow}} color='inherit'>{title}</Typography>
+            {iconElementRight}
+          </Toolbar>
+        </AppBar>
+
         <Drawer classes={{paper: classes.drawerPaper}}  open={this.state.isDrawerOpen}
             onClose={() => this.setState({isDrawerOpen: false})}>
-          <div className='app-drawer-header' style={{
-              backgroundColor: muiTheme!.palette!.primary1Color,
-              color: muiTheme!.palette!.alternateTextColor}}>
-            <div className='user-icon'>📈</div>
-            <div className='name'>Spent</div>
+          <div className={classes.drawerHeader}>
+            <div className={classes.drawerHeaderIcon}>📈</div>
+            <Typography variant='h5' color='inherit'>Spent</Typography>
           </div>
           <List>
             <ListItem
