@@ -179,7 +179,7 @@ class extends React.Component<IMenuBarProps, IMenuBarReactState> {
 
     return (
       <div className={classes.flexNone}>
-        <AppBar position='fixed'
+        <AppBar position='static'
             classes={{root: numSelectedTransactions ? classes.appBarSelected
                                                     : classes.appBar}}>
           <Toolbar>

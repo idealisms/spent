@@ -1,3 +1,4 @@
+import { createStyles, WithStyles } from '@material-ui/core';
 import Button from '@material-ui/core/Button';
 import Dialog from '@material-ui/core/Dialog';
 import DialogActions from '@material-ui/core/DialogActions';
@@ -6,22 +7,48 @@ import DialogTitle from '@material-ui/core/DialogTitle';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import Radio from '@material-ui/core/Radio';
 import RadioGroup from '@material-ui/core/RadioGroup';
+import { Theme, withStyles } from '@material-ui/core/styles';
 import * as React from 'react';
-import { Category, ITransaction } from '../Model';
-import { categoryToEmoji, compareTransactions, formatAmount, getCategory } from '../utils';
+import { ITransaction } from '../Model';
+import { compareTransactions } from '../utils';
+import { Transaction } from './Transaction';
 
-type IMergeTransactionDialogProps = {
-  transactions: ITransaction[],
-  onClose: () => void,
-  onSaveChanges: (transaction: ITransaction) => void,
-};
-type IMergeTransactionDialogState = {
-  selectedTransactionId?: string,
-  transactions: ITransaction[],
-};
-export class MergeTransactionDialog extends React.Component<IMergeTransactionDialogProps, IMergeTransactionDialogState> {
+const styles = (theme: Theme) => createStyles({
+  mergeRadioButton: {
+    '& > div': {
+      align: 'center',
+    },
+    '& .transactions': {
+      borderTop: 'none',
+      overflow: 'visible',
+    },
+  },
+  transactionRow: {
+    borderBottom: 'none',
+  },
+  transactionDescription: {
+    overflow: 'hidden',
+    flex: '1 0 auto',
+    paddingRight: '24px',
+  },
+  transactionAmount: {
+    marginLeft: '0',
+    flex: '0 0 73px',
+  },
+});
+interface IMergeTransactionDialogProps extends WithStyles<typeof styles> {
+  transactions: ITransaction[];
+  onClose: () => void;
+  onSaveChanges: (transaction: ITransaction) => void;
+}
+interface IMergeTransactionDialogState {
+  selectedTransactionId?: string;
+  transactions: ITransaction[];
+}
+export const MergeTransactionDialog = withStyles(styles)(
+class extends React.Component<IMergeTransactionDialogProps, IMergeTransactionDialogState> {
 
-  constructor(props: IMergeTransactionDialogProps, context: any) {
+  constructor(props: IMergeTransactionDialogProps, context?: any) {
     super(props, context);
     let sortedTransactions = [...props.transactions];
     sortedTransactions.sort(compareTransactions);
@@ -31,28 +58,20 @@ export class MergeTransactionDialog extends React.Component<IMergeTransactionDia
   }
 
   public render(): React.ReactElement<object> {
+    let classes = this.props.classes;
     let rows: JSX.Element[] = [];
     for (let transaction of this.state.transactions) {
-      let isCredit = transaction.amount_cents < 0;
-      let categoryEmoji = '🙅';
-      let categoryName = 'error';
-      try {
-        let category = getCategory(transaction);
-        categoryEmoji = categoryToEmoji(category);
-        categoryName = Category[category];
-      } catch(e) {
-        console.log(e);
-      }
       let label =
           <div className='transactions'>
-            <div className='row'>
-              <div className={'amount' + (isCredit ? ' credit' : '')}>{formatAmount(transaction)}</div>
-              <div className='category' title={categoryName}>{categoryEmoji}</div>
-              <div className='description'>
-                {transaction.description}
-                {transaction.notes ? <span className='notes'> - {transaction.notes}</span> : ''}
-              </div>
-            </div>
+            <Transaction
+                transaction={transaction}
+                hideDate={true}
+                hideTags={true}
+                classes={{
+                    row: classes.transactionRow,
+                    description: classes.transactionDescription,
+                    amount: classes.transactionAmount,
+                }} />
           </div>;
       rows.push(
           <FormControlLabel
@@ -60,7 +79,7 @@ export class MergeTransactionDialog extends React.Component<IMergeTransactionDia
               value={transaction.id}
               label={label}
               control={<Radio color='primary'/>}
-              className='merge-radio-button' />,
+              className={classes.mergeRadioButton} />,
       );
     }
 
@@ -107,4 +126,4 @@ export class MergeTransactionDialog extends React.Component<IMergeTransactionDia
 
     this.props.onClose();
   }
-}
+});
