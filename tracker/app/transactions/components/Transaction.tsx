@@ -29,6 +29,9 @@ const styles = (theme: Theme) => createStyles({
     marginLeft: '16px',
     flex: '1 1 auto',
     overflow: 'auto',
+    '& > .notes': {
+      color: '#9e9e9e',
+    },
     // These are the spans around tags.
     '& > span:not(.notes)': {
       backgroundColor: '#ddd',
@@ -38,17 +41,14 @@ const styles = (theme: Theme) => createStyles({
       color: '#666',
     },
   },
-  notes: {
-    color: '#9e9e9e',
-  },
   amount: {
     whiteSpace: 'nowrap',
     textAlign: 'right',
     marginLeft: '16px',
     flex: '0 0 80px',
-  },
-  credit: {
-    color: 'green',
+    '&.credit': {
+      color: 'green',
+    },
   },
   category: {
     marginLeft: '16px',
@@ -64,10 +64,12 @@ const styles = (theme: Theme) => createStyles({
 
 interface ITransactionProps extends WithStyles<typeof styles> {
   transaction: ITransaction;
+  key?: string;
   isSelected?: boolean;
   onCategoryClick?: (transaction: ITransaction) => void;
   hideDate?: boolean;
   hideTags?: boolean;
+  amountFragment?: JSX.Element;
 }
 export const Transaction = withStyles(styles)(
 class extends React.Component<ITransactionProps, object> {
@@ -88,9 +90,13 @@ class extends React.Component<ITransactionProps, object> {
     // selects the tag and not the words around it.
     let tags = this.props.transaction.tags.map(tag => ['\u200B', <span key={tag}>{tag}</span>]);
     return (
-      <div className={classes.row + (this.props.isSelected ? ' selected' : '')}>
+      <div
+          className={classes.row + (this.props.isSelected ? ' selected' : '')}
+          key={this.props.key ? this.props.key : ''}>
         {this.props.hideDate ? '' : <div className={classes.date}>{this.props.transaction.date}</div>}
-        <div className={classes.amount + (isCredit ? ' ' + classes.credit : '')}>{this.formatAmount()}</div>
+        {this.props.amountFragment
+            ? this.props.amountFragment
+            : <div className={classes.amount + (isCredit ? ' credit' : '')}>{this.formatAmount()}</div>}
         <div
             className={classes.category + (this.props.onCategoryClick ? ' editable' : '')}
             title={categoryName}
@@ -98,7 +104,7 @@ class extends React.Component<ITransactionProps, object> {
             >{this.props.isSelected ? <CheckBoxIcon /> : categoryEmoji}</div>
         <div className={classes.description}>
           {this.props.transaction.description}
-          {this.props.transaction.notes ? <span className={classes.notes}> - {this.props.transaction.notes}</span> : ''}
+          {this.props.transaction.notes ? <span className='notes'> - {this.props.transaction.notes}</span> : ''}
           {this.props.hideTags ? '' : tags}
         </div>
       </div>

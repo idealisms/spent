@@ -1,19 +1,32 @@
+import { createStyles, WithStyles } from '@material-ui/core';
 import Button from '@material-ui/core/Button';
 import Dialog from '@material-ui/core/Dialog';
 import DialogActions from '@material-ui/core/DialogActions';
 import DialogContent from '@material-ui/core/DialogContent';
 import DialogTitle from '@material-ui/core/DialogTitle';
-import { withStyles } from '@material-ui/core/styles';
+import { Theme, withStyles } from '@material-ui/core/styles';
 import TextField from '@material-ui/core/TextField';
 import * as React from 'react';
-import { Category, ITransaction } from '../Model';
-import { categoryToEmoji, compareTransactions, generateUUID, getCategory } from '../utils';
+import { ITransaction } from '../Model';
+import { compareTransactions, generateUUID } from '../utils';
+import { Transaction } from './Transaction';
 
-type ISplitTransactionDialogProps = {
-  transaction: ITransaction,
-  onClose: () => void,
-  onSaveChanges: (transactions: Map<string, ITransaction>) => void,
-};
+const styles = (theme: Theme) => createStyles({
+  amount: {
+    flex: '0 0 80px',
+    // This fixes the vertical alignment of the input.
+    paddingTop: '8px',
+    '& input': {
+      textAlign: 'right',
+    },
+  },
+});
+
+interface ISplitTransactionDialogProps extends WithStyles<typeof styles> {
+  transaction: ITransaction;
+  onClose: () => void;
+  onSaveChanges: (transactions: Map<string, ITransaction>) => void;
+}
 type ISplitTransactionRow = ITransaction & {
   amountString?: string,
 };
@@ -23,19 +36,10 @@ type ISplitTransactionDialogState = {
   isEditing: boolean,
 };
 
-const AmountTextField = withStyles({
-  root: {
-    // This fixes the vertical alignment of the input.
-    paddingTop: '8px',
-    '& input': {
-      textAlign: 'right',
-    },
-  },
-})(TextField);
+export const SplitTransactionDialog = withStyles(styles)(
+class extends React.Component<ISplitTransactionDialogProps, ISplitTransactionDialogState> {
 
-export class SplitTransactionDialog extends React.Component<ISplitTransactionDialogProps, ISplitTransactionDialogState> {
-
-  constructor(props: ISplitTransactionDialogProps, context: any) {
+  constructor(props: ISplitTransactionDialogProps, context?: any) {
     super(props, context);
     let transactions: ISplitTransactionRow[] = [];
     let wasMerged = false;
@@ -79,36 +83,30 @@ export class SplitTransactionDialog extends React.Component<ISplitTransactionDia
   }
 
   public render(): React.ReactElement<object> {
+    let classes = this.props.classes;
     let totalAmountCents = 0;
     this.state.transactions.map((t) => totalAmountCents += t.amount_cents);
 
     let rows: JSX.Element[] = [];
     for (let transaction of this.state.transactions) {
-      let categoryEmoji = '🙅';
-      let categoryName = 'error';
-      try {
-        let category = getCategory(transaction);
-        categoryEmoji = categoryToEmoji(category);
-        categoryName = Category[category];
-      } catch(e) {
-        console.log(e);
-      }
       rows.push(
-        <div className='row' key={`split-${transaction.id}`}>
-          <div>$</div>
-          <AmountTextField
-            className='amount'
-            value={transaction.amountString}
-            name={transaction.id}
-            onChange={(event) => this.handleChange(event.target as HTMLInputElement)}
-            onBlur={(event) => this.handleBlur(event.target as HTMLInputElement)}
-            disabled={this.state.wasMerged} />
-          <div className='category' title={categoryName}>{categoryEmoji}</div>
-          <div className='description'>
-            {transaction.description}
-            {transaction.notes ? <span className='notes'> - {transaction.notes}</span> : ''}
-          </div>
-        </div>);
+        <Transaction
+          transaction={transaction}
+          key={`split-${transaction.id}`}
+          hideDate={true}
+          hideTags={true}
+          amountFragment={
+              <React.Fragment>
+                <div>$</div>
+                <TextField
+                  className={classes.amount}
+                  value={transaction.amountString}
+                  name={transaction.id}
+                  onChange={(event) => this.handleChange(event.target as HTMLInputElement)}
+                  onBlur={(event) => this.handleBlur(event.target as HTMLInputElement)}
+                  disabled={this.state.wasMerged} />
+              </React.Fragment>}
+          />);
     }
 
     return <Dialog
@@ -197,4 +195,4 @@ export class SplitTransactionDialog extends React.Component<ISplitTransactionDia
     }
     return amount;
   }
-}
+});
