@@ -11,7 +11,7 @@ import { Theme, withStyles } from '@material-ui/core/styles';
 import * as React from 'react';
 import { ITransaction } from '../Model';
 import { compareTransactions } from '../utils';
-import { Transaction } from './Transaction';
+import Transaction from './Transaction';
 
 const styles = (theme: Theme) => createStyles({
   mergeRadioButton: {

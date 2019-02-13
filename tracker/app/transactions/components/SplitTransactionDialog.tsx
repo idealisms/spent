@@ -9,7 +9,7 @@ import TextField from '@material-ui/core/TextField';
 import * as React from 'react';
 import { ITransaction } from '../Model';
 import { compareTransactions, generateUUID } from '../utils';
-import { Transaction } from './Transaction';
+import Transaction from './Transaction';
 
 const styles = (theme: Theme) => createStyles({
   amount: {

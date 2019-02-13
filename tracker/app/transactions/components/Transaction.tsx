@@ -71,7 +71,7 @@ interface ITransactionProps extends WithStyles<typeof styles> {
   hideTags?: boolean;
   amountFragment?: JSX.Element;
 }
-export const Transaction = withStyles(styles)(
+const Transaction = withStyles(styles)(
 class extends React.Component<ITransactionProps, object> {
 
   public render(): React.ReactElement<object> {
@@ -119,3 +119,5 @@ class extends React.Component<ITransactionProps, object> {
     return getCategory(this.props.transaction);
   }
 });
+
+export default Transaction;
