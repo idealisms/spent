@@ -1,10 +1,10 @@
-html, body, #app, #page-daily, #page-editor {
+html, body, #app, #page-daily {
 	height: 100%;
 }
 body {
   margin: 0;
 }
-#page-daily, #page-editor {
+#page-daily {
   display: flex;
 	flex-direction: column;
 }
@@ -29,7 +29,7 @@ body {
   display: flex;
   padding-bottom: 16px;
 }
-#page-editor .controls, #page-report .controls {
+#page-report .controls {
   padding-top: 16px;
 }
 

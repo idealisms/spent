@@ -1,24 +1,48 @@
+import { createStyles, WithStyles } from '@material-ui/core';
 import CircularProgress from '@material-ui/core/CircularProgress';
+import { Theme, withStyles } from '@material-ui/core/styles';
 import * as Dropbox from 'dropbox';
 import { InlineDatePicker } from 'material-ui-pickers';
 import * as moment from 'moment';
 import * as React from 'react';
-import { RouteComponentProps } from 'react-router';
 import { ACCESS_TOKEN } from '../../config';
 import { compareTransactions, filterTransactionsByDate, generateUUID, ITransaction, Transaction } from '../../transactions';
 import MenuBar, { CloudState } from './MenuBar';
 
-type IEditorState = {
-  transactions: ITransaction[],
-  visibleTransactions: ITransaction[],
-  startDate: Date,
-  endDate: Date,
-  selectedTransactions: Map<string, ITransaction>,
-  cloudState: CloudState,
-};
-class Editor extends React.Component<RouteComponentProps<object>, IEditorState> {
+const styles = (theme: Theme) => createStyles({
+  root: {
+    height: '100%',
+    display: 'flex',
+    flexDirection: 'column',
+  },
+  controls: {
+    display: 'flex',
+    flex: 'none',
+    padding: '16px',
 
-  constructor(props:any, context:any) {
+    '& .datepicker': {
+      width: '140px',
+    },
+    '& .datepicker:not(:first-child)': {
+      marginLeft: '24px',
+    },
+  },
+});
+
+interface IEditorProps extends WithStyles<typeof styles> {
+}
+interface IEditorState {
+  transactions: ITransaction[];
+  visibleTransactions: ITransaction[];
+  startDate: Date;
+  endDate: Date;
+  selectedTransactions: Map<string, ITransaction>;
+  cloudState: CloudState;
+}
+
+const Editor = withStyles(styles)(
+class extends React.Component<IEditorProps, IEditorState> {
+  constructor(props: IEditorProps, context?: any) {
     super(props, context);
     this.state = {
       transactions: [],
@@ -32,6 +56,7 @@ class Editor extends React.Component<RouteComponentProps<object>, IEditorState> 
   }
 
   public render(): React.ReactElement<object> {
+    let classes = this.props.classes;
     let rows = this.state.visibleTransactions.map(t => {
         return (
           <Transaction
@@ -51,7 +76,7 @@ class Editor extends React.Component<RouteComponentProps<object>, IEditorState> 
     }
 
     return (
-      <div id='page-editor'>
+      <div className={classes.root}>
         <MenuBar
             title='Editor'
             selectedTransactions={this.state.selectedTransactions}
@@ -64,8 +89,9 @@ class Editor extends React.Component<RouteComponentProps<object>, IEditorState> 
             onSelectedSplitSaveClick={(transactions: Map<string, ITransaction>) => this.handleSplitTransaction(transactions)}
         />
 
-        <div className='controls'>
+        <div className={classes.controls}>
           <InlineDatePicker
+            className='datepicker'
             keyboard
             label='Start date'
             minDate={minDate}
@@ -76,12 +102,12 @@ class Editor extends React.Component<RouteComponentProps<object>, IEditorState> 
             mask={[/\d/, /\d/, /\d/, /\d/, '-', /\d/, /\d/, '-', /\d/, /\d/]}
           />
           <InlineDatePicker
+            className='datepicker'
             keyboard
             label='End date'
             minDate={minDate}
             maxDate={maxDate}
             value={this.state.endDate}
-            style={{marginLeft: '24px'}}
             onChange={this.handleChangeEndDate}
             format='YYYY-MM-DD'
             mask={[/\d/, /\d/, /\d/, /\d/, '-', /\d/, /\d/, '-', /\d/, /\d/]}
@@ -273,6 +299,6 @@ class Editor extends React.Component<RouteComponentProps<object>, IEditorState> 
   private filterTransactions(transactions: ITransaction[], startDate?: Date, endDate?: Date): ITransaction[] {
     return filterTransactionsByDate(transactions, startDate || this.state.startDate, endDate || this.state.endDate);
   }
-}
+});
 
 export default Editor;
