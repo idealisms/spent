@@ -5,7 +5,7 @@ import * as moment from 'moment';
 import * as React from 'react';
 import { RouteComponentProps } from 'react-router';
 import { ACCESS_TOKEN } from '../../config';
-import { Category, filterTransactionsByDate, formatAmountNumber, ITransaction, TAG_TO_CATEGORY, Transaction } from '../../transactions';
+import { Category, ITransaction, TAG_TO_CATEGORY, Transaction, TransactionUtils } from '../../transactions';
 import MenuBar, { CloudState } from './MenuBar';
 
 type ReportNode = {
@@ -46,7 +46,7 @@ class Report extends React.Component<RouteComponentProps<object>, IReportState> 
   }
 
   public render(): React.ReactElement<object> {
-    let filteredTransactions = filterTransactionsByDate(
+    let filteredTransactions = TransactionUtils.filterTransactionsByDate(
         this.state.transactions, this.state.startDate, this.state.endDate);
     let [unmatchedTransactions, renderedTree] = this.buildTree(filteredTransactions);
     let rows = unmatchedTransactions.map(t => {
@@ -318,7 +318,7 @@ class Report extends React.Component<RouteComponentProps<object>, IReportState> 
                 key={`${renderNode.ReportNode.title}-${renderNode.amountCents}`}
                 className='row'
                 style={{marginLeft: (depth * 32) + 'px'}}>
-              <span className='amount'>${formatAmountNumber(renderNode.amountCents)}</span>
+              <span className='amount'>${TransactionUtils.formatAmountNumber(renderNode.amountCents)}</span>
               {renderNode.ReportNode.title} from {renderNode.transactions.length} transaction(s)
             </div>);
         buildDom(renderNode.subcategories, depth + 1, outputDom);

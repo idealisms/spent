@@ -7,7 +7,7 @@ import { Chart } from 'react-google-charts';
 import Measure from 'react-measure';
 import { RouteComponentProps } from 'react-router';
 import { ACCESS_TOKEN } from '../../config';
-import { DAILY_EXCLUDE_TAGS, ITransaction, shouldExclude, Transaction } from '../../transactions';
+import { DAILY_EXCLUDE_TAGS, ITransaction, Transaction, TransactionUtils } from '../../transactions';
 import MenuBar from './MenuBar';
 
 type IDailyGraphProps = {
@@ -44,7 +44,7 @@ class DailyGraph extends React.Component<IDailyGraphProps, IDailyGraphState> {
       }
 
       for (let transaction of this.props.transactions) {
-        if (shouldExclude(transaction, DAILY_EXCLUDE_TAGS)) {
+        if (TransactionUtils.shouldExclude(transaction, DAILY_EXCLUDE_TAGS)) {
           continue;
         }
 
@@ -125,7 +125,7 @@ class Daily extends React.Component<RouteComponentProps<object>, IDailyState> {
       let transactionDate = new Date(parseInt(fullYear, 10), parseInt(month, 10) - 1, parseInt(day, 10));
       return this.state.startDate <= transactionDate
           && transactionDate <= this.state.endDate
-          && !shouldExclude(t, DAILY_EXCLUDE_TAGS);
+          && !TransactionUtils.shouldExclude(t, DAILY_EXCLUDE_TAGS);
     });
     let rows = filteredTransactions.map(t => {
         return (

@@ -6,7 +6,7 @@ import { InlineDatePicker } from 'material-ui-pickers';
 import * as moment from 'moment';
 import * as React from 'react';
 import { ACCESS_TOKEN } from '../../config';
-import { compareTransactions, filterTransactionsByDate, generateUUID, ITransaction, Transaction } from '../../transactions';
+import { ITransaction, Transaction, TransactionUtils } from '../../transactions';
 import MenuBar, { CloudState } from './MenuBar';
 
 const styles = (theme: Theme) => createStyles({
@@ -174,7 +174,7 @@ class extends React.Component<IEditorProps, IEditorState> {
         continue;
       } else if (t.id == transaction.id) {
         t = Object.assign({}, transaction);
-        t.id = generateUUID();
+        t.id = TransactionUtils.generateUUID();
         t.transactions = [...transaction.transactions];
         if (transaction.transactions && transaction.transactions.length == 0) {
           t.transactions.push(transaction);
@@ -222,7 +222,7 @@ class extends React.Component<IEditorProps, IEditorState> {
       transactionsToKeep.push(transaction);
       selectedTransactions.set(transaction.id, transaction);
     }
-    transactionsToKeep.sort(compareTransactions);
+    transactionsToKeep.sort(TransactionUtils.compareTransactions);
     this.setState({
       transactions: transactionsToKeep,
       visibleTransactions: this.filterTransactions(transactionsToKeep),
@@ -270,10 +270,6 @@ class extends React.Component<IEditorProps, IEditorState> {
             let fr = new FileReader();
             fr.addEventListener('load', ev => {
                 let transactions: ITransaction[] = JSON.parse(fr.result as string);
-                // let endDate = daily.refs['end-date'] as DatePicker;
-                // endDate.setState({
-                //   date: moment(transactions[0].date).toDate(),
-                // });
 
                 let state: any = {
                   transactions: transactions,
@@ -297,7 +293,10 @@ class extends React.Component<IEditorProps, IEditorState> {
   }
 
   private filterTransactions(transactions: ITransaction[], startDate?: Date, endDate?: Date): ITransaction[] {
-    return filterTransactionsByDate(transactions, startDate || this.state.startDate, endDate || this.state.endDate);
+    return TransactionUtils.filterTransactionsByDate(
+        transactions,
+        startDate || this.state.startDate,
+        endDate || this.state.endDate);
   }
 });
 
