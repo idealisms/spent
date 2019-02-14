@@ -182,3 +182,13 @@ export function filterTransactionsByDate(transactions: ITransaction[], startDate
   let endIndex = searchByDate(transactions, endDateString, false);
   return transactions.slice(endIndex, startIndex + 1);
 }
+
+export function getTags(transactions: ITransaction[]): Set<string> {
+  let tagSet = new Set();
+  for (let transaction of transactions) {
+    for (let tag of transaction.tags) {
+      tagSet.add(tag);
+    }
+  }
+  return tagSet;
+}

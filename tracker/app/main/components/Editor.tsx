@@ -5,6 +5,9 @@ import * as Dropbox from 'dropbox';
 import { InlineDatePicker } from 'material-ui-pickers';
 import * as moment from 'moment';
 import * as React from 'react';
+import Select from 'react-select';
+import { ValueType } from 'react-select/lib/types';
+import { isUndefined } from 'util';
 import { ACCESS_TOKEN } from '../../config';
 import { ITransaction, Transaction, TransactionUtils } from '../../transactions';
 import MenuBar, { CloudState } from './MenuBar';
@@ -21,9 +24,12 @@ const styles = (theme: Theme) => createStyles({
     padding: '16px',
 
     '& .datepicker': {
-      width: '140px',
+      flex: '0 0 140px',
     },
-    '& .datepicker:not(:first-child)': {
+    '& .tagselect': {
+      flex: '1 1 200px',
+    },
+    '& > *:not(:first-child)': {
       marginLeft: '24px',
     },
   },
@@ -38,6 +44,7 @@ interface IEditorState {
   endDate: Date;
   selectedTransactions: Map<string, ITransaction>;
   cloudState: CloudState;
+  tagFilters: ValueType<{label: string, value: string}>;
 }
 
 const Editor = withStyles(styles)(
@@ -51,6 +58,7 @@ class extends React.Component<IEditorProps, IEditorState> {
       endDate: moment().hours(0).minutes(0).seconds(0).milliseconds(0).toDate(),
       selectedTransactions: new Map(),
       cloudState: CloudState.Done,
+      tagFilters: null,
     };
     this.loadFromDropbox();
   }
@@ -75,6 +83,10 @@ class extends React.Component<IEditorProps, IEditorState> {
       maxDate = moment(this.state.transactions[0].date).toDate();
     }
 
+    let tags = TransactionUtils.getTags(this.state.visibleTransactions);
+    let tagSuggestions = new Array(...tags).sort().map(
+      (t) => ({label: t, value: t}),
+      tags);
     return (
       <div className={classes.root}>
         <MenuBar
@@ -112,6 +124,13 @@ class extends React.Component<IEditorProps, IEditorState> {
             format='YYYY-MM-DD'
             mask={[/\d/, /\d/, /\d/, /\d/, '-', /\d/, /\d/, '-', /\d/, /\d/]}
           />
+
+          <Select
+            className='tagselect'
+            value={this.state.tagFilters}
+            onChange={this.handleChangeTagFilter}
+            options={tagSuggestions}
+            isMulti />
         </div>
         {this.state.transactions.length
             ? <div className='transactions'>{rows}</div>
@@ -132,6 +151,14 @@ class extends React.Component<IEditorProps, IEditorState> {
     this.setState({
       endDate: endDate,
       visibleTransactions: this.filterTransactions(this.state.transactions, undefined, endDate),
+    });
+  }
+
+  public handleChangeTagFilter = (tagFilters: ValueType<{label: string, value: string}>, action: any): void => {
+    this.setState({
+      tagFilters: tagFilters,
+      visibleTransactions: this.filterTransactions(
+          this.state.transactions, undefined, undefined, tagFilters),
     });
   }
 
@@ -240,7 +267,7 @@ class extends React.Component<IEditorProps, IEditorState> {
         autorename: false,
         mute: false,
     };
-    let dbx = new Dropbox.Dropbox({ accessToken: ACCESS_TOKEN });
+    let dbx = new Dropbox.Dropbox({ accessToken: ACCESS_TOKEN, fetch: fetch });
     dbx.filesUpload(filesCommitInfo)
         .then(metadata => {
             console.log('wrote to dropbox');
@@ -263,7 +290,7 @@ class extends React.Component<IEditorProps, IEditorState> {
     let filesDownloadArg = {
       path: '/transactions.json',
     };
-    let dbx = new Dropbox.Dropbox({ accessToken: ACCESS_TOKEN });
+    let dbx = new Dropbox.Dropbox({ accessToken: ACCESS_TOKEN, fetch: fetch });
     let daily = this;
     dbx.filesDownload(filesDownloadArg)
         .then(file => {
@@ -292,11 +319,27 @@ class extends React.Component<IEditorProps, IEditorState> {
         });
   }
 
-  private filterTransactions(transactions: ITransaction[], startDate?: Date, endDate?: Date): ITransaction[] {
-    return TransactionUtils.filterTransactionsByDate(
+  private filterTransactions(
+      transactions: ITransaction[],
+      startDate?: Date,
+      endDate?: Date,
+      tagFilters?: ValueType<{label: string, value: string}>): ITransaction[] {
+
+    let filteredTransactions = TransactionUtils.filterTransactionsByDate(
         transactions,
         startDate || this.state.startDate,
         endDate || this.state.endDate);
+
+    tagFilters = isUndefined(tagFilters) ? this.state.tagFilters : tagFilters;
+    if (Array.isArray(tagFilters) && tagFilters.length > 0) {
+      let tagsInclude = new Set(tagFilters.map((t) => (t.value)));
+
+      filteredTransactions = filteredTransactions.filter((transaction) => {
+        let intersection = transaction.tags.filter((t) => tagsInclude.has(t));
+        return intersection.length == tagsInclude.size;
+      });
+    }
+    return filteredTransactions;
   }
 });
 
