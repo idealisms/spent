@@ -1,4 +1,4 @@
-import { createStyles, WithStyles } from '@material-ui/core';
+import { createStyles, TextField, WithStyles } from '@material-ui/core';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import { Theme, withStyles } from '@material-ui/core/styles';
 import * as Dropbox from 'dropbox';
@@ -21,16 +21,31 @@ const styles = (theme: Theme) => createStyles({
   controls: {
     display: 'flex',
     flex: 'none',
-    padding: '16px',
+    flexWrap: 'wrap',
+    alignItems: 'baseline',
+    padding: '8px 4px',
+    justifyContent: 'space-between',
 
+    '& > *': {
+      margin: '8px 12px',
+      '@media (max-width: 420px)': {
+        marginTop: '4px',
+        marginBottom: '4px',
+      },
+    },
     '& .datepicker': {
-      flex: '0 0 140px',
+      flex: '1 0 140px',
+      maxWidth: '160px',
     },
     '& .tagselect': {
-      flex: '1 1 200px',
+      flex: '10 1 200px',
     },
-    '& > *:not(:first-child)': {
-      marginLeft: '24px',
+    '& .search': {
+      flex: '10 1 200px',
+      '@media (max-width: 420px)': {
+        marginTop: '0 !important',
+        marginBottom: '4px !important',
+      },
     },
   },
 });
@@ -45,6 +60,7 @@ interface IEditorState {
   selectedTransactions: Map<string, ITransaction>;
   cloudState: CloudState;
   tagFilters: ValueType<{label: string, value: string}>;
+  searchQuery: string;
 }
 
 const Editor = withStyles(styles)(
@@ -59,6 +75,7 @@ class extends React.Component<IEditorProps, IEditorState> {
       selectedTransactions: new Map(),
       cloudState: CloudState.Done,
       tagFilters: null,
+      searchQuery: '',
     };
     this.loadFromDropbox();
   }
@@ -130,7 +147,17 @@ class extends React.Component<IEditorProps, IEditorState> {
             value={this.state.tagFilters}
             onChange={this.handleChangeTagFilter}
             options={tagSuggestions}
+            placeholder='Select tags'
             isMulti />
+
+          <TextField
+            className='search'
+            label='Search'
+            type='search'
+            margin='dense'
+            onChange={this.handleChangeSearch}
+            value={this.state.searchQuery}
+          />
         </div>
         {this.state.transactions.length
             ? <div className='transactions'>{rows}</div>
@@ -159,6 +186,15 @@ class extends React.Component<IEditorProps, IEditorState> {
       tagFilters: tagFilters,
       visibleTransactions: this.filterTransactions(
           this.state.transactions, undefined, undefined, tagFilters),
+    });
+  }
+
+  public handleChangeSearch = (event: React.ChangeEvent<HTMLInputElement>): void => {
+    let searchQuery = event.target.value;
+    this.setState({
+      searchQuery,
+      visibleTransactions: this.filterTransactions(
+          this.state.transactions, undefined, undefined, undefined, searchQuery),
     });
   }
 
@@ -323,7 +359,8 @@ class extends React.Component<IEditorProps, IEditorState> {
       transactions: ITransaction[],
       startDate?: Date,
       endDate?: Date,
-      tagFilters?: ValueType<{label: string, value: string}>): ITransaction[] {
+      tagFilters?: ValueType<{label: string, value: string}>,
+      searchQuery?: string): ITransaction[] {
 
     let filteredTransactions = TransactionUtils.filterTransactionsByDate(
         transactions,
@@ -337,6 +374,21 @@ class extends React.Component<IEditorProps, IEditorState> {
       filteredTransactions = filteredTransactions.filter((transaction) => {
         let intersection = transaction.tags.filter((t) => tagsInclude.has(t));
         return intersection.length == tagsInclude.size;
+      });
+    }
+    searchQuery = isUndefined(searchQuery) ? this.state.searchQuery : searchQuery;
+    if (searchQuery) {
+      let tokens = searchQuery.toLowerCase().split(/\s+/);
+      filteredTransactions = filteredTransactions.filter((transaction) => {
+        let descriptionLowerCase = transaction.description.toLowerCase();
+        let notesLowerCase = (transaction.notes || '').toLowerCase();
+        for (let token of tokens) {
+          if (descriptionLowerCase.indexOf(token) == -1 &&
+              notesLowerCase.indexOf(token) == -1) {
+            return false;
+          }
+        }
+        return true;
       });
     }
     return filteredTransactions;
