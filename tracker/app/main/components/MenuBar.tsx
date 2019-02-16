@@ -48,9 +48,6 @@ const styles = (theme: Theme) => createStyles({
       color: '#fff',
     },
   },
-  drawerItemText: {
-    fontWeight: 500,
-  },
   flexNone: {
     flex: 'none',
   },
@@ -72,8 +69,11 @@ const styles = (theme: Theme) => createStyles({
     color: '#fff',
   },
   drawerHeaderIcon: {
-    fontSize: '32px',
-    width: '56px',
+    fontSize: '24px',
+    width: '48px',
+  },
+  drawerItemText: {
+    fontWeight: 500,
   },
 });
 
@@ -177,6 +177,7 @@ class extends React.Component<IMenuBarProps, IMenuBarReactState> {
               }</IconButton>
             </span> : undefined);
 
+    let selectedPage = this.props.location!.pathname;
     return (
       <div className={classes.flexNone}>
         <AppBar position='static'
@@ -193,31 +194,31 @@ class extends React.Component<IMenuBarProps, IMenuBarReactState> {
             onClose={() => this.setState({isDrawerOpen: false})}>
           <div className={classes.drawerHeader}>
             <div className={classes.drawerHeaderIcon}>📈</div>
-            <Typography variant='h5' color='inherit'>Spent</Typography>
+            <Typography variant='h6' color='inherit'>Spent</Typography>
           </div>
           <List>
             <ListItem
                 key='Daily'
                 button
-                selected={this.props.location!.pathname === DailyPage}
+                selected={selectedPage === DailyPage}
                 onClick={() => this.handleNavigate(DailyPage)}>
-              <ListItemIcon><TimelineIcon color='primary' /></ListItemIcon>
+              <ListItemIcon><TimelineIcon color={selectedPage === DailyPage ? 'primary' : 'default'} /></ListItemIcon>
               <ListItemText classes={{primary: classes.drawerItemText}} primary='Daily' />
             </ListItem>
             <ListItem
                 key='Editor'
                 button
-                selected={this.props.location!.pathname === EditorPage}
+                selected={selectedPage === EditorPage}
                 onClick={() => this.handleNavigate(EditorPage)}>
-              <ListItemIcon><EditIcon color='primary' /></ListItemIcon>
+              <ListItemIcon><EditIcon color={selectedPage === EditorPage ? 'primary' : 'default'} /></ListItemIcon>
               <ListItemText classes={{primary: classes.drawerItemText}} primary='Editor' />
             </ListItem>
             <ListItem
                 key='Report'
                 button
-                selected={this.props.location!.pathname === ReportPage}
+                selected={selectedPage === ReportPage}
                 onClick={() => this.handleNavigate(ReportPage)}>
-              <ListItemIcon><CategoryIcon color='primary' /></ListItemIcon>
+              <ListItemIcon><CategoryIcon color={selectedPage === ReportPage ? 'primary' : 'default'} /></ListItemIcon>
               <ListItemText classes={{primary: classes.drawerItemText}} primary='Report' />
             </ListItem>
           </List>
