@@ -1,33 +1,14 @@
-html, body, #app, #page-daily {
+html, body, #app {
 	height: 100%;
 }
 body {
   margin: 0;
 }
-#page-daily {
-  display: flex;
-	flex-direction: column;
-}
-
-.chart, .controls {
-  flex: none;
-  padding: 0 16px;
-}
-
-#page-daily > .chart {
-  flex: 0 1 400px;
-  max-height: calc(50% - 64px);
-}
-#page-daily .controls > :nth-child(2) {
-  margin: 0 24px;
-}
-#page-daily .controls > :nth-child(3) {
-  flex-shrink: 1.5;
-}
 
 .controls {
+  flex: none;
+  padding: 0 16px 16px;
   display: flex;
-  padding-bottom: 16px;
 }
 #page-report .controls {
   padding-top: 16px;
@@ -80,13 +61,4 @@ body {
 #page-report #rendered-tree > .info {
   color: rgba(0, 0, 0, .3);
   font-size: small;
-}
-
-@media (max-width: 420px) {
-  #page-daily .controls > :nth-child(2) {
-    margin: 0 8px;
-  }
-  #page-daily .controls button {
-    padding: 0;
-  }
 }

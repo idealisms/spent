@@ -1,30 +1,41 @@
-import TextField from '@material-ui/core/TextField';
+import { createStyles, TextField, WithStyles } from '@material-ui/core';
+import { Theme, withStyles } from '@material-ui/core/styles';
 import { Dropbox } from 'dropbox';
 import { InlineDatePicker } from 'material-ui-pickers';
 import * as moment from 'moment';
 import * as React from 'react';
 import { Chart } from 'react-google-charts';
 import Measure from 'react-measure';
-import { RouteComponentProps } from 'react-router';
 import { ACCESS_TOKEN } from '../../config';
 import { DAILY_EXCLUDE_TAGS, ITransaction, Transaction, TransactionUtils } from '../../transactions';
 import MenuBar from './MenuBar';
 
-type IDailyGraphProps = {
-  transactions: ITransaction[],
-  startDate: Date,
-  endDate: Date,
-  dailyBudgetCents: number,
-};
-type IDailyGraphState = {
+const dailyGraphStyles = (theme: Theme) => createStyles({
+  chart: {
+    flex: '0 1 400px',
+    padding: '8px 16px',
+    maxHeight: 'calc(50% - 64px)',
+    '@media (max-width: 420px)': {
+      paddingBottom: '0',
+    },
+  },
+});
+interface IDailyGraphProps extends WithStyles<typeof dailyGraphStyles> {
+  transactions: ITransaction[];
+  startDate: Date;
+  endDate: Date;
+  dailyBudgetCents: number;
+}
+interface IDailyGraphState {
   dimensions: {
     width: number,
     height: number,
-  },
-};
-class DailyGraph extends React.Component<IDailyGraphProps, IDailyGraphState> {
+  };
+}
+const DailyGraph = withStyles(dailyGraphStyles)(
+class extends React.Component<IDailyGraphProps, IDailyGraphState> {
 
-  constructor(props:IDailyGraphProps, context:any) {
+  constructor(props: IDailyGraphProps, context?: any) {
     super(props, context);
     this.state = {
       dimensions: {
@@ -35,6 +46,7 @@ class DailyGraph extends React.Component<IDailyGraphProps, IDailyGraphState> {
   }
 
   public render(): React.ReactElement<object> {
+    let classes = this.props.classes;
     let data: [string, number][] = [];
 
     if (this.props.transactions.length) {
@@ -81,7 +93,7 @@ class DailyGraph extends React.Component<IDailyGraphProps, IDailyGraphState> {
         }}
       >
         {({ measureRef }) =>
-          <div ref={measureRef} className='chart'>
+          <div ref={measureRef} className={classes.chart}>
             <Chart
                 chartType='LineChart'
                 columns={[{'label': 'Date', 'type': 'string'}, {'label':'Dollars', 'type':'number'}]}
@@ -96,17 +108,46 @@ class DailyGraph extends React.Component<IDailyGraphProps, IDailyGraphState> {
       </Measure>
     );
   }
+});
+
+const dailyStyles = (theme: Theme) => createStyles({
+  root: {
+    height: '100%',
+    display: 'flex',
+    flexDirection: 'column',
+  },
+  controls: {
+    flex: 'none',
+    display: 'flex',
+    padding: '0 16px 16px',
+    '& > :nth-child(2)': {
+      margin: '0 24px',
+      '@media (max-width: 420px)': {
+        margin: '0 8px',
+      },
+    },
+    '& > :nth-child(3)': {
+      flexShrink: 1.5,
+    },
+    '@media (max-width: 420px)': {
+      '& button': {
+        padding: 0,
+      },
+    },
+  },
+});
+interface IDailyProps extends WithStyles<typeof dailyStyles> {
+}
+interface IDailyState {
+  transactions: ITransaction[];
+  startDate: Date;
+  endDate: Date;
+  dailyBudgetCents: number;
 }
 
-type IDailyState = {
-  transactions: ITransaction[],
-  startDate: Date,
-  endDate: Date,
-  dailyBudgetCents: number,
-};
-class Daily extends React.Component<RouteComponentProps<object>, IDailyState> {
-
-  constructor(props:any, context:any) {
+const Daily = withStyles(dailyStyles)(
+class extends React.Component<IDailyProps, IDailyState> {
+  constructor(props: IDailyProps, context?: any) {
     super(props, context);
     this.state = {
       transactions: [],
@@ -119,6 +160,7 @@ class Daily extends React.Component<RouteComponentProps<object>, IDailyState> {
   }
 
   public render(): React.ReactElement<object> {
+    let classes = this.props.classes;
     let filteredTransactions = this.state.transactions.filter(t => {
       // TODO: Would it be faster to use moment(t.date).toDate()?
       let [fullYear, month, day] = t.date.split('-');
@@ -141,7 +183,7 @@ class Daily extends React.Component<RouteComponentProps<object>, IDailyState> {
     }
 
     return (
-      <div id='page-daily'>
+      <div className={classes.root}>
         <MenuBar title='Daily'/>
 
         <DailyGraph
@@ -151,7 +193,7 @@ class Daily extends React.Component<RouteComponentProps<object>, IDailyState> {
           dailyBudgetCents={this.state.dailyBudgetCents}
           />
 
-        <div className='controls'>
+        <div className={classes.controls}>
           <InlineDatePicker
             keyboard
             label='Start date'
@@ -236,6 +278,6 @@ class Daily extends React.Component<RouteComponentProps<object>, IDailyState> {
         });
 
   }
-}
+});
 
 export default Daily;
