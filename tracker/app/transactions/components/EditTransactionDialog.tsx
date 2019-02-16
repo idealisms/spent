@@ -67,6 +67,7 @@ export class EditTransactionDialog extends React.Component<IEditTransactionDialo
               className='textfield'
               defaultValue={this.state.tagsValue}
               style={{width: '100%'}}
+              inputProps={{autoCapitalize: 'none'}}
               autoFocus={!this.state.tagsValue}
               onChange={(event) => this.setState({tagsValue: (event.target as HTMLInputElement).value})}
               onKeyPress={(e) => this.handleKeyPress(e)}
