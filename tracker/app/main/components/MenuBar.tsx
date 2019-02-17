@@ -202,7 +202,7 @@ class extends React.Component<IMenuBarProps, IMenuBarReactState> {
                 button
                 selected={selectedPage === DailyPage}
                 onClick={() => this.handleNavigate(DailyPage)}>
-              <ListItemIcon><TimelineIcon color={selectedPage === DailyPage ? 'primary' : 'default'} /></ListItemIcon>
+              <ListItemIcon><TimelineIcon color={selectedPage === DailyPage ? 'primary' : 'inherit'} /></ListItemIcon>
               <ListItemText classes={{primary: classes.drawerItemText}} primary='Daily' />
             </ListItem>
             <ListItem
@@ -210,7 +210,7 @@ class extends React.Component<IMenuBarProps, IMenuBarReactState> {
                 button
                 selected={selectedPage === EditorPage}
                 onClick={() => this.handleNavigate(EditorPage)}>
-              <ListItemIcon><EditIcon color={selectedPage === EditorPage ? 'primary' : 'default'} /></ListItemIcon>
+              <ListItemIcon><EditIcon color={selectedPage === EditorPage ? 'primary' : 'inherit'} /></ListItemIcon>
               <ListItemText classes={{primary: classes.drawerItemText}} primary='Editor' />
             </ListItem>
             <ListItem
@@ -218,7 +218,7 @@ class extends React.Component<IMenuBarProps, IMenuBarReactState> {
                 button
                 selected={selectedPage === ReportPage}
                 onClick={() => this.handleNavigate(ReportPage)}>
-              <ListItemIcon><CategoryIcon color={selectedPage === ReportPage ? 'primary' : 'default'} /></ListItemIcon>
+              <ListItemIcon><CategoryIcon color={selectedPage === ReportPage ? 'primary' : 'inherit'} /></ListItemIcon>
               <ListItemText classes={{primary: classes.drawerItemText}} primary='Report' />
             </ListItem>
           </List>
