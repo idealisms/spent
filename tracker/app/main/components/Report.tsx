@@ -1,13 +1,55 @@
-import TextField from '@material-ui/core/TextField';
+import { createStyles, TextField, WithStyles } from '@material-ui/core';
+import { Theme, withStyles } from '@material-ui/core/styles';
 import * as Dropbox from 'dropbox';
 import { InlineDatePicker } from 'material-ui-pickers';
 import * as moment from 'moment';
 import * as React from 'react';
-import { RouteComponentProps } from 'react-router';
 import { ACCESS_TOKEN } from '../../config';
 import { Category, ITransaction, TAG_TO_CATEGORY, Transaction, TransactionUtils } from '../../transactions';
 import MenuBar, { CloudState } from './MenuBar';
 
+const styles = (theme: Theme) => createStyles({
+  controls: {
+    flex: 'none',
+    padding: '16px',
+    display: 'flex',
+  },
+  reportTrees: {
+    display: 'flex',
+    flexWrap: 'wrap',
+    '& > div': {
+      flex: '1 1 0',
+      margin: '16px',
+      minWidth: '300px',
+    },
+  },
+  jsonCategories: {
+    minHeight: '360px',
+    maxHeight: '600px',
+  },
+  renderedTree: {
+    // 37px more than #json-categories.
+    maxHeight: '637px',
+    overflow: 'auto',
+    '& > .row': {
+      lineHeight: '24px',
+      borderRadius: '4px',
+      margin: '4px',
+      backgroundColor: 'rgba(0, 0, 0, .08)',
+    },
+    '& > .row .amount': {
+      display: 'inline-block',
+      whiteSpace: 'nowrap',
+      textAlign: 'right',
+      marginRight: '16px',
+      width: '90px',
+    },
+    '& > .info': {
+      color: 'rgba(0, 0, 0, .3)',
+      fontSize: 'small',
+    },
+  },
+});
 type ReportNode = {
   title: string,
   tags: string[],
@@ -19,17 +61,20 @@ type ReportRenderNode = {
   transactions: ITransaction[],
   subcategories: ReportRenderNode[],
 };
-type IReportState = {
-  transactions: ITransaction[],
-  startDate: Date,
-  endDate: Date,
-  categories: ReportNode[],
-  categoriesPretty: string,
-  cloudState: CloudState,
-};
-class Report extends React.Component<RouteComponentProps<object>, IReportState> {
 
-  constructor(props:any, context:any) {
+interface IReportProps extends WithStyles<typeof styles> {
+}
+interface IReportState {
+  transactions: ITransaction[];
+  startDate: Date;
+  endDate: Date;
+  categories: ReportNode[];
+  categoriesPretty: string;
+  cloudState: CloudState;
+}
+const Report = withStyles(styles)(
+class extends React.Component<IReportProps, IReportState> {
+  constructor(props: IReportProps, context?: any) {
     super(props, context);
     let startDate = moment().year(moment().year() - 1).month(0).date(1).toDate();
     let endDate = moment().year(moment().year() - 1).month(11).date(31).toDate();
@@ -46,6 +91,7 @@ class Report extends React.Component<RouteComponentProps<object>, IReportState> 
   }
 
   public render(): React.ReactElement<object> {
+    let classes = this.props.classes;
     let filteredTransactions = TransactionUtils.filterTransactionsByDate(
         this.state.transactions, this.state.startDate, this.state.endDate);
     let [unmatchedTransactions, renderedTree] = this.buildTree(filteredTransactions);
@@ -70,7 +116,7 @@ class Report extends React.Component<RouteComponentProps<object>, IReportState> 
           onSaveClick={this.handleSaveReportJson}
         />
 
-        <div className='controls'>
+        <div className={classes.controls}>
           <InlineDatePicker
             keyboard
             label='Start date'
@@ -93,9 +139,9 @@ class Report extends React.Component<RouteComponentProps<object>, IReportState> 
             mask={[/\d/, /\d/, /\d/, /\d/, '-', /\d/, /\d/, '-', /\d/, /\d/]}
           />
         </div>
-        <div className='report-trees'>
+        <div className={classes.reportTrees}>
           <TextField
-            id='json-categories'
+            InputProps={{classes: {input: classes.jsonCategories}}}
             label='categories'
             placeholder='e.g., {}'
             multiline
@@ -103,8 +149,8 @@ class Report extends React.Component<RouteComponentProps<object>, IReportState> 
             value={this.state.categoriesPretty}
             onChange={this.handleChangeReportJson}
           />
-          <div id='rendered-tree'>
-              {renderedTree}
+          <div className={classes.renderedTree}>
+            {renderedTree}
           </div>
         </div>
         <div className='transactions'>
@@ -227,10 +273,10 @@ class Report extends React.Component<RouteComponentProps<object>, IReportState> 
     });
   }
 
-  // Builds the preview tree to be rendered.
-  private buildTree = (transactions: ITransaction[]): [ITransaction[], JSX.Element[]] => {
+  // Builds the tree to be rendered.
+  private buildTree = (transactions: ITransaction[]): [ITransaction[], JSX.Element] => {
     if (!this.state.categories.length) {
-      return [[], [<div key='loading'>Loading...</div>]];
+      return [[], <div key='loading'>Loading...</div>];
     }
 
     let startTime = window.performance.now();
@@ -254,10 +300,12 @@ class Report extends React.Component<RouteComponentProps<object>, IReportState> 
     for (let renderNode of ReportRenderNodes) {
       for (let tag of renderNode.ReportNode.tags) {
         if (tagToRootReportRenderNode.has(tag)) {
-          return [[], [<div key={tagToRootReportRenderNode.get(tag)!.ReportNode.title + tag}>
-              Error, tag appears twice.
-              {tag} in {tagToRootReportRenderNode.get(tag)!.ReportNode.title}
-              and {renderNode.ReportNode.title}.</div>]];
+          return [
+              [],
+              <div>Error, tag appears twice.
+                {tag} in {tagToRootReportRenderNode.get(tag)!.ReportNode.title}
+                and {renderNode.ReportNode.title}.
+              </div>];
         }
         tagToRootReportRenderNode.set(tag, renderNode);
       }
@@ -327,10 +375,14 @@ class Report extends React.Component<RouteComponentProps<object>, IReportState> 
     buildDom(ReportRenderNodes, 0, output);
 
     let domTime = window.performance.now();
-    output.push(<div key='debug0' className='info'>Build time: {(buildTime - startTime).toFixed(2)}ms</div>);
-    output.push(<div key='debug1' className='info'>DOM time: {(domTime - buildTime).toFixed(2)}ms</div>);
-    return [unmatchedTransactions, output];
+    return [
+      unmatchedTransactions,
+      <React.Fragment>
+        {output}
+        <div className='info'>Build time: {(buildTime - startTime).toFixed(2)}ms</div>
+        <div className='info'>DOM time: {(domTime - buildTime).toFixed(2)}ms</div>
+      </React.Fragment>];
   }
-}
+});
 
 export default Report;
