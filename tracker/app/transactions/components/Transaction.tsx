@@ -23,6 +23,11 @@ const styles = (theme: Theme) => createStyles({
     fontSize: '70%',
     marginLeft: '16px',
     flex: 'none',
+    '@media (max-width: 420px)': {
+      '& .y': {
+        display: 'none',
+      },
+    },
   },
   description: {
     whiteSpace: 'nowrap',
@@ -93,7 +98,12 @@ class extends React.Component<ITransactionProps, object> {
       <div
           className={classes.row + (this.props.isSelected ? ' selected' : '')}
           key={this.props.key ? this.props.key : ''}>
-        {this.props.hideDate ? '' : <div className={classes.date}>{this.props.transaction.date}</div>}
+        {this.props.hideDate
+            ? ''
+            : <div className={classes.date}>
+                <span className='y'>{this.props.transaction.date.substr(0, 5)}</span>
+                {this.props.transaction.date.substr(5)}
+              </div>}
         {this.props.amountFragment
             ? this.props.amountFragment
             : <div className={classes.amount + (isCredit ? ' credit' : '')}>{this.formatAmount()}</div>}
