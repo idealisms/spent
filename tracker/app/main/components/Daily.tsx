@@ -7,7 +7,7 @@ import * as React from 'react';
 import { Chart } from 'react-google-charts';
 import Measure from 'react-measure';
 import { ACCESS_TOKEN } from '../../config';
-import { DAILY_EXCLUDE_TAGS, ITransaction, Transaction, TransactionUtils } from '../../transactions';
+import { DAILY_EXCLUDE_TAGS, ITransaction, Transaction, TransactionsTable, TransactionUtils } from '../../transactions';
 import MenuBar from './MenuBar';
 
 const dailyGraphStyles = (theme: Theme) => createStyles({
@@ -135,6 +135,10 @@ const dailyStyles = (theme: Theme) => createStyles({
       },
     },
   },
+  transactionsTable: {
+    flex: 1,
+    overflow: 'auto',
+  },
 });
 interface IDailyProps extends WithStyles<typeof dailyStyles> {
 }
@@ -224,9 +228,9 @@ class extends React.Component<IDailyProps, IDailyState> {
             />
           </div>
         </div>
-        <div className='transactions'>
+        <TransactionsTable classes={{root: classes.transactionsTable}}>
           {rows}
-        </div>
+        </TransactionsTable>
       </div>
     );
   }

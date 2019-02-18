@@ -5,7 +5,7 @@ import { InlineDatePicker } from 'material-ui-pickers';
 import * as moment from 'moment';
 import * as React from 'react';
 import { ACCESS_TOKEN } from '../../config';
-import { Category, ITransaction, TAG_TO_CATEGORY, Transaction, TransactionUtils } from '../../transactions';
+import { Category, ITransaction, TAG_TO_CATEGORY, Transaction, TransactionsTable, TransactionUtils } from '../../transactions';
 import MenuBar, { CloudState } from './MenuBar';
 
 const styles = (theme: Theme) => createStyles({
@@ -153,9 +153,9 @@ class extends React.Component<IReportProps, IReportState> {
             {renderedTree}
           </div>
         </div>
-        <div className='transactions'>
+        <TransactionsTable>
           {rows}
-        </div>
+        </TransactionsTable>
       </div>
     );
   }

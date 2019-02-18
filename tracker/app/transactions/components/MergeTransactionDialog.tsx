@@ -12,16 +12,16 @@ import * as React from 'react';
 import { ITransaction } from '../Model';
 import { compareTransactions } from '../utils';
 import Transaction from './Transaction';
+import TransactionsTable from './TransactionsTable';
 
 const styles = (theme: Theme) => createStyles({
   mergeRadioButton: {
     '& > div': {
       align: 'center',
     },
-    '& .transactions': {
-      borderTop: 'none',
-      overflow: 'visible',
-    },
+  },
+  transactionsTable: {
+    borderTop: 'none',
   },
   transactionRow: {
     borderBottom: 'none',
@@ -62,7 +62,7 @@ class extends React.Component<IMergeTransactionDialogProps, IMergeTransactionDia
     let rows: JSX.Element[] = [];
     for (let transaction of this.state.transactions) {
       let label =
-          <div className='transactions'>
+          <TransactionsTable classes={{root: classes.transactionsTable}}>
             <Transaction
                 transaction={transaction}
                 hideDate={true}
@@ -72,7 +72,7 @@ class extends React.Component<IMergeTransactionDialogProps, IMergeTransactionDia
                     description: classes.transactionDescription,
                     amount: classes.transactionAmount,
                 }} />
-          </div>;
+          </TransactionsTable>;
       rows.push(
           <FormControlLabel
               key={'radio-' + transaction.id}

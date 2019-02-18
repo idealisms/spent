@@ -7,7 +7,6 @@ import * as ReactDOM from 'react-dom';
 import { Provider } from 'react-redux';
 import { ConnectedRouter } from 'react-router-redux';
 import { Store } from 'redux';
-import './global.css';
 import { App, IAppState } from './main';
 import { theme } from './muiTheme';
 

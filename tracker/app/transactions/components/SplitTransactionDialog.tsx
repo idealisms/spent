@@ -10,6 +10,7 @@ import * as React from 'react';
 import { ITransaction } from '../Model';
 import { compareTransactions, generateUUID } from '../utils';
 import Transaction from './Transaction';
+import TransactionsTable from './TransactionsTable';
 
 const styles = (theme: Theme) => createStyles({
   amount: {
@@ -19,6 +20,10 @@ const styles = (theme: Theme) => createStyles({
     '& input': {
       textAlign: 'right',
     },
+  },
+  dialogContent: {
+    padding: 0,
+    margin: '0 24px 24px',
   },
 });
 
@@ -115,8 +120,10 @@ class extends React.Component<ISplitTransactionDialogProps, ISplitTransactionDia
           scroll='paper'
           >
         <DialogTitle>{'Choose transaction to split into'}</DialogTitle>
-        <DialogContent className='transactions' style={{padding: 0, margin: '0 24px 24px'}}>
-          {rows}
+        <DialogContent className={classes.dialogContent}>
+          <TransactionsTable>
+            {rows}
+          </TransactionsTable>
         </DialogContent>
         <DialogActions>
           <Button color='primary' onClick={this.props.onClose}>Cancel</Button>

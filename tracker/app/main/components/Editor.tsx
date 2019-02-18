@@ -9,7 +9,7 @@ import Select from 'react-select';
 import { ValueType } from 'react-select/lib/types';
 import { isUndefined } from 'util';
 import { ACCESS_TOKEN } from '../../config';
-import { ITransaction, Transaction, TransactionUtils } from '../../transactions';
+import { ITransaction, Transaction, TransactionsTable, TransactionUtils } from '../../transactions';
 import MenuBar, { CloudState } from './MenuBar';
 
 const styles = (theme: Theme) => createStyles({
@@ -52,6 +52,10 @@ const styles = (theme: Theme) => createStyles({
         marginBottom: '4px !important',
       },
     },
+  },
+  transactionsTable: {
+    flex: 1,
+    overflow: 'auto',
   },
 });
 
@@ -165,7 +169,7 @@ class extends React.Component<IEditorProps, IEditorState> {
           />
         </div>
         {this.state.transactions.length
-            ? <div className='transactions'>{rows}</div>
+            ? <TransactionsTable classes={{root: classes.transactionsTable}}>{rows}</TransactionsTable>
             : <div className={classes.loadingContainer}><CircularProgress /></div>}
     </div>);
   }
