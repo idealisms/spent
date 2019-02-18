@@ -45,7 +45,7 @@ interface IMergeTransactionDialogState {
   selectedTransactionId?: string;
   transactions: ITransaction[];
 }
-export const MergeTransactionDialog = withStyles(styles)(
+const MergeTransactionDialog = withStyles(styles)(
 class extends React.Component<IMergeTransactionDialogProps, IMergeTransactionDialogState> {
 
   constructor(props: IMergeTransactionDialogProps, context?: any) {
@@ -127,3 +127,5 @@ class extends React.Component<IMergeTransactionDialogProps, IMergeTransactionDia
     this.props.onClose();
   }
 });
+
+export default MergeTransactionDialog;

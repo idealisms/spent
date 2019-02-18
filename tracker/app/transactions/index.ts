@@ -1,6 +1,6 @@
-import { EditTransactionDialog } from './components/EditTransactionDialog';
-import { MergeTransactionDialog } from './components/MergeTransactionDialog';
-import { SplitTransactionDialog } from './components/SplitTransactionDialog';
+import EditTransactionDialog from './components/EditTransactionDialog';
+import MergeTransactionDialog from './components/MergeTransactionDialog';
+import SplitTransactionDialog from './components/SplitTransactionDialog';
 import Transaction from './components/Transaction';
 import TransactionsTable from './components/TransactionsTable';
 import { Category, DAILY_EXCLUDE_TAGS, EMPTY_TRANSACTION, ITransaction, TAG_TO_CATEGORY } from './Model';

@@ -38,7 +38,7 @@ const StyledDialog = withStyles({
   },
 })(Dialog);
 
-export class EditTransactionDialog extends React.Component<IEditTransactionDialogProps, IEditTransactionDialogState> {
+class EditTransactionDialog extends React.Component<IEditTransactionDialogProps, IEditTransactionDialogState> {
 
   constructor(props: IEditTransactionDialogProps, context: any) {
     super(props, context);
@@ -115,3 +115,5 @@ export class EditTransactionDialog extends React.Component<IEditTransactionDialo
     this.props.onClose();
   }
 }
+
+export default EditTransactionDialog;

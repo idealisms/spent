@@ -41,7 +41,7 @@ type ISplitTransactionDialogState = {
   isEditing: boolean,
 };
 
-export const SplitTransactionDialog = withStyles(styles)(
+const SplitTransactionDialog = withStyles(styles)(
 class extends React.Component<ISplitTransactionDialogProps, ISplitTransactionDialogState> {
 
   constructor(props: ISplitTransactionDialogProps, context?: any) {
@@ -203,3 +203,5 @@ class extends React.Component<ISplitTransactionDialogProps, ISplitTransactionDia
     return amount;
   }
 });
+
+export default SplitTransactionDialog;
