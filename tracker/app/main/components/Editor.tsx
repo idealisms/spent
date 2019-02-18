@@ -43,10 +43,10 @@ const styles = (theme: Theme) => createStyles({
       maxWidth: '160px',
     },
     '& .tagselect': {
-      flex: '10 1 200px',
+      flex: '10 1 140px',
     },
     '& .search': {
-      flex: '10 1 200px',
+      flex: '10 1 140px',
       '@media (max-width: 420px)': {
         marginTop: '0 !important',
         marginBottom: '4px !important',
