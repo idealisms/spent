@@ -1,26 +1,18 @@
+import { createStyles, WithStyles } from '@material-ui/core';
 import Button from '@material-ui/core/Button';
 import Dialog from '@material-ui/core/Dialog';
 import DialogActions from '@material-ui/core/DialogActions';
 import DialogContent from '@material-ui/core/DialogContent';
 import DialogTitle from '@material-ui/core/DialogTitle';
-import { withStyles } from '@material-ui/core/styles';
+import { Theme, withStyles } from '@material-ui/core/styles';
 import TextField from '@material-ui/core/TextField';
 import * as React from 'react';
 import { ITransaction } from '../Model';
-import { formatAmount } from '../utils';
+import Transaction from './Transaction';
+import TransactionsTable from './TransactionsTable';
 
-type IEditTransactionDialogProps = {
-  transaction: ITransaction,
-  onClose: () => void,
-  onSaveChanges: (transaction: ITransaction) => void,
-};
-type IEditTransactionDialogState = {
-  tagsValue: string,
-  notesValue: string,
-};
-
-const StyledDialog = withStyles({
-  root: {
+const styles = (theme: Theme) => createStyles({
+  dialogRoot: {
     '@media (max-height: 380px)': {
       marginTop: '-40px',
       marginBottom: '-40px',
@@ -32,15 +24,35 @@ const StyledDialog = withStyles({
       marginTop: '16px',
     },
   },
-  paper: {
+  dialogPaper: {
     width: 'calc(100% - 64px)',
     maxWidth: '360px',
   },
-})(Dialog);
+  transactionTableRoot: {
+    borderTop: 'none',
+  },
+  transactionAmount: {
+    flex: '0 0 auto',
+    marginLeft: 0,
+  },
+  transactionRow: {
+    borderBottom: 'none',
+  },
+});
 
-class EditTransactionDialog extends React.Component<IEditTransactionDialogProps, IEditTransactionDialogState> {
+interface IEditTransactionDialogProps extends WithStyles<typeof styles> {
+  transaction: ITransaction;
+  onClose: () => void;
+  onSaveChanges: (transaction: ITransaction) => void;
+}
+interface IEditTransactionDialogState {
+  tagsValue: string;
+  notesValue: string;
+}
+const EditTransactionDialog = withStyles(styles)(
+class extends React.Component<IEditTransactionDialogProps, IEditTransactionDialogState> {
 
-  constructor(props: IEditTransactionDialogProps, context: any) {
+  constructor(props: IEditTransactionDialogProps, context?: any) {
     super(props, context);
     this.state = {
       tagsValue: props.transaction.tags.join(', '),
@@ -49,18 +61,27 @@ class EditTransactionDialog extends React.Component<IEditTransactionDialogProps,
   }
 
   public render(): React.ReactElement<object> {
+    let classes = this.props.classes;
     let transaction: ITransaction = this.props.transaction;
-    return <StyledDialog
+    return <Dialog
             open={true}
             onClose={this.props.onClose}
             scroll='paper'
+            classes={{root: classes.dialogRoot, paper: classes.dialogPaper}}
             >
         <DialogTitle>{'Edit Transaction'}</DialogTitle>
         <DialogContent>
-          <div className='transaction'>
-            <span className='amount'>{formatAmount(transaction)}</span>&nbsp;
-            <span className='transaction'>{transaction.description}</span>
-          </div>
+          <TransactionsTable classes={{root: classes.transactionTableRoot}}>
+            <Transaction
+                transaction={transaction}
+                hideDate
+                hideTags
+                classes={{
+                    row: classes.transactionRow,
+                    amount: classes.transactionAmount,
+                }}
+                />
+          </TransactionsTable>
           <TextField
               placeholder='e.g. food, restaurant'
               label='Tags (comma separated)'
@@ -87,7 +108,7 @@ class EditTransactionDialog extends React.Component<IEditTransactionDialogProps,
           {/* TODO: Disable button unless there are changes. */}
           <Button color='primary' onClick={() => this.handleSave() }>Save</Button>
         </DialogActions>
-      </StyledDialog>;
+      </Dialog>;
   }
 
   private handleKeyPress(e: React.KeyboardEvent<{}>): void {
@@ -114,6 +135,6 @@ class EditTransactionDialog extends React.Component<IEditTransactionDialogProps,
     this.props.onSaveChanges(transaction);
     this.props.onClose();
   }
-}
+});
 
 export default EditTransactionDialog;
