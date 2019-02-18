@@ -18,6 +18,11 @@ const styles = (theme: Theme) => createStyles({
     display: 'flex',
     flexDirection: 'column',
   },
+  loadingContainer: {
+    borderTop: '1px solid lightgrey',
+    textAlign: 'center',
+    paddingTop: '24px',
+  },
   controls: {
     display: 'flex',
     flex: 'none',
@@ -161,7 +166,7 @@ class extends React.Component<IEditorProps, IEditorState> {
         </div>
         {this.state.transactions.length
             ? <div className='transactions'>{rows}</div>
-            : <div className='loading-container'><CircularProgress /></div>}
+            : <div className={classes.loadingContainer}><CircularProgress /></div>}
     </div>);
   }
 
