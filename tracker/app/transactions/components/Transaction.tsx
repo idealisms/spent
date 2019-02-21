@@ -5,7 +5,7 @@ import * as React from 'react';
 import { Category, ITransaction } from '../Model';
 import { categoryToEmoji, formatAmount, getCategory } from '../utils';
 
-const styles = (theme: Theme) => createStyles({
+export const styles = (theme: Theme) => createStyles({
   row: {
     display: 'flex',
     borderBottom: '1px solid lightgrey',

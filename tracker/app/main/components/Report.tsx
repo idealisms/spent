@@ -49,6 +49,9 @@ const styles = (theme: Theme) => createStyles({
       fontSize: 'small',
     },
   },
+  transactionsTable: {
+    borderTop: '1px solid lightgrey',
+  },
 });
 type ReportNode = {
   title: string,
@@ -153,7 +156,7 @@ class extends React.Component<IReportProps, IReportState> {
             {renderedTree}
           </div>
         </div>
-        <TransactionsTable>
+        <TransactionsTable classes={{root: classes.transactionsTable}}>
           {rows}
         </TransactionsTable>
       </div>

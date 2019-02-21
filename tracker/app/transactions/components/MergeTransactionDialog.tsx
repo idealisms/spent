@@ -20,9 +20,6 @@ const styles = (theme: Theme) => createStyles({
       align: 'center',
     },
   },
-  transactionsTable: {
-    borderTop: 'none',
-  },
   transactionRow: {
     borderBottom: 'none',
   },
@@ -62,7 +59,7 @@ class extends React.Component<IMergeTransactionDialogProps, IMergeTransactionDia
     let rows: JSX.Element[] = [];
     for (let transaction of this.state.transactions) {
       let label =
-          <TransactionsTable classes={{root: classes.transactionsTable}}>
+          <TransactionsTable>
             <Transaction
                 transaction={transaction}
                 hideDate={true}

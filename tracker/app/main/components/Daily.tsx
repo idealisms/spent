@@ -138,6 +138,7 @@ const dailyStyles = (theme: Theme) => createStyles({
   transactionsTable: {
     flex: 1,
     overflow: 'auto',
+    borderTop: '1px solid lightgrey',
   },
 });
 interface IDailyProps extends WithStyles<typeof dailyStyles> {

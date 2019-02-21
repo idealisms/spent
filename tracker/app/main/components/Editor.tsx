@@ -9,7 +9,7 @@ import Select from 'react-select';
 import { ValueType } from 'react-select/lib/types';
 import { isUndefined } from 'util';
 import { ACCESS_TOKEN } from '../../config';
-import { ITransaction, Transaction, TransactionsTable, TransactionUtils } from '../../transactions';
+import { ITransaction, Transaction, TransactionsTable, TransactionsTableHeader, TransactionUtils } from '../../transactions';
 import MenuBar, { CloudState } from './MenuBar';
 
 const styles = (theme: Theme) => createStyles({
@@ -169,7 +169,14 @@ class extends React.Component<IEditorProps, IEditorState> {
           />
         </div>
         {this.state.transactions.length
-            ? <TransactionsTable classes={{root: classes.transactionsTable}}>{rows}</TransactionsTable>
+            ? <TransactionsTable classes={{root: classes.transactionsTable}}>
+                <TransactionsTableHeader
+                    transactions={this.state.visibleTransactions}
+                    selectAllChecked={this.state.visibleTransactions.length == this.state.selectedTransactions.size}
+                    onSelectAllClick={this.handleSelectAllClick}
+                    />
+                {rows}
+              </TransactionsTable>
             : <div className={classes.loadingContainer}><CircularProgress /></div>}
     </div>);
   }
@@ -177,16 +184,18 @@ class extends React.Component<IEditorProps, IEditorState> {
   public handleChangeStartDate = (m: moment.Moment): void => {
     let startDate = m.toDate();
     this.setState({
-      startDate: startDate,
+      startDate,
       visibleTransactions: this.filterTransactions(this.state.transactions, startDate),
+      selectedTransactions: new Map(),
     });
   }
 
   public handleChangeEndDate = (m: moment.Moment): void => {
     let endDate = m.toDate();
     this.setState({
-      endDate: endDate,
+      endDate,
       visibleTransactions: this.filterTransactions(this.state.transactions, undefined, endDate),
+      selectedTransactions: new Map(),
     });
   }
 
@@ -195,6 +204,7 @@ class extends React.Component<IEditorProps, IEditorState> {
       tagFilters: tagFilters,
       visibleTransactions: this.filterTransactions(
           this.state.transactions, undefined, undefined, tagFilters),
+      selectedTransactions: new Map(),
     });
   }
 
@@ -204,7 +214,24 @@ class extends React.Component<IEditorProps, IEditorState> {
       searchQuery,
       visibleTransactions: this.filterTransactions(
           this.state.transactions, undefined, undefined, undefined, searchQuery),
+      selectedTransactions: new Map(),
     });
+  }
+
+  public handleSelectAllClick = (selectAll: boolean): void => {
+    if (selectAll) {
+      let selectedTransactions = new Map();
+      this.state.visibleTransactions.forEach((t) => {
+        selectedTransactions.set(t.id, t);
+      });
+      this.setState({
+        selectedTransactions,
+      });
+    } else {
+      this.setState({
+        selectedTransactions: new Map(),
+      });
+    }
   }
 
   private handleTransactionClick(t: ITransaction): void {

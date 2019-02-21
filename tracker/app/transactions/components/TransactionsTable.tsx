@@ -4,8 +4,7 @@ import * as React from 'react';
 
 const styles = (theme: Theme) => createStyles({
   root: {
-    borderTop: '1px solid lightgrey',
-    lineHeight: '46px',
+    lineHeight: '47px',
   },
 });
 interface ITransactionsTableProps extends WithStyles<typeof styles> {

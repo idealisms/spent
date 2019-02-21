@@ -28,9 +28,6 @@ const styles = (theme: Theme) => createStyles({
     width: 'calc(100% - 64px)',
     maxWidth: '360px',
   },
-  transactionTableRoot: {
-    borderTop: 'none',
-  },
   transactionAmount: {
     flex: '0 0 auto',
     marginLeft: 0,
@@ -71,7 +68,7 @@ class extends React.Component<IEditTransactionDialogProps, IEditTransactionDialo
             >
         <DialogTitle>{'Edit Transaction'}</DialogTitle>
         <DialogContent>
-          <TransactionsTable classes={{root: classes.transactionTableRoot}}>
+          <TransactionsTable>
             <Transaction
                 transaction={transaction}
                 hideDate

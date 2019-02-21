@@ -25,6 +25,9 @@ const styles = (theme: Theme) => createStyles({
     padding: 0,
     margin: '0 24px 24px',
   },
+  transactionRow: {
+    borderBottom: 'none',
+  },
 });
 
 interface ISplitTransactionDialogProps extends WithStyles<typeof styles> {
@@ -96,6 +99,7 @@ class extends React.Component<ISplitTransactionDialogProps, ISplitTransactionDia
     for (let transaction of this.state.transactions) {
       rows.push(
         <Transaction
+          classes={{row: classes.transactionRow}}
           transaction={transaction}
           key={`split-${transaction.id}`}
           hideDate={true}
