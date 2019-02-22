@@ -49,7 +49,7 @@ interface IBatchEditTagsDialogState {
   action?: BatchEditTagsAction;
   tags: ValueType<{label: string, value: string}>;
 }
-export const BatchEditTagsDialog = withStyles(styles)(
+const BatchEditTagsDialog = withStyles(styles)(
 class extends React.Component<IBatchEditTagsDialogProps, IBatchEditTagsDialogState> {
 
   constructor(props: IBatchEditTagsDialogProps, context?: any) {

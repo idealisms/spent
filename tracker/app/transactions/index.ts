@@ -1,4 +1,4 @@
-import { BatchEditTagsAction, BatchEditTagsDialog } from './components/BatchEditTagsDialog';
+import BatchEditTagsDialog, { BatchEditTagsAction } from './components/BatchEditTagsDialog';
 import EditTransactionDialog from './components/EditTransactionDialog';
 import MergeTransactionDialog from './components/MergeTransactionDialog';
 import SplitTransactionDialog from './components/SplitTransactionDialog';
