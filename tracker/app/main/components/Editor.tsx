@@ -247,15 +247,7 @@ class extends React.Component<IEditorProps, IEditorState> {
     });
   }
 
-  private handleEditTransaction = (transaction: Transactions.ITransaction): void => {
-    // This seems inefficient. Can't we use the selectedTransactions transaction?
-    for (let t of this.state.transactions) {
-      if (t.id == transaction.id) {
-        t.notes = transaction.notes;
-        t.tags = transaction.tags;
-        break;
-      }
-    }
+  private handleEditTransaction = (): void => {
     // We re-filter the transactions since edits can change search string or
     // tag matches.
     this.setState({

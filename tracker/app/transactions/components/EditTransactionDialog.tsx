@@ -40,7 +40,7 @@ const styles = (theme: Theme) => createStyles({
 interface IEditTransactionDialogProps extends WithStyles<typeof styles> {
   transaction: ITransaction;
   onClose: () => void;
-  onSaveChanges: (transaction: ITransaction) => void;
+  onSaveChanges: () => void;
 }
 interface IEditTransactionDialogState {
   tagsValue: string;
@@ -97,38 +97,39 @@ class extends React.Component<IEditTransactionDialogProps, IEditTransactionDialo
               style={{width: '100%'}}
               autoFocus={!!this.state.tagsValue}
               onChange={(event) => this.setState({notesValue: (event.target as HTMLInputElement).value})}
-              onKeyPress={(e) => { this.handleKeyPress(e); }}
+              onKeyPress={this.handleKeyPress}
           />
         </DialogContent>
         <DialogActions>
           <Button color='primary' onClick={this.props.onClose}>Cancel</Button>
           {/* TODO: Disable button unless there are changes. */}
-          <Button color='primary' onClick={() => this.handleSave() }>Save</Button>
+          <Button color='primary' onClick={this.handleSave}>Save</Button>
         </DialogActions>
       </Dialog>;
   }
 
-  private handleKeyPress(e: React.KeyboardEvent<{}>): void {
+  private handleKeyPress = (e: React.KeyboardEvent<{}>): void => {
     // charCode 13 is the Enter key.
     if (e.charCode == 13) {
       this.handleSave();
     }
   }
 
-  private handleSave(): void {
-    let transaction: ITransaction = {...this.props.transaction};
-    transaction.notes = this.state.notesValue.trim();
-    transaction.tags = [];
+  private handleSave = (): void => {
+    let tags: string[] = [];
     // Remove trailing commas and spaces.
     let tagsValue = this.state.tagsValue.replace(/([, ]+$)/g, '');
     tagsValue.split(',').forEach((tag) => {
         tag = tag.trim();
         if (tag !== '') {
-            transaction.tags.push(tag);
+            tags.push(tag);
         }
     });
 
-    this.props.onSaveChanges(transaction);
+    this.props.transaction.notes = this.state.notesValue.trim();
+    this.props.transaction.tags = tags;
+
+    this.props.onSaveChanges();
     this.props.onClose();
   }
 });

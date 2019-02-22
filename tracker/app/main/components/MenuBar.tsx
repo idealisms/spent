@@ -84,7 +84,7 @@ interface IMenuBarOwnProps extends WithStyles<typeof styles> {
   cloudState?: CloudState;
   onSaveClick?: () => void;
   onSelectedBackClick?: () => void;
-  onSelectedEditSaveClick?: (transaction: Transactions.ITransaction) => void;
+  onSelectedEditSaveClick?: () => void;
   onSelectedBatchEditTagsSaveClick?: () => void;
   onSelectedMergeSaveClick?: (transaction: Transactions.ITransaction) => void;
   onSelectedDeleteClick?: (transactions: Map<string, Transactions.ITransaction>) => void;
