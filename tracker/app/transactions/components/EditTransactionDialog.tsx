@@ -127,7 +127,6 @@ class extends React.Component<IEditTransactionDialogProps, IEditTransactionDialo
             transaction.tags.push(tag);
         }
     });
-    transaction.tags = transaction.tags;
 
     this.props.onSaveChanges(transaction);
     this.props.onClose();

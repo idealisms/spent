@@ -19,13 +19,14 @@ import CloudDoneIcon from '@material-ui/icons/CloudDone';
 import CloudUploadIcon from '@material-ui/icons/CloudUpload';
 import DeleteIcon from '@material-ui/icons/Delete';
 import EditIcon from '@material-ui/icons/Edit';
+import LabelIcon from '@material-ui/icons/Label';
 import MenuIcon from '@material-ui/icons/Menu';
 import TimelineIcon from '@material-ui/icons/Timeline';
 import { Location, LocationDescriptor, LocationState } from 'history';
 import * as React from 'react';
 import { connect, Dispatch } from 'react-redux';
 import { push, RouterAction } from 'react-router-redux';
-import { EditTransactionDialog, ITransaction, MergeTransactionDialog, SplitTransactionDialog } from '../../transactions';
+import * as Transactions from '../../transactions';
 import { IAppState } from '../Model';
 import { DailyPage, EditorPage, ReportPage } from './RoutePaths';
 
@@ -79,14 +80,15 @@ const styles = (theme: Theme) => createStyles({
 
 interface IMenuBarOwnProps extends WithStyles<typeof styles> {
   title: string;
-  selectedTransactions?: Map<string, ITransaction>;
+  selectedTransactions?: Map<string, Transactions.ITransaction>;
   cloudState?: CloudState;
   onSaveClick?: () => void;
   onSelectedBackClick?: () => void;
-  onSelectedEditSaveClick?: (transaction: ITransaction) => void;
-  onSelectedMergeSaveClick?: (transaction: ITransaction) => void;
-  onSelectedDeleteClick?: (transactions: Map<string, ITransaction>) => void;
-  onSelectedSplitSaveClick?: (transactions: Map<string, ITransaction>) => void;
+  onSelectedEditSaveClick?: (transaction: Transactions.ITransaction) => void;
+  onSelectedBatchEditTagsSaveClick?: () => void;
+  onSelectedMergeSaveClick?: (transaction: Transactions.ITransaction) => void;
+  onSelectedDeleteClick?: (transactions: Map<string, Transactions.ITransaction>) => void;
+  onSelectedSplitSaveClick?: (transactions: Map<string, Transactions.ITransaction>) => void;
 }
 interface IMenuBarStateProps {
   location: Location | null;
@@ -99,6 +101,7 @@ type IMenuBarProps = IMenuBarOwnProps & IMenuBarStateProps & IMenuBarDispatchPro
 interface IMenuBarReactState {
   isDrawerOpen: boolean;
   isEditDialogOpen: boolean;
+  isBatchEditTagsDialogOpen: boolean;
   isMergeDialogOpen: boolean;
   isSplitDialogOpen: boolean;
 }
@@ -111,6 +114,7 @@ class extends React.Component<IMenuBarProps, IMenuBarReactState> {
     this.state = {
       isDrawerOpen: false,
       isEditDialogOpen: false,
+      isBatchEditTagsDialogOpen: false,
       isMergeDialogOpen: false,
       isSplitDialogOpen: false,
     };
@@ -146,17 +150,22 @@ class extends React.Component<IMenuBarProps, IMenuBarReactState> {
         ? <span>
             <Tooltip classes={{tooltip: classes.tooltip}} title='Edit'><span><IconButton
                 disabled={numSelectedTransactions > 1}
-                onClick={() => this.handleShowEditDialog()}
+                onClick={this.handleShowEditDialog}
                 ><EditIcon /></IconButton></span>
+            </Tooltip>
+            <Tooltip classes={{tooltip: classes.tooltip}} title='Batch Edit Tags'><span><IconButton
+                disabled={numSelectedTransactions === 1}
+                onClick={this.handleShowBatchEditTagsDialog}
+                ><LabelIcon /></IconButton></span>
             </Tooltip>
             <Tooltip classes={{tooltip: classes.tooltip}} title='Merge'><span><IconButton
                 disabled={numSelectedTransactions === 1}
-                onClick={() => this.handleShowMergeDialog()}
+                onClick={this.handleShowMergeDialog}
                 ><CallMergeIcon /></IconButton></span>
             </Tooltip>
             <Tooltip classes={{tooltip: classes.tooltip}} title='Split'><span><IconButton
                 disabled={numSelectedTransactions > 1}
-                onClick={() => this.handleShowSplitDialog()}
+                onClick={this.handleShowSplitDialog}
                 ><CallSplitIcon /></IconButton></span>
             </Tooltip>
             <Tooltip title='Delete' placement='bottom-end'><IconButton
@@ -224,19 +233,25 @@ class extends React.Component<IMenuBarProps, IMenuBarReactState> {
           </List>
         </Drawer>
         {this.state.isEditDialogOpen && this.props.onSelectedEditSaveClick ?
-          <EditTransactionDialog
+          <Transactions.EditTransactionDialog
               transaction={this.props.selectedTransactions!.values().next().value}
               onClose={() => this.setState({isEditDialogOpen: false})}
               onSaveChanges={this.props.onSelectedEditSaveClick}
           /> : undefined}
+        {this.state.isBatchEditTagsDialogOpen && this.props.onSelectedBatchEditTagsSaveClick ?
+          <Transactions.BatchEditTagsDialog
+              transactions={selectedTransactionsArray}
+              onClose={() => this.setState({isBatchEditTagsDialogOpen: false})}
+              onSaveChanges={this.props.onSelectedBatchEditTagsSaveClick}
+          /> : undefined}
         {this.state.isMergeDialogOpen && this.props.onSelectedMergeSaveClick ?
-          <MergeTransactionDialog
+          <Transactions.MergeTransactionDialog
               transactions={selectedTransactionsArray}
               onClose={() => this.setState({isMergeDialogOpen: false})}
               onSaveChanges={this.props.onSelectedMergeSaveClick}
           /> : undefined}
         {this.state.isSplitDialogOpen && this.props.onSelectedSplitSaveClick ?
-          <SplitTransactionDialog
+          <Transactions.SplitTransactionDialog
               transaction={this.props.selectedTransactions!.values().next().value}
               onClose={() => this.setState({isSplitDialogOpen: false})}
               onSaveChanges={this.props.onSelectedSplitSaveClick}
@@ -245,7 +260,7 @@ class extends React.Component<IMenuBarProps, IMenuBarReactState> {
     );
   }
 
-  private handleShowEditDialog(): void {
+  private handleShowEditDialog = (): void => {
     if (!this.props.selectedTransactions || this.props.selectedTransactions.size != 1) {
       return;
     }
@@ -254,7 +269,16 @@ class extends React.Component<IMenuBarProps, IMenuBarReactState> {
     });
   }
 
-  private handleShowMergeDialog(): void {
+  private handleShowBatchEditTagsDialog = (): void => {
+    if (!this.props.selectedTransactions || this.props.selectedTransactions.size < 2) {
+      return;
+    }
+    this.setState({
+      isBatchEditTagsDialogOpen: true,
+    });
+  }
+
+  private handleShowMergeDialog = (): void => {
     if (!this.props.selectedTransactions || this.props.selectedTransactions.size < 2) {
       return;
     }
@@ -263,7 +287,7 @@ class extends React.Component<IMenuBarProps, IMenuBarReactState> {
     });
   }
 
-  private handleShowSplitDialog(): void {
+  private handleShowSplitDialog = (): void => {
     if (!this.props.selectedTransactions || this.props.selectedTransactions.size != 1) {
       return;
     }
@@ -282,13 +306,13 @@ class extends React.Component<IMenuBarProps, IMenuBarReactState> {
   }
 });
 
-const mapStateToProps = (state: IAppState):IMenuBarStateProps => {
+const mapStateToProps = (state: IAppState): IMenuBarStateProps => {
   return {
     location: state.routing.location,
   };
 };
 
-const mapDispatchToProps = (dispatch:Dispatch<any>):IMenuBarDispatchProps => ({
+const mapDispatchToProps = (dispatch:Dispatch<any>): IMenuBarDispatchProps => ({
   navigateTo: (location:LocationDescriptor, state?: LocationState) => {
     return dispatch(push(location));
   },

@@ -9,7 +9,7 @@ import Select from 'react-select';
 import { ValueType } from 'react-select/lib/types';
 import { isUndefined } from 'util';
 import { ACCESS_TOKEN } from '../../config';
-import { ITransaction, Transaction, TransactionsTable, TransactionsTableHeader, TransactionUtils } from '../../transactions';
+import * as Transactions from '../../transactions';
 import MenuBar, { CloudState } from './MenuBar';
 
 const styles = (theme: Theme) => createStyles({
@@ -62,11 +62,11 @@ const styles = (theme: Theme) => createStyles({
 interface IEditorProps extends WithStyles<typeof styles> {
 }
 interface IEditorState {
-  transactions: ITransaction[];
-  visibleTransactions: ITransaction[];
+  transactions: Transactions.ITransaction[];
+  visibleTransactions: Transactions.ITransaction[];
   startDate: Date;
   endDate: Date;
-  selectedTransactions: Map<string, ITransaction>;
+  selectedTransactions: Map<string, Transactions.ITransaction>;
   cloudState: CloudState;
   tagFilters: ValueType<{label: string, value: string}>;
   searchQuery: string;
@@ -93,11 +93,11 @@ class extends React.Component<IEditorProps, IEditorState> {
     let classes = this.props.classes;
     let rows = this.state.visibleTransactions.map(t => {
         return (
-          <Transaction
+          <Transactions.Transaction
               key={t.id}
               transaction={t}
               isSelected={this.state.selectedTransactions.has(t.id)}
-              onCategoryClick={(clicked: ITransaction) => this.handleTransactionClick(clicked)}
+              onCategoryClick={this.handleTransactionClick}
               />
         );
       });
@@ -109,10 +109,10 @@ class extends React.Component<IEditorProps, IEditorState> {
       maxDate = moment(this.state.transactions[0].date).toDate();
     }
 
-    let tags = TransactionUtils.getTags(this.state.visibleTransactions);
+    let tags = Transactions.TransactionUtils.getTags(this.state.visibleTransactions);
     let tagSuggestions = new Array(...tags).sort().map(
-      (t) => ({label: t, value: t}),
-      tags);
+        (t) => ({label: t, value: t}),
+        tags);
     return (
       <div className={classes.root}>
         <MenuBar
@@ -120,11 +120,12 @@ class extends React.Component<IEditorProps, IEditorState> {
             selectedTransactions={this.state.selectedTransactions}
             cloudState={this.state.cloudState}
             onSaveClick={this.handleSaveTransactions}
-            onSelectedBackClick={() => this.handleClearSelections()}
-            onSelectedEditSaveClick={(transaction: ITransaction) => this.handleUpdateTransaction(transaction)}
-            onSelectedMergeSaveClick={(transaction: ITransaction) => this.handleMergeSelectedTransactions(transaction)}
-            onSelectedDeleteClick={(transactions: Map<string, ITransaction>) => this.handleDeleteTransactions(transactions)}
-            onSelectedSplitSaveClick={(transactions: Map<string, ITransaction>) => this.handleSplitTransaction(transactions)}
+            onSelectedBackClick={this.handleClearSelections}
+            onSelectedEditSaveClick={this.handleEditTransaction}
+            onSelectedBatchEditTagsSaveClick={this.handleBatchEditTags}
+            onSelectedMergeSaveClick={this.handleMergeSelectedTransactions}
+            onSelectedDeleteClick={this.handleDeleteTransactions}
+            onSelectedSplitSaveClick={this.handleSplitTransaction}
         />
 
         <div className={classes.controls}>
@@ -169,14 +170,14 @@ class extends React.Component<IEditorProps, IEditorState> {
           />
         </div>
         {this.state.transactions.length
-            ? <TransactionsTable classes={{root: classes.transactionsTable}}>
-                <TransactionsTableHeader
+            ? <Transactions.TransactionsTable classes={{root: classes.transactionsTable}}>
+                <Transactions.TransactionsTableHeader
                     transactions={this.state.visibleTransactions}
                     selectAllChecked={this.state.visibleTransactions.length == this.state.selectedTransactions.size}
                     onSelectAllClick={this.handleSelectAllClick}
                     />
                 {rows}
-              </TransactionsTable>
+              </Transactions.TransactionsTable>
             : <div className={classes.loadingContainer}><CircularProgress /></div>}
     </div>);
   }
@@ -234,7 +235,7 @@ class extends React.Component<IEditorProps, IEditorState> {
     }
   }
 
-  private handleTransactionClick(t: ITransaction): void {
+  private handleTransactionClick = (t: Transactions.ITransaction): void => {
     let selectedTransactions = new Map(this.state.selectedTransactions.entries());
     if (selectedTransactions.has(t.id)) {
       selectedTransactions.delete(t.id);
@@ -246,7 +247,8 @@ class extends React.Component<IEditorProps, IEditorState> {
     });
   }
 
-  private handleUpdateTransaction(transaction: ITransaction): void {
+  private handleEditTransaction = (transaction: Transactions.ITransaction): void => {
+    // This seems inefficient. Can't we use the selectedTransactions transaction?
     for (let t of this.state.transactions) {
       if (t.id == transaction.id) {
         t.notes = transaction.notes;
@@ -254,26 +256,39 @@ class extends React.Component<IEditorProps, IEditorState> {
         break;
       }
     }
-    // Shouldn't need to update visible transactions since edits don't
-    // create or remove transactions.
+    // We re-filter the transactions since edits can change search string or
+    // tag matches.
     this.setState({
       transactions: this.state.transactions,
       selectedTransactions: new Map(),
+      visibleTransactions: this.filterTransactions(this.state.transactions),
       cloudState: CloudState.Modified,
     });
   }
 
-  private handleMergeSelectedTransactions(transaction: ITransaction): void {
+  private handleBatchEditTags = () => {
+    // Since clearning/removing tags can change the tagFilter results,
+    // reset it.
+    this.setState({
+      transactions: this.state.transactions,
+      tagFilters: null,
+      visibleTransactions: this.filterTransactions(
+          this.state.transactions, undefined, undefined, null),
+      cloudState: CloudState.Modified,
+    });
+  }
+
+  private handleMergeSelectedTransactions = (transaction: Transactions.ITransaction): void => {
     let fromTransactions = this.state.selectedTransactions;
     fromTransactions.delete(transaction.id);
     let selectedTransactions = new Map();
-    let transactionsToKeep: ITransaction[] = [];
+    let transactionsToKeep: Transactions.ITransaction[] = [];
     for (let t of this.state.transactions) {
       if (fromTransactions.has(t.id)) {
         continue;
       } else if (t.id == transaction.id) {
         t = Object.assign({}, transaction);
-        t.id = TransactionUtils.generateUUID();
+        t.id = Transactions.TransactionUtils.generateUUID();
         t.transactions = [...transaction.transactions];
         if (transaction.transactions && transaction.transactions.length == 0) {
           t.transactions.push(transaction);
@@ -300,8 +315,8 @@ class extends React.Component<IEditorProps, IEditorState> {
     });
   }
 
-  private handleDeleteTransactions(transactionsToDelete: Map<string, ITransaction>): void {
-    let transactionsToKeep = this.state.transactions.filter((t: ITransaction) => {
+  private handleDeleteTransactions = (transactionsToDelete: Map<string, Transactions.ITransaction>): void => {
+    let transactionsToKeep = this.state.transactions.filter((t: Transactions.ITransaction) => {
       return !transactionsToDelete.has(t.id);
     });
     this.setState({
@@ -312,8 +327,8 @@ class extends React.Component<IEditorProps, IEditorState> {
     });
   }
 
-  private handleSplitTransaction(newTransactions: Map<string, ITransaction>): void {
-    let transactionsToKeep = this.state.transactions.filter((t: ITransaction) => {
+  private handleSplitTransaction = (newTransactions: Map<string, Transactions.ITransaction>): void => {
+    let transactionsToKeep = this.state.transactions.filter((t: Transactions.ITransaction) => {
       return !this.state.selectedTransactions.has(t.id);
     });
     let selectedTransactions = new Map();
@@ -321,7 +336,7 @@ class extends React.Component<IEditorProps, IEditorState> {
       transactionsToKeep.push(transaction);
       selectedTransactions.set(transaction.id, transaction);
     }
-    transactionsToKeep.sort(TransactionUtils.compareTransactions);
+    transactionsToKeep.sort(Transactions.TransactionUtils.compareTransactions);
     this.setState({
       transactions: transactionsToKeep,
       visibleTransactions: this.filterTransactions(transactionsToKeep),
@@ -352,7 +367,7 @@ class extends React.Component<IEditorProps, IEditorState> {
         });
   }
 
-  private handleClearSelections(): void {
+  private handleClearSelections = (): void => {
     this.setState({
       selectedTransactions: new Map(),
     });
@@ -368,7 +383,7 @@ class extends React.Component<IEditorProps, IEditorState> {
         .then(file => {
             let fr = new FileReader();
             fr.addEventListener('load', ev => {
-                let transactions: ITransaction[] = JSON.parse(fr.result as string);
+                let transactions: Transactions.ITransaction[] = JSON.parse(fr.result as string);
 
                 let state: any = {
                   transactions: transactions,
@@ -392,13 +407,13 @@ class extends React.Component<IEditorProps, IEditorState> {
   }
 
   private filterTransactions(
-      transactions: ITransaction[],
+      transactions: Transactions.ITransaction[],
       startDate?: Date,
       endDate?: Date,
       tagFilters?: ValueType<{label: string, value: string}>,
-      searchQuery?: string): ITransaction[] {
+      searchQuery?: string): Transactions.ITransaction[] {
 
-    let filteredTransactions = TransactionUtils.filterTransactionsByDate(
+    let filteredTransactions = Transactions.TransactionUtils.filterTransactionsByDate(
         transactions,
         startDate || this.state.startDate,
         endDate || this.state.endDate);
