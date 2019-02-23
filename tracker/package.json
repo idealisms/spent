@@ -14,7 +14,7 @@
     "test:watch": "npm test -- --watch"
   },
   "bugs": {
-    "url": ""
+    "url": "https://github.com/idealisms/spent/issues"
   },
   "homepage": "https://github.com/idealisms/spent/",
   "jest": {
