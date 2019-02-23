@@ -1,5 +1,5 @@
+import moment from 'moment';
 import { Category, ITransaction, TAG_TO_CATEGORY } from './Model';
-import moment = require('moment');
 
 export function shouldExclude(transaction: ITransaction, excludeTags: Set<string>): boolean {
   for (let tag of transaction.tags) {

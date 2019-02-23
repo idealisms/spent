@@ -58,7 +58,7 @@ describe('Home', () => {
   });
 
   // Disable for now, there are problems importing moment in the tests.
-  xit('filterTransactionsByDate test', () => {
+  it('filterTransactionsByDate test', () => {
     let transactions = JSON.parse(fs.readFileSync('./app/transactions/__test__/transactions-dates-only.json').toString());
     // March 1 to Apr 30.
     let filtered = utils.filterTransactionsByDate(transactions, new Date(2018, 2, 1), new Date(2018, 3, 30));
