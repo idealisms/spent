@@ -17,7 +17,7 @@ interface ITransactionsTableProps extends WithStyles<typeof styles> {
   lazyRender?: boolean;
 }
 interface ITransactionsTableState {
-  computedHeight: number;
+  containerHeight: number;
   scrollTop: number;
 }
 const TransactionsTable = withStyles(styles)(
@@ -27,7 +27,7 @@ class extends React.Component<ITransactionsTableProps, ITransactionsTableState> 
   constructor(props: ITransactionsTableProps, context?: any) {
     super(props, context);
     this.state = {
-      computedHeight: -1,
+      containerHeight: -1,
       scrollTop: -1,
     };
   }
@@ -38,7 +38,7 @@ class extends React.Component<ITransactionsTableProps, ITransactionsTableState> 
       return;
     }
     this.setState({
-      computedHeight: this.container.offsetHeight,
+      containerHeight: this.container.offsetHeight,
       scrollTop: this.container.scrollTop,
     });
     window.addEventListener('resize', this.handleWindowResize);
@@ -50,12 +50,12 @@ class extends React.Component<ITransactionsTableProps, ITransactionsTableState> 
 
   public render(): React.ReactElement<object> {
     let classes = this.props.classes;
-    let shouldRenderChildren = !this.props.lazyRender || this.state.computedHeight != -1;
+    let shouldRenderChildren = !this.props.lazyRender || this.state.containerHeight != -1;
 
     return (
         <div
             className={classes.root}
-            ref={(el) => this.container = el}
+            ref={(elt) => this.container = elt}
             onScroll={this.handleScroll}>
           {shouldRenderChildren && this.renderChildren()}
         </div>);
@@ -67,7 +67,7 @@ class extends React.Component<ITransactionsTableProps, ITransactionsTableState> 
       return;
     }
     this.setState({
-      computedHeight: this.container.offsetHeight,
+      containerHeight: this.container.offsetHeight,
       scrollTop: this.container.scrollTop,
     });
   }
@@ -89,7 +89,7 @@ class extends React.Component<ITransactionsTableProps, ITransactionsTableState> 
 
     let numRows = React.Children.count(this.props.children);
     let rowsBefore = Math.floor(this.state.scrollTop / ROW_HEIGHT);
-    let rowsToShow = Math.min(numRows, Math.ceil(this.state.computedHeight / ROW_HEIGHT) + 2);
+    let rowsToShow = Math.min(numRows, Math.ceil(this.state.containerHeight / ROW_HEIGHT) + 2);
     let rowsAfter = Math.max(0, numRows - rowsBefore - rowsToShow);
 
     return (

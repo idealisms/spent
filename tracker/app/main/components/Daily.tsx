@@ -5,7 +5,6 @@ import { InlineDatePicker } from 'material-ui-pickers';
 import * as moment from 'moment';
 import * as React from 'react';
 import { Chart } from 'react-google-charts';
-import Measure from 'react-measure';
 import { ACCESS_TOKEN } from '../../config';
 import { DAILY_EXCLUDE_TAGS, ITransaction, Transaction, TransactionsTable, TransactionUtils } from '../../transactions';
 import MenuBar from './MenuBar';
@@ -27,29 +26,39 @@ interface IDailyGraphProps extends WithStyles<typeof dailyGraphStyles> {
   dailyBudgetCents: number;
 }
 interface IDailyGraphState {
-  dimensions: {
-    width: number,
-    height: number,
-  };
+  containerWidth: number;
 }
 const DailyGraph = withStyles(dailyGraphStyles)(
 class extends React.Component<IDailyGraphProps, IDailyGraphState> {
+  private container: HTMLElement|null = null;
 
   constructor(props: IDailyGraphProps, context?: any) {
     super(props, context);
     this.state = {
-      dimensions: {
-        width: -1,
-        height: -1,
-      },
+      containerWidth: -1,
     };
+  }
+
+  public componentDidMount(): void {
+    if (!this.container) {
+      console.log('container not set (componentDidMount)');
+      return;
+    }
+    this.setState({
+      containerWidth: this.container.offsetWidth,
+    });
+    window.addEventListener('resize', this.handleWindowResize);
+  }
+
+  public componentWillUnmount(): void {
+    window.removeEventListener('resize', this.handleWindowResize);
   }
 
   public render(): React.ReactElement<object> {
     let classes = this.props.classes;
     let data: [string, number][] = [];
 
-    if (this.props.transactions.length) {
+    if (this.props.transactions.length && this.state.containerWidth != -1) {
       let dailyTotals: { [s: string]: number; } = {};
       for (let m = moment(this.props.startDate); m.isSameOrBefore(moment(this.props.endDate)); m = m.add(1, 'days')) {
         dailyTotals[m.format('YYYY-MM-DD')] = 0;
@@ -72,41 +81,36 @@ class extends React.Component<IDailyGraphProps, IDailyGraphState> {
     } else {
       data.push([moment().format('YYYY-MM-DD'), 0]);
     }
-    if (this.state.dimensions.width != -1) {
+    if (this.state.containerWidth != -1) {
       // Limit the number of graph points based on how much space we have.
-      let maxToShow = Math.max(Math.round(this.state.dimensions.width / 10), 31);
+      let maxToShow = Math.max(Math.round(this.state.containerWidth / 10), 31);
       if (maxToShow < data.length) {
         data = data.slice(data.length - maxToShow);
       }
     }
 
     return (
-      <Measure
-        bounds
-        onResize={(contentRect) => {
-          this.setState({
-            dimensions: {
-              width: contentRect!.bounds!.width,
-              height: contentRect!.bounds!.height,
-            },
-          });
-        }}
-      >
-        {({ measureRef }) =>
-          <div ref={measureRef} className={classes.chart}>
-            <Chart
-                chartType='LineChart'
-                columns={[{'label': 'Date', 'type': 'string'}, {'label':'Dollars', 'type':'number'}]}
-                rows={data}
-                options={{'hAxis': {'title': 'Date'}, 'vAxis': {'title': 'Dollars'}, 'legend': 'none'}}
-                graph_id='daily-spend-chart'
-                width='auto'
-                height='100%'
-              />
-          </div>
-        }
-      </Measure>
-    );
+        <div className={classes.chart} ref={(elt) => this.container = elt}>
+          <Chart
+              chartType='LineChart'
+              columns={[{'label': 'Date', 'type': 'string'}, {'label':'Dollars', 'type':'number'}]}
+              rows={data}
+              options={{'hAxis': {'title': 'Date'}, 'vAxis': {'title': 'Dollars'}, 'legend': 'none'}}
+              graph_id='daily-spend-chart'
+              width='auto'
+              height='100%'
+            />
+        </div>);
+  }
+
+  private handleWindowResize = () => {
+    if (!this.container) {
+      console.log('container not set (handleWindowResize)');
+      return;
+    }
+    this.setState({
+      containerWidth: this.container.offsetWidth,
+    });
   }
 });
 
