@@ -1,4 +1,4 @@
-import * as MomentUtils from '@date-io/moment';
+import MomentUtils from '@date-io/moment';
 import { MuiThemeProvider } from '@material-ui/core/styles';
 import { createHashHistory } from 'history';
 import { MuiPickersUtilsProvider } from 'material-ui-pickers';

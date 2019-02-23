@@ -2,7 +2,7 @@ import { createStyles, TextField, WithStyles } from '@material-ui/core';
 import { Theme, withStyles } from '@material-ui/core/styles';
 import * as Dropbox from 'dropbox';
 import { InlineDatePicker } from 'material-ui-pickers';
-import * as moment from 'moment';
+import moment from 'moment';
 import * as React from 'react';
 import { ACCESS_TOKEN } from '../../config';
 import { Category, ITransaction, TAG_TO_CATEGORY, Transaction, TransactionsTable, TransactionUtils } from '../../transactions';

@@ -10,7 +10,8 @@
     "strictNullChecks": true,
     "noUnusedLocals": true,
     "outDir": "build",
-    "allowSyntheticDefaultImports": true
+    "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true
   },
   "exclude": [
     "build",

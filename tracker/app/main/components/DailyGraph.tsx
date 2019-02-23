@@ -1,12 +1,12 @@
 import { createStyles, WithStyles } from '@material-ui/core';
 import { Theme, withStyles } from '@material-ui/core/styles';
-import * as moment from 'moment';
+import moment from 'moment';
 import * as React from 'react';
 import { Chart } from 'react-google-charts';
 import { DAILY_EXCLUDE_TAGS, ITransaction, TransactionUtils } from '../../transactions';
 
 const styles = (theme: Theme) => createStyles({
-  chart: {
+  root: {
     flex: '0 1 400px',
     padding: '8px 16px',
     maxHeight: 'calc(50% - 64px)',
@@ -20,6 +20,7 @@ interface IDailyGraphProps extends WithStyles<typeof styles> {
   startDate: Date;
   endDate: Date;
   dailyBudgetCents: number;
+  graph_id: string;
 }
 interface IDailyGraphState {
   containerWidth: number;
@@ -55,8 +56,8 @@ class extends React.Component<IDailyGraphProps, IDailyGraphState> {
     let data: [string, number][] = [];
 
     if (this.props.transactions.length && this.state.containerWidth != -1) {
-      // TODO: Move this into the constructor. We don't need to recompute
-      // this on every render.
+      // let startTime = performance.now();
+
       let dailyTotals: { [s: string]: number; } = {};
       for (let m = moment(this.props.startDate); m.isSameOrBefore(moment(this.props.endDate)); m = m.add(1, 'days')) {
         dailyTotals[m.format('YYYY-MM-DD')] = 0;
@@ -76,6 +77,11 @@ class extends React.Component<IDailyGraphProps, IDailyGraphState> {
         currentTotal += dailyTotals[currentDate] - this.props.dailyBudgetCents;
         data.push([currentDate, currentTotal / 100.0]);
       }
+      // This takes about 41ms on my laptop when loading 1168 transactions.
+      // Memoizing (e.g., using memoize-one) would help save that time when
+      // resizing, although since that's not the main time sink, ignore it
+      // for now.
+      // console.log(performance.now() - startTime);
     } else {
       data.push([moment().format('YYYY-MM-DD'), 0]);
     }
@@ -88,13 +94,13 @@ class extends React.Component<IDailyGraphProps, IDailyGraphState> {
     }
 
     return (
-        <div className={classes.chart} ref={(elt) => this.container = elt}>
+        <div className={classes.root} ref={(elt) => this.container = elt}>
           <Chart
               chartType='LineChart'
               columns={[{'label': 'Date', 'type': 'string'}, {'label':'Dollars', 'type':'number'}]}
               rows={data}
               options={{'hAxis': {'title': 'Date'}, 'vAxis': {'title': 'Dollars'}, 'legend': 'none'}}
-              graph_id='daily-spend-chart'
+              graph_id={this.props.graph_id}
               width='auto'
               height='100%'
             />

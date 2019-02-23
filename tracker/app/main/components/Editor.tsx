@@ -3,7 +3,7 @@ import CircularProgress from '@material-ui/core/CircularProgress';
 import { Theme, withStyles } from '@material-ui/core/styles';
 import * as Dropbox from 'dropbox';
 import { InlineDatePicker } from 'material-ui-pickers';
-import * as moment from 'moment';
+import moment from 'moment';
 import * as React from 'react';
 import Select from 'react-select';
 import { ValueType } from 'react-select/lib/types';
