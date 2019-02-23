@@ -229,7 +229,9 @@ class extends React.Component<IDailyProps, IDailyState> {
             />
           </div>
         </div>
-        <TransactionsTable classes={{root: classes.transactionsTable}}>
+        <TransactionsTable
+            classes={{root: classes.transactionsTable}}
+            lazyRender>
           {rows}
         </TransactionsTable>
       </div>

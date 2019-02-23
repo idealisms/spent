@@ -170,7 +170,9 @@ class extends React.Component<IEditorProps, IEditorState> {
           />
         </div>
         {this.state.transactions.length
-            ? <Transactions.TransactionsTable classes={{root: classes.transactionsTable}}>
+            ? <Transactions.TransactionsTable
+                  classes={{root: classes.transactionsTable}}
+                  lazyRender>
                 <Transactions.TransactionsTableHeader
                     transactions={this.state.visibleTransactions}
                     selectAllChecked={this.state.visibleTransactions.length == this.state.selectedTransactions.size}
