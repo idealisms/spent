@@ -86,8 +86,16 @@ class extends React.Component<ITransactionsTableProps, ITransactionsTableState> 
     if (!this.props.lazyRender) {
       return <React.Fragment>{this.props.children}</React.Fragment>;
     }
+    if (!this.container) {
+      console.log('container not set (renderChildren)');
+      return <div></div>;
+    }
 
     let numRows = React.Children.count(this.props.children);
+    if (this.state.scrollTop > 48 * numRows - this.state.containerHeight) {
+      this.container.scrollTop = Math.max(0, 48 * numRows - this.state.containerHeight);
+    }
+
     let rowsBefore = Math.floor(this.state.scrollTop / ROW_HEIGHT);
     let rowsToShow = Math.min(numRows, Math.ceil(this.state.containerHeight / ROW_HEIGHT) + 2);
     let rowsAfter = Math.max(0, numRows - rowsBefore - rowsToShow);
