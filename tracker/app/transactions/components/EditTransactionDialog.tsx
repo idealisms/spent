@@ -61,7 +61,7 @@ class extends React.Component<IEditTransactionDialogProps, IEditTransactionDialo
     let classes = this.props.classes;
     let transaction: ITransaction = this.props.transaction;
     return <Dialog
-            open={true}
+            open
             onClose={this.props.onClose}
             scroll='paper'
             classes={{root: classes.dialogRoot, paper: classes.dialogPaper}}

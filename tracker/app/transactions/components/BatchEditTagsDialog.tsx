@@ -72,13 +72,13 @@ class extends React.Component<IBatchEditTagsDialogProps, IBatchEditTagsDialogSta
           <Transaction
               key={t.id}
               transaction={t}
-              hideDate={true}
+              hideDate
               />
         );
       });
 
     return <Dialog
-            open={true}
+            open
             onClose={this.props.onClose}
             classes={{paper: classes.dialogPaper}}
             maxWidth='md'

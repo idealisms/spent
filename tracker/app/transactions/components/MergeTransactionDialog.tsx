@@ -62,8 +62,8 @@ class extends React.Component<IMergeTransactionDialogProps, IMergeTransactionDia
           <TransactionsTable>
             <Transaction
                 transaction={transaction}
-                hideDate={true}
-                hideTags={true}
+                hideDate
+                hideTags
                 classes={{
                     row: classes.transactionRow,
                     description: classes.transactionDescription,
@@ -81,7 +81,7 @@ class extends React.Component<IMergeTransactionDialogProps, IMergeTransactionDia
     }
 
     return <Dialog
-            open={true}
+            open
             onClose={this.props.onClose}
             scroll='paper'>
         <DialogTitle>{'Choose transaction to merge into'}</DialogTitle>

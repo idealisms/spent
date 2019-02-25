@@ -102,8 +102,8 @@ class extends React.Component<ISplitTransactionDialogProps, ISplitTransactionDia
           classes={{row: classes.transactionRow}}
           transaction={transaction}
           key={`split-${transaction.id}`}
-          hideDate={true}
-          hideTags={true}
+          hideDate
+          hideTags
           amountFragment={
               <React.Fragment>
                 <div>$</div>
@@ -119,7 +119,7 @@ class extends React.Component<ISplitTransactionDialogProps, ISplitTransactionDia
     }
 
     return <Dialog
-          open={true}
+          open
           onClose={this.props.onClose}
           scroll='paper'
           >
