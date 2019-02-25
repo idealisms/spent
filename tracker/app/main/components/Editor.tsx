@@ -378,15 +378,20 @@ class extends React.Component<IEditorProps, IEditorState> {
             let fr = new FileReader();
             fr.addEventListener('load', ev => {
                 let transactions: Transactions.ITransaction[] = JSON.parse(fr.result as string);
-
-                let state: any = {
-                  transactions: transactions,
-                  visibleTransactions: this.filterTransactions(transactions),
-                };
-                if (transactions[0]) {
-                  state.endDate = moment(transactions[0].date).toDate();
+                let startDate = this.state.startDate;
+                let endDate = this.state.endDate;
+                if (transactions.length) {
+                  startDate = moment(transactions[transactions.length - 1].date).toDate();
+                  endDate = moment(transactions[0].date).toDate();
                 }
-                daily.setState(state);
+
+                daily.setState({
+                  transactions,
+                  startDate,
+                  endDate,
+                  visibleTransactions: this.filterTransactions(
+                      transactions, startDate, endDate),
+                });
             });
             fr.addEventListener('error', ev => {
                 console.log(ev);
