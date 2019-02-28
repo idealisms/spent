@@ -26,7 +26,6 @@ const styles = (theme: Theme) => createStyles({
   },
   dialogPaper: {
     width: 'calc(100% - 64px)',
-    maxWidth: '360px',
   },
   transactionAmount: {
     flex: '0 0 auto',
