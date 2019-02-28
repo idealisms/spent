@@ -24,8 +24,9 @@ import MenuIcon from '@material-ui/icons/Menu';
 import TimelineIcon from '@material-ui/icons/Timeline';
 import { Location, LocationDescriptor, LocationState } from 'history';
 import * as React from 'react';
-import { connect, Dispatch } from 'react-redux';
+import { connect } from 'react-redux';
 import { push, RouterAction } from 'react-router-redux';
+import { Dispatch } from 'redux';
 import * as Transactions from '../../transactions';
 import { IAppState } from '../Model';
 import { DailyPage, EditorPage, ReportPage } from './RoutePaths';
@@ -186,7 +187,7 @@ class extends React.Component<IMenuBarProps, IMenuBarReactState> {
               }</IconButton>
             </span> : undefined);
 
-    let selectedPage = this.props.location!.pathname;
+    let selectedPage = this.props.location && this.props.location.pathname;
     return (
       <div className={classes.flexNone}>
         <AppBar position='static'
@@ -312,8 +313,8 @@ const mapStateToProps = (state: IAppState): IMenuBarStateProps => {
   };
 };
 
-const mapDispatchToProps = (dispatch:Dispatch<any>): IMenuBarDispatchProps => ({
-  navigateTo: (location:LocationDescriptor, state?: LocationState) => {
+const mapDispatchToProps = (dispatch: Dispatch<RouterAction>): IMenuBarDispatchProps => ({
+  navigateTo: (location: LocationDescriptor, state?: LocationState) => {
     return dispatch(push(location));
   },
 });

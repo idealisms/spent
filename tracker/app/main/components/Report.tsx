@@ -6,6 +6,7 @@ import moment from 'moment';
 import * as React from 'react';
 import { ACCESS_TOKEN } from '../../config';
 import { Category, ITransaction, TAG_TO_CATEGORY, Transaction, TransactionsTable, TransactionUtils } from '../../transactions';
+import { IReportNode } from '../Model';
 import MenuBar, { CloudState } from './MenuBar';
 
 const styles = (theme: Theme) => createStyles({
@@ -53,13 +54,8 @@ const styles = (theme: Theme) => createStyles({
     borderTop: '1px solid lightgrey',
   },
 });
-type ReportNode = {
-  title: string,
-  tags: string[],
-  subcategories: ReportNode[],
-};
 type ReportRenderNode = {
-  ReportNode: ReportNode,
+  reportNode: IReportNode,
   amountCents: number,
   transactions: ITransaction[],
   subcategories: ReportRenderNode[],
@@ -71,7 +67,7 @@ interface IReportState {
   transactions: ITransaction[];
   startDate: Date;
   endDate: Date;
-  categories: ReportNode[];
+  categories: IReportNode[];
   categoriesPretty: string;
   cloudState: CloudState;
 }
@@ -260,14 +256,14 @@ class extends React.Component<IReportProps, IReportState> {
         });
   }
   private loadDefaultCategories = (): void => {
-    let lookup = new Map<string, ReportNode>();
+    let lookup = new Map<string, IReportNode>();
     TAG_TO_CATEGORY.forEach((category, tag) => {
       let categoryName = Category[category];
       let node = lookup.get(categoryName) || {title: categoryName, tags: [], subcategories: []};
       node.tags.push(tag);
       lookup.set(categoryName, node);
     });
-    let categories: ReportNode[] = [];
+    let categories: IReportNode[] = [];
     lookup.forEach(node => categories.push(node));
 
     this.setState({
@@ -284,11 +280,11 @@ class extends React.Component<IReportProps, IReportState> {
 
     let startTime = window.performance.now();
     let output: JSX.Element[] = [];
-    const buildRenderTree = (ReportNodes: ReportNode[]): ReportRenderNode[] => {
+    const buildRenderTree = (ReportNodes: IReportNode[]): ReportRenderNode[] => {
       let renderNodes: ReportRenderNode[] = [];
       for (let reportNode of ReportNodes) {
         let reportRenderNode: ReportRenderNode = {
-          ReportNode: reportNode,
+          reportNode: reportNode,
           amountCents: 0,
           transactions: [],
           subcategories: buildRenderTree(reportNode.subcategories),
@@ -301,13 +297,13 @@ class extends React.Component<IReportProps, IReportState> {
 
     let tagToRootReportRenderNode: Map<string, ReportRenderNode> = new Map();
     for (let renderNode of ReportRenderNodes) {
-      for (let tag of renderNode.ReportNode.tags) {
+      for (let tag of renderNode.reportNode.tags) {
         if (tagToRootReportRenderNode.has(tag)) {
           return [
               [],
               <div>Error, tag appears twice.
-                {tag} in {tagToRootReportRenderNode.get(tag)!.ReportNode.title}
-                and {renderNode.ReportNode.title}.
+                {tag} in {tagToRootReportRenderNode.get(tag)!.reportNode.title}
+                and {renderNode.reportNode.title}.
               </div>];
         }
         tagToRootReportRenderNode.set(tag, renderNode);
@@ -319,7 +315,7 @@ class extends React.Component<IReportProps, IReportState> {
       node.amountCents += transaction.amount_cents;
       let subnodes = [];
       for (let subnode of node.subcategories) {
-        for (let tag of subnode.ReportNode.tags) {
+        for (let tag of subnode.reportNode.tags) {
           if (transaction.tags.indexOf(tag) != -1) {
             subnodes.push(subnode);
             break;
@@ -328,7 +324,7 @@ class extends React.Component<IReportProps, IReportState> {
       }
       if (subnodes.length > 1) {
         output.push(<div key={transaction.id}>
-            Multiple subnodes of {node.ReportNode.title}: {transaction.description} ({transaction.tags.join(', ')})</div>);
+            Multiple subnodes of {node.reportNode.title}: {transaction.description} ({transaction.tags.join(', ')})</div>);
       } else if (subnodes.length == 1) {
         addTransactionToRenderNode(transaction, subnodes[0]);
       }
@@ -366,11 +362,11 @@ class extends React.Component<IReportProps, IReportState> {
       for (let renderNode of renderNodes) {
         outputDom.push(
             <div
-                key={`${renderNode.ReportNode.title}-${renderNode.amountCents}`}
+                key={`${renderNode.reportNode.title}-${renderNode.amountCents}`}
                 className='row'
                 style={{marginLeft: (depth * 32) + 'px'}}>
               <span className='amount'>${TransactionUtils.formatAmountNumber(renderNode.amountCents)}</span>
-              {renderNode.ReportNode.title} from {renderNode.transactions.length} transaction(s)
+              {renderNode.reportNode.title} from {renderNode.transactions.length} transaction(s)
             </div>);
         buildDom(renderNode.subcategories, depth + 1, outputDom);
       }

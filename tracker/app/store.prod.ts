@@ -1,13 +1,14 @@
-import {applyMiddleware, compose, createStore, Store} from 'redux';
-import {IAppState, rootReducer} from './main';
-import {routerMiddleware} from 'react-router-redux';
-import {History} from 'history';
+import { History } from 'history';
+import { routerMiddleware } from 'react-router-redux';
+import { applyMiddleware, compose, createStore, Store } from 'redux';
+import thunkMiddleware from 'redux-thunk';
+import { IAppState, rootReducer } from './main';
 
 export function configureStore(history: History): Store<IAppState> {
 
   const routingMiddleware = routerMiddleware(history);
-  const enhancers = compose(applyMiddleware(routingMiddleware));
+  const enhancers = compose(
+      applyMiddleware(routingMiddleware, thunkMiddleware));
 
-  return createStore<IAppState>(rootReducer, enhancers);
+  return createStore(rootReducer, enhancers);
 }
-
