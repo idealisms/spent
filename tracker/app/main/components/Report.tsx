@@ -4,10 +4,15 @@ import * as Dropbox from 'dropbox';
 import { InlineDatePicker } from 'material-ui-pickers';
 import moment from 'moment';
 import * as React from 'react';
+import { connect } from 'react-redux';
+import { ThunkDispatch } from 'redux-thunk';
 import { ACCESS_TOKEN } from '../../config';
 import { Category, ITransaction, TAG_TO_CATEGORY, Transaction, TransactionsTable, TransactionUtils } from '../../transactions';
-import { IReportNode } from '../Model';
+import { fetchSettingsFromDropboxIfNeeded, updateSetting } from '../actions';
+import { IAppState, IReportNode, ISettings } from '../Model';
 import MenuBar, { CloudState } from './MenuBar';
+
+const LOADING_TEXT = 'loading...';
 
 const styles = (theme: Theme) => createStyles({
   controls: {
@@ -61,13 +66,20 @@ type ReportRenderNode = {
   subcategories: ReportRenderNode[],
 };
 
-interface IReportProps extends WithStyles<typeof styles> {
+interface IReportOwnProps extends WithStyles<typeof styles> {
 }
+interface IReportStateProps {
+  settings: ISettings;
+}
+interface IReportDispatchProps {
+  fetchSettings: () => void;
+  updateReportCategories: (categories: IReportNode[]) => void;
+}
+type IReportProps = IReportOwnProps & IReportStateProps & IReportDispatchProps;
 interface IReportState {
   transactions: ITransaction[];
   startDate: Date;
   endDate: Date;
-  categories: IReportNode[];
   categoriesPretty: string;
   cloudState: CloudState;
 }
@@ -82,11 +94,20 @@ class extends React.Component<IReportProps, IReportState> {
       transactions: [],
       startDate: startDate,
       endDate: endDate,
-      categories: [],
-      categoriesPretty: 'loading...',
+      categoriesPretty: LOADING_TEXT,
       cloudState: CloudState.Done,
     };
     this.loadFromDropbox();
+    this.props.fetchSettings();
+  }
+
+  public componentDidUpdate(prevProps: IReportProps): void {
+    // Update the editable textarea once settings load.
+    if (this.state.categoriesPretty == LOADING_TEXT && this.props.settings.reportCategories) {
+      this.setState({
+        categoriesPretty: JSON.stringify(this.props.settings.reportCategories, null, 2),
+      });
+    }
   }
 
   public render(): React.ReactElement<object> {
@@ -173,22 +194,23 @@ class extends React.Component<IReportProps, IReportState> {
 
   public handleChangeReportJson = (event: React.ChangeEvent<{}>): void => {
     let categoriesPretty = (event.target as HTMLTextAreaElement).value;
-    let state = {
-      cloudState: CloudState.Modified,
-      categoriesPretty: categoriesPretty,
-      categories: this.state.categories,
-    };
+    let categories;
     try {
-      state.categories = JSON.parse(categoriesPretty);
+      categories = JSON.parse(categoriesPretty);
+      this.props.updateReportCategories(categories);
     } catch (e) {
       // If there's a parse error, don't update categories.
     }
-    this.setState(state);
+    this.setState({
+      cloudState: CloudState.Modified,
+      categoriesPretty: categoriesPretty,
+    });
   }
+
   public handleSaveReportJson = (): void => {
     this.setState({cloudState: CloudState.Uploading});
     let filesCommitInfo = {
-        contents: JSON.stringify({reportCategories: this.state.categories}),
+        contents: JSON.stringify(this.props.settings),
         path: '/settings.json',
         mode: {'.tag': 'overwrite'} as DropboxTypes.files.WriteModeOverwrite,
         autorename: false,
@@ -207,7 +229,7 @@ class extends React.Component<IReportProps, IReportState> {
         });
   }
 
-  public loadFromDropbox = (): void => {
+  private loadFromDropbox = (): void => {
     let dbx = new Dropbox.Dropbox({ accessToken: ACCESS_TOKEN });
     let report = this;
     dbx.filesDownload({path: '/transactions.json'})
@@ -228,53 +250,11 @@ class extends React.Component<IReportProps, IReportState> {
         }).catch(error => {
             console.log(error);
         });
-
-    dbx.filesDownload({path: '/settings.json'})
-        .then(file => {
-            let fr = new FileReader();
-            fr.addEventListener('load', ev => {
-                let settings = JSON.parse(fr.result as string);
-                let categories = settings.reportCategories;
-                if (categories) {
-                  let categoriesPretty = JSON.stringify(categories, null, 2);
-                  report.setState({
-                    categories: categories,
-                    categoriesPretty: categoriesPretty,
-                  });
-                } else {
-                  console.info('reportCategories not found in settings.json');
-                  report.loadDefaultCategories();
-                }
-            });
-            fr.addEventListener('error', ev => {
-                console.log(ev);
-            });
-            fr.readAsText((file as any).fileBlob);
-        }).catch(error => {
-            console.info(`settings.json download failed, ignoring. ${error}`);
-            report.loadDefaultCategories();
-        });
-  }
-  private loadDefaultCategories = (): void => {
-    let lookup = new Map<string, IReportNode>();
-    TAG_TO_CATEGORY.forEach((category, tag) => {
-      let categoryName = Category[category];
-      let node = lookup.get(categoryName) || {title: categoryName, tags: [], subcategories: []};
-      node.tags.push(tag);
-      lookup.set(categoryName, node);
-    });
-    let categories: IReportNode[] = [];
-    lookup.forEach(node => categories.push(node));
-
-    this.setState({
-      categories: categories,
-      categoriesPretty: JSON.stringify(categories, null, 2),
-    });
   }
 
   // Builds the tree to be rendered.
   private buildTree = (transactions: ITransaction[]): [ITransaction[], JSX.Element] => {
-    if (!this.state.categories.length) {
+    if (!this.props.settings.reportCategories.length) {
       return [[], <div key='loading'>Loading...</div>];
     }
 
@@ -293,7 +273,7 @@ class extends React.Component<IReportProps, IReportState> {
       }
       return renderNodes;
     };
-    let ReportRenderNodes = buildRenderTree(this.state.categories);
+    let ReportRenderNodes = buildRenderTree(this.props.settings.reportCategories);
 
     let tagToRootReportRenderNode: Map<string, ReportRenderNode> = new Map();
     for (let renderNode of ReportRenderNodes) {
@@ -384,4 +364,28 @@ class extends React.Component<IReportProps, IReportState> {
   }
 });
 
-export default Report;
+const mapStateToProps = (state: IAppState): IReportStateProps => ({
+  settings: state.settings.settings,
+});
+const mapDispatchToProps = (dispatch: ThunkDispatch<{}, {}, any>): IReportDispatchProps => ({
+  fetchSettings: async () => {
+    await dispatch(fetchSettingsFromDropboxIfNeeded());
+  },
+  updateReportCategories: (categories) => {
+    return dispatch(updateSetting('reportCategories', categories));
+  },
+});
+export default connect(mapStateToProps, mapDispatchToProps)(Report);
+
+export const getDefaultCategories = (): IReportNode[] => {
+  let lookup = new Map<string, IReportNode>();
+  TAG_TO_CATEGORY.forEach((category, tag) => {
+    let categoryName = Category[category];
+    let node = lookup.get(categoryName) || {title: categoryName, tags: [], subcategories: []};
+    node.tags.push(tag);
+    lookup.set(categoryName, node);
+  });
+  let categories: IReportNode[] = [];
+  lookup.forEach(node => categories.push(node));
+  return categories;
+};

@@ -1,6 +1,7 @@
 import { routerReducer } from 'react-router-redux';
 import { combineReducers, Reducer } from 'redux';
 import { ActionType, SettingsAction } from './actions';
+import { getDefaultCategories } from './components/Report';
 import { IAppState, ISettingsState } from './Model';
 
 const initialState: ISettingsState = {
@@ -32,6 +33,10 @@ export const settingsReducer = (state: ISettingsState = initialState, action: Se
         return {
           ...state,
           isFetching: false,
+          settings: {
+            ...state.settings,
+            reportCategories: getDefaultCategories(),
+          },
         };
       }
     case ActionType.UPDATE_SETTING:
