@@ -19,8 +19,6 @@ const store: Store<IAppState> = (process.env.NODE_ENV !== 'production')
         ? (require('./store.dev') as any).configureStore(history)
         : (require('./store.prod') as any).configureStore(history);
 
-
-
 ReactDOM.render(
     <Provider store={store}>
       <MuiThemeProvider theme={theme}>

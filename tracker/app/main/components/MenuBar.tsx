@@ -25,7 +25,7 @@ import TimelineIcon from '@material-ui/icons/Timeline';
 import { Location, LocationDescriptor, LocationState } from 'history';
 import * as React from 'react';
 import { connect } from 'react-redux';
-import { push, RouterAction } from 'react-router-redux';
+import { push } from 'react-router-redux';
 import { Dispatch } from 'redux';
 import * as Transactions from '../../transactions';
 import { IAppState } from '../Model';
@@ -95,7 +95,7 @@ interface IMenuBarStateProps {
   location: Location | null;
 }
 interface IMenuBarDispatchProps {
-  navigateTo: (location: LocationDescriptor, state?: LocationState) => RouterAction;
+  navigateTo: (location: LocationDescriptor, state?: LocationState) => void;
 }
 type IMenuBarProps = IMenuBarOwnProps & IMenuBarStateProps & IMenuBarDispatchProps;
 
@@ -313,9 +313,9 @@ const mapStateToProps = (state: IAppState): IMenuBarStateProps => {
   };
 };
 
-const mapDispatchToProps = (dispatch: Dispatch<RouterAction>): IMenuBarDispatchProps => ({
+const mapDispatchToProps = (dispatch: Dispatch): IMenuBarDispatchProps => ({
   navigateTo: (location: LocationDescriptor, state?: LocationState) => {
-    return dispatch(push(location));
+    dispatch(push(location));
   },
 });
 

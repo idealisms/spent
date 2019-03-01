@@ -5,7 +5,6 @@ import { createLogger } from 'redux-logger';
 import thunkMiddleware from 'redux-thunk';
 import { IAppState, rootReducer } from './main';
 
-
 interface IHotModule {
   hot?: { accept: (path: string, callback: () => void) => void };
 }
@@ -26,14 +25,14 @@ export function configureStore(history: History): Store<IAppState> {
       loggerMiddleware),
   );
 
-  const result = createStore(rootReducer, enhancers);
+  const store = createStore(rootReducer, enhancers);
 
   if (module.hot) {
-    module.hot.accept('./main/Module', () => {
-      const nextRootReducer: any = require('./main/Module').rootReducer;
-      result.replaceReducer(nextRootReducer);
+    module.hot.accept('./main/reducers', () => {
+      const nextRootReducer: any = require('./main/reducers').rootReducer;
+      store.replaceReducer(nextRootReducer);
     });
   }
 
-  return result;
+  return store;
 }
