@@ -94,7 +94,9 @@ class extends React.Component<IReportProps, IReportState> {
     this.state = {
       startDate: startDate,
       endDate: endDate,
-      categoriesPretty: LOADING_TEXT,
+      categoriesPretty: this.props.settings.reportCategories.length
+          ? JSON.stringify(this.props.settings.reportCategories, null, 2)
+          : LOADING_TEXT,
     };
     this.props.fetchSettings();
     this.props.fetchTransactions();
