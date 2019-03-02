@@ -5,11 +5,13 @@ import SplitTransactionDialog from './components/SplitTransactionDialog';
 import Transaction from './components/Transaction';
 import TransactionsTable from './components/TransactionsTable';
 import TransactionsTableHeader from './components/TransactionsTableHeader';
-import { Category, DAILY_EXCLUDE_TAGS, ITransaction, TAG_TO_CATEGORY } from './Model';
+import { Category, DAILY_EXCLUDE_TAGS, ITransaction, ITransactionsState, TAG_TO_CATEGORY } from './Model';
+import { transactionsReducer } from './reducers';
 import * as TransactionUtils from './utils';
 
 export { BatchEditTagsDialog, BatchEditTagsAction, Category, DAILY_EXCLUDE_TAGS };
-export { EditTransactionDialog, ITransaction };
+export { EditTransactionDialog, ITransaction, ITransactionsState };
 export { MergeTransactionDialog, SplitTransactionDialog, TAG_TO_CATEGORY };
 export { Transaction, TransactionsTable, TransactionUtils, TransactionsTableHeader };
+export { transactionsReducer };
 

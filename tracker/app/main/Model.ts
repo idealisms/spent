@@ -1,5 +1,5 @@
 import { RouterState } from 'react-router-redux';
-import { ITransactionsState } from '../transactions/Model';
+import { ITransactionsState } from '../transactions';
 
 export enum CloudState {
   Done = 1,

@@ -1,6 +1,6 @@
 import { routerReducer } from 'react-router-redux';
 import { combineReducers, Reducer } from 'redux';
-import { transactionsReducer } from '../transactions/reducers';
+import { transactionsReducer } from '../transactions';
 import { ActionType, SettingsAction } from './actions';
 import { getDefaultCategories } from './components/Report';
 import { CloudState, IAppState, ISettingsState } from './Model';
