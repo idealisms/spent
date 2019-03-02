@@ -1,3 +1,4 @@
+
 export enum Category {
   Bank,
   Car,
@@ -111,4 +112,14 @@ export interface ITransaction {
   transactions: Array<ITransaction>;
   source?: string;
   notes?: string;
+}
+
+export interface ITransactionsState {
+  isFetching: boolean;
+  /** ms since the epoch */
+  lastUpdated: number;
+  // Uncomment when implementing saving transactions.
+  // cloudState: CloudState;
+
+  transactions: ITransaction[];
 }

@@ -1,4 +1,5 @@
 import { RouterState } from 'react-router-redux';
+import { ITransactionsState } from '../transactions/Model';
 
 export enum CloudState {
   Done = 1,
@@ -28,4 +29,5 @@ export interface ISettingsState {
 export interface IAppState {
   routing: RouterState;
   settings: ISettingsState;
+  transactions: ITransactionsState;
 }

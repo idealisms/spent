@@ -18,9 +18,8 @@ export enum ActionType {
 export const requestSettingsFromDropbox = () => ({
   type: ActionType.REQUEST_SETTINGS_FROM_DROPBOX as typeof ActionType.REQUEST_SETTINGS_FROM_DROPBOX,
 });
-export const receivedSettingsFromDropbox = (success: boolean, settings?: ISettings) => ({
+export const receivedSettingsFromDropbox = (settings?: ISettings) => ({
   type: ActionType.RECEIVED_SETTINGS_FROM_DROPBOX as typeof ActionType.RECEIVED_SETTINGS_FROM_DROPBOX,
-  success,
   settings: settings,
 });
 
@@ -57,16 +56,16 @@ export const fetchSettingsFromDropbox = (): ThunkAction<void, IAppState, null, S
       let fr = new FileReader();
       fr.addEventListener('load', ev => {
         let settings: ISettings = JSON.parse((fr.result as string));
-        dispatch(receivedSettingsFromDropbox(true, settings));
+        dispatch(receivedSettingsFromDropbox(settings));
       });
       fr.addEventListener('error', ev => {
         console.log(ev);
-        dispatch(receivedSettingsFromDropbox(false));
+        dispatch(receivedSettingsFromDropbox());
       });
       fr.readAsText((file as any).fileBlob);
     } catch (error) {
       console.info(`settings.json download failed, ignoring. ${error}`);
-      dispatch(receivedSettingsFromDropbox(false));
+      dispatch(receivedSettingsFromDropbox());
     }
   };
 };

@@ -1,5 +1,6 @@
 import { routerReducer } from 'react-router-redux';
 import { combineReducers, Reducer } from 'redux';
+import { transactionsReducer } from '../transactions/reducers';
 import { ActionType, SettingsAction } from './actions';
 import { getDefaultCategories } from './components/Report';
 import { CloudState, IAppState, ISettingsState } from './Model';
@@ -22,7 +23,7 @@ export const settingsReducer = (state: ISettingsState = initialState, action: Se
         isFetching: true,
       };
     case ActionType.RECEIVED_SETTINGS_FROM_DROPBOX:
-      if (action.success && action.settings) {
+      if (action.settings) {
         return {
           ...state,
           isFetching: false,
@@ -67,4 +68,5 @@ export const settingsReducer = (state: ISettingsState = initialState, action: Se
 export const rootReducer: Reducer<IAppState> = combineReducers({
   routing: routerReducer,
   settings: settingsReducer,
+  transactions: transactionsReducer,
 });
