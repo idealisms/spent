@@ -10,7 +10,8 @@ import { ValueType } from 'react-select/lib/types';
 import { isUndefined } from 'util';
 import { ACCESS_TOKEN } from '../../config';
 import * as Transactions from '../../transactions';
-import MenuBar, { CloudState } from './MenuBar';
+import { CloudState } from '../Model';
+import MenuBar from './MenuBar';
 
 const styles = (theme: Theme) => createStyles({
   root: {

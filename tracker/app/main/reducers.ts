@@ -2,12 +2,12 @@ import { routerReducer } from 'react-router-redux';
 import { combineReducers, Reducer } from 'redux';
 import { ActionType, SettingsAction } from './actions';
 import { getDefaultCategories } from './components/Report';
-import { IAppState, ISettingsState } from './Model';
+import { CloudState, IAppState, ISettingsState } from './Model';
 
 const initialState: ISettingsState = {
   isFetching: false,
-  isSaving: false,
   lastUpdated: 0,
+  cloudState: CloudState.Done,
 
   settings: {
     reportCategories: [],
@@ -42,10 +42,21 @@ export const settingsReducer = (state: ISettingsState = initialState, action: Se
     case ActionType.UPDATE_SETTING:
       return {
         ...state,
+        cloudState: CloudState.Modified,
         settings: {
           ...state.settings,
           [action.key]: action.value,
         },
+      };
+    case ActionType.REQUEST_SAVE_SETTINGS_TO_DROPBOX:
+      return {
+        ...state,
+        cloudState: CloudState.Uploading,
+      };
+    case ActionType.FINISHED_SAVE_SETTINGS_TO_DROPBOX:
+      return {
+        ...state,
+        cloudState: action.success ? CloudState.Done : CloudState.Modified,
       };
 
     default:

@@ -28,14 +28,8 @@ import { connect } from 'react-redux';
 import { push } from 'react-router-redux';
 import { Dispatch } from 'redux';
 import * as Transactions from '../../transactions';
-import { IAppState } from '../Model';
+import { CloudState, IAppState } from '../Model';
 import { DailyPage, EditorPage, ReportPage } from './RoutePaths';
-
-export enum CloudState {
-  Done = 1,
-  Modified = 2,
-  Uploading = 3,
-}
 
 const styles = (theme: Theme) => createStyles({
   drawerPaper: {

@@ -8,9 +8,9 @@ import { connect } from 'react-redux';
 import { ThunkDispatch } from 'redux-thunk';
 import { ACCESS_TOKEN } from '../../config';
 import { Category, ITransaction, TAG_TO_CATEGORY, Transaction, TransactionsTable, TransactionUtils } from '../../transactions';
-import { fetchSettingsFromDropboxIfNeeded, updateSetting } from '../actions';
-import { IAppState, IReportNode, ISettings } from '../Model';
-import MenuBar, { CloudState } from './MenuBar';
+import { fetchSettingsFromDropboxIfNeeded, saveSettingsToDropbox, updateSetting } from '../actions';
+import { CloudState, IAppState, IReportNode, ISettings } from '../Model';
+import MenuBar from './MenuBar';
 
 const LOADING_TEXT = 'loading...';
 
@@ -70,10 +70,12 @@ interface IReportOwnProps extends WithStyles<typeof styles> {
 }
 interface IReportStateProps {
   settings: ISettings;
+  settingsCloudState: CloudState;
 }
 interface IReportDispatchProps {
   fetchSettings: () => void;
   updateReportCategories: (categories: IReportNode[]) => void;
+  saveSettings: (settings: ISettings) => void;
 }
 type IReportProps = IReportOwnProps & IReportStateProps & IReportDispatchProps;
 interface IReportState {
@@ -81,7 +83,6 @@ interface IReportState {
   startDate: Date;
   endDate: Date;
   categoriesPretty: string;
-  cloudState: CloudState;
 }
 const Report = withStyles(styles)(
 class extends React.Component<IReportProps, IReportState> {
@@ -95,7 +96,6 @@ class extends React.Component<IReportProps, IReportState> {
       startDate: startDate,
       endDate: endDate,
       categoriesPretty: LOADING_TEXT,
-      cloudState: CloudState.Done,
     };
     this.loadFromDropbox();
     this.props.fetchSettings();
@@ -132,7 +132,7 @@ class extends React.Component<IReportProps, IReportState> {
       <div id='page-report'>
         <MenuBar
           title='Report'
-          cloudState={this.state.cloudState}
+          cloudState={this.props.settingsCloudState}
           onSaveClick={this.handleSaveReportJson}
         />
 
@@ -202,31 +202,12 @@ class extends React.Component<IReportProps, IReportState> {
       // If there's a parse error, don't update categories.
     }
     this.setState({
-      cloudState: CloudState.Modified,
       categoriesPretty: categoriesPretty,
     });
   }
 
   public handleSaveReportJson = (): void => {
-    this.setState({cloudState: CloudState.Uploading});
-    let filesCommitInfo = {
-        contents: JSON.stringify(this.props.settings),
-        path: '/settings.json',
-        mode: {'.tag': 'overwrite'} as DropboxTypes.files.WriteModeOverwrite,
-        autorename: false,
-        mute: false,
-    };
-    let dbx = new Dropbox.Dropbox({ accessToken: ACCESS_TOKEN });
-    dbx.filesUpload(filesCommitInfo)
-        .then(metadata => {
-            console.log('wrote to dropbox');
-            console.log(metadata);
-            this.setState({cloudState: CloudState.Done});
-        }).catch(error => {
-            console.log('error');
-            console.log(error);
-            this.setState({cloudState: CloudState.Modified});
-        });
+    this.props.saveSettings(this.props.settings);
   }
 
   private loadFromDropbox = (): void => {
@@ -366,13 +347,17 @@ class extends React.Component<IReportProps, IReportState> {
 
 const mapStateToProps = (state: IAppState): IReportStateProps => ({
   settings: state.settings.settings,
+  settingsCloudState: state.settings.cloudState,
 });
 const mapDispatchToProps = (dispatch: ThunkDispatch<{}, {}, any>): IReportDispatchProps => ({
-  fetchSettings: async () => {
-    await dispatch(fetchSettingsFromDropboxIfNeeded());
+  fetchSettings: () => {
+    dispatch(fetchSettingsFromDropboxIfNeeded());
   },
   updateReportCategories: (categories) => {
-    return dispatch(updateSetting('reportCategories', categories));
+    dispatch(updateSetting('reportCategories', categories));
+  },
+  saveSettings: (settings) => {
+    dispatch(saveSettingsToDropbox(settings));
   },
 });
 export default connect(mapStateToProps, mapDispatchToProps)(Report);

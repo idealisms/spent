@@ -1,5 +1,11 @@
 import { RouterState } from 'react-router-redux';
 
+export enum CloudState {
+  Done = 1,
+  Modified = 2,
+  Uploading = 3,
+}
+
 export interface IReportNode {
   title: string;
   tags: string[];
@@ -12,9 +18,9 @@ export interface ISettings {
 
 export interface ISettingsState {
   isFetching: boolean;
-  isSaving: boolean;
   /** ms since the epoch */
   lastUpdated: number;
+  cloudState: CloudState;
 
   settings: ISettings;
 }
