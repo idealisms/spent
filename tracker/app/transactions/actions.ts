@@ -44,6 +44,9 @@ export const fetchTransactionsFromDropboxIfNeeded = (): ThunkAction<void, IAppSt
         console.log(ev);
         dispatch(receivedTransactionsFromDropbox());
       });
+      // NOTE: The Dropbox SDK specification does not include a fileBlob
+      // field on the FileLinkMetadataReference type, so it is missing from
+      // the TypeScript type. This field is injected by the Dropbox SDK.
       fr.readAsText((file as any).fileBlob);
     } catch (error) {
       console.info(`transactions.json download failed, ignoring. ${error}`);

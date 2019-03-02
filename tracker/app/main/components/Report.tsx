@@ -1,13 +1,12 @@
 import { createStyles, TextField, WithStyles } from '@material-ui/core';
 import { Theme, withStyles } from '@material-ui/core/styles';
-import * as Dropbox from 'dropbox';
 import { InlineDatePicker } from 'material-ui-pickers';
 import moment from 'moment';
 import * as React from 'react';
 import { connect } from 'react-redux';
 import { ThunkDispatch } from 'redux-thunk';
-import { ACCESS_TOKEN } from '../../config';
 import { Category, ITransaction, TAG_TO_CATEGORY, Transaction, TransactionsTable, TransactionUtils } from '../../transactions';
+import { fetchTransactionsFromDropboxIfNeeded } from '../../transactions/actions';
 import { fetchSettingsFromDropboxIfNeeded, saveSettingsToDropbox, updateSetting } from '../actions';
 import { CloudState, IAppState, IReportNode, ISettings } from '../Model';
 import MenuBar from './MenuBar';
@@ -68,18 +67,19 @@ type ReportRenderNode = {
 
 interface IReportOwnProps extends WithStyles<typeof styles> {
 }
-interface IReportStateProps {
+interface IReportAppStateProps {
   settings: ISettings;
   settingsCloudState: CloudState;
+  transactions: ITransaction[];
 }
 interface IReportDispatchProps {
   fetchSettings: () => void;
   updateReportCategories: (categories: IReportNode[]) => void;
   saveSettings: (settings: ISettings) => void;
+  fetchTransactions: () => void;
 }
-type IReportProps = IReportOwnProps & IReportStateProps & IReportDispatchProps;
+type IReportProps = IReportOwnProps & IReportAppStateProps & IReportDispatchProps;
 interface IReportState {
-  transactions: ITransaction[];
   startDate: Date;
   endDate: Date;
   categoriesPretty: string;
@@ -92,13 +92,12 @@ class extends React.Component<IReportProps, IReportState> {
     let endDate = moment().year(moment().year() - 1).month(11).date(31).toDate();
 
     this.state = {
-      transactions: [],
       startDate: startDate,
       endDate: endDate,
       categoriesPretty: LOADING_TEXT,
     };
-    this.loadFromDropbox();
     this.props.fetchSettings();
+    this.props.fetchTransactions();
   }
 
   public componentDidUpdate(prevProps: IReportProps): void {
@@ -113,7 +112,7 @@ class extends React.Component<IReportProps, IReportState> {
   public render(): React.ReactElement<object> {
     let classes = this.props.classes;
     let filteredTransactions = TransactionUtils.filterTransactionsByDate(
-        this.state.transactions, this.state.startDate, this.state.endDate);
+        this.props.transactions, this.state.startDate, this.state.endDate);
     let [unmatchedTransactions, renderedTree] = this.buildTree(filteredTransactions);
     let rows = unmatchedTransactions.map(t => {
         return (
@@ -123,9 +122,9 @@ class extends React.Component<IReportProps, IReportState> {
 
     let minDate = moment(this.state.startDate).toDate();
     let maxDate = moment(this.state.endDate).toDate();
-    if (this.state.transactions.length > 0) {
-      minDate = moment(this.state.transactions.slice(-1)[0].date).toDate();
-      maxDate = moment(this.state.transactions[0].date).toDate();
+    if (this.props.transactions.length > 0) {
+      minDate = moment(this.props.transactions.slice(-1)[0].date).toDate();
+      maxDate = moment(this.props.transactions[0].date).toDate();
     }
 
     return (
@@ -208,29 +207,6 @@ class extends React.Component<IReportProps, IReportState> {
 
   public handleSaveReportJson = (): void => {
     this.props.saveSettings(this.props.settings);
-  }
-
-  private loadFromDropbox = (): void => {
-    let dbx = new Dropbox.Dropbox({ accessToken: ACCESS_TOKEN });
-    let report = this;
-    dbx.filesDownload({path: '/transactions.json'})
-        .then(file => {
-            let fr = new FileReader();
-            fr.addEventListener('load', ev => {
-                let transactions: ITransaction[] = JSON.parse(fr.result as string);
-                let state: any = { transactions: transactions };
-                report.setState(state);
-            });
-            fr.addEventListener('error', ev => {
-                console.log(ev);
-            });
-            // NOTE: The Dropbox SDK specification does not include a fileBlob
-            // field on the FileLinkMetadataReference type, so it is missing from
-            // the TypeScript type. This field is injected by the Dropbox SDK.
-            fr.readAsText((file as any).fileBlob);
-        }).catch(error => {
-            console.log(error);
-        });
   }
 
   // Builds the tree to be rendered.
@@ -345,11 +321,12 @@ class extends React.Component<IReportProps, IReportState> {
   }
 });
 
-const mapStateToProps = (state: IAppState): IReportStateProps => ({
+const mapStateToProps = (state: IAppState): IReportAppStateProps => ({
   settings: state.settings.settings,
   settingsCloudState: state.settings.cloudState,
+  transactions: state.transactions.transactions,
 });
-const mapDispatchToProps = (dispatch: ThunkDispatch<{}, {}, any>): IReportDispatchProps => ({
+const mapDispatchToProps = (dispatch: ThunkDispatch<IAppState, null, any>): IReportDispatchProps => ({
   fetchSettings: () => {
     dispatch(fetchSettingsFromDropboxIfNeeded());
   },
@@ -358,6 +335,9 @@ const mapDispatchToProps = (dispatch: ThunkDispatch<{}, {}, any>): IReportDispat
   },
   saveSettings: (settings) => {
     dispatch(saveSettingsToDropbox(settings));
+  },
+  fetchTransactions: () => {
+    dispatch(fetchTransactionsFromDropboxIfNeeded());
   },
 });
 export default connect(mapStateToProps, mapDispatchToProps)(Report);
