@@ -1,3 +1,4 @@
+import { fetchTransactionsFromDropboxIfNeeded } from './actions';
 import BatchEditTagsDialog, { BatchEditTagsAction } from './components/BatchEditTagsDialog';
 import EditTransactionDialog from './components/EditTransactionDialog';
 import MergeTransactionDialog from './components/MergeTransactionDialog';
@@ -10,8 +11,7 @@ import { transactionsReducer } from './reducers';
 import * as TransactionUtils from './utils';
 
 export { BatchEditTagsDialog, BatchEditTagsAction, Category, DAILY_EXCLUDE_TAGS };
-export { EditTransactionDialog, ITransaction, ITransactionsState };
+export { EditTransactionDialog, fetchTransactionsFromDropboxIfNeeded, ITransaction, ITransactionsState };
 export { MergeTransactionDialog, SplitTransactionDialog, TAG_TO_CATEGORY };
-export { Transaction, TransactionsTable, TransactionUtils, TransactionsTableHeader };
-export { transactionsReducer };
+export { Transaction, TransactionsTable, TransactionUtils, transactionsReducer, TransactionsTableHeader };
 

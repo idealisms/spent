@@ -1,11 +1,13 @@
 import { createStyles, TextField, WithStyles } from '@material-ui/core';
 import { Theme, withStyles } from '@material-ui/core/styles';
-import { Dropbox } from 'dropbox';
 import { InlineDatePicker } from 'material-ui-pickers';
 import moment from 'moment';
 import * as React from 'react';
-import { ACCESS_TOKEN } from '../../config';
-import { DAILY_EXCLUDE_TAGS, ITransaction, Transaction, TransactionsTable, TransactionUtils } from '../../transactions';
+import { connect } from 'react-redux';
+import { ThunkDispatch } from 'redux-thunk';
+// tslint:disable-next-line:max-line-length
+import { DAILY_EXCLUDE_TAGS, fetchTransactionsFromDropboxIfNeeded, ITransaction, Transaction, TransactionsTable, TransactionUtils } from '../../transactions';
+import { IAppState } from '../Model';
 import DailyGraph from './DailyGraph';
 import MenuBar from './MenuBar';
 
@@ -40,10 +42,16 @@ const styles = (theme: Theme) => createStyles({
     borderTop: '1px solid lightgrey',
   },
 });
-interface IDailyProps extends WithStyles<typeof styles> {
+interface IDailyOwnProps extends WithStyles<typeof styles> {
 }
-interface IDailyState {
+interface IDailyAppStateProps {
   transactions: ITransaction[];
+}
+interface IDailyDispatchProps {
+  fetchTransactions: () => void;
+}
+type IDailyProps = IDailyOwnProps & IDailyAppStateProps & IDailyDispatchProps;
+interface IDailyState {
   startDate: Date;
   endDate: Date;
   dailyBudgetCents: number;
@@ -54,18 +62,27 @@ class extends React.Component<IDailyProps, IDailyState> {
   constructor(props: IDailyProps, context?: any) {
     super(props, context);
     this.state = {
-      transactions: [],
       // March 3, 2018 (months are 0 indexed).
       startDate: new Date(2018, 2, 3),
-      endDate: moment().hours(0).minutes(0).seconds(0).milliseconds(0).toDate(),
+      endDate: this.props.transactions.length
+          ? moment(this.props.transactions[0].date).toDate()
+          : moment().hours(0).minutes(0).seconds(0).milliseconds(0).toDate(),
       dailyBudgetCents: 10402,
     };
-    this.loadFromDropbox();
+    this.props.fetchTransactions();
+  }
+
+  public componentDidUpdate(prevProps: IDailyProps): void {
+    if (this.props.transactions !== prevProps.transactions && this.props.transactions.length) {
+      this.setState({
+        endDate: moment(this.props.transactions[0].date).toDate(),
+      });
+    }
   }
 
   public render(): React.ReactElement<object> {
     let classes = this.props.classes;
-    let filteredTransactions = this.state.transactions.filter(t => {
+    let filteredTransactions = this.props.transactions.filter(t => {
       // TODO: Would it be faster to use moment(t.date).toDate()?
       let [fullYear, month, day] = t.date.split('-');
       let transactionDate = new Date(parseInt(fullYear, 10), parseInt(month, 10) - 1, parseInt(day, 10));
@@ -81,9 +98,9 @@ class extends React.Component<IDailyProps, IDailyState> {
 
     let minDate = moment(this.state.startDate).toDate();
     let maxDate = moment(this.state.endDate).toDate();
-    if (this.state.transactions.length > 0) {
-      minDate = moment(this.state.transactions.slice(-1)[0].date).toDate();
-      maxDate = moment(this.state.transactions[0].date).toDate();
+    if (this.props.transactions.length > 0) {
+      minDate = moment(this.props.transactions.slice(-1)[0].date).toDate();
+      maxDate = moment(this.props.transactions[0].date).toDate();
     }
 
     return (
@@ -155,36 +172,15 @@ class extends React.Component<IDailyProps, IDailyState> {
       dailyBudgetCents: parseInt('' + parseFloat((event.target as HTMLInputElement).value) * 100, 10),
     });
   }
-
-  public loadFromDropbox = (): void => {
-    let filesDownloadArg = {
-      path: '/transactions.json',
-    };
-    let dbx = new Dropbox({ accessToken: ACCESS_TOKEN });
-    let daily = this;
-    dbx.filesDownload(filesDownloadArg)
-        .then(file => {
-            let fr = new FileReader();
-            fr.addEventListener('load', ev => {
-                let transactions: ITransaction[] = JSON.parse(fr.result as string);
-                let state: any = { transactions: transactions };
-                if (transactions[0]) {
-                  state.endDate = moment(transactions[0].date).toDate();
-                }
-                daily.setState(state);
-            });
-            fr.addEventListener('error', ev => {
-                console.log(ev);
-            });
-            // NOTE: The Dropbox SDK specification does not include a fileBlob
-            // field on the FileLinkMetadataReference type, so it is missing from
-            // the TypeScript type. This field is injected by the Dropbox SDK.
-            fr.readAsText((file as any).fileBlob);
-        }).catch(error => {
-            console.log(error);
-        });
-
-  }
 });
 
-export default Daily;
+const mapStateToProps = (state: IAppState): IDailyAppStateProps => ({
+  transactions: state.transactions.transactions,
+});
+const mapDispatchToProps = (dispatch: ThunkDispatch<IAppState, null, any>): IDailyDispatchProps => ({
+  fetchTransactions: () => {
+    dispatch(fetchTransactionsFromDropboxIfNeeded());
+  },
+});
+
+export default connect(mapStateToProps, mapDispatchToProps)(Daily);
