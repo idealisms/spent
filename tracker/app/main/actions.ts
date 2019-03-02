@@ -1,5 +1,4 @@
 import * as Dropbox from 'dropbox';
-import { AnyAction } from 'redux';
 import { ThunkAction } from 'redux-thunk';
 import { ACCESS_TOKEN } from '../config';
 import { IAppState, ISettings } from './Model';
@@ -16,40 +15,39 @@ export enum ActionType {
 }
 
 // Action creators
-// We can also use { createAction } from the redux-actions library.
 export const requestSettingsFromDropbox = () => ({
-  type: ActionType.REQUEST_SETTINGS_FROM_DROPBOX,
+  type: ActionType.REQUEST_SETTINGS_FROM_DROPBOX as typeof ActionType.REQUEST_SETTINGS_FROM_DROPBOX,
 });
 export const receivedSettingsFromDropbox = (success: boolean, settings?: ISettings) => ({
-  type: ActionType.RECEIVED_SETTINGS_FROM_DROPBOX,
+  type: ActionType.RECEIVED_SETTINGS_FROM_DROPBOX as typeof ActionType.RECEIVED_SETTINGS_FROM_DROPBOX,
   success,
   settings: settings,
 });
 
 export const updateSetting = (key: keyof ISettings, value: ISettings[keyof ISettings]) => ({
-  type: ActionType.UPDATE_SETTING,
+  type: ActionType.UPDATE_SETTING as typeof ActionType.UPDATE_SETTING,
   key,
   value,
 });
 
 export const requestSaveSettingsToDropbox = () => ({
-  type: ActionType.REQUEST_SAVE_SETTINGS_TO_DROPBOX,
+  type: ActionType.REQUEST_SAVE_SETTINGS_TO_DROPBOX as typeof ActionType.REQUEST_SAVE_SETTINGS_TO_DROPBOX,
 });
 export const finishedSaveSettingsToDropbox = (success: boolean) => ({
-  type: ActionType.FINISHED_SAVE_SETTINGS_TO_DROPBOX,
+  type: ActionType.FINISHED_SAVE_SETTINGS_TO_DROPBOX as typeof ActionType.FINISHED_SAVE_SETTINGS_TO_DROPBOX,
   success,
 });
 
 export type SettingsAction = (
-  ReturnType<typeof requestSettingsFromDropbox> &
-  ReturnType<typeof receivedSettingsFromDropbox> &
-  ReturnType<typeof updateSetting> &
-  ReturnType<typeof requestSaveSettingsToDropbox> &
+  ReturnType<typeof requestSettingsFromDropbox> |
+  ReturnType<typeof receivedSettingsFromDropbox> |
+  ReturnType<typeof updateSetting> |
+  ReturnType<typeof requestSaveSettingsToDropbox> |
   ReturnType<typeof finishedSaveSettingsToDropbox>
 );
 
-// Async actions.
-export const fetchSettingsFromDropbox = (): ThunkAction<void, IAppState, null, AnyAction> => {
+// Async actions
+export const fetchSettingsFromDropbox = (): ThunkAction<void, IAppState, null, SettingsAction> => {
   return async (dispatch) => {
     dispatch(requestSettingsFromDropbox());
 
@@ -73,7 +71,7 @@ export const fetchSettingsFromDropbox = (): ThunkAction<void, IAppState, null, A
   };
 };
 
-export const fetchSettingsFromDropboxIfNeeded = (): ThunkAction<void, IAppState, null, AnyAction> => {
+export const fetchSettingsFromDropboxIfNeeded = (): ThunkAction<void, IAppState, null, SettingsAction> => {
   return async (dispatch, getState) => {
     let state = getState();
     if (state.settings.lastUpdated == 0) {
@@ -82,7 +80,7 @@ export const fetchSettingsFromDropboxIfNeeded = (): ThunkAction<void, IAppState,
   };
 };
 
-export const saveSettingsToDropbox = (settings: ISettings): ThunkAction<void, IAppState, null, AnyAction> => {
+export const saveSettingsToDropbox = (settings: ISettings): ThunkAction<void, IAppState, null, SettingsAction> => {
   return async (dispatch) => {
     dispatch(requestSaveSettingsToDropbox());
 
