@@ -1,4 +1,6 @@
 
+// If this were to move into Settings, we would need to also
+// move the mappings to emoji.
 export enum Category {
   Bank,
   Car,
@@ -24,6 +26,7 @@ export enum Category {
   Other,
 }
 
+// TODO: Move into settings.
 export const TAG_TO_CATEGORY: Map<string, Category> = new Map([
   ['bank transfer', Category.Bank],
   ['credit card', Category.Bank],
@@ -80,6 +83,7 @@ export const TAG_TO_CATEGORY: Map<string, Category> = new Map([
   ['vitamins', Category.Vitamins],
 ]);
 
+// TODO: Move into settings.
 export const DAILY_EXCLUDE_TAGS = new Set([
   'bank transfer',
   'credit card',
