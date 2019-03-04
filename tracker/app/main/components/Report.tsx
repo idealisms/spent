@@ -8,7 +8,7 @@ import { ThunkDispatch } from 'redux-thunk';
 import { Category, ITransaction, TAG_TO_CATEGORY, Transaction, TransactionsTable, TransactionUtils } from '../../transactions';
 import { fetchTransactionsFromDropboxIfNeeded } from '../../transactions/actions';
 import { fetchSettingsFromDropboxIfNeeded, saveSettingsToDropbox, updateSetting } from '../actions';
-import { CloudState, IAppState, IReportNode, ISettings } from '../Model';
+import { CloudState, IAppState, IReportNode } from '../Model';
 import MenuBar from './MenuBar';
 
 const LOADING_TEXT = 'loading...';
@@ -68,7 +68,7 @@ type ReportRenderNode = {
 interface IReportOwnProps extends WithStyles<typeof styles> {
 }
 interface IReportAppStateProps {
-  settings: ISettings;
+  reportCategories: IReportNode[];
   settingsCloudState: CloudState;
   transactions: ITransaction[];
 }
@@ -94,8 +94,8 @@ class extends React.Component<IReportProps, IReportState> {
     this.state = {
       startDate: startDate,
       endDate: endDate,
-      categoriesPretty: this.props.settings.reportCategories.length
-          ? JSON.stringify(this.props.settings.reportCategories, null, 2)
+      categoriesPretty: this.props.reportCategories.length
+          ? JSON.stringify(this.props.reportCategories, null, 2)
           : LOADING_TEXT,
     };
     this.props.fetchSettings();
@@ -104,9 +104,9 @@ class extends React.Component<IReportProps, IReportState> {
 
   public componentDidUpdate(prevProps: IReportProps): void {
     // Update the editable textarea once settings load.
-    if (this.state.categoriesPretty == LOADING_TEXT && this.props.settings.reportCategories) {
+    if (this.state.categoriesPretty == LOADING_TEXT && this.props.reportCategories) {
       this.setState({
-        categoriesPretty: JSON.stringify(this.props.settings.reportCategories, null, 2),
+        categoriesPretty: JSON.stringify(this.props.reportCategories, null, 2),
       });
     }
   }
@@ -209,7 +209,7 @@ class extends React.Component<IReportProps, IReportState> {
 
   // Builds the tree to be rendered.
   private buildTree = (transactions: ITransaction[]): [ITransaction[], JSX.Element] => {
-    if (!this.props.settings.reportCategories.length) {
+    if (!this.props.reportCategories.length) {
       return [[], <div key='loading'>Loading...</div>];
     }
 
@@ -228,7 +228,7 @@ class extends React.Component<IReportProps, IReportState> {
       }
       return renderNodes;
     };
-    let ReportRenderNodes = buildRenderTree(this.props.settings.reportCategories);
+    let ReportRenderNodes = buildRenderTree(this.props.reportCategories);
 
     let tagToRootReportRenderNode: Map<string, ReportRenderNode> = new Map();
     for (let renderNode of ReportRenderNodes) {
@@ -320,7 +320,7 @@ class extends React.Component<IReportProps, IReportState> {
 });
 
 const mapStateToProps = (state: IAppState): IReportAppStateProps => ({
-  settings: state.settings.settings,
+  reportCategories: state.settings.settings.reportCategories,
   settingsCloudState: state.settings.cloudState,
   transactions: state.transactions.transactions,
 });
