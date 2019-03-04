@@ -1,11 +1,12 @@
 import { Reducer } from 'redux';
+import { CloudState } from '../main/Model';
 import { ActionType, TransactionsAction } from './actions';
 import { ITransactionsState } from './Model';
 
 const initialState: ITransactionsState = {
   isFetching: false,
   lastUpdated: 0,
-  // cloudState: CloudState.Done,
+  cloudState: CloudState.Done,
 
   transactions: [],
 };
@@ -32,6 +33,22 @@ export const transactionsReducer: Reducer<ITransactionsState, TransactionsAction
           transactions: [],
         };
       }
+    case ActionType.UPDATE_TRANSACTIONS:
+      return {
+        ...state,
+        transactions: action.transactions,
+        cloudState: CloudState.Modified,
+      };
+    case ActionType.REQUEST_SAVE_TRANSACTIONS_TO_DROPBOX:
+      return {
+        ...state,
+        cloudState: CloudState.Uploading,
+      };
+    case ActionType.FINISHED_SAVE_TRANSACTIONS_TO_DROPBOX:
+      return {
+        ...state,
+        cloudState: action.success ? CloudState.Done : CloudState.Modified,
+      };
 
     default:
       return state;

@@ -1,3 +1,4 @@
+import { CloudState } from '../main/Model';
 
 // If this were to move into Settings, we would need to also
 // move the mappings to emoji.
@@ -122,8 +123,7 @@ export interface ITransactionsState {
   isFetching: boolean;
   /** ms since the epoch */
   lastUpdated: number;
-  // Uncomment when implementing saving transactions.
-  // cloudState: CloudState;
+  cloudState: CloudState;
 
   transactions: ITransaction[];
 }
