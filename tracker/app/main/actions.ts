@@ -79,13 +79,13 @@ export const fetchSettingsFromDropboxIfNeeded = (): ThunkAction<void, IAppState,
   };
 };
 
-export const saveSettingsToDropbox = (settings: ISettings): ThunkAction<void, IAppState, null, SettingsAction> => {
-  return async (dispatch) => {
+export const saveSettingsToDropbox = (): ThunkAction<void, IAppState, null, SettingsAction> => {
+  return async (dispatch, getState) => {
     dispatch(requestSaveSettingsToDropbox());
 
     let dbx = new Dropbox.Dropbox({ accessToken: ACCESS_TOKEN, fetch });
     let filesCommitInfo = {
-      contents: JSON.stringify(settings),
+      contents: JSON.stringify(getState().settings.settings),
       path: '/settings.json',
       mode: {'.tag': 'overwrite'} as DropboxTypes.files.WriteModeOverwrite,
       autorename: false,

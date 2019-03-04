@@ -75,7 +75,7 @@ interface IReportAppStateProps {
 interface IReportDispatchProps {
   fetchSettings: () => void;
   updateReportCategories: (categories: IReportNode[]) => void;
-  saveSettings: (settings: ISettings) => void;
+  saveSettings: () => void;
   fetchTransactions: () => void;
 }
 type IReportProps = IReportOwnProps & IReportAppStateProps & IReportDispatchProps;
@@ -134,7 +134,7 @@ class extends React.Component<IReportProps, IReportState> {
         <MenuBar
           title='Report'
           cloudState={this.props.settingsCloudState}
-          onSaveClick={this.handleSaveReportJson}
+          onSaveClick={this.props.saveSettings}
         />
 
         <div className={classes.controls}>
@@ -205,10 +205,6 @@ class extends React.Component<IReportProps, IReportState> {
     this.setState({
       categoriesPretty: categoriesPretty,
     });
-  }
-
-  public handleSaveReportJson = (): void => {
-    this.props.saveSettings(this.props.settings);
   }
 
   // Builds the tree to be rendered.
@@ -335,8 +331,8 @@ const mapDispatchToProps = (dispatch: ThunkDispatch<IAppState, null, any>): IRep
   updateReportCategories: (categories) => {
     dispatch(updateSetting('reportCategories', categories));
   },
-  saveSettings: (settings) => {
-    dispatch(saveSettingsToDropbox(settings));
+  saveSettings: () => {
+    dispatch(saveSettingsToDropbox());
   },
   fetchTransactions: () => {
     dispatch(fetchTransactionsFromDropboxIfNeeded());
