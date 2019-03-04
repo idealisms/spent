@@ -39,7 +39,7 @@ const styles = (theme: Theme) => createStyles({
 interface IEditTransactionDialogProps extends WithStyles<typeof styles> {
   transaction: ITransaction;
   onClose: () => void;
-  onSaveChanges: () => void;
+  onSaveChanges: (transaction: ITransaction) => void;
 }
 interface IEditTransactionDialogState {
   tagsValue: string;
@@ -125,10 +125,11 @@ class extends React.Component<IEditTransactionDialogProps, IEditTransactionDialo
         }
     });
 
-    this.props.transaction.notes = this.state.notesValue.trim();
-    this.props.transaction.tags = tags;
-
-    this.props.onSaveChanges();
+    this.props.onSaveChanges({
+      ...this.props.transaction,
+      tags,
+      notes: this.state.notesValue.trim(),
+    });
     this.props.onClose();
   }
 });

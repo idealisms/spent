@@ -250,25 +250,34 @@ class extends React.Component<IEditorProps, IEditorState> {
     });
   }
 
-  private handleEditTransaction = (): void => {
+  private handleEditTransaction = (updatedTransaction: Transactions.ITransaction): void => {
+    let transactions = this.state.transactions.map(t => (
+      t.id == updatedTransaction.id ? updatedTransaction : t
+    ));
     // We re-filter the transactions since edits can change search string or
     // tag matches.
     this.setState({
-      transactions: this.state.transactions,
+      transactions,
       selectedTransactions: new Map(),
-      visibleTransactions: this.filterTransactions(this.state.transactions),
+      visibleTransactions: this.filterTransactions(transactions),
       cloudState: CloudState.Modified,
     });
   }
 
-  private handleBatchEditTags = () => {
+  private handleBatchEditTags = (updatedTransactions: Transactions.ITransaction[]) => {
+    let updatedTransactionsMap = new Map(updatedTransactions.map(
+        (t): [string, Transactions.ITransaction] => [t.id, t]));
+
+    let transactions = this.state.transactions.map(t => (
+      updatedTransactionsMap.get(t.id) || t
+    ));
     // Since clearning/removing tags can change the tagFilter results,
     // reset it.
     this.setState({
-      transactions: this.state.transactions,
+      transactions,
       tagFilters: null,
       visibleTransactions: this.filterTransactions(
-          this.state.transactions, undefined, undefined, null),
+          transactions, undefined, undefined, null),
       cloudState: CloudState.Modified,
     });
   }

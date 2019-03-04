@@ -43,7 +43,7 @@ const styles = (theme: Theme) => createStyles({
 interface IBatchEditTagsDialogProps extends WithStyles<typeof styles> {
   transactions: ITransaction[];
   onClose: () => void;
-  onSaveChanges: () => void;
+  onSaveChanges: (updatedTransactions: ITransaction[]) => void;
 }
 interface IBatchEditTagsDialogState {
   action?: BatchEditTagsAction;
@@ -142,31 +142,40 @@ class extends React.Component<IBatchEditTagsDialogProps, IBatchEditTagsDialogSta
   }
 
   private handleBatchEditTags = (): void => {
-    let tags = new Set();
+    let tags: Set<string> = new Set();
     if (Array.isArray(this.state.tags)) {
       this.state.tags.forEach((value) => tags.add(value.value));
     }
 
+    let updatedTransactions: ITransaction[] = [];
     if (this.state.action == BatchEditTagsAction.SetTags) {
+      updatedTransactions = this.props.transactions.map((t) => ({
+        ...t,
+        tags: [...tags],
+      }));
       for (let t of this.props.transactions.values()) {
         t.tags = new Array(...tags);
       }
     } else if (this.state.action == BatchEditTagsAction.AddTags) {
-      for (let t of this.props.transactions.values()) {
+      updatedTransactions = this.props.transactions.map((t) => {
+        let newTransaction = {...t};
         for (let tag of tags) {
-          if (t.tags.indexOf(tag) == -1) {
-            t.tags.push(tag);
+          if (newTransaction.tags.indexOf(tag) == -1) {
+            newTransaction.tags.push(tag);
           }
         }
-      }
+        return newTransaction;
+      });
     } else if (this.state.action == BatchEditTagsAction.RemoveTags) {
-      for (let t of this.props.transactions.values()) {
-        t.tags = t.tags.filter((tag) => !tags.has(tag));
-      }
+      updatedTransactions = this.props.transactions.map((t) => {
+        let newTransaction = {...t};
+        newTransaction.tags = newTransaction.tags.filter((tag) => !tags.has(tag));
+        return newTransaction;
+      });
     }
 
     if (this.state.action) {
-      this.props.onSaveChanges();
+      this.props.onSaveChanges(updatedTransactions);
     }
 
     this.props.onClose();
