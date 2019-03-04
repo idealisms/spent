@@ -6,7 +6,7 @@ import * as React from 'react';
 import { connect } from 'react-redux';
 import { ThunkDispatch } from 'redux-thunk';
 // tslint:disable-next-line:max-line-length
-import { DAILY_EXCLUDE_TAGS, fetchTransactionsFromDropboxIfNeeded, ITransaction, Transaction, TransactionsTable, TransactionUtils } from '../../transactions';
+import { DAILY_EXCLUDE_TAGS, ITransaction, Transaction, TransactionsActions, TransactionsTable, TransactionUtils } from '../../transactions';
 import { IAppState } from '../Model';
 import DailyGraph from './DailyGraph';
 import MenuBar from './MenuBar';
@@ -63,10 +63,12 @@ class extends React.Component<IDailyProps, IDailyState> {
     super(props, context);
     this.state = {
       // March 3, 2018 (months are 0 indexed).
+      // TODO: Move to settings.
       startDate: new Date(2018, 2, 3),
       endDate: this.props.transactions.length
           ? moment(this.props.transactions[0].date).toDate()
           : moment().hours(0).minutes(0).seconds(0).milliseconds(0).toDate(),
+      // TODO: Move to settings.
       dailyBudgetCents: 10402,
     };
     this.props.fetchTransactions();
@@ -179,7 +181,7 @@ const mapStateToProps = (state: IAppState): IDailyAppStateProps => ({
 });
 const mapDispatchToProps = (dispatch: ThunkDispatch<IAppState, null, any>): IDailyDispatchProps => ({
   fetchTransactions: () => {
-    dispatch(fetchTransactionsFromDropboxIfNeeded());
+    dispatch(TransactionsActions.fetchTransactionsFromDropboxIfNeeded());
   },
 });
 
