@@ -1,16 +1,16 @@
 import { createStyles, TextField, WithStyles } from '@material-ui/core';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import { Theme, withStyles } from '@material-ui/core/styles';
-import * as Dropbox from 'dropbox';
 import { InlineDatePicker } from 'material-ui-pickers';
 import moment from 'moment';
 import * as React from 'react';
+import { connect } from 'react-redux';
 import Select from 'react-select';
 import { ValueType } from 'react-select/lib/types';
+import { ThunkDispatch } from 'redux-thunk';
 import { isUndefined } from 'util';
-import { ACCESS_TOKEN } from '../../config';
 import * as Transactions from '../../transactions';
-import { CloudState } from '../Model';
+import { CloudState, IAppState } from '../Model';
 import MenuBar from './MenuBar';
 
 const styles = (theme: Theme) => createStyles({
@@ -60,15 +60,23 @@ const styles = (theme: Theme) => createStyles({
   },
 });
 
-interface IEditorProps extends WithStyles<typeof styles> {
+interface IEditorOwnProps extends WithStyles<typeof styles> {
 }
-interface IEditorState {
+interface IEditorAppStateProps {
   transactions: Transactions.ITransaction[];
+  cloudState: CloudState;
+}
+interface IEditorDispatchProps {
+  fetchTransactions: () => void;
+  updateTransactions: (transactions: Transactions.ITransaction[]) => void;
+  saveTransactions: () => void;
+}
+type IEditorProps = IEditorOwnProps & IEditorAppStateProps & IEditorDispatchProps;
+interface IEditorState {
   visibleTransactions: Transactions.ITransaction[];
   startDate: Date;
   endDate: Date;
   selectedTransactions: Map<string, Transactions.ITransaction>;
-  cloudState: CloudState;
   tagFilters: ValueType<{label: string, value: string}>;
   searchQuery: string;
 }
@@ -77,17 +85,27 @@ const Editor = withStyles(styles)(
 class extends React.Component<IEditorProps, IEditorState> {
   constructor(props: IEditorProps, context?: any) {
     super(props, context);
-    this.state = {
-      transactions: [],
+
+    let state: IEditorState = {
       visibleTransactions: [],
       startDate: moment().subtract(3, 'months').toDate(),
       endDate: moment().hours(0).minutes(0).seconds(0).milliseconds(0).toDate(),
       selectedTransactions: new Map(),
-      cloudState: CloudState.Done,
-      tagFilters: null,
+      tagFilters: [],
       searchQuery: '',
     };
-    this.loadFromDropbox();
+
+    this.state = this.initState(state);
+    this.props.fetchTransactions();
+  }
+
+  public componentDidUpdate(prevProps: IEditorProps): void {
+    if (this.props.transactions !== prevProps.transactions) {
+      this.setState({
+        ...this.initState(this.state),
+        selectedTransactions: new Map(),
+      });
+    }
   }
 
   public render(): React.ReactElement<object> {
@@ -105,9 +123,9 @@ class extends React.Component<IEditorProps, IEditorState> {
 
     let minDate = moment(this.state.startDate).toDate();
     let maxDate = moment(this.state.endDate).toDate();
-    if (this.state.transactions.length > 0) {
-      minDate = moment(this.state.transactions.slice(-1)[0].date).toDate();
-      maxDate = moment(this.state.transactions[0].date).toDate();
+    if (this.props.transactions.length > 0) {
+      minDate = moment(this.props.transactions.slice(-1)[0].date).toDate();
+      maxDate = moment(this.props.transactions[0].date).toDate();
     }
 
     let tags = Transactions.TransactionUtils.getTags(this.state.visibleTransactions);
@@ -119,8 +137,8 @@ class extends React.Component<IEditorProps, IEditorState> {
         <MenuBar
             title='Editor'
             selectedTransactions={this.state.selectedTransactions}
-            cloudState={this.state.cloudState}
-            onSaveClick={this.handleSaveTransactions}
+            cloudState={this.props.cloudState}
+            onSaveClick={this.props.saveTransactions}
             onSelectedBackClick={this.handleClearSelections}
             onSelectedEditSaveClick={this.handleEditTransaction}
             onSelectedBatchEditTagsSaveClick={this.handleBatchEditTags}
@@ -170,7 +188,7 @@ class extends React.Component<IEditorProps, IEditorState> {
             value={this.state.searchQuery}
           />
         </div>
-        {this.state.transactions.length
+        {this.props.transactions.length
             ? <Transactions.TransactionsTable
                   classes={{root: classes.transactionsTable}}
                   lazyRender>
@@ -185,44 +203,44 @@ class extends React.Component<IEditorProps, IEditorState> {
     </div>);
   }
 
-  public handleChangeStartDate = (m: moment.Moment): void => {
+  private handleChangeStartDate = (m: moment.Moment): void => {
     let startDate = m.toDate();
     this.setState({
       startDate,
-      visibleTransactions: this.filterTransactions(this.state.transactions, startDate),
+      visibleTransactions: this.filterTransactions(this.props.transactions, startDate),
       selectedTransactions: new Map(),
     });
   }
 
-  public handleChangeEndDate = (m: moment.Moment): void => {
+  private handleChangeEndDate = (m: moment.Moment): void => {
     let endDate = m.toDate();
     this.setState({
       endDate,
-      visibleTransactions: this.filterTransactions(this.state.transactions, undefined, endDate),
+      visibleTransactions: this.filterTransactions(this.props.transactions, undefined, endDate),
       selectedTransactions: new Map(),
     });
   }
 
-  public handleChangeTagFilter = (tagFilters: ValueType<{label: string, value: string}>, action: any): void => {
+  private handleChangeTagFilter = (tagFilters: ValueType<{label: string, value: string}>, action: any): void => {
     this.setState({
       tagFilters: tagFilters,
       visibleTransactions: this.filterTransactions(
-          this.state.transactions, undefined, undefined, tagFilters),
+          this.props.transactions, undefined, undefined, tagFilters),
       selectedTransactions: new Map(),
     });
   }
 
-  public handleChangeSearch = (event: React.ChangeEvent<HTMLInputElement>): void => {
+  private handleChangeSearch = (event: React.ChangeEvent<HTMLInputElement>): void => {
     let searchQuery = event.target.value;
     this.setState({
       searchQuery,
       visibleTransactions: this.filterTransactions(
-          this.state.transactions, undefined, undefined, undefined, searchQuery),
+          this.props.transactions, undefined, undefined, undefined, searchQuery),
       selectedTransactions: new Map(),
     });
   }
 
-  public handleSelectAllClick = (selectAll: boolean): void => {
+  private handleSelectAllClick = (selectAll: boolean): void => {
     if (selectAll) {
       let selectedTransactions = new Map();
       this.state.visibleTransactions.forEach((t) => {
@@ -251,34 +269,30 @@ class extends React.Component<IEditorProps, IEditorState> {
   }
 
   private handleEditTransaction = (updatedTransaction: Transactions.ITransaction): void => {
-    let transactions = this.state.transactions.map(t => (
+    this.props.updateTransactions(this.props.transactions.map(t => (
       t.id == updatedTransaction.id ? updatedTransaction : t
-    ));
+    )));
     // We re-filter the transactions since edits can change search string or
     // tag matches.
     this.setState({
-      transactions,
       selectedTransactions: new Map(),
-      visibleTransactions: this.filterTransactions(transactions),
-      cloudState: CloudState.Modified,
+      visibleTransactions: this.filterTransactions(this.props.transactions),
     });
   }
 
   private handleBatchEditTags = (updatedTransactions: Transactions.ITransaction[]) => {
     let updatedTransactionsMap = new Map(updatedTransactions.map(
         (t): [string, Transactions.ITransaction] => [t.id, t]));
-
-    let transactions = this.state.transactions.map(t => (
+    this.props.updateTransactions(this.props.transactions.map(t => (
       updatedTransactionsMap.get(t.id) || t
-    ));
+    )));
+
     // Since clearning/removing tags can change the tagFilter results,
     // reset it.
     this.setState({
-      transactions,
       tagFilters: null,
       visibleTransactions: this.filterTransactions(
-          transactions, undefined, undefined, null),
-      cloudState: CloudState.Modified,
+          this.props.transactions, undefined, undefined, null),
     });
   }
 
@@ -287,7 +301,7 @@ class extends React.Component<IEditorProps, IEditorState> {
     fromTransactions.delete(transaction.id);
     let selectedTransactions = new Map();
     let transactionsToKeep: Transactions.ITransaction[] = [];
-    for (let t of this.state.transactions) {
+    for (let t of this.props.transactions) {
       if (fromTransactions.has(t.id)) {
         continue;
       } else if (t.id == transaction.id) {
@@ -311,28 +325,26 @@ class extends React.Component<IEditorProps, IEditorState> {
       }
       transactionsToKeep.push(t);
     }
+    this.props.updateTransactions(transactionsToKeep);
     this.setState({
-      transactions: transactionsToKeep,
       visibleTransactions: this.filterTransactions(transactionsToKeep),
       selectedTransactions,
-      cloudState: CloudState.Modified,
     });
   }
 
   private handleDeleteTransactions = (transactionsToDelete: Map<string, Transactions.ITransaction>): void => {
-    let transactionsToKeep = this.state.transactions.filter((t: Transactions.ITransaction) => {
+    let transactionsToKeep = this.props.transactions.filter((t: Transactions.ITransaction) => {
       return !transactionsToDelete.has(t.id);
     });
+    this.props.updateTransactions(transactionsToKeep);
     this.setState({
-      transactions: transactionsToKeep,
       visibleTransactions: this.filterTransactions(transactionsToKeep),
       selectedTransactions: new Map(),
-      cloudState: CloudState.Modified,
     });
   }
 
   private handleSplitTransaction = (newTransactions: Map<string, Transactions.ITransaction>): void => {
-    let transactionsToKeep = this.state.transactions.filter((t: Transactions.ITransaction) => {
+    let transactionsToKeep = this.props.transactions.filter((t: Transactions.ITransaction) => {
       return !this.state.selectedTransactions.has(t.id);
     });
     let selectedTransactions = new Map();
@@ -341,34 +353,11 @@ class extends React.Component<IEditorProps, IEditorState> {
       selectedTransactions.set(transaction.id, transaction);
     }
     transactionsToKeep.sort(Transactions.TransactionUtils.compareTransactions);
+    this.props.updateTransactions(transactionsToKeep);
     this.setState({
-      transactions: transactionsToKeep,
       visibleTransactions: this.filterTransactions(transactionsToKeep),
       selectedTransactions,
-      cloudState: CloudState.Modified,
     });
-  }
-
-  private handleSaveTransactions = (): void => {
-    this.setState({cloudState: CloudState.Uploading});
-    let filesCommitInfo = {
-        contents: JSON.stringify(this.state.transactions),
-        path: '/transactions.json',
-        mode: {'.tag': 'overwrite'} as DropboxTypes.files.WriteModeOverwrite,
-        autorename: false,
-        mute: false,
-    };
-    let dbx = new Dropbox.Dropbox({ accessToken: ACCESS_TOKEN, fetch: fetch });
-    dbx.filesUpload(filesCommitInfo)
-        .then(metadata => {
-            console.log('wrote to dropbox');
-            console.log(metadata);
-            this.setState({cloudState: CloudState.Done});
-        }).catch(error => {
-            console.log('error');
-            console.log(error);
-            this.setState({cloudState: CloudState.Modified});
-        });
   }
 
   private handleClearSelections = (): void => {
@@ -377,42 +366,20 @@ class extends React.Component<IEditorProps, IEditorState> {
     });
   }
 
-  private loadFromDropbox = (): void => {
-    let filesDownloadArg = {
-      path: '/transactions.json',
-    };
-    let dbx = new Dropbox.Dropbox({ accessToken: ACCESS_TOKEN, fetch: fetch });
-    let daily = this;
-    dbx.filesDownload(filesDownloadArg)
-        .then(file => {
-            let fr = new FileReader();
-            fr.addEventListener('load', ev => {
-                let transactions: Transactions.ITransaction[] = JSON.parse(fr.result as string);
-                let startDate = this.state.startDate;
-                let endDate = this.state.endDate;
-                if (transactions.length) {
-                  startDate = moment(transactions[transactions.length - 1].date).toDate();
-                  endDate = moment(transactions[0].date).toDate();
-                }
-
-                daily.setState({
-                  transactions,
-                  startDate,
-                  endDate,
-                  visibleTransactions: this.filterTransactions(
-                      transactions, startDate, endDate),
-                });
-            });
-            fr.addEventListener('error', ev => {
-                console.log(ev);
-            });
-            // NOTE: The Dropbox SDK specification does not include a fileBlob
-            // field on the FileLinkMetadataReference type, so it is missing from
-            // the TypeScript type. This field is injected by the Dropbox SDK.
-            fr.readAsText((file as any).fileBlob);
-        }).catch(error => {
-            console.log(error);
-        });
+  private initState(state: IEditorState): IEditorState {
+    if (this.props.transactions.length) {
+      const transactions = this.props.transactions;
+      let startDate = moment(transactions[transactions.length - 1].date).toDate();
+      let endDate = moment(transactions[0].date).toDate();
+      return {
+          ...state,
+          startDate,
+          endDate,
+          visibleTransactions: this.filterTransactions(
+              transactions, startDate, endDate, state.tagFilters, state.searchQuery),
+      };
+    }
+    return state;
   }
 
   private filterTransactions(
@@ -455,4 +422,20 @@ class extends React.Component<IEditorProps, IEditorState> {
   }
 });
 
-export default Editor;
+const mapStateToProps = (state: IAppState): IEditorAppStateProps => ({
+  transactions: state.transactions.transactions,
+  cloudState: state.transactions.cloudState,
+});
+const mapDispatchToProps = (dispatch: ThunkDispatch<IAppState, null, any>): IEditorDispatchProps => ({
+  fetchTransactions: () => {
+    dispatch(Transactions.TransactionsActions.fetchTransactionsFromDropboxIfNeeded());
+  },
+  updateTransactions: (transactions) => {
+    dispatch(Transactions.TransactionsActions.updateTransactions(transactions));
+  },
+  saveTransactions: () => {
+    dispatch(Transactions.TransactionsActions.saveTransactionsToDropbox());
+  },
+});
+
+export default connect(mapStateToProps, mapDispatchToProps)(Editor);
