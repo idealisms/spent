@@ -8,6 +8,8 @@ const styles = (theme: Theme) => createStyles({
   root: {
     // The border rendered on the bottom of each row takes 1px.
     lineHeight: `${ROW_HEIGHT - 1}px`,
+    // This allows overflow: auto to work on iOS.
+    WebkitOverflowScrolling: 'touch',
   },
 });
 interface ITransactionsTableProps extends WithStyles<typeof styles> {
