@@ -395,11 +395,12 @@ class extends React.Component<IEditorProps, IEditorState> {
         : [];
     return Transactions.TransactionUtils.filterTransactions(
         transactions,
-        startDate || this.state.startDate,
-        endDate || this.state.endDate,
-        tagsInclude,
-        undefined,
-        searchQuery);
+        {
+          startDate: startDate || this.state.startDate,
+          endDate: endDate || this.state.endDate,
+          tagsIncludeAll: tagsInclude,
+          searchQuery,
+        });
   }
 });
 

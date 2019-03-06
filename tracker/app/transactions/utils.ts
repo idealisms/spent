@@ -183,54 +183,66 @@ export function filterTransactionsByDate(transactions: ITransaction[], startDate
   return transactions.slice(endIndex, startIndex + 1);
 }
 
+/** Filters for {filterTransactions}. */
+export interface IFilters {
+  /** Starting date, inclusive. */
+  startDate?: Date;
+  /** Ending date, inclusive. */
+  endDate?: Date;
+  /** The transaction must have one of these tags. */
+  tagsIncludeAny?: string[];
+  /** The transaction must have all of these tags. */
+  tagsIncludeAll?: string[];
+  /** The transaction may not have any of these tags. */
+  tagsExcludeAny?: string[];
+  /** Split the search query into keywords and the transaction must have
+   *  all of the keywords in the description or notes.
+   */
+  searchQuery?: string;
+}
 /**
  * Filter transactions by the parameters provided.
- *
- * If tagsInclude is not empty, then the transaction must have all the tags
- * listed.
- *
- * If tagsExclude is not empty, then the transaction must have none of the
- * tags listed.
- *
- * searchQuery is split into keywords and the transaction must have all the
- * keywords in the description or notes.
  */
 export function filterTransactions(
     transactions: ITransaction[],
-    startDate?: Date,
-    endDate?: Date,
-    tagsInclude?: string[],
-    tagsExclude?: string[],
-    searchQuery?: string): ITransaction[] {
+    filters: IFilters): ITransaction[] {
   if (!transactions.length) {
     return [];
   }
   let filteredTransactions: ITransaction[] = transactions;
-  if (startDate || endDate) {
+  if (filters.startDate || filters.endDate) {
     filteredTransactions = filterTransactionsByDate(
         filteredTransactions,
-        startDate || moment(transactions[transactions.length - 1].date).toDate(),
-        endDate || moment(transactions[0].date).toDate());
+        filters.startDate || moment(transactions[transactions.length - 1].date).toDate(),
+        filters.endDate || moment(transactions[0].date).toDate());
   }
 
-  if (tagsInclude && tagsInclude.length > 0) {
-    let includeSet = new Set(tagsInclude);
+  if (filters.tagsIncludeAll && filters.tagsIncludeAll.length > 0) {
+    let tagsInclude = new Set(filters.tagsIncludeAll);
     filteredTransactions = filteredTransactions.filter(transaction => {
-      let intersection = transaction.tags.filter(tag => includeSet.has(tag));
-      return intersection.length == includeSet.size;
+      let intersection = transaction.tags.filter(tag => tagsInclude.has(tag));
+      return intersection.length == tagsInclude.size;
     });
   }
 
-  if (tagsExclude &&  tagsExclude.length > 0) {
-    let excludeSet = new Set(tagsExclude);
+  if (filters.tagsIncludeAny && filters.tagsIncludeAny.length > 0) {
+    let tagsInclude = new Set(filters.tagsIncludeAny);
     filteredTransactions = filteredTransactions.filter(transaction => {
-      let intersection = transaction.tags.filter(tag => excludeSet.has(tag));
+      let intersection = transaction.tags.filter(tag => tagsInclude.has(tag));
+      return intersection.length > 0;
+    });
+  }
+
+  if (filters.tagsExcludeAny &&  filters.tagsExcludeAny.length > 0) {
+    let tagsExclude = new Set(filters.tagsExcludeAny);
+    filteredTransactions = filteredTransactions.filter(transaction => {
+      let intersection = transaction.tags.filter(tag => tagsExclude.has(tag));
       return intersection.length == 0;
     });
   }
 
-  if (searchQuery) {
-    let tokens = searchQuery.toLowerCase().split(/\s+/);
+  if (filters.searchQuery) {
+    let tokens = filters.searchQuery.toLowerCase().split(/\s+/);
     filteredTransactions = filteredTransactions.filter(transaction => {
       let descriptionLowerCase = transaction.description.toLowerCase();
       let notesLowerCase = (transaction.notes || '').toLowerCase();

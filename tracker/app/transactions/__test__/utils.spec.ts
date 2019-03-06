@@ -101,65 +101,78 @@ describe('Home', () => {
     let transactions = JSON.parse(fs.readFileSync('./app/transactions/__test__/transactions.json').toString());
 
     // No filters.
-    let filtered = utils.filterTransactions(transactions);
+    let filtered = utils.filterTransactions(transactions, {});
     expect(filtered.length).toBe(transactions.length);
 
     filtered = utils.filterTransactions(
-        transactions, moment('2019-01-03').toDate());
+        transactions, { startDate: moment('2019-01-03').toDate() });
     expect(filtered.length).toBe(6);
 
     filtered = utils.filterTransactions(
-        transactions, undefined, moment('2019-01-04').toDate());
+        transactions, { endDate: moment('2019-01-04').toDate() });
     expect(filtered.length).toBe(8);
 
     filtered = utils.filterTransactions(
-        transactions, undefined, undefined, ['aaa']);
+        transactions, { tagsIncludeAll: ['aaa'] });
     expect(filtered.length).toBe(5);
     filtered = utils.filterTransactions(
-        transactions, undefined, undefined, ['aaa', 'bbb']);
+        transactions, { tagsIncludeAll: ['aaa', 'bbb'] });
     expect(filtered.length).toBe(2);
 
     filtered = utils.filterTransactions(
-        transactions, undefined, undefined, undefined, ['bbb']);
+        transactions, { tagsIncludeAny: ['aaa'] });
+    expect(filtered.length).toBe(5);
+    filtered = utils.filterTransactions(
+        transactions, { tagsIncludeAny: ['aaa', 'bbb'] });
+    expect(filtered.length).toBe(7);
+
+    filtered = utils.filterTransactions(
+        transactions, { tagsExcludeAny: ['bbb'] });
     expect(filtered.length).toBe(6);
     filtered = utils.filterTransactions(
-        transactions, undefined, undefined, undefined, ['bbb', 'aaa']);
+        transactions, { tagsExcludeAny: ['bbb', 'aaa'] });
     expect(filtered.length).toBe(3);
 
     filtered = utils.filterTransactions(
-        transactions, undefined, undefined, undefined, undefined, 'a');
+        transactions, { searchQuery: 'a' });
     expect(filtered.length).toBe(10);
     filtered = utils.filterTransactions(
-        transactions, undefined, undefined, undefined, undefined, 'notfound');
+        transactions, { searchQuery: 'notfound' });
     expect(filtered.length).toBe(0);
     filtered = utils.filterTransactions(
-        transactions, undefined, undefined, undefined, undefined, 'note 1');
+        transactions, { searchQuery: 'note 1' });
     expect(filtered.length).toBe(2);
     filtered = utils.filterTransactions(
-        transactions, undefined, undefined, undefined, undefined, 'note  aaa');
+        transactions, { searchQuery: 'note  aaa' });
     expect(filtered.length).toBe(1);
     filtered = utils.filterTransactions(
-        transactions, undefined, undefined, undefined, undefined, '1 2');
+        transactions, { searchQuery: '1 2' });
     expect(filtered.length).toBe(0);
     filtered = utils.filterTransactions(
-        transactions, undefined, undefined, undefined, undefined, 'aaa');
+        transactions, { searchQuery: 'aaa' });
     expect(filtered.length).toBe(1);
 
     filtered = utils.filterTransactions(
         transactions,
-        moment('2019-01-02').toDate(),
-        moment('2019-01-04').toDate(),
-        ['aaa'],
-        ['bbb'],
-        'note');
+        {
+          startDate: moment('2019-01-02').toDate(),
+          endDate: moment('2019-01-04').toDate(),
+          tagsIncludeAll: ['aaa'],
+          tagsIncludeAny: ['aaa'],
+          tagsExcludeAny: ['bbb'],
+          searchQuery: 'note',
+        });
     expect(filtered.length).toBe(2);
     filtered = utils.filterTransactions(
         transactions,
-        moment('2019-01-02').toDate(),
-        moment('2019-01-04').toDate(),
-        ['aaa'],
-        ['bbb'],
-        'aae');
+        {
+          startDate: moment('2019-01-02').toDate(),
+          endDate: moment('2019-01-04').toDate(),
+          tagsIncludeAll: ['aaa'],
+          tagsIncludeAny: ['aaa'],
+          tagsExcludeAny: ['bbb'],
+          searchQuery: 'aae',
+        });
     expect(filtered.length).toBe(1);
   });
 });
