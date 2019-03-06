@@ -389,36 +389,17 @@ class extends React.Component<IEditorProps, IEditorState> {
       tagFilters?: ValueType<{label: string, value: string}>,
       searchQuery?: string): Transactions.ITransaction[] {
 
-    let filteredTransactions = Transactions.TransactionUtils.filterTransactionsByDate(
+    tagFilters = isUndefined(tagFilters) ? this.state.tagFilters : tagFilters;
+    let tagsInclude = (Array.isArray(tagFilters) && tagFilters.length > 0)
+        ? tagFilters.map(valueType => valueType.value)
+        : [];
+    return Transactions.TransactionUtils.filterTransactions(
         transactions,
         startDate || this.state.startDate,
-        endDate || this.state.endDate);
-
-    tagFilters = isUndefined(tagFilters) ? this.state.tagFilters : tagFilters;
-    if (Array.isArray(tagFilters) && tagFilters.length > 0) {
-      let tagsInclude = new Set(tagFilters.map((t) => (t.value)));
-
-      filteredTransactions = filteredTransactions.filter((transaction) => {
-        let intersection = transaction.tags.filter((t) => tagsInclude.has(t));
-        return intersection.length == tagsInclude.size;
-      });
-    }
-    searchQuery = isUndefined(searchQuery) ? this.state.searchQuery : searchQuery;
-    if (searchQuery) {
-      let tokens = searchQuery.toLowerCase().split(/\s+/);
-      filteredTransactions = filteredTransactions.filter((transaction) => {
-        let descriptionLowerCase = transaction.description.toLowerCase();
-        let notesLowerCase = (transaction.notes || '').toLowerCase();
-        for (let token of tokens) {
-          if (descriptionLowerCase.indexOf(token) == -1 &&
-              notesLowerCase.indexOf(token) == -1) {
-            return false;
-          }
-        }
-        return true;
-      });
-    }
-    return filteredTransactions;
+        endDate || this.state.endDate,
+        tagsInclude,
+        undefined,
+        searchQuery);
   }
 });
 

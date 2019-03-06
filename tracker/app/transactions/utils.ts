@@ -183,6 +183,70 @@ export function filterTransactionsByDate(transactions: ITransaction[], startDate
   return transactions.slice(endIndex, startIndex + 1);
 }
 
+/**
+ * Filter transactions by the parameters provided.
+ *
+ * If tagsInclude is not empty, then the transaction must have all the tags
+ * listed.
+ *
+ * If tagsExclude is not empty, then the transaction must have none of the
+ * tags listed.
+ *
+ * searchQuery is split into keywords and the transaction must have all the
+ * keywords in the description or notes.
+ */
+export function filterTransactions(
+    transactions: ITransaction[],
+    startDate?: Date,
+    endDate?: Date,
+    tagsInclude?: string[],
+    tagsExclude?: string[],
+    searchQuery?: string): ITransaction[] {
+  if (!transactions.length) {
+    return [];
+  }
+  let filteredTransactions: ITransaction[] = transactions;
+  if (startDate || endDate) {
+    filteredTransactions = filterTransactionsByDate(
+        filteredTransactions,
+        startDate || moment(transactions[transactions.length - 1].date).toDate(),
+        endDate || moment(transactions[0].date).toDate());
+  }
+
+  if (tagsInclude && tagsInclude.length > 0) {
+    let includeSet = new Set(tagsInclude);
+    filteredTransactions = filteredTransactions.filter(transaction => {
+      let intersection = transaction.tags.filter(tag => includeSet.has(tag));
+      return intersection.length == includeSet.size;
+    });
+  }
+
+  if (tagsExclude &&  tagsExclude.length > 0) {
+    let excludeSet = new Set(tagsExclude);
+    filteredTransactions = filteredTransactions.filter(transaction => {
+      let intersection = transaction.tags.filter(tag => excludeSet.has(tag));
+      return intersection.length == 0;
+    });
+  }
+
+  if (searchQuery) {
+    let tokens = searchQuery.toLowerCase().split(/\s+/);
+    filteredTransactions = filteredTransactions.filter(transaction => {
+      let descriptionLowerCase = transaction.description.toLowerCase();
+      let notesLowerCase = (transaction.notes || '').toLowerCase();
+      for (let token of tokens) {
+        if (descriptionLowerCase.indexOf(token) == -1 &&
+            notesLowerCase.indexOf(token) == -1) {
+          return false;
+        }
+      }
+      return true;
+    });
+  }
+
+  return filteredTransactions;
+}
+
 export function getTags(transactions: ITransaction[]): Set<string> {
   let tagSet = new Set();
   for (let transaction of transactions) {

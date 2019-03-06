@@ -1,6 +1,7 @@
 // import * as React from 'react';
 // import {createRenderer, ShallowRenderer} from 'react-test-renderer/shallow';
 import * as fs from 'fs';
+import moment from 'moment';
 import { ITransaction } from '../Model';
 import * as utils from '../utils';
 
@@ -57,7 +58,6 @@ describe('Home', () => {
     }} as Crypto)).toBe('0001001000510100027105100961100019a12710');
   });
 
-  // Disable for now, there are problems importing moment in the tests.
   it('filterTransactionsByDate test', () => {
     let transactions = JSON.parse(fs.readFileSync('./app/transactions/__test__/transactions-dates-only.json').toString());
     // March 1 to Apr 30.
@@ -95,5 +95,71 @@ describe('Home', () => {
     // Start date is after end date.
     filtered = utils.filterTransactionsByDate(transactions, new Date(2050, 0, 1), new Date(2010, 0, 1));
     expect(filtered.length).toBe(0);
+  });
+
+  it('filterTransactions test', () => {
+    let transactions = JSON.parse(fs.readFileSync('./app/transactions/__test__/transactions.json').toString());
+
+    // No filters.
+    let filtered = utils.filterTransactions(transactions);
+    expect(filtered.length).toBe(transactions.length);
+
+    filtered = utils.filterTransactions(
+        transactions, moment('2019-01-03').toDate());
+    expect(filtered.length).toBe(6);
+
+    filtered = utils.filterTransactions(
+        transactions, undefined, moment('2019-01-04').toDate());
+    expect(filtered.length).toBe(8);
+
+    filtered = utils.filterTransactions(
+        transactions, undefined, undefined, ['aaa']);
+    expect(filtered.length).toBe(5);
+    filtered = utils.filterTransactions(
+        transactions, undefined, undefined, ['aaa', 'bbb']);
+    expect(filtered.length).toBe(2);
+
+    filtered = utils.filterTransactions(
+        transactions, undefined, undefined, undefined, ['bbb']);
+    expect(filtered.length).toBe(6);
+    filtered = utils.filterTransactions(
+        transactions, undefined, undefined, undefined, ['bbb', 'aaa']);
+    expect(filtered.length).toBe(3);
+
+    filtered = utils.filterTransactions(
+        transactions, undefined, undefined, undefined, undefined, 'a');
+    expect(filtered.length).toBe(10);
+    filtered = utils.filterTransactions(
+        transactions, undefined, undefined, undefined, undefined, 'notfound');
+    expect(filtered.length).toBe(0);
+    filtered = utils.filterTransactions(
+        transactions, undefined, undefined, undefined, undefined, 'note 1');
+    expect(filtered.length).toBe(2);
+    filtered = utils.filterTransactions(
+        transactions, undefined, undefined, undefined, undefined, 'note  aaa');
+    expect(filtered.length).toBe(1);
+    filtered = utils.filterTransactions(
+        transactions, undefined, undefined, undefined, undefined, '1 2');
+    expect(filtered.length).toBe(0);
+    filtered = utils.filterTransactions(
+        transactions, undefined, undefined, undefined, undefined, 'aaa');
+    expect(filtered.length).toBe(1);
+
+    filtered = utils.filterTransactions(
+        transactions,
+        moment('2019-01-02').toDate(),
+        moment('2019-01-04').toDate(),
+        ['aaa'],
+        ['bbb'],
+        'note');
+    expect(filtered.length).toBe(2);
+    filtered = utils.filterTransactions(
+        transactions,
+        moment('2019-01-02').toDate(),
+        moment('2019-01-04').toDate(),
+        ['aaa'],
+        ['bbb'],
+        'aae');
+    expect(filtered.length).toBe(1);
   });
 });
