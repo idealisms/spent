@@ -12,6 +12,7 @@ const initialState: ISettingsState = {
 
   settings: {
     reportCategories: [],
+    spendTargets: [],
   },
 };
 

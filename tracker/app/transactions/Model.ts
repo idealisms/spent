@@ -84,29 +84,6 @@ export const TAG_TO_CATEGORY: Map<string, Category> = new Map([
   ['vitamins', Category.Vitamins],
 ]);
 
-// TODO: Move into settings.
-export const DAILY_EXCLUDE_TAGS = new Set([
-  'bank transfer',
-  'credit card',
-  'domain name',
-  'exclude',
-  'hoa',
-  'home sale',
-  'insurance',
-  'investment',
-  'medical',
-  'mortgage',
-  'netflix',
-  'new house',
-  'paycheck',
-  'phone service',
-  'rent',
-  'settlement',
-  'stock',
-  'taxes',
-  'utility',
-]);
-
 export interface ITransaction {
   id: string;
   description: string;

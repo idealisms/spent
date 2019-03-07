@@ -85,7 +85,7 @@ export const saveSettingsToDropbox = (): ThunkAction<void, IAppState, null, Sett
 
     let dbx = new Dropbox.Dropbox({ accessToken: ACCESS_TOKEN, fetch });
     let filesCommitInfo = {
-      contents: JSON.stringify(getState().settings.settings),
+      contents: JSON.stringify(getState().settings.settings, null, 2),
       path: '/settings.json',
       mode: {'.tag': 'overwrite'} as DropboxTypes.files.WriteModeOverwrite,
       autorename: false,

@@ -3,7 +3,7 @@ import { Theme, withStyles } from '@material-ui/core/styles';
 import moment from 'moment';
 import * as React from 'react';
 import { Chart } from 'react-google-charts';
-import { DAILY_EXCLUDE_TAGS, ITransaction, TransactionUtils } from '../../transactions';
+import { ITransaction } from '../../transactions';
 
 const styles = (theme: Theme) => createStyles({
   root: {
@@ -20,6 +20,7 @@ interface IDailyGraphProps extends WithStyles<typeof styles> {
   startDate: Date;
   endDate: Date;
   dailyBudgetCents: number;
+  startBalanceCents: number;
   graph_id: string;
 }
 interface IDailyGraphState {
@@ -64,14 +65,10 @@ class extends React.Component<IDailyGraphProps, IDailyGraphState> {
       }
 
       for (let transaction of this.props.transactions) {
-        if (TransactionUtils.shouldExclude(transaction, DAILY_EXCLUDE_TAGS)) {
-          continue;
-        }
-
         dailyTotals[transaction.date] += transaction.amount_cents;
       }
 
-      let currentTotal = 0;
+      let currentTotal = this.props.startBalanceCents;
       for (let m = moment(this.props.startDate); m.isSameOrBefore(moment(this.props.endDate)); m = m.add(1, 'days')) {
         let currentDate = m.format('YYYY-MM-DD');
         currentTotal += dailyTotals[currentDate] - this.props.dailyBudgetCents;
