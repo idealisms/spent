@@ -8,7 +8,6 @@ import { connect } from 'react-redux';
 import Select from 'react-select';
 import { ValueType } from 'react-select/lib/types';
 import { ThunkDispatch } from 'redux-thunk';
-import { isUndefined } from 'util';
 import * as Transactions from '../../transactions';
 import { CloudState, IAppState } from '../Model';
 import MenuBar from './MenuBar';
@@ -389,7 +388,7 @@ class extends React.Component<IEditorProps, IEditorState> {
       tagFilters?: ValueType<{label: string, value: string}>,
       searchQuery?: string): Transactions.ITransaction[] {
 
-    tagFilters = isUndefined(tagFilters) ? this.state.tagFilters : tagFilters;
+    tagFilters = (tagFilters === undefined) ? this.state.tagFilters : tagFilters;
     let tagsInclude = (Array.isArray(tagFilters) && tagFilters.length > 0)
         ? tagFilters.map(valueType => valueType.value)
         : [];

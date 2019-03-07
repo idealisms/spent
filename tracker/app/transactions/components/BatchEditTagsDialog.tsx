@@ -11,7 +11,6 @@ import { Theme, withStyles } from '@material-ui/core/styles';
 import * as React from 'react';
 import CreatableSelect from 'react-select/lib/Creatable';
 import { ValueType } from 'react-select/lib/types';
-import { isUndefined } from 'util';
 import { ITransaction } from '../Model';
 import * as TransactionUtils from '../utils';
 import Transaction from './Transaction';
@@ -107,7 +106,7 @@ class extends React.Component<IBatchEditTagsDialogProps, IBatchEditTagsDialogSta
                 value={this.state.tags}
                 onChange={this.handleChangeTagSelect}
                 options={tagSuggestions}
-                isDisabled={isUndefined(this.state.action)}
+                isDisabled={this.state.action === undefined}
                 formatCreateLabel={(inputValue) => <span>New tag: {inputValue}</span>}
                 createOptionPosition='first'
                 placeholder={this.state.action ? this.state.action + ' tag(s)' : ''}
@@ -182,7 +181,7 @@ class extends React.Component<IBatchEditTagsDialogProps, IBatchEditTagsDialogSta
   }
 
   private isApplyDisabled = (): boolean => {
-    if (isUndefined(this.state.action)) {
+    if (this.state.action === undefined) {
       return true;
     }
     if (this.state.action != BatchEditTagsAction.SetTags) {
