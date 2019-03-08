@@ -7,12 +7,25 @@ export enum CloudState {
   Uploading = 3,
 }
 
+/**
+ * Used on the report page for making annual reports.
+ *
+ * Each ReportNode is a category of transaction types.
+ */
 export interface IReportNode {
   title: string;
+  /** Transaction is included if it has any of these tags. */
   tags: string[];
   subcategories: IReportNode[];
 }
 
+/**
+ * Used to track a spending target.
+ *
+ * For example, can be used to track a total budget,
+ * or perhaps a more specific budget like healthcare
+ * or eating out.
+ */
 export interface ISpendTarget {
   name: string;
   targetAnnualCents: number;
@@ -24,9 +37,12 @@ export interface ISpendTarget {
    */
   endDate?: string;
   tags: {
+    /** A transaction is included if it has any of these tags. */
     include: string[];
+    /** A transaction is excluded if it has any of these tags. */
     exclude: string[];
   };
+  /** Optional field for arbitrary notes. */
   notes?: string;
 }
 
