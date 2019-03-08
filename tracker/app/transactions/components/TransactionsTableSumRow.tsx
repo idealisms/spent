@@ -16,16 +16,16 @@ const headerStyles = (theme: Theme) => {
   return createStyles(mergedStyles);
 };
 
-interface ITransactionsTableHeaderProps extends WithStyles<typeof headerStyles> {
+interface ITransactionsTableSumRowProps extends WithStyles<typeof headerStyles> {
   transactions: ITransaction[];
-  selectAllChecked: boolean;
+  selectAllChecked?: boolean;
   onSelectAllClick?: (selectAll: boolean) => void;
 }
-interface ITransactionsTableHeaderState {
+interface ITransactionsTableSumRowState {
 }
 const TransactionTableHeader = withStyles(headerStyles)(
-class extends React.Component<ITransactionsTableHeaderProps, ITransactionsTableHeaderState> {
-  constructor(props: ITransactionsTableHeaderProps, context?: any) {
+class extends React.Component<ITransactionsTableSumRowProps, ITransactionsTableSumRowState> {
+  constructor(props: ITransactionsTableSumRowProps, context?: any) {
     super(props, context);
   }
 
@@ -43,12 +43,14 @@ class extends React.Component<ITransactionsTableHeaderProps, ITransactionsTableH
           className={classes.row}>
         <div className={classes.date}><span className='y'>2000-</span>01-01</div>
         <div className={classes.amount + (isCredit ? ' credit' : '')}>{formatAmountNumber(totalAmount)}</div>
-        <div
-            className={classes.category + ' editable'}
-            title='Select All'
-            onClick={this.handleSelectAllClick}>
-          {this.props.selectAllChecked ? <CheckBoxIcon /> : <CheckBoxOutlineBlankIcon />}
-        </div>
+        {this.props.onSelectAllClick
+          ? <div
+                className={classes.category + ' editable'}
+                title='Select All'
+                onClick={this.handleSelectAllClick}>
+              {this.props.selectAllChecked ? <CheckBoxIcon /> : <CheckBoxOutlineBlankIcon />}
+            </div>
+          : <div className={classes.category}></div>}
         <div className={classes.description}>{description}</div>
     </div>);
   }

@@ -191,7 +191,7 @@ class extends React.Component<IEditorProps, IEditorState> {
             ? <Transactions.TransactionsTable
                   classes={{root: classes.transactionsTable}}
                   lazyRender>
-                <Transactions.TransactionsTableHeader
+                <Transactions.TransactionsTableSumRow
                     transactions={this.state.visibleTransactions}
                     selectAllChecked={this.state.visibleTransactions.length == this.state.selectedTransactions.size}
                     onSelectAllClick={this.handleSelectAllClick}
