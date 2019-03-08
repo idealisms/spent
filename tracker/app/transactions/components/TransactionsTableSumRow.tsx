@@ -23,7 +23,7 @@ interface ITransactionsTableSumRowProps extends WithStyles<typeof headerStyles> 
 }
 interface ITransactionsTableSumRowState {
 }
-const TransactionTableHeader = withStyles(headerStyles)(
+const TransactionsTableSumRow = withStyles(headerStyles)(
 class extends React.Component<ITransactionsTableSumRowProps, ITransactionsTableSumRowState> {
   constructor(props: ITransactionsTableSumRowProps, context?: any) {
     super(props, context);
@@ -62,4 +62,4 @@ class extends React.Component<ITransactionsTableSumRowProps, ITransactionsTableS
   }
 });
 
-export default TransactionTableHeader;
+export default TransactionsTableSumRow;
