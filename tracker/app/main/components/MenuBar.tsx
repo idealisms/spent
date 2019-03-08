@@ -12,6 +12,7 @@ import Toolbar from '@material-ui/core/Toolbar';
 import Tooltip from '@material-ui/core/Tooltip';
 import Typography from '@material-ui/core/Typography';
 import ArrowBackIcon from '@material-ui/icons/ArrowBack';
+import BarChartIcon from '@material-ui/icons/BarChart';
 import CallMergeIcon from '@material-ui/icons/CallMerge';
 import CallSplitIcon from '@material-ui/icons/CallSplit';
 import CategoryIcon from '@material-ui/icons/Category';
@@ -29,7 +30,7 @@ import { push } from 'react-router-redux';
 import { Dispatch } from 'redux';
 import * as Transactions from '../../transactions';
 import { CloudState, IAppState } from '../Model';
-import { DailyPage, EditorPage, ReportPage } from './RoutePaths';
+import * as Pages from './RoutePaths';
 
 const styles = (theme: Theme) => createStyles({
   drawerPaper: {
@@ -204,25 +205,33 @@ class extends React.Component<IMenuBarProps, IMenuBarReactState> {
             <ListItem
                 key='Daily'
                 button
-                selected={selectedPage === DailyPage}
-                onClick={() => this.handleNavigate(DailyPage)}>
-              <ListItemIcon><TimelineIcon color={selectedPage === DailyPage ? 'primary' : 'inherit'} /></ListItemIcon>
+                selected={selectedPage === Pages.DailyPage}
+                onClick={() => this.handleNavigate(Pages.DailyPage)}>
+              <ListItemIcon><TimelineIcon color={selectedPage === Pages.DailyPage ? 'primary' : 'inherit'} /></ListItemIcon>
               <ListItemText classes={{primary: classes.drawerItemText}} primary='Daily' />
+            </ListItem>
+            <ListItem
+                key='Monthly'
+                button
+                selected={selectedPage === Pages.MonthlyPage}
+                onClick={() => this.handleNavigate(Pages.MonthlyPage)}>
+              <ListItemIcon><BarChartIcon color={selectedPage === Pages.MonthlyPage ? 'primary' : 'inherit'} /></ListItemIcon>
+              <ListItemText classes={{primary: classes.drawerItemText}} primary='Monthly' />
             </ListItem>
             <ListItem
                 key='Editor'
                 button
-                selected={selectedPage === EditorPage}
-                onClick={() => this.handleNavigate(EditorPage)}>
-              <ListItemIcon><EditIcon color={selectedPage === EditorPage ? 'primary' : 'inherit'} /></ListItemIcon>
+                selected={selectedPage === Pages.EditorPage}
+                onClick={() => this.handleNavigate(Pages.EditorPage)}>
+              <ListItemIcon><EditIcon color={selectedPage === Pages.EditorPage ? 'primary' : 'inherit'} /></ListItemIcon>
               <ListItemText classes={{primary: classes.drawerItemText}} primary='Editor' />
             </ListItem>
             <ListItem
                 key='Report'
                 button
-                selected={selectedPage === ReportPage}
-                onClick={() => this.handleNavigate(ReportPage)}>
-              <ListItemIcon><CategoryIcon color={selectedPage === ReportPage ? 'primary' : 'inherit'} /></ListItemIcon>
+                selected={selectedPage === Pages.ReportPage}
+                onClick={() => this.handleNavigate(Pages.ReportPage)}>
+              <ListItemIcon><CategoryIcon color={selectedPage === Pages.ReportPage ? 'primary' : 'inherit'} /></ListItemIcon>
               <ListItemText classes={{primary: classes.drawerItemText}} primary='Report' />
             </ListItem>
           </List>
