@@ -5,6 +5,7 @@ import MergeTransactionDialog from './components/MergeTransactionDialog';
 import SplitTransactionDialog from './components/SplitTransactionDialog';
 import Transaction from './components/Transaction';
 import TransactionsTable from './components/TransactionsTable';
+import TransactionsTableHeadingRow from './components/TransactionsTableHeadingRow';
 import TransactionsTableSumRow from './components/TransactionsTableSumRow';
 import { Category, ITransaction, ITransactionsState, TAG_TO_CATEGORY } from './Model';
 import { transactionsReducer } from './reducers';
@@ -14,5 +15,5 @@ export { BatchEditTagsDialog, BatchEditTagsAction, Category };
 export { EditTransactionDialog, ITransaction, ITransactionsState };
 export { MergeTransactionDialog, SplitTransactionDialog, TAG_TO_CATEGORY };
 export { Transaction, TransactionsActions, TransactionsTable, TransactionUtils };
-export { transactionsReducer, TransactionsTableSumRow };
+export { transactionsReducer, TransactionsTableSumRow, TransactionsTableHeadingRow };
 

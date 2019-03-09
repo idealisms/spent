@@ -1,4 +1,4 @@
-import { createStyles, WithStyles } from '@material-ui/core';
+import { createStyles, Typography, WithStyles } from '@material-ui/core';
 import MenuItem from '@material-ui/core/MenuItem';
 import OutlinedInput from '@material-ui/core/OutlinedInput';
 import Select from '@material-ui/core/Select';
@@ -8,7 +8,7 @@ import * as React from 'react';
 import { connect } from 'react-redux';
 import { ThunkDispatch } from 'redux-thunk';
 // tslint:disable-next-line:max-line-length
-import { ITransaction, Transaction, TransactionsActions, TransactionsTable, TransactionsTableSumRow, TransactionUtils } from '../../transactions';
+import { ITransaction, Transaction, TransactionsActions, TransactionsTable, TransactionsTableHeadingRow, TransactionsTableSumRow, TransactionUtils } from '../../transactions';
 import { fetchSettingsFromDropboxIfNeeded } from '../actions';
 import { IAppState, ISpendTarget } from '../Model';
 import MenuBar from './MenuBar';
@@ -27,6 +27,13 @@ const styles = (theme: Theme) => createStyles({
     flex: 1,
     overflow: 'auto',
     borderTop: '1px solid lightgrey',
+  },
+  transactionsTableHeader: {
+    lineHeight: 'inherit',
+  },
+  transactionsTableSpacer: {
+    borderBottom: 'none',
+    height: '48px',
   },
 });
 interface IMonthlyOwnProps extends WithStyles<typeof styles> {
@@ -84,7 +91,7 @@ class extends React.Component<IMonthlyProps, IMonthlyState> {
           tagsIncludeAny: spendTarget && spendTarget.tags.include,
           tagsExcludeAny: spendTarget && spendTarget.tags.exclude,
         });
-    let rows = this.groupByMonths(filteredTransactions);
+    let rows = this.groupByMonths(filteredTransactions, spendTarget);
 
     return (
       <div className={classes.root}>
@@ -101,15 +108,10 @@ class extends React.Component<IMonthlyProps, IMonthlyState> {
 
         <div className={classes.controls}>
           <Select
-            value={this.props.spendTargets[this.state.spendTargetIndex]
-                ? this.props.spendTargets[this.state.spendTargetIndex].name
-                : ''}
+            value={spendTarget ? spendTarget.name : ''}
             onChange={this.handleSelectSpendTarget}
             input={
-              <OutlinedInput
-                labelWidth={0}
-                margin='dense'
-                name='Target' />}
+              <OutlinedInput labelWidth={0} margin='dense' name='Target' />}
           >
             {this.props.spendTargets.map(target => (
               <MenuItem value={target.name} key={target.name}>
@@ -143,41 +145,88 @@ class extends React.Component<IMonthlyProps, IMonthlyState> {
     });
   }
 
-  private groupByMonths = (transactions: ITransaction[]): JSX.Element[] => {
+  private groupByMonths = (transactions: ITransaction[], spendTarget?: ISpendTarget): JSX.Element[] => {
+    let classes = this.props.classes;
     let rows: JSX.Element[] = [];
 
-    let monthMap: Map<string, ITransaction[]> = new Map;
+    // Pre-allocate each month with the monthly balance.
+    const monthlyBudgetCents = spendTarget ? spendTarget.targetAnnualCents / 12 : 0;
+    let monthlySpendingMap: Map<string, number> = new Map;
+    if (transactions.length > 0) {
+      let startMonth = moment(transactions[transactions.length - 1].date).date(1).hours(0).minutes(0).seconds(0).milliseconds(0);
+      let endMonth = moment(transactions[0].date).date(1).hours(0).minutes(0).seconds(0).milliseconds(0);
+      for (let m = startMonth; m.isSameOrBefore(endMonth); m = m.add(1, 'months')) {
+        monthlySpendingMap.set(m.format('YYYY-MM'), monthlyBudgetCents);
+      }
+    }
+
+    // Fill in the spending for each month in monthlySpendingMap and allocate
+    // a map of months to transactions to be used below.
+    let monthlyTransactionsMap: Map<string, ITransaction[]> = new Map;
     transactions.forEach(t => {
       let month = moment(t.date).format('YYYY-MM');
-      let arr = monthMap.get(month);
+      let arr = monthlyTransactionsMap.get(month);
       if (arr) {
         arr.push(t);
       } else {
-        monthMap.set(month, [t]);
+        monthlyTransactionsMap.set(month, [t]);
       }
+      monthlySpendingMap.set(month, monthlySpendingMap.get(month)! - t.amount_cents);
     });
+
+    // Now convert monthlySpendingMap to be a rolling total.
+    [...monthlySpendingMap.keys()].sort().reduce(
+      (total: number, month: string): number => {
+        total += monthlySpendingMap.get(month)!;
+        monthlySpendingMap.set(month, total);
+        return total;
+      },
+      spendTarget ? -spendTarget.startBalanceCents : 0);
 
     let lastMonth = '';
     let lastMonthTransactions: ITransaction[] | undefined;
     for (let t of transactions) {
       let month = moment(t.date).format('YYYY-MM');
       if (lastMonth != month) {
-        lastMonthTransactions = monthMap.get(lastMonth);
+        lastMonthTransactions = monthlyTransactionsMap.get(lastMonth);
         if (lastMonthTransactions) {
-          rows.push(<TransactionsTableSumRow transactions={lastMonthTransactions} />);
+          rows.push(...this.monthlySumRows(lastMonth, lastMonthTransactions, monthlySpendingMap));
+          rows.push(<TransactionsTableHeadingRow key={`spacer-${lastMonth}`} classes={{row: classes.transactionsTableSpacer}}/>);
         }
         let headerText = moment(t.date).format('MMMM YYYY');
-        rows.push(<div key={`header-${month}`}>{headerText}</div>);
+        rows.push(
+          <TransactionsTableHeadingRow key={`header-${month}`}>
+            <Typography variant='h6' classes={{root: classes.transactionsTableHeader}}>
+              {headerText}
+            </Typography>
+          </TransactionsTableHeadingRow>);
         lastMonth = month;
       }
       rows.push(<Transaction transaction={t} key={t.id}/>);
     }
-    lastMonthTransactions = monthMap.get(lastMonth);
+    lastMonthTransactions = monthlyTransactionsMap.get(lastMonth);
     if (lastMonthTransactions) {
-      rows.push(<TransactionsTableSumRow transactions={lastMonthTransactions} />);
+      rows.push(...this.monthlySumRows(lastMonth, lastMonthTransactions, monthlySpendingMap));
     }
 
     return rows;
+  }
+
+  private monthlySumRows = (month: string, transactions: ITransaction[], monthlySpendingMap: Map<string, number>): JSX.Element[] => {
+    return [
+      <TransactionsTableSumRow key={`month-sum-${month}`} transactions={transactions} description='monthly total' />,
+      <TransactionsTableSumRow key={`balance-${month}`} transactions={[
+        {
+          id: '',
+          description: '',
+          original_line: '',
+          date: `${month}-01`,
+          tags: [],
+          amount_cents: monthlySpendingMap.get(month)!,
+          transactions: [],
+        }]} description='balance'/>
+      ,
+    ];
   }
 });
 
