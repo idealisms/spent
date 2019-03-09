@@ -150,7 +150,7 @@ class extends React.Component<IMonthlyProps, IMonthlyState> {
     let rows: JSX.Element[] = [];
 
     // Pre-allocate each month with the monthly balance.
-    const monthlyBudgetCents = spendTarget ? spendTarget.targetAnnualCents / 12 : 0;
+    const monthlyBudgetCents = spendTarget ? Math.floor(spendTarget.targetAnnualCents / 12) : 0;
     let monthlySpendingMap: Map<string, number> = new Map;
     if (transactions.length > 0) {
       let startMonth = moment(transactions[transactions.length - 1].date).date(1).hours(0).minutes(0).seconds(0).milliseconds(0);
