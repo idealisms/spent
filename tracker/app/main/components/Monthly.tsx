@@ -35,6 +35,11 @@ const styles = (theme: Theme) => createStyles({
     borderBottom: 'none',
     height: '48px',
   },
+  transactionsTableBalanceAmount: {
+    '&.credit': {
+      color: 'rgba(255, 0, 0, .54)',
+    },
+  },
 });
 interface IMonthlyOwnProps extends WithStyles<typeof styles> {
 }
@@ -213,18 +218,24 @@ class extends React.Component<IMonthlyProps, IMonthlyState> {
   }
 
   private monthlySumRows = (month: string, transactions: ITransaction[], monthlySpendingMap: Map<string, number>): JSX.Element[] => {
+    let classes = this.props.classes;
     return [
       <TransactionsTableSumRow key={`month-sum-${month}`} transactions={transactions} description='monthly total' />,
-      <TransactionsTableSumRow key={`balance-${month}`} transactions={[
-        {
-          id: '',
-          description: '',
-          original_line: '',
-          date: `${month}-01`,
-          tags: [],
-          amount_cents: monthlySpendingMap.get(month)!,
-          transactions: [],
-        }]} description='balance'/>
+      <TransactionsTableSumRow
+        key={`balance-${month}`}
+        transactions={[
+          {
+            id: '',
+            description: '',
+            original_line: '',
+            date: `${month}-01`,
+            tags: [],
+            amount_cents: monthlySpendingMap.get(month)!,
+            transactions: [],
+          }]}
+        description='balance'
+        classes={{amount: classes.transactionsTableBalanceAmount}}
+      />
       ,
     ];
   }

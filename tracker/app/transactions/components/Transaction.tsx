@@ -15,7 +15,7 @@ export const styles = (theme: Theme) => createStyles({
     },
     '&.selected > $category': {
       marginTop: '4px',
-      color: '#757575',
+      color: theme.palette.text.secondary,
     },
   },
   date: {

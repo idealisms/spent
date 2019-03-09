@@ -9,10 +9,10 @@ import { styles } from './Transaction';
 
 const headerStyles = (theme: Theme) => {
   let mergedStyles = styles(theme);
-  mergedStyles.row.color = '#757575';
+  mergedStyles.row.color = theme.palette.text.secondary;
   mergedStyles.date.visibility = 'hidden';
   mergedStyles.category.marginTop = '4px';
-  mergedStyles.category.color = '#757575';
+  mergedStyles.category.color = theme.palette.text.secondary;
   return createStyles(mergedStyles);
 };
 
