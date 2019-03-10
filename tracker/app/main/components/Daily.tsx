@@ -24,6 +24,7 @@ const styles = (theme: Theme) => createStyles({
     flex: 'none',
     display: 'flex',
     flexWrap: 'wrap',
+    marginTop: '16px',
     '& .budgetText': {
       whiteSpace: 'nowrap',
       flexShrink: 1.5,
@@ -41,6 +42,7 @@ const styles = (theme: Theme) => createStyles({
       flex: '1 1 120px',
     },
     '@media (max-width: 420px)': {
+      marginTop: '4px',
       '& button': {
         padding: 0,
       },

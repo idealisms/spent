@@ -3,6 +3,7 @@ import { Theme, withStyles } from '@material-ui/core/styles';
 import moment from 'moment';
 import * as React from 'react';
 import { Chart } from 'react-google-charts';
+import { GoogleDataTableCell } from 'react-google-charts/dist/types';
 import { ITransaction } from '../../transactions';
 
 const styles = (theme: Theme) => createStyles({
@@ -13,6 +14,7 @@ const styles = (theme: Theme) => createStyles({
     '@media (max-width: 420px)': {
       paddingBottom: '0',
     },
+    overflowX: 'auto',
   },
 });
 interface IDailyGraphProps extends WithStyles<typeof styles> {
@@ -24,41 +26,35 @@ interface IDailyGraphProps extends WithStyles<typeof styles> {
   graph_id: string;
 }
 interface IDailyGraphState {
-  containerWidth: number;
 }
 const DailyGraph = withStyles(styles)(
 class extends React.Component<IDailyGraphProps, IDailyGraphState> {
   private container: HTMLElement|null = null;
-
-  constructor(props: IDailyGraphProps, context?: any) {
-    super(props, context);
-    this.state = {
-      containerWidth: -1,
-    };
-  }
 
   public componentDidMount(): void {
     if (!this.container) {
       console.log('container not set (componentDidMount)');
       return;
     }
-    this.setState({
-      containerWidth: this.container.offsetWidth,
-    });
-    window.addEventListener('resize', this.handleWindowResize);
+    this.showEndOfGraph();
   }
 
-  public componentWillUnmount(): void {
-    window.removeEventListener('resize', this.handleWindowResize);
+  public componentDidUpdate(prevProps: IDailyGraphProps): void {
+    if (prevProps.transactions !== this.props.transactions && this.container) {
+      this.showEndOfGraph();
+    }
   }
 
   public render(): React.ReactElement<object> {
     let classes = this.props.classes;
-    let data: [string, number][] = [];
 
-    if (this.props.transactions.length && this.state.containerWidth != -1) {
-      // let startTime = performance.now();
+    // We want the y-axis on the right side only. To do this, we create a
+    // fake data set for the left y-axis.
+    let data: [Date, number|null, number][] = [];
 
+    let min = 0;
+    let max = 0;
+    if (this.props.transactions.length) {
       let dailyTotals: { [s: string]: number; } = {};
       for (let m = moment(this.props.startDate); m.isSameOrBefore(moment(this.props.endDate)); m = m.add(1, 'days')) {
         dailyTotals[m.format('YYYY-MM-DD')] = 0;
@@ -72,46 +68,88 @@ class extends React.Component<IDailyGraphProps, IDailyGraphState> {
       for (let m = moment(this.props.startDate); m.isSameOrBefore(moment(this.props.endDate)); m = m.add(1, 'days')) {
         let currentDate = m.format('YYYY-MM-DD');
         currentTotal += dailyTotals[currentDate] - this.props.dailyBudgetCents;
-        data.push([currentDate, currentTotal / 100.0]);
+        data.push([m.toDate(), data.length ? null : 0, currentTotal / 100.0]);
+
+        min = Math.min(min, currentTotal / 100.0);
+        max = Math.max(max, currentTotal / 100.0);
       }
-      // This takes about 41ms on my laptop when loading 1168 transactions.
-      // Memoizing (e.g., using memoize-one) would help save that time when
-      // resizing, although since that's not the main time sink, ignore it
-      // for now.
-      // console.log(performance.now() - startTime);
     } else {
-      data.push([moment().format('YYYY-MM-DD'), 0]);
+      data.push([moment().toDate(), 0, 0]);
     }
-    if (this.state.containerWidth != -1) {
-      // Limit the number of graph points based on how much space we have.
-      let maxToShow = Math.max(Math.round(this.state.containerWidth / 10), 31);
-      if (maxToShow < data.length) {
-        data = data.slice(data.length - maxToShow);
-      }
-    }
+
+    let chartWidth = data.length < 30 ? 'auto' : `${data.length * 10}px`;
+
+    // Set the y axis range to be 5% padding above and below.
+    let yHeight = max - min;
+    max = max + .05 * yHeight;
+    min = min - .05 * yHeight;
 
     return (
         <div className={classes.root} ref={(elt) => this.container = elt}>
-          <Chart
-              chartType='LineChart'
-              columns={[{'label': 'Date', 'type': 'string'}, {'label':'Dollars', 'type':'number'}]}
-              rows={data}
-              options={{'hAxis': {'title': 'Date'}, 'vAxis': {'title': 'Dollars'}, 'legend': 'none'}}
-              graph_id={this.props.graph_id}
-              width='auto'
-              height='100%'
-            />
+          <div style={{width: chartWidth, height: '100%'}}>
+            <Chart
+                chartType='LineChart'
+                columns={[
+                  {label: 'Date', type: 'date'},
+                  {label: '-', type: 'number'},
+                  {label: 'Dollars', type: 'number'},
+                ]}
+                rows={data as GoogleDataTableCell[][]}
+                options={{
+                  chartArea: {
+                    top: 16,
+                    right: 80,
+                    bottom: 32,
+                    left: 16,
+                  },
+                  series: {
+                    0: {targetAxisIndex: 0, visibleInLegend: false, pointSize: 0, lineWidth: 0},
+                    1: {targetAxisIndex: 1},
+                  },
+                  colors: ['#3366cc', '#3366cc'],
+                  hAxis: {
+                    title: '',
+                    textStyle: {
+                      fontSize: 13,
+                    },
+                  },
+                  vAxes: [
+                    {
+                      textPosition: 'none',
+                      viewWindow: {
+                        min,
+                        max,
+                      },
+                    },
+                    {
+                      title: '',
+                      format: '¤#,###',
+                      textPosition: 'out',
+                      textStyle: {
+                        fontSize: 16,
+                      },
+                      viewWindow: {
+                        min,
+                        max,
+                      },
+                    },
+                  ],
+                  legend: {position: 'none'},
+                }}
+                graph_id={this.props.graph_id}
+                width='auto'
+                height='100%'
+              />
+          </div>
         </div>);
   }
 
-  private handleWindowResize = () => {
+  private showEndOfGraph = () => {
     if (!this.container) {
-      console.log('container not set (handleWindowResize)');
+      console.log('container not set (showEndOfGraph)');
       return;
     }
-    this.setState({
-      containerWidth: this.container.offsetWidth,
-    });
+    this.container.scrollLeft = this.container.scrollWidth;
   }
 });
 
