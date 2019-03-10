@@ -100,10 +100,16 @@ class extends React.Component<IEditorProps, IEditorState> {
 
   public componentDidUpdate(prevProps: IEditorProps): void {
     if (this.props.transactions !== prevProps.transactions) {
-      this.setState({
-        ...this.initState(this.state),
-        selectedTransactions: new Map(),
-      });
+      if (prevProps.transactions.length == 0) {
+        this.setState({
+          ...this.initState(this.state),
+          selectedTransactions: new Map(),
+        });
+      } else {
+        this.setState({
+          visibleTransactions: this.filterTransactions(this.props.transactions),
+        });
+      }
     }
   }
 
@@ -271,11 +277,8 @@ class extends React.Component<IEditorProps, IEditorState> {
     this.props.updateTransactions(this.props.transactions.map(t => (
       t.id == updatedTransaction.id ? updatedTransaction : t
     )));
-    // We re-filter the transactions since edits can change search string or
-    // tag matches.
     this.setState({
       selectedTransactions: new Map(),
-      visibleTransactions: this.filterTransactions(this.props.transactions),
     });
   }
 
@@ -290,8 +293,7 @@ class extends React.Component<IEditorProps, IEditorState> {
     // reset it.
     this.setState({
       tagFilters: null,
-      visibleTransactions: this.filterTransactions(
-          this.props.transactions, undefined, undefined, null),
+      selectedTransactions: new Map(),
     });
   }
 
@@ -326,7 +328,6 @@ class extends React.Component<IEditorProps, IEditorState> {
     }
     this.props.updateTransactions(transactionsToKeep);
     this.setState({
-      visibleTransactions: this.filterTransactions(transactionsToKeep),
       selectedTransactions,
     });
   }
@@ -337,7 +338,6 @@ class extends React.Component<IEditorProps, IEditorState> {
     });
     this.props.updateTransactions(transactionsToKeep);
     this.setState({
-      visibleTransactions: this.filterTransactions(transactionsToKeep),
       selectedTransactions: new Map(),
     });
   }
@@ -354,7 +354,6 @@ class extends React.Component<IEditorProps, IEditorState> {
     transactionsToKeep.sort(Transactions.TransactionUtils.compareTransactions);
     this.props.updateTransactions(transactionsToKeep);
     this.setState({
-      visibleTransactions: this.filterTransactions(transactionsToKeep),
       selectedTransactions,
     });
   }
@@ -382,12 +381,11 @@ class extends React.Component<IEditorProps, IEditorState> {
   }
 
   private filterTransactions(
-      transactions: Transactions.ITransaction[],
-      startDate?: Date,
-      endDate?: Date,
-      tagFilters?: ValueType<{label: string, value: string}>,
-      searchQuery?: string): Transactions.ITransaction[] {
-
+        transactions: Transactions.ITransaction[],
+        startDate?: Date,
+        endDate?: Date,
+        tagFilters?: ValueType<{label: string, value: string}>,
+        searchQuery?: string): Transactions.ITransaction[] {
     tagFilters = (tagFilters === undefined) ? this.state.tagFilters : tagFilters;
     let tagsInclude = (Array.isArray(tagFilters) && tagFilters.length > 0)
         ? tagFilters.map(valueType => valueType.value)
