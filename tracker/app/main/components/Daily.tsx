@@ -4,6 +4,7 @@ import OutlinedInput from '@material-ui/core/OutlinedInput';
 import Select from '@material-ui/core/Select';
 import { Theme, withStyles } from '@material-ui/core/styles';
 import { InlineDatePicker } from 'material-ui-pickers';
+import memoize from 'memoize-one';
 import moment from 'moment';
 import * as React from 'react';
 import { connect } from 'react-redux';
@@ -54,6 +55,13 @@ const styles = (theme: Theme) => createStyles({
     borderTop: '1px solid lightgrey',
   },
 });
+
+type filterTransactionsFunction = (
+    transactions: ITransaction[],
+    startDate: Date,
+    endDate: Date,
+    spendTarget?: ISpendTarget) => ITransaction[];
+
 interface IDailyOwnProps extends WithStyles<typeof styles> {
 }
 interface IDailyAppStateProps {
@@ -105,14 +113,8 @@ class extends React.Component<IDailyProps, IDailyState> {
     let spendTarget = this.props.spendTargets.length > 0
         ? this.props.spendTargets[this.state.spendTargetIndex]
         : undefined;
-    let filteredTransactions = TransactionUtils.filterTransactions(
-        this.props.transactions,
-        {
-          startDate: this.state.startDate,
-          endDate: this.state.endDate,
-          tagsIncludeAny: spendTarget && spendTarget.tags.include,
-          tagsExcludeAny: spendTarget && spendTarget.tags.exclude,
-        });
+    let filteredTransactions = this.filterTransactions(
+        this.props.transactions, this.state.startDate, this.state.endDate, spendTarget);
     let rows = filteredTransactions.map(t => {
         return (
           <Transaction transaction={t} key={t.id}/>
@@ -255,6 +257,21 @@ class extends React.Component<IDailyProps, IDailyState> {
       endDate,
     ];
   }
+
+  // tslint:disable-next-line:member-ordering (this is a function, not a field)
+  private filterTransactions: filterTransactionsFunction = memoize<filterTransactionsFunction>(
+      (transactions, startDate, endDate, spendTarget?) => {
+          return TransactionUtils.filterTransactions(
+              transactions,
+              {
+                startDate,
+                endDate,
+                tagsIncludeAny: spendTarget && spendTarget.tags.include,
+                tagsExcludeAny: spendTarget && spendTarget.tags.exclude,
+              },
+          );
+      },
+  );
 });
 
 const mapStateToProps = (state: IAppState): IDailyAppStateProps => ({
