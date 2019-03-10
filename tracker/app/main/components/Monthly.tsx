@@ -12,6 +12,7 @@ import { ITransaction, Transaction, TransactionsActions, TransactionsTable, Tran
 import { fetchSettingsFromDropboxIfNeeded } from '../actions';
 import { IAppState, ISpendTarget } from '../Model';
 import MenuBar from './MenuBar';
+import MonthlyGraph from './MonthlyGraph';
 
 const styles = (theme: Theme) => createStyles({
   root: {
@@ -96,20 +97,16 @@ class extends React.Component<IMonthlyProps, IMonthlyState> {
           tagsIncludeAny: spendTarget && spendTarget.tags.include,
           tagsExcludeAny: spendTarget && spendTarget.tags.exclude,
         });
-    let rows = this.groupByMonths(filteredTransactions, spendTarget);
+    let [rows, data] = this.groupByMonths(filteredTransactions, spendTarget);
 
     return (
       <div className={classes.root}>
         <MenuBar title='Monthly'/>
 
-        {/* <MonthlyGraph
-          graph_id='daily-spend-chart'
-          transactions={filteredTransactions}
-          startDate={this.state.startDate}
-          endDate={this.state.endDate}
-          dailyBudgetCents={this.state.dailyBudgetCents}
-          startBalanceCents={spendTarget ? spendTarget.startBalanceCents : 0}
-          /> */}
+        <MonthlyGraph
+          graph_id='monthly-budget-chart'
+          data={data}
+          />
 
         <div className={classes.controls}>
           <Select
@@ -150,9 +147,11 @@ class extends React.Component<IMonthlyProps, IMonthlyState> {
     });
   }
 
-  private groupByMonths = (transactions: ITransaction[], spendTarget?: ISpendTarget): JSX.Element[] => {
+  private groupByMonths = (transactions: ITransaction[], spendTarget?: ISpendTarget):
+      [JSX.Element[], [Date, number, number][]] => {
     let classes = this.props.classes;
     let rows: JSX.Element[] = [];
+    let data: [Date, number, number][] = [];
 
     // Pre-allocate each month with the monthly balance.
     const monthlyBudgetCents = spendTarget ? Math.floor(spendTarget.targetAnnualCents / 12) : 0;
@@ -182,8 +181,13 @@ class extends React.Component<IMonthlyProps, IMonthlyState> {
     // Now convert monthlySpendingMap to be a rolling total.
     [...monthlySpendingMap.keys()].sort().reduce(
       (total: number, month: string): number => {
-        total += monthlySpendingMap.get(month)!;
+        let monthlySpend = monthlySpendingMap.get(month)!;
+        total += monthlySpend;
         monthlySpendingMap.set(month, total);
+        data.push([
+            moment(month).toDate(),
+            (monthlyBudgetCents - monthlySpend) / 100.0,
+            total / 100.0]);
         return total;
       },
       spendTarget ? -spendTarget.startBalanceCents : 0);
@@ -214,7 +218,7 @@ class extends React.Component<IMonthlyProps, IMonthlyState> {
       rows.push(...this.monthlySumRows(lastMonth, lastMonthTransactions, monthlySpendingMap));
     }
 
-    return rows;
+    return [rows, data];
   }
 
   private monthlySumRows = (month: string, transactions: ITransaction[], monthlySpendingMap: Map<string, number>): JSX.Element[] => {
