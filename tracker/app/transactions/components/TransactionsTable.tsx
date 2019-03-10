@@ -17,6 +17,8 @@ interface ITransactionsTableProps extends WithStyles<typeof styles> {
    *  rows (e.g., a fixed height or flex child).
    */
   lazyRender?: boolean;
+  /** The index to scroll into view. */
+  scrollToRow?: number;
 }
 interface ITransactionsTableState {
   containerHeight: number;
@@ -48,6 +50,16 @@ class extends React.Component<ITransactionsTableProps, ITransactionsTableState> 
 
   public componentWillUnmount(): void {
     window.removeEventListener('resize', this.handleWindowResize);
+  }
+
+  public componentDidUpdate(prevProps: ITransactionsTableProps): void {
+    if (this.props.scrollToRow !== prevProps.scrollToRow) {
+      if (this.props.scrollToRow !== undefined && this.container) {
+        let scrollTop = this.props.scrollToRow * ROW_HEIGHT;
+        // This will trigger the scroll event handler.
+        this.container.scrollTo(0, scrollTop);
+      }
+    }
   }
 
   public render(): React.ReactElement<object> {
@@ -94,8 +106,11 @@ class extends React.Component<ITransactionsTableProps, ITransactionsTableState> 
     }
 
     let numRows = React.Children.count(this.props.children);
-    if (this.state.scrollTop > 48 * numRows - this.state.containerHeight) {
-      this.container.scrollTop = Math.max(0, 48 * numRows - this.state.containerHeight);
+
+    // Make sure we haven't scrolled past the bottom of the table.
+    let maxScrollTop = Math.max(0, ROW_HEIGHT * numRows - this.state.containerHeight);
+    if (this.state.scrollTop > maxScrollTop) {
+      this.container.scrollTop = maxScrollTop;
     }
 
     let rowsBefore = Math.floor(this.state.scrollTop / ROW_HEIGHT);

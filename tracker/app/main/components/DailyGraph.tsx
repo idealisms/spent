@@ -24,6 +24,7 @@ interface IDailyGraphProps extends WithStyles<typeof styles> {
   dailyBudgetCents: number;
   startBalanceCents: number;
   graph_id: string;
+  onClickDate?: (date: Date) => void;
 }
 interface IDailyGraphState {
 }
@@ -139,6 +140,18 @@ class extends React.Component<IDailyGraphProps, IDailyGraphState> {
                 graph_id={this.props.graph_id}
                 width='auto'
                 height='100%'
+                chartEvents={this.props.onClickDate
+                  ? [{
+                      eventName: 'select',
+                      callback: ({chartWrapper}) => {
+                        // chartWrapper.getChart().getSelection()
+                        // this.props.onClickDate()
+                        let selected = chartWrapper.getChart().getSelection();
+                        let row = selected[0].row as number;
+                        this.props.onClickDate!(data[row][0]);
+                      },
+                    }]
+                  : []}
               />
           </div>
         </div>);

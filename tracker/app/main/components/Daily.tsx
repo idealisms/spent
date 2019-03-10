@@ -78,6 +78,7 @@ interface IDailyState {
   startDate: Date;
   endDate: Date;
   dailyBudgetCents: number;
+  scrollToRow?: number;
 }
 
 const Daily = withStyles(styles)(
@@ -139,6 +140,7 @@ class extends React.Component<IDailyProps, IDailyState> {
           endDate={this.state.endDate}
           dailyBudgetCents={this.state.dailyBudgetCents}
           startBalanceCents={spendTarget ? spendTarget.startBalanceCents : 0}
+          onClickDate={this.scrollDateIntoView}
           />
 
         <div className={classes.controls}>
@@ -194,7 +196,8 @@ class extends React.Component<IDailyProps, IDailyState> {
         </div>
         <TransactionsTable
             classes={{root: classes.transactionsTable}}
-            lazyRender>
+            lazyRender
+            scrollToRow={this.state.scrollToRow}>
           {rows}
         </TransactionsTable>
       </div>
@@ -227,6 +230,24 @@ class extends React.Component<IDailyProps, IDailyState> {
     this.setState({
       dailyBudgetCents: parseInt('' + parseFloat((event.target as HTMLInputElement).value) * 100, 10),
     });
+  }
+
+  public scrollDateIntoView = (date: Date): void => {
+    let spendTarget = this.props.spendTargets.length > 0
+        ? this.props.spendTargets[this.state.spendTargetIndex]
+        : undefined;
+    let filteredTransactions = this.filterTransactions(
+        this.props.transactions, this.state.startDate, this.state.endDate, spendTarget);
+
+    for (let rowNum = 0; rowNum < filteredTransactions.length; ++rowNum) {
+      let t = filteredTransactions[rowNum];
+      if (moment(t.date).isSameOrBefore(date)) {
+        this.setState({
+          scrollToRow: rowNum,
+        });
+        break;
+      }
+    }
   }
 
   private updateSpendTarget = (spendTargetIndex: number): void => {
