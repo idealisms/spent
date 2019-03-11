@@ -1,6 +1,5 @@
 const path = require('path');
 const webpack = require('webpack');
-const FaviconsWebpackPlugin = require('favicons-webpack-plugin');
 
 module.exports = (options) => ({
   entry: options.entry,
@@ -52,7 +51,6 @@ module.exports = (options) => ({
   },
   plugins: options.plugins.concat([
     new webpack.NamedModulesPlugin(),
-    new FaviconsWebpackPlugin('favicon.png'),
     new webpack.LoaderOptionsPlugin({
       debug: false,
       options: {

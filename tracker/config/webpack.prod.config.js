@@ -1,6 +1,7 @@
 const path = require('path');
 const webpack = require('webpack');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
+const FaviconsWebpackPlugin = require('favicons-webpack-plugin');
 
 module.exports = require('./webpack.shared.config')({
   entry: [
@@ -28,6 +29,7 @@ module.exports = require('./webpack.shared.config')({
         minifyURLs: true,
       },
       inject: true,
-    })
+    }),
+    new FaviconsWebpackPlugin('favicon.png'),
   ],
 });
