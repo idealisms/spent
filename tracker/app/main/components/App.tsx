@@ -1,3 +1,5 @@
+import { createStyles } from '@material-ui/core';
+import { Theme, withStyles } from '@material-ui/core/styles';
 import * as React from 'react';
 import { Switch } from 'react-router';
 import { Redirect, Route } from 'react-router-dom';
@@ -7,12 +9,28 @@ import Monthly from './Monthly';
 import Report from './Report';
 import * as Pages from './RoutePaths';
 
+const styles = (theme: Theme) => createStyles({
+  '@global': {
+    html: {
+      height: '100%',
+    },
+    body: {
+      height: '100%',
+      margin: 0,
+    },
+    '#app': {
+      height: '100%',
+    },
+  },
+});
+
 const NoMatch = () => (
   <h1 style={{color:'red'}}>Page not found!</h1>
 );
 
-export class App extends React.Component<object, object> {
-  public render(): React.ReactElement<App> {
+const App = withStyles(styles)(
+class extends React.Component<object, object> {
+  public render(): React.ReactElement<object> {
 
     return (
         <Switch>
@@ -27,6 +45,6 @@ export class App extends React.Component<object, object> {
         </Switch>
       );
   }
-}
+});
 
 export default App;
