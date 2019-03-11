@@ -251,6 +251,9 @@ class extends React.Component<IDailyProps, IDailyState> {
   }
 
   private updateSpendTarget = (spendTargetIndex: number): void => {
+    if (this.props.spendTargets.length == 0) {
+      return;
+    }
     let spendTarget = this.props.spendTargets[spendTargetIndex];
     let [startDate, endDate] = this.startEndDatesFromProps(spendTargetIndex);
     this.setState({
