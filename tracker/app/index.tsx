@@ -9,9 +9,11 @@ import { ConnectedRouter } from 'react-router-redux';
 import { Store } from 'redux';
 import { App, IAppState } from './main';
 import { theme } from './muiTheme';
-
+import * as serviceWorker from './serviceWorker';
 
 declare const require: (name: String) => any;
+
+serviceWorker.register();
 
 const history = createHashHistory();
 

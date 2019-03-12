@@ -2,6 +2,7 @@ const path = require('path');
 const webpack = require('webpack');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const FaviconsWebpackPlugin = require('favicons-webpack-plugin');
+const SWPrecacheWebpackPlugin = require('sw-precache-webpack-plugin');
 
 module.exports = require('./webpack.shared.config')({
   entry: [
@@ -31,5 +32,15 @@ module.exports = require('./webpack.shared.config')({
       inject: true,
     }),
     new FaviconsWebpackPlugin('favicon.png'),
+    new SWPrecacheWebpackPlugin(
+      {
+        cacheId: 'spent',
+        dontCacheBustUrlsMatching: [/\.\w{8}\./, /icons-\w{32}/],
+        filename: 'service-worker.js',
+        minify: true,
+        navigateFallback: '/index.html',
+        staticFileGlobsIgnorePatterns: [/\.map$/, /asset-manifest\.json$/],
+      }
+    )
   ],
 });
