@@ -72,6 +72,7 @@ interface IEditorDispatchProps {
 }
 type IEditorProps = IEditorOwnProps & IEditorAppStateProps & IEditorDispatchProps;
 interface IEditorState {
+  // visibleTransactions is derived state. Remove it and if it's slow, use memoize-one.
   visibleTransactions: Transactions.ITransaction[];
   startDate: Date;
   endDate: Date;
