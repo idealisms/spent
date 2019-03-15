@@ -4,7 +4,8 @@ import moment from 'moment';
 import * as React from 'react';
 import { Chart } from 'react-google-charts';
 import { GoogleDataTableCell } from 'react-google-charts/dist/types';
-import { ITransaction } from '../../transactions';
+import { ITransaction, TransactionUtils } from '../../transactions';
+import { ISpendTarget } from '../Model';
 
 const styles = (theme: Theme) => createStyles({
   root: {
@@ -18,12 +19,9 @@ const styles = (theme: Theme) => createStyles({
   },
 });
 interface IDailyGraphProps extends WithStyles<typeof styles> {
-  transactions: ITransaction[];
-  startDate: Date;
-  endDate: Date;
-  dailyBudgetCents: number;
-  startBalanceCents: number;
   graph_id: string;
+  transactions: ITransaction[];
+  spendTarget?: ISpendTarget;
   onClickDate?: (date: Date) => void;
 }
 interface IDailyGraphState {
@@ -55,20 +53,36 @@ class extends React.Component<IDailyGraphProps, IDailyGraphState> {
 
     let min = 0;
     let max = 0;
-    if (this.props.transactions.length) {
+    if (this.props.transactions.length && this.props.spendTarget) {
+      let startDate = this.props.spendTarget.startDate;
+      let endDate = this.props.spendTarget.endDate
+          ? this.props.spendTarget.endDate : this.props.transactions[0].date;
+
       let dailyTotals: { [s: string]: number; } = {};
-      for (let m = moment(this.props.startDate); m.isSameOrBefore(moment(this.props.endDate)); m = m.add(1, 'days')) {
+      for (let m = moment(startDate); m.isSameOrBefore(moment(endDate)); m = m.add(1, 'days')) {
         dailyTotals[m.format('YYYY-MM-DD')] = 0;
       }
 
       for (let transaction of this.props.transactions) {
-        dailyTotals[transaction.date] += transaction.amount_cents;
+        let spreadDuration = TransactionUtils.getSpreadDurationAsDays(transaction);
+        if (spreadDuration !== undefined) {
+          let spreadStartDate = moment(transaction.date);
+          let spreadEndDate = moment.min(
+              spreadStartDate.clone().add(spreadDuration - 1, 'days'),
+              moment(endDate));
+          for (let m = spreadStartDate; m.isSameOrBefore(spreadEndDate); m = m.add(1, 'days')) {
+            dailyTotals[m.format('YYYY-MM-DD')] += transaction.amount_cents / spreadDuration;
+          }
+        } else {
+          dailyTotals[transaction.date] += transaction.amount_cents;
+        }
       }
 
-      let currentTotal = this.props.startBalanceCents;
-      for (let m = moment(this.props.startDate); m.isSameOrBefore(moment(this.props.endDate)); m = m.add(1, 'days')) {
+      let currentTotal = this.props.spendTarget.startBalanceCents;
+      let dailyBudgetCents = this.props.spendTarget.targetAnnualCents / 365;
+      for (let m = moment(startDate); m.isSameOrBefore(moment(endDate)); m = m.add(1, 'days')) {
         let currentDate = m.format('YYYY-MM-DD');
-        currentTotal += dailyTotals[currentDate] - this.props.dailyBudgetCents;
+        currentTotal += dailyTotals[currentDate] - dailyBudgetCents;
         data.push([m.toDate(), data.length ? null : 0, currentTotal / 100.0]);
 
         min = Math.min(min, currentTotal / 100.0);
@@ -144,8 +158,6 @@ class extends React.Component<IDailyGraphProps, IDailyGraphState> {
                   ? [{
                       eventName: 'select',
                       callback: ({chartWrapper}) => {
-                        // chartWrapper.getChart().getSelection()
-                        // this.props.onClickDate()
                         let selected = chartWrapper.getChart().getSelection();
                         let row = selected[0].row as number;
                         this.props.onClickDate!(data[row][0]);

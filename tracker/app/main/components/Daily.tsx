@@ -136,11 +136,8 @@ class extends React.Component<IDailyProps, IDailyState> {
         <DailyGraph
           graph_id='daily-spend-chart'
           transactions={filteredTransactions}
-          startDate={this.state.startDate}
-          endDate={this.state.endDate}
-          dailyBudgetCents={this.state.dailyBudgetCents}
-          startBalanceCents={spendTarget ? spendTarget.startBalanceCents : 0}
           onClickDate={this.scrollDateIntoView}
+          spendTarget={spendTarget}
           />
 
         <div className={classes.controls}>

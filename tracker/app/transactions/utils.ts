@@ -268,3 +268,12 @@ export function getTags(transactions: ITransaction[]): Set<string> {
   }
   return tagSet;
 }
+
+export function getSpreadDurationAsDays(transaction: ITransaction): number | undefined {
+  for (let tag of transaction.tags) {
+    if (tag.startsWith('spread:')) {
+      let durationString = tag.split(':')[1];
+      return moment.duration(`P${durationString.toUpperCase()}`).asDays();
+    }
+  }
+}
