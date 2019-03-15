@@ -38,6 +38,16 @@ class extends React.Component<IDailyGraphProps, IDailyGraphState> {
     this.showEndOfGraph();
   }
 
+  public shouldComponentUpdate(nextProps: IDailyGraphProps, nextState: IDailyGraphState): boolean {
+    // Prevent a re-render when props haven't changed. This was happening when
+    // the onClickDate callback was called, which triggered a re-render of
+    // DailyGraph.
+    return !(this.props.graph_id == nextProps.graph_id &&
+        this.props.transactions === nextProps.transactions &&
+        this.props.spendTarget === nextProps.spendTarget &&
+        this.props.onClickDate === nextProps.onClickDate);
+  }
+
   public componentDidUpdate(prevProps: IDailyGraphProps): void {
     if (prevProps.transactions !== this.props.transactions && this.container) {
       this.showEndOfGraph();
