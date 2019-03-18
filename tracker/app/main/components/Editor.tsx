@@ -2,6 +2,7 @@ import { createStyles, TextField, WithStyles } from '@material-ui/core';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import { Theme, withStyles } from '@material-ui/core/styles';
 import { InlineDatePicker } from 'material-ui-pickers';
+import memoize from 'memoize-one';
 import moment from 'moment';
 import * as React from 'react';
 import { connect } from 'react-redux';
@@ -59,6 +60,13 @@ const styles = (theme: Theme) => createStyles({
   },
 });
 
+type filterTransactionsFunction = (
+  transactions: Transactions.ITransaction[],
+  startDate: Date,
+  endDate: Date,
+  tagFilters: ValueType<{label: string, value: string}>,
+  searchQuery: string) => Transactions.ITransaction[];
+
 interface IEditorOwnProps extends WithStyles<typeof styles> {
 }
 interface IEditorAppStateProps {
@@ -72,8 +80,6 @@ interface IEditorDispatchProps {
 }
 type IEditorProps = IEditorOwnProps & IEditorAppStateProps & IEditorDispatchProps;
 interface IEditorState {
-  // visibleTransactions is derived state. Remove it and if it's slow, use memoize-one.
-  visibleTransactions: Transactions.ITransaction[];
   startDate: Date;
   endDate: Date;
   selectedTransactions: Map<string, Transactions.ITransaction>;
@@ -86,29 +92,28 @@ class extends React.Component<IEditorProps, IEditorState> {
   constructor(props: IEditorProps, context?: any) {
     super(props, context);
 
-    let state: IEditorState = {
-      visibleTransactions: [],
-      startDate: moment().subtract(3, 'months').toDate(),
-      endDate: moment().startOf('day').toDate(),
+    let transactions = this.props.transactions;
+    this.state = {
+      startDate: transactions.length
+          ? moment(transactions[transactions.length - 1].date).toDate()
+          : moment().subtract(3, 'months').toDate(),
+      endDate: transactions.length
+          ? moment(transactions[0].date).toDate()
+          : moment().startOf('day').toDate(),
       selectedTransactions: new Map(),
       tagFilters: [],
       searchQuery: '',
     };
-
-    this.state = this.initState(state);
     this.props.fetchTransactions();
   }
 
   public componentDidUpdate(prevProps: IEditorProps): void {
     if (this.props.transactions !== prevProps.transactions) {
       if (prevProps.transactions.length == 0) {
+        const transactions = this.props.transactions;
         this.setState({
-          ...this.initState(this.state),
-          selectedTransactions: new Map(),
-        });
-      } else {
-        this.setState({
-          visibleTransactions: this.filterTransactions(this.props.transactions),
+            startDate: moment(transactions[transactions.length - 1].date).toDate(),
+            endDate: moment(transactions[0].date).toDate(),
         });
       }
     }
@@ -116,7 +121,10 @@ class extends React.Component<IEditorProps, IEditorState> {
 
   public render(): React.ReactElement<object> {
     let classes = this.props.classes;
-    let rows = this.state.visibleTransactions.map(t => {
+    let visibleTransactions = this.filterTransactions(
+        this.props.transactions, this.state.startDate, this.state.endDate, this.state.tagFilters, this.state.searchQuery);
+
+    let rows = visibleTransactions.map(t => {
         return (
           <Transactions.Transaction
               key={t.id}
@@ -134,7 +142,7 @@ class extends React.Component<IEditorProps, IEditorState> {
       maxDate = moment(this.props.transactions[0].date).toDate();
     }
 
-    let tags = Transactions.TransactionUtils.getTags(this.state.visibleTransactions);
+    let tags = Transactions.TransactionUtils.getTags(visibleTransactions);
     let tagSuggestions = new Array(...tags).sort().map(
         (t) => ({label: t, value: t}),
         tags);
@@ -199,8 +207,8 @@ class extends React.Component<IEditorProps, IEditorState> {
                   classes={{root: classes.transactionsTable}}
                   lazyRender>
                 <Transactions.TransactionsTableSumRow
-                    transactions={this.state.visibleTransactions}
-                    selectAllChecked={this.state.visibleTransactions.length == this.state.selectedTransactions.size}
+                    transactions={visibleTransactions}
+                    selectAllChecked={visibleTransactions.length == this.state.selectedTransactions.size}
                     onSelectAllClick={this.handleSelectAllClick}
                     />
                 {rows}
@@ -213,7 +221,6 @@ class extends React.Component<IEditorProps, IEditorState> {
     let startDate = m.toDate();
     this.setState({
       startDate,
-      visibleTransactions: this.filterTransactions(this.props.transactions, startDate),
       selectedTransactions: new Map(),
     });
   }
@@ -222,7 +229,6 @@ class extends React.Component<IEditorProps, IEditorState> {
     let endDate = m.toDate();
     this.setState({
       endDate,
-      visibleTransactions: this.filterTransactions(this.props.transactions, undefined, endDate),
       selectedTransactions: new Map(),
     });
   }
@@ -230,8 +236,6 @@ class extends React.Component<IEditorProps, IEditorState> {
   private handleChangeTagFilter = (tagFilters: ValueType<{label: string, value: string}>, action: any): void => {
     this.setState({
       tagFilters: tagFilters,
-      visibleTransactions: this.filterTransactions(
-          this.props.transactions, undefined, undefined, tagFilters),
       selectedTransactions: new Map(),
     });
   }
@@ -240,8 +244,6 @@ class extends React.Component<IEditorProps, IEditorState> {
     let searchQuery = event.target.value;
     this.setState({
       searchQuery,
-      visibleTransactions: this.filterTransactions(
-          this.props.transactions, undefined, undefined, undefined, searchQuery),
       selectedTransactions: new Map(),
     });
   }
@@ -249,7 +251,9 @@ class extends React.Component<IEditorProps, IEditorState> {
   private handleSelectAllClick = (selectAll: boolean): void => {
     if (selectAll) {
       let selectedTransactions = new Map();
-      this.state.visibleTransactions.forEach((t) => {
+      let visibleTransactions = this.filterTransactions(
+        this.props.transactions, this.state.startDate, this.state.endDate, this.state.tagFilters, this.state.searchQuery);
+      visibleTransactions.forEach((t) => {
         selectedTransactions.set(t.id, t);
       });
       this.setState({
@@ -365,28 +369,9 @@ class extends React.Component<IEditorProps, IEditorState> {
     });
   }
 
-  private initState(state: IEditorState): IEditorState {
-    if (this.props.transactions.length) {
-      const transactions = this.props.transactions;
-      let startDate = moment(transactions[transactions.length - 1].date).toDate();
-      let endDate = moment(transactions[0].date).toDate();
-      return {
-          ...state,
-          startDate,
-          endDate,
-          visibleTransactions: this.filterTransactions(
-              transactions, startDate, endDate, state.tagFilters, state.searchQuery),
-      };
-    }
-    return state;
-  }
-
-  private filterTransactions(
-        transactions: Transactions.ITransaction[],
-        startDate?: Date,
-        endDate?: Date,
-        tagFilters?: ValueType<{label: string, value: string}>,
-        searchQuery?: string): Transactions.ITransaction[] {
+  // tslint:disable-next-line:member-ordering (this is a function, not a field)
+  private filterTransactions: filterTransactionsFunction = memoize<filterTransactionsFunction>(
+      (transactions, startDate, endDate, tagFilters, searchQuery) => {
     tagFilters = (tagFilters === undefined) ? this.state.tagFilters : tagFilters;
     let tagsInclude = (Array.isArray(tagFilters) && tagFilters.length > 0)
         ? tagFilters.map(valueType => valueType.value)
@@ -399,7 +384,7 @@ class extends React.Component<IEditorProps, IEditorState> {
           tagsIncludeAll: tagsInclude,
           searchQuery,
         });
-  }
+  });
 });
 
 const mapStateToProps = (state: IAppState): IEditorAppStateProps => ({
