@@ -85,10 +85,10 @@ class extends React.Component<IMonthlyProps, IMonthlyState> {
         : undefined;
     let startDate = spendTarget
         ? moment(spendTarget.startDate).toDate()
-        : moment().hours(0).minutes(0).seconds(0).milliseconds(0).toDate();
+        : moment().startOf('day').toDate();
     let endDate = spendTarget
         ? moment(spendTarget.endDate).toDate()
-        : moment().hours(0).minutes(0).seconds(0).milliseconds(0).toDate();
+        : moment().startOf('day').toDate();
     let filteredTransactions = TransactionUtils.filterTransactions(
         this.props.transactions,
         {
@@ -157,8 +157,8 @@ class extends React.Component<IMonthlyProps, IMonthlyState> {
     const monthlyBudgetCents = spendTarget ? Math.floor(spendTarget.targetAnnualCents / 12) : 0;
     let monthlySpendingMap: Map<string, number> = new Map;
     if (transactions.length > 0) {
-      let startMonth = moment(transactions[transactions.length - 1].date).date(1).hours(0).minutes(0).seconds(0).milliseconds(0);
-      let endMonth = moment(transactions[0].date).date(1).hours(0).minutes(0).seconds(0).milliseconds(0);
+      let startMonth = moment(transactions[transactions.length - 1].date).date(1).startOf('day');
+      let endMonth = moment(transactions[0].date).date(1).startOf('day');
       for (let m = startMonth; m.isSameOrBefore(endMonth); m = m.add(1, 'months')) {
         monthlySpendingMap.set(m.format('YYYY-MM'), monthlyBudgetCents);
       }

@@ -264,7 +264,7 @@ class extends React.Component<IDailyProps, IDailyState> {
   private startEndDatesFromProps = (spendTargetIndex?: number): [Date, Date] => {
     let endDate = this.props.transactions.length
         ? moment(this.props.transactions[0].date).toDate()
-        : moment().hours(0).minutes(0).seconds(0).milliseconds(0).toDate();
+        : moment().startOf('day').toDate();
     if (this.props.spendTargets.length > 0) {
       spendTargetIndex = (spendTargetIndex === undefined) ? this.state.spendTargetIndex : spendTargetIndex;
       let spendTarget = this.props.spendTargets[spendTargetIndex];
@@ -274,7 +274,7 @@ class extends React.Component<IDailyProps, IDailyState> {
         ];
     }
     return [
-      moment().hours(0).minutes(0).seconds(0).milliseconds(0).toDate(),
+      moment().startOf('day').toDate(),
       endDate,
     ];
   }

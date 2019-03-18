@@ -89,7 +89,7 @@ class extends React.Component<IEditorProps, IEditorState> {
     let state: IEditorState = {
       visibleTransactions: [],
       startDate: moment().subtract(3, 'months').toDate(),
-      endDate: moment().hours(0).minutes(0).seconds(0).milliseconds(0).toDate(),
+      endDate: moment().startOf('day').toDate(),
       selectedTransactions: new Map(),
       tagFilters: [],
       searchQuery: '',
