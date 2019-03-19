@@ -7,7 +7,12 @@ import DialogTitle from '@material-ui/core/DialogTitle';
 import { Theme, withStyles } from '@material-ui/core/styles';
 import TextField from '@material-ui/core/TextField';
 import * as React from 'react';
+import { connect } from 'react-redux';
+import CreatableSelect from 'react-select/lib/Creatable';
+import { ValueType } from 'react-select/lib/types';
+import { IAppState } from '../../main';
 import { ITransaction } from '../Model';
+import * as TransactionUtils from '../utils';
 import Transaction from './Transaction';
 import TransactionsTable from './TransactionsTable';
 
@@ -22,6 +27,7 @@ const styles = (theme: Theme) => createStyles({
     },
     '& .textfield': {
       marginTop: '16px',
+      width: '100%',
     },
   },
   dialogPaper: {
@@ -36,13 +42,17 @@ const styles = (theme: Theme) => createStyles({
   },
 });
 
-interface IEditTransactionDialogProps extends WithStyles<typeof styles> {
+interface IEditTransactionDialogOwnProps extends WithStyles<typeof styles> {
   transaction: ITransaction;
   onClose: () => void;
   onSaveChanges: (transaction: ITransaction) => void;
 }
+interface IEditTransactionDialogAppStateProps {
+  transactions: ITransaction[];
+}
+type IEditTransactionDialogProps = IEditTransactionDialogOwnProps & IEditTransactionDialogAppStateProps;
 interface IEditTransactionDialogState {
-  tagsValue: string;
+  tags: {label: string, value: string}[];
   notesValue: string;
 }
 const EditTransactionDialog = withStyles(styles)(
@@ -51,7 +61,7 @@ class extends React.Component<IEditTransactionDialogProps, IEditTransactionDialo
   constructor(props: IEditTransactionDialogProps, context?: any) {
     super(props, context);
     this.state = {
-      tagsValue: props.transaction.tags.join(', '),
+      tags: props.transaction.tags.map(t => ({label: t, value: t})),
       notesValue: props.transaction.notes || '',
     };
   }
@@ -59,6 +69,7 @@ class extends React.Component<IEditTransactionDialogProps, IEditTransactionDialo
   public render(): React.ReactElement<object> {
     let classes = this.props.classes;
     let transaction: ITransaction = this.props.transaction;
+    let tagSuggestions = TransactionUtils.getTagsForSuggestions(this.props.transactions);
     return <Dialog
             open
             onClose={this.props.onClose}
@@ -78,23 +89,21 @@ class extends React.Component<IEditTransactionDialogProps, IEditTransactionDialo
                 }}
                 />
           </TransactionsTable>
-          <TextField
-              placeholder='e.g. food, restaurant'
-              label='Tags (comma separated)'
+          <CreatableSelect
               className='textfield'
-              defaultValue={this.state.tagsValue}
-              style={{width: '100%'}}
-              inputProps={{autoCapitalize: 'none'}}
-              autoFocus={!this.state.tagsValue}
-              onChange={(event) => this.setState({tagsValue: (event.target as HTMLInputElement).value})}
-              onKeyPress={(e) => this.handleKeyPress(e)}
-          /><br />
+              value={this.state.tags}
+              onChange={this.handleChangeTagSelect}
+              autoFocus={this.state.tags.length == 0}
+              options={tagSuggestions}
+              formatCreateLabel={(inputValue) => <span>New tag: {inputValue}</span>}
+              placeholder='e.g. food, restaurant'
+              isMulti /><br />
+
           <TextField
               label='Notes'
               className='textfield'
               defaultValue={this.state.notesValue}
-              style={{width: '100%'}}
-              autoFocus={!!this.state.tagsValue}
+              autoFocus={this.state.tags.length != 0}
               onChange={(event) => this.setState({notesValue: (event.target as HTMLInputElement).value})}
               onKeyPress={this.handleKeyPress}
           />
@@ -107,6 +116,14 @@ class extends React.Component<IEditTransactionDialogProps, IEditTransactionDialo
       </Dialog>;
   }
 
+  private handleChangeTagSelect = (tags: ValueType<{label: string, value: string}>, action: any): void => {
+    if (Array.isArray(tags)) {
+      this.setState({
+        tags,
+      });
+    }
+  }
+
   private handleKeyPress = (e: React.KeyboardEvent<{}>): void => {
     // charCode 13 is the Enter key.
     if (e.charCode == 13) {
@@ -115,15 +132,7 @@ class extends React.Component<IEditTransactionDialogProps, IEditTransactionDialo
   }
 
   private handleSave = (): void => {
-    let tags: string[] = [];
-    // Remove trailing commas and spaces.
-    let tagsValue = this.state.tagsValue.replace(/([, ]+$)/g, '');
-    tagsValue.split(',').forEach((tag) => {
-        tag = tag.trim();
-        if (tag !== '') {
-            tags.push(tag);
-        }
-    });
+    let tags = this.state.tags.map(t => t.value);
 
     this.props.onSaveChanges({
       ...this.props.transaction,
@@ -134,4 +143,8 @@ class extends React.Component<IEditTransactionDialogProps, IEditTransactionDialo
   }
 });
 
-export default EditTransactionDialog;
+const mapStateToProps = (state: IAppState): IEditTransactionDialogAppStateProps => ({
+  transactions: state.transactions.transactions,
+});
+
+export default connect(mapStateToProps, {})(EditTransactionDialog);
