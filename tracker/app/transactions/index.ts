@@ -3,6 +3,7 @@ import BatchEditTagsDialog, { BatchEditTagsAction } from './components/BatchEdit
 import EditTransactionDialog from './components/EditTransactionDialog';
 import MergeTransactionDialog from './components/MergeTransactionDialog';
 import SplitTransactionDialog from './components/SplitTransactionDialog';
+import TagSelect from './components/TagSelect';
 import Transaction from './components/Transaction';
 import TransactionsTable from './components/TransactionsTable';
 import TransactionsTableHeadingRow from './components/TransactionsTableHeadingRow';
@@ -13,7 +14,7 @@ import * as TransactionUtils from './utils';
 
 export { BatchEditTagsDialog, BatchEditTagsAction, Category };
 export { EditTransactionDialog, ITransaction, ITransactionsState };
-export { MergeTransactionDialog, SplitTransactionDialog, TAG_TO_CATEGORY };
+export { MergeTransactionDialog, SplitTransactionDialog, TagSelect, TAG_TO_CATEGORY };
 export { Transaction, TransactionsActions, TransactionsTable, TransactionUtils };
 export { transactionsReducer, TransactionsTableSumRow, TransactionsTableHeadingRow };
 

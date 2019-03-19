@@ -9,10 +9,9 @@ import Radio from '@material-ui/core/Radio';
 import RadioGroup from '@material-ui/core/RadioGroup';
 import { Theme, withStyles } from '@material-ui/core/styles';
 import * as React from 'react';
-import CreatableSelect from 'react-select/lib/Creatable';
-import { ValueType } from 'react-select/lib/types';
 import { ITransaction } from '../Model';
 import * as TransactionUtils from '../utils';
+import TagSelect from './TagSelect';
 import Transaction from './Transaction';
 import TransactionsTable from './TransactionsTable';
 
@@ -46,7 +45,7 @@ interface IBatchEditTagsDialogProps extends WithStyles<typeof styles> {
 }
 interface IBatchEditTagsDialogState {
   action?: BatchEditTagsAction;
-  tags: ValueType<{label: string, value: string}>;
+  tags: string[];
 }
 const BatchEditTagsDialog = withStyles(styles)(
 class extends React.Component<IBatchEditTagsDialogProps, IBatchEditTagsDialogState> {
@@ -56,13 +55,12 @@ class extends React.Component<IBatchEditTagsDialogProps, IBatchEditTagsDialogSta
     let sortedTransactions = [...props.transactions];
     sortedTransactions.sort(TransactionUtils.compareTransactions);
     this.state = {
-      tags: null,
+      tags: [],
     };
   }
 
   public render(): React.ReactElement<object> {
     let classes = this.props.classes;
-    let tagSuggestions = TransactionUtils.getTagsForSuggestions(this.props.transactions);
     let rows = this.props.transactions.map((t) => {
         return (
           <Transaction
@@ -98,16 +96,16 @@ class extends React.Component<IBatchEditTagsDialogProps, IBatchEditTagsDialogSta
                   label={'Remove'}
                   control={<Radio color='primary'/>} />
             </RadioGroup>
-            <CreatableSelect
-                className='tagselect'
-                value={this.state.tags}
+            <TagSelect
                 onChange={this.handleChangeTagSelect}
-                options={tagSuggestions}
+                value={this.state.tags}
+                transactions={this.props.transactions}
+                allowNewTags
+                className='tagselect'
                 isDisabled={this.state.action === undefined}
-                formatCreateLabel={(inputValue) => <span>New tag: {inputValue}</span>}
                 createOptionPosition='first'
                 placeholder={this.state.action ? this.state.action + ' tag(s)' : ''}
-                isMulti />
+                />
           </div>
           <TransactionsTable classes={{root: classes.transactionsTableRoot}}>
             {rows}
@@ -131,31 +129,23 @@ class extends React.Component<IBatchEditTagsDialogProps, IBatchEditTagsDialogSta
     });
   }
 
-  private handleChangeTagSelect = (tags: ValueType<{label: string, value: string}>, action: any): void => {
+  private handleChangeTagSelect = (tags: string[]): void => {
     this.setState({
       tags,
     });
   }
 
   private handleBatchEditTags = (): void => {
-    let tags: Set<string> = new Set();
-    if (Array.isArray(this.state.tags)) {
-      this.state.tags.forEach((value) => tags.add(value.value));
-    }
-
     let updatedTransactions: ITransaction[] = [];
     if (this.state.action == BatchEditTagsAction.SetTags) {
       updatedTransactions = this.props.transactions.map((t) => ({
         ...t,
-        tags: [...tags],
+        tags: [...this.state.tags],
       }));
-      for (let t of this.props.transactions.values()) {
-        t.tags = new Array(...tags);
-      }
     } else if (this.state.action == BatchEditTagsAction.AddTags) {
       updatedTransactions = this.props.transactions.map((t) => {
         let newTransaction = {...t};
-        for (let tag of tags) {
+        for (let tag of this.state.tags) {
           if (newTransaction.tags.indexOf(tag) == -1) {
             newTransaction.tags.push(tag);
           }
@@ -163,9 +153,10 @@ class extends React.Component<IBatchEditTagsDialogProps, IBatchEditTagsDialogSta
         return newTransaction;
       });
     } else if (this.state.action == BatchEditTagsAction.RemoveTags) {
+      let tagsSet = new Set(this.state.tags);
       updatedTransactions = this.props.transactions.map((t) => {
         let newTransaction = {...t};
-        newTransaction.tags = newTransaction.tags.filter((tag) => !tags.has(tag));
+        newTransaction.tags = newTransaction.tags.filter((tag) => !tagsSet.has(tag));
         return newTransaction;
       });
     }

@@ -269,23 +269,6 @@ export function getTags(transactions: ITransaction[]): Set<string> {
   return tagSet;
 }
 
-export function getTagsForSuggestions(
-    transactions: ITransaction[], includeCount?: boolean): {label: string, value: string}[] {
-  let tagMap: Map<string, number> = new Map();
-  for (let transaction of transactions) {
-    for (let tag of transaction.tags) {
-      tagMap.set(tag, (tagMap.get(tag) || 0) + 1);
-    }
-  }
-
-  return new Array(...tagMap.keys()).sort().map(
-    tag => ({
-      label: includeCount ? `${tag} (${tagMap.get(tag)})` : tag,
-      value: tag,
-    }),
-  );
-}
-
 export function getSpreadDurationAsDays(transaction: ITransaction): number | undefined {
   for (let tag of transaction.tags) {
     if (tag.startsWith('spread:')) {

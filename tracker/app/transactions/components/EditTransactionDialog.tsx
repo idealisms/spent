@@ -7,12 +7,8 @@ import DialogTitle from '@material-ui/core/DialogTitle';
 import { Theme, withStyles } from '@material-ui/core/styles';
 import TextField from '@material-ui/core/TextField';
 import * as React from 'react';
-import { connect } from 'react-redux';
-import CreatableSelect from 'react-select/lib/Creatable';
-import { ValueType } from 'react-select/lib/types';
-import { IAppState } from '../../main';
 import { ITransaction } from '../Model';
-import * as TransactionUtils from '../utils';
+import TagSelect from './TagSelect';
 import Transaction from './Transaction';
 import TransactionsTable from './TransactionsTable';
 
@@ -42,17 +38,13 @@ const styles = (theme: Theme) => createStyles({
   },
 });
 
-interface IEditTransactionDialogOwnProps extends WithStyles<typeof styles> {
+interface IEditTransactionDialogProps extends WithStyles<typeof styles> {
   transaction: ITransaction;
   onClose: () => void;
   onSaveChanges: (transaction: ITransaction) => void;
 }
-interface IEditTransactionDialogAppStateProps {
-  transactions: ITransaction[];
-}
-type IEditTransactionDialogProps = IEditTransactionDialogOwnProps & IEditTransactionDialogAppStateProps;
 interface IEditTransactionDialogState {
-  tags: {label: string, value: string}[];
+  tags: string[];
   notesValue: string;
 }
 const EditTransactionDialog = withStyles(styles)(
@@ -61,7 +53,7 @@ class extends React.Component<IEditTransactionDialogProps, IEditTransactionDialo
   constructor(props: IEditTransactionDialogProps, context?: any) {
     super(props, context);
     this.state = {
-      tags: props.transaction.tags.map(t => ({label: t, value: t})),
+      tags: [...this.props.transaction.tags],
       notesValue: props.transaction.notes || '',
     };
   }
@@ -69,7 +61,6 @@ class extends React.Component<IEditTransactionDialogProps, IEditTransactionDialo
   public render(): React.ReactElement<object> {
     let classes = this.props.classes;
     let transaction: ITransaction = this.props.transaction;
-    let tagSuggestions = TransactionUtils.getTagsForSuggestions(this.props.transactions);
     return <Dialog
             open
             onClose={this.props.onClose}
@@ -89,15 +80,14 @@ class extends React.Component<IEditTransactionDialogProps, IEditTransactionDialo
                 }}
                 />
           </TransactionsTable>
-          <CreatableSelect
-              className='textfield'
-              value={this.state.tags}
+          <TagSelect
               onChange={this.handleChangeTagSelect}
+              value={this.state.tags}
+              allowNewTags
+              className='textfield'
               autoFocus={this.state.tags.length == 0}
-              options={tagSuggestions}
-              formatCreateLabel={(inputValue) => <span>New tag: {inputValue}</span>}
               placeholder='e.g. food, restaurant'
-              isMulti /><br />
+              /><br />
 
           <TextField
               label='Notes'
@@ -116,12 +106,10 @@ class extends React.Component<IEditTransactionDialogProps, IEditTransactionDialo
       </Dialog>;
   }
 
-  private handleChangeTagSelect = (tags: ValueType<{label: string, value: string}>, action: any): void => {
-    if (Array.isArray(tags)) {
-      this.setState({
-        tags,
-      });
-    }
+  private handleChangeTagSelect = (tags: string[]): void => {
+    this.setState({
+      tags,
+    });
   }
 
   private handleKeyPress = (e: React.KeyboardEvent<{}>): void => {
@@ -132,7 +120,7 @@ class extends React.Component<IEditTransactionDialogProps, IEditTransactionDialo
   }
 
   private handleSave = (): void => {
-    let tags = this.state.tags.map(t => t.value);
+    let tags = new Array(...this.state.tags);
 
     this.props.onSaveChanges({
       ...this.props.transaction,
@@ -143,8 +131,4 @@ class extends React.Component<IEditTransactionDialogProps, IEditTransactionDialo
   }
 });
 
-const mapStateToProps = (state: IAppState): IEditTransactionDialogAppStateProps => ({
-  transactions: state.transactions.transactions,
-});
-
-export default connect(mapStateToProps, {})(EditTransactionDialog);
+export default EditTransactionDialog;

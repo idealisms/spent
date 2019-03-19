@@ -6,8 +6,6 @@ import memoize from 'memoize-one';
 import moment from 'moment';
 import * as React from 'react';
 import { connect } from 'react-redux';
-import Select from 'react-select';
-import { ValueType } from 'react-select/lib/types';
 import { ThunkDispatch } from 'redux-thunk';
 import * as Transactions from '../../transactions';
 import { CloudState, IAppState } from '../Model';
@@ -64,7 +62,7 @@ type filterTransactionsFunction = (
   transactions: Transactions.ITransaction[],
   startDate: Date,
   endDate: Date,
-  tagFilters: ValueType<{label: string, value: string}>,
+  tagFilters: string[],
   searchQuery: string) => Transactions.ITransaction[];
 
 interface IEditorOwnProps extends WithStyles<typeof styles> {
@@ -83,7 +81,7 @@ interface IEditorState {
   startDate: Date;
   endDate: Date;
   selectedTransactions: Map<string, Transactions.ITransaction>;
-  tagFilters: ValueType<{label: string, value: string}>;
+  tagFilters: string[];
   searchQuery: string;
 }
 
@@ -142,9 +140,6 @@ class extends React.Component<IEditorProps, IEditorState> {
       maxDate = moment(this.props.transactions[0].date).toDate();
     }
 
-    let includeCounts = true;
-    let tagSuggestions = Transactions.TransactionUtils.getTagsForSuggestions(
-        visibleTransactions, includeCounts);
     return (
       <div className={classes.root}>
         <MenuBar
@@ -184,13 +179,13 @@ class extends React.Component<IEditorProps, IEditorState> {
             mask={[/\d/, /\d/, /\d/, /\d/, '-', /\d/, /\d/, '-', /\d/, /\d/]}
           />
 
-          <Select
-            className='tagselect'
-            value={this.state.tagFilters}
-            onChange={this.handleChangeTagFilter}
-            options={tagSuggestions}
-            placeholder='Select tags'
-            isMulti />
+          <Transactions.TagSelect
+              onChange={this.handleChangeTagFilter}
+              value={this.state.tagFilters}
+              transactions={visibleTransactions}
+              className='tagselect'
+              placeholder='Select tags'
+              />
 
           <TextField
             className='search'
@@ -232,9 +227,9 @@ class extends React.Component<IEditorProps, IEditorState> {
     });
   }
 
-  private handleChangeTagFilter = (tagFilters: ValueType<{label: string, value: string}>, action: any): void => {
+  private handleChangeTagFilter = (tagFilters: string[]): void => {
     this.setState({
-      tagFilters: tagFilters,
+      tagFilters,
       selectedTransactions: new Map(),
     });
   }
@@ -296,7 +291,7 @@ class extends React.Component<IEditorProps, IEditorState> {
     // Since clearning/removing tags can change the tagFilter results,
     // reset it.
     this.setState({
-      tagFilters: null,
+      tagFilters: [],
       selectedTransactions: new Map(),
     });
   }
@@ -371,16 +366,12 @@ class extends React.Component<IEditorProps, IEditorState> {
   // tslint:disable-next-line:member-ordering (this is a function, not a field)
   private filterTransactions: filterTransactionsFunction = memoize<filterTransactionsFunction>(
       (transactions, startDate, endDate, tagFilters, searchQuery) => {
-    tagFilters = (tagFilters === undefined) ? this.state.tagFilters : tagFilters;
-    let tagsInclude = (Array.isArray(tagFilters) && tagFilters.length > 0)
-        ? tagFilters.map(valueType => valueType.value)
-        : [];
     return Transactions.TransactionUtils.filterTransactions(
         transactions,
         {
           startDate: startDate || this.state.startDate,
           endDate: endDate || this.state.endDate,
-          tagsIncludeAll: tagsInclude,
+          tagsIncludeAll: new Array(...tagFilters),
           searchQuery,
         });
   });
