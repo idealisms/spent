@@ -62,10 +62,7 @@ class extends React.Component<IBatchEditTagsDialogProps, IBatchEditTagsDialogSta
 
   public render(): React.ReactElement<object> {
     let classes = this.props.classes;
-    let tags = TransactionUtils.getTags(this.props.transactions);
-    let tagSuggestions = new Array(...tags).sort().map(
-        (t) => ({label: t, value: t}),
-        tags);
+    let tagSuggestions = TransactionUtils.getTagsForSuggestions(this.props.transactions);
     let rows = this.props.transactions.map((t) => {
         return (
           <Transaction

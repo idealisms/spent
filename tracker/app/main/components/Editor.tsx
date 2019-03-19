@@ -142,10 +142,9 @@ class extends React.Component<IEditorProps, IEditorState> {
       maxDate = moment(this.props.transactions[0].date).toDate();
     }
 
-    let tags = Transactions.TransactionUtils.getTags(visibleTransactions);
-    let tagSuggestions = new Array(...tags).sort().map(
-        (t) => ({label: t, value: t}),
-        tags);
+    let includeCounts = true;
+    let tagSuggestions = Transactions.TransactionUtils.getTagsForSuggestions(
+        visibleTransactions, includeCounts);
     return (
       <div className={classes.root}>
         <MenuBar
