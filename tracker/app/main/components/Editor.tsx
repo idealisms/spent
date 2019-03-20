@@ -185,6 +185,7 @@ class extends React.Component<IEditorProps, IEditorState> {
               transactions={visibleTransactions}
               className='tagselect'
               placeholder='Select tags'
+              showCounts
               />
 
           <TextField

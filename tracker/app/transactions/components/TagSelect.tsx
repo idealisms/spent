@@ -1,15 +1,34 @@
 import { createStyles, WithStyles } from '@material-ui/core';
 import { Theme, withStyles } from '@material-ui/core/styles';
+import { css } from 'emotion';
 import * as React from 'react';
 import { connect } from 'react-redux';
 import Select from 'react-select';
+import { OptionProps } from 'react-select/lib/components/Option';
 import CreatableSelect from 'react-select/lib/Creatable';
 import { ValueType } from 'react-select/lib/types';
 import { IAppState } from '../../main';
-import { ITransaction } from '../Model';
+import { ITransaction, TAG_TO_CATEGORY } from '../Model';
+import { categoryToEmoji } from '../utils';
 
 const styles = (theme: Theme) => createStyles({
-  root: {
+  option: {
+    display: 'flex !important',
+    flexDirection: 'row',
+    alignItems: 'center',
+    '& .cat': {
+      width: '24px',
+      textAlign: 'center',
+      flex: 'none',
+      marginRight: '8px',
+    },
+    '& .lbl': {
+      flex: '1 0 auto',
+    },
+    '& .cnt': {
+      flex: '0 0 auto',
+      color: 'rgba(0, 0, 0, .54)',
+    },
   },
 });
 interface ITagSelectOwnProps extends WithStyles<typeof styles> {
@@ -20,7 +39,7 @@ interface ITagSelectOwnProps extends WithStyles<typeof styles> {
    */
   transactions?: ITransaction[];
   allowNewTags?: boolean;
-  showCategories?: boolean;
+  hideCategories?: boolean;
   showCounts?: boolean;
 }
 interface ITagSelectPassThroughProps {
@@ -40,7 +59,6 @@ const TagSelect = withStyles(styles)(
 class extends React.Component<ITagSelectProps, ITagSelectState> {
 
   public render(): React.ReactElement<object> {
-    let classes = this.props.classes;
     let transactions = this.props.transactions || this.props.allTransactions;
 
     let tagMap: Map<string, number> = new Map();
@@ -51,30 +69,25 @@ class extends React.Component<ITagSelectProps, ITagSelectState> {
     }
 
     let suggestions = new Array(...tagMap.keys()).sort().map(
-      tag => {
-        let label = tag;
-        if (this.props.showCounts) {
-          label += ` (${tagMap.get(tag)})`;
-        }
-        return {
-          label,
-          value: tag,
-        };
-      },
-    );
+      tag => ({ label: tag, value: tag }));
+
+    let Option = this.getOptionClass(tagMap);
 
     let componentProps = {
       // Pass through props.
-      className: `${classes.root} ${this.props.className ? this.props.className : ''}`,
+      className: this.props.className,
       isDisabled: this.props.isDisabled,
       createOptionPosition: this.props.createOptionPosition,
       placeholder: this.props.placeholder,
       autoFocus: this.props.autoFocus,
 
+      components: {Option},
       isMulti: true,
       options: suggestions,
       onChange: this.handleChangeTags,
-      value: this.props.value ? this.props.value.map(t => ({label: t, value: t})) : undefined,
+      value: this.props.value
+          ? this.props.value.map(t => ({label: t, value: t }))
+          : undefined,
     };
 
     if (this.props.allowNewTags) {
@@ -97,6 +110,54 @@ class extends React.Component<ITagSelectProps, ITagSelectState> {
     } else {
       this.props.onChange([]);
     }
+  }
+
+  private getOptionClass = (tagMap: Map<string, number>): React.FunctionComponent<OptionProps<{ label: string; value: string; }>> => {
+    let hideCategories = this.props.hideCategories;
+    let showCounts = this.props.showCounts;
+    let renderChild = (tag: string): JSX.Element => {
+      let categoryNode: JSX.Element|undefined;
+      if (!hideCategories) {
+        let category = TAG_TO_CATEGORY.get(tag);
+        let emoji = category ? categoryToEmoji(category) : '';
+        categoryNode = <span className='cat'>{emoji}</span>;
+      }
+      let countNode: JSX.Element|undefined;
+      if (showCounts) {
+        let count = tagMap.get(tag) || 0;
+        countNode = <span className='cnt'>{count}</span>;
+      }
+      return (
+        <React.Fragment>
+          {hideCategories ? '' : categoryNode}
+          <span className='lbl'>{tag}</span>
+          {showCounts ? countNode : ''}
+        </React.Fragment>
+      );
+    };
+
+    let classes = this.props.classes;
+    return (props) => {
+      const { className, cx, getStyles, isDisabled, isFocused, isSelected, innerRef, innerProps } = props;
+      return (
+        <div
+          ref={innerRef}
+          className={`${classes.option} ` + (cx(
+            css(getStyles('option', props)),
+            {
+              'option': true,
+              'option--is-disabled': isDisabled,
+              'option--is-focused': isFocused,
+              'option--is-selected': isSelected,
+            },
+            className,
+          ) || '')}
+          {...innerProps}
+        >
+          {renderChild(props.label)}
+        </div>
+      );
+    };
   }
 });
 
