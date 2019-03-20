@@ -169,8 +169,12 @@ class extends React.Component<IDailyGraphProps, IDailyGraphState> {
                       eventName: 'select',
                       callback: ({chartWrapper}) => {
                         let selected = chartWrapper.getChart().getSelection();
-                        let row = selected[0].row as number;
-                        this.props.onClickDate!(data[row][0]);
+                        // This event also fires when de-selecting a point,
+                        // in which case, selected is an empty array.
+                        if (selected.length > 0) {
+                          let row = selected[0].row as number;
+                          this.props.onClickDate!(data[row][0]);
+                        }
                       },
                     }]
                   : []}
