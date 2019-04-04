@@ -99,5 +99,8 @@
     "redux": "^4.0.1",
     "redux-thunk": "^2.3.0",
     "style-loader": "^0.21.0"
+  },
+  "resolutions": {
+    "lodash": "4.17.11"
   }
 }
