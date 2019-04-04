@@ -93,7 +93,7 @@ class extends React.Component<IDailyGraphProps, IDailyGraphState> {
       for (let m = moment(startDate); m.isSameOrBefore(moment(endDate)); m = m.add(1, 'days')) {
         let currentDate = m.format('YYYY-MM-DD');
         currentTotal += dailyTotals[currentDate] - dailyBudgetCents;
-        data.push([m.toDate(), data.length ? null : 0, currentTotal / 100.0]);
+        data.push([m.toDate(), data.length ? null : 0, Math.round(currentTotal) / 100.0]);
 
         min = Math.min(min, currentTotal / 100.0);
         max = Math.max(max, currentTotal / 100.0);

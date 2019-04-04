@@ -164,7 +164,7 @@ class extends React.Component<IDailyProps, IDailyState> {
               placeholder='Default: 104.02'
               label='Daily Budget'
               style={{verticalAlign: 'baseline'}}
-              value={this.state.dailyBudgetCents / 100.0}
+              value={Math.round(this.state.dailyBudgetCents) / 100.0}
               InputProps={{readOnly: true}}
               onChange={this.handleChangeDailyBudget}
             />
