@@ -72,6 +72,7 @@ class extends React.Component<ITagSelectProps, ITagSelectState> {
       tag => ({ label: tag, value: tag }));
 
     let Option = this.getOptionClass(tagMap);
+    let MultiValueLabel = this.getMultiValueLabelClass();
 
     let componentProps = {
       // Pass through props.
@@ -81,7 +82,7 @@ class extends React.Component<ITagSelectProps, ITagSelectState> {
       placeholder: this.props.placeholder,
       autoFocus: this.props.autoFocus,
 
-      components: {Option},
+      components: {Option, MultiValueLabel},
       isMulti: true,
       options: suggestions,
       onChange: this.handleChangeTags,
@@ -156,6 +157,18 @@ class extends React.Component<ITagSelectProps, ITagSelectState> {
         >
           {renderChild(props.label)}
         </div>
+      );
+    };
+  }
+
+  private getMultiValueLabelClass = (): React.FunctionComponent<OptionProps<{ label: string; value: string; }>> => {
+    // let classes = this.props.classes;
+    let hideCategories = this.props.hideCategories;
+    return (props) => {
+      let category = TAG_TO_CATEGORY.get(props.data.label);
+      let emoji = (!hideCategories && category) ? categoryToEmoji(category) + ' ' : '';
+      return (
+        <div {...props.innerProps}>{emoji}{props.children}</div>
       );
     };
   }
