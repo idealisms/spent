@@ -99,7 +99,7 @@ class extends React.Component<IBatchEditTagsDialogProps, IBatchEditTagsDialogSta
             <TagSelect
                 onChange={this.handleChangeTagSelect}
                 value={this.state.tags}
-                transactions={this.props.transactions}
+                transactions={this.state.action == BatchEditTagsAction.RemoveTags ? this.props.transactions : undefined}
                 allowNewTags
                 className='tagselect'
                 isDisabled={this.state.action === undefined}
