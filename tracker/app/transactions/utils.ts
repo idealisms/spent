@@ -15,6 +15,7 @@ export function formatAmount(transaction: ITransaction): string {
 }
 
 export function formatAmountNumber(amountCentsNumber: number): string {
+  amountCentsNumber = Math.round(amountCentsNumber);
   let isNegative = amountCentsNumber < 0;
   let amountCents = Math.abs(amountCentsNumber).toString();
   let digits = amountCents.length;
