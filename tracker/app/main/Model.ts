@@ -1,4 +1,4 @@
-import { RouterState } from 'react-router-redux';
+import { RouterState } from 'connected-react-router';
 import { ITransactionsState } from '../transactions';
 
 export enum CloudState {
@@ -61,7 +61,7 @@ export interface ISettingsState {
 }
 
 export interface IAppState {
-  routing: RouterState;
+  router: RouterState;
   settings: ISettingsState;
   transactions: ITransactionsState;
 }

@@ -1,11 +1,11 @@
 import MomentUtils from '@date-io/moment';
 import { MuiThemeProvider } from '@material-ui/core/styles';
-import { createHashHistory } from 'history';
+import { ConnectedRouter } from 'connected-react-router';
+import { createBrowserHistory } from 'history';
 import { MuiPickersUtilsProvider } from 'material-ui-pickers';
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 import { Provider } from 'react-redux';
-import { ConnectedRouter } from 'react-router-redux';
 import { Store } from 'redux';
 import { App, IAppState } from './main';
 import { theme } from './muiTheme';
@@ -15,7 +15,7 @@ declare const require: (name: String) => any;
 
 serviceWorker.register();
 
-const history = createHashHistory();
+const history = createBrowserHistory();
 
 const store: Store<IAppState> = (process.env.NODE_ENV !== 'production')
         ? (require('./store.dev') as any).configureStore(history)
@@ -24,7 +24,7 @@ const store: Store<IAppState> = (process.env.NODE_ENV !== 'production')
 ReactDOM.render(
     <Provider store={store}>
       <MuiThemeProvider theme={theme}>
-        <ConnectedRouter store={store} history={history}>
+        <ConnectedRouter history={history}>
           <MuiPickersUtilsProvider utils={MomentUtils}>
             <App/>
           </MuiPickersUtilsProvider>

@@ -23,10 +23,10 @@ import EditIcon from '@material-ui/icons/Edit';
 import LabelIcon from '@material-ui/icons/Label';
 import MenuIcon from '@material-ui/icons/Menu';
 import TimelineIcon from '@material-ui/icons/Timeline';
-import { Location, LocationDescriptor, LocationState } from 'history';
+import { push } from 'connected-react-router';
+import { Location, LocationState } from 'history';
 import * as React from 'react';
 import { connect } from 'react-redux';
-import { push } from 'react-router-redux';
 import { Dispatch } from 'redux';
 import * as Transactions from '../../transactions';
 import { CloudState, IAppState } from '../Model';
@@ -90,7 +90,7 @@ interface IMenuBarStateProps {
   location: Location | null;
 }
 interface IMenuBarDispatchProps {
-  navigateTo: (location: LocationDescriptor, state?: LocationState) => void;
+  navigateTo: (location: string, state?: LocationState) => void;
 }
 type IMenuBarProps = IMenuBarOwnProps & IMenuBarStateProps & IMenuBarDispatchProps;
 
@@ -312,12 +312,12 @@ class extends React.Component<IMenuBarProps, IMenuBarReactState> {
 
 const mapStateToProps = (state: IAppState): IMenuBarStateProps => {
   return {
-    location: state.routing.location,
+    location: state.router.location,
   };
 };
 
 const mapDispatchToProps = (dispatch: Dispatch): IMenuBarDispatchProps => ({
-  navigateTo: (location: LocationDescriptor, state?: LocationState) => {
+  navigateTo: (location: string, state?: LocationState) => {
     dispatch(push(location));
   },
 });
