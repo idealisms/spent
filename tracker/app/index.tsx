@@ -1,7 +1,7 @@
 import MomentUtils from '@date-io/moment';
 import { MuiThemeProvider } from '@material-ui/core/styles';
 import { ConnectedRouter } from 'connected-react-router';
-import { createBrowserHistory } from 'history';
+import { createHashHistory } from 'history';
 import { MuiPickersUtilsProvider } from 'material-ui-pickers';
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
@@ -15,7 +15,7 @@ declare const require: (name: String) => any;
 
 serviceWorker.register();
 
-const history = createBrowserHistory();
+const history = createHashHistory();
 
 const store: Store<IAppState> = (process.env.NODE_ENV !== 'production')
         ? (require('./store.dev') as any).configureStore(history)
