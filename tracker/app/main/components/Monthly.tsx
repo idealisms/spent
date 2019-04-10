@@ -3,6 +3,8 @@ import MenuItem from '@material-ui/core/MenuItem';
 import OutlinedInput from '@material-ui/core/OutlinedInput';
 import Select from '@material-ui/core/Select';
 import { Theme, withStyles } from '@material-ui/core/styles';
+import { push } from 'connected-react-router';
+import { Location } from 'history';
 import moment from 'moment';
 import * as React from 'react';
 import { connect } from 'react-redux';
@@ -13,6 +15,7 @@ import { fetchSettingsFromDropboxIfNeeded } from '../actions';
 import { IAppState, ISpendTarget } from '../Model';
 import MenuBar from './MenuBar';
 import MonthlyGraph from './MonthlyGraph';
+import * as Pages from './RoutePaths';
 
 const styles = (theme: Theme) => createStyles({
   root: {
@@ -47,42 +50,44 @@ interface IMonthlyOwnProps extends WithStyles<typeof styles> {
 interface IMonthlyAppStateProps {
   transactions: ITransaction[];
   spendTargets: ISpendTarget[];
+  location: Location;
 }
 interface IMonthlyDispatchProps {
   fetchTransactions: () => void;
   fetchSettings: () => void;
+  navigateTo: (location: string) => void;
 }
 type IMonthlyProps = IMonthlyOwnProps & IMonthlyAppStateProps & IMonthlyDispatchProps;
 interface IMonthlyState {
-  spendTargetIndex: number;
 }
 
 const Monthly = withStyles(styles)(
 class extends React.Component<IMonthlyProps, IMonthlyState> {
   constructor(props: IMonthlyProps, context?: any) {
     super(props, context);
-    let spendTargetIndex = 0;
-    this.state = {
-      spendTargetIndex,
-    };
+    this.state = {};
     this.props.fetchTransactions();
     this.props.fetchSettings();
   }
 
-  public componentDidUpdate(prevProps: IMonthlyProps): void {
-    if (this.props.spendTargets !== prevProps.spendTargets && this.props.spendTargets.length) {
-      this.updateSpendTarget(0);
-    }
-    if (this.props.transactions !== prevProps.transactions) {
-      this.updateSpendTarget(this.state.spendTargetIndex);
-    }
-  }
-
   public render(): React.ReactElement<object> {
     let classes = this.props.classes;
-    let spendTarget = this.props.spendTargets.length > 0
-        ? this.props.spendTargets[this.state.spendTargetIndex]
-        : undefined;
+    let spendTarget;
+
+    if (this.props.spendTargets.length > 0) {
+      spendTarget = this.props.spendTargets[0];
+
+      // Construct a fake URL so we can parse the search param even if
+      // we are using a hash history.
+      let url = new URL('https://www.example.com/' + this.props.location.search);
+      let spendTargetName = url.searchParams.get('t');
+      for (let i = 0; i < this.props.spendTargets.length; ++i) {
+        if (this.props.spendTargets[i].name == spendTargetName) {
+          spendTarget = this.props.spendTargets[i];
+          break;
+        }
+      }
+    }
     let startDate = spendTarget
         ? moment(spendTarget.startDate).toDate()
         : moment().startOf('day').toDate();
@@ -133,18 +138,7 @@ class extends React.Component<IMonthlyProps, IMonthlyState> {
 
   public handleSelectSpendTarget = (event: React.ChangeEvent<HTMLSelectElement>): void => {
     let spendTargetName = event.target.value;
-    for (let i = 0; i < this.props.spendTargets.length; ++i) {
-      if (this.props.spendTargets[i].name == spendTargetName) {
-        this.updateSpendTarget(i);
-        break;
-      }
-    }
-  }
-
-  private updateSpendTarget = (spendTargetIndex: number): void => {
-    this.setState({
-      spendTargetIndex,
-    });
+    this.props.navigateTo(Pages.MonthlyPage + `?t=${encodeURIComponent(spendTargetName)}`);
   }
 
   private groupByMonths = (transactions: ITransaction[], spendTarget?: ISpendTarget):
@@ -248,6 +242,7 @@ class extends React.Component<IMonthlyProps, IMonthlyState> {
 const mapStateToProps = (state: IAppState): IMonthlyAppStateProps => ({
   transactions: state.transactions.transactions,
   spendTargets: state.settings.settings.spendTargets,
+  location: state.router.location,
 });
 const mapDispatchToProps = (dispatch: ThunkDispatch<IAppState, null, any>): IMonthlyDispatchProps => ({
   fetchTransactions: () => {
@@ -255,6 +250,9 @@ const mapDispatchToProps = (dispatch: ThunkDispatch<IAppState, null, any>): IMon
   },
   fetchSettings: () => {
     dispatch(fetchSettingsFromDropboxIfNeeded());
+  },
+  navigateTo: (location: string) => {
+    dispatch(push(location));
   },
 });
 
