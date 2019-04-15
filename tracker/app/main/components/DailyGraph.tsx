@@ -1,4 +1,6 @@
 import { createStyles, WithStyles } from '@material-ui/core';
+import Checkbox from '@material-ui/core/Checkbox';
+import FormControlLabel from '@material-ui/core/FormControlLabel';
 import { Theme, withStyles } from '@material-ui/core/styles';
 import moment from 'moment';
 import * as React from 'react';
@@ -9,12 +11,25 @@ import { ISpendTarget } from '../Model';
 
 const styles = (theme: Theme) => createStyles({
   root: {
+    position: 'relative',
     flex: '0 1 400px',
-    padding: '8px 16px',
     maxHeight: 'calc(50% - 64px)',
     '@media (max-width: 420px)': {
       paddingBottom: '0',
     },
+  },
+  controls: {
+    position: 'absolute',
+    top: '8px',
+    left: '16px',
+    zIndex: 1,
+    padding: '0 8px',
+    backgroundColor: 'rgba(232, 232, 232, .72)',
+    borderRadius: '4px',
+  },
+  chartContainer: {
+    height: 'calc(100% - 16px)',
+    padding: '8px 16px',
     overflowX: 'auto',
     '& .google-visualization-tooltip': {
       paddingLeft: '4px',
@@ -48,10 +63,20 @@ interface IDailyGraphProps extends WithStyles<typeof styles> {
   onClickDate?: (date: Date) => void;
 }
 interface IDailyGraphState {
+  useSpread: boolean;
+  shouldAnimate: boolean;
 }
 const DailyGraph = withStyles(styles)(
 class extends React.Component<IDailyGraphProps, IDailyGraphState> {
   private container: HTMLElement|null = null;
+
+  constructor(props: IDailyGraphProps, context?: any) {
+    super(props, context);
+    this.state = {
+      useSpread: true,
+      shouldAnimate: false,
+    };
+  }
 
   public componentDidMount(): void {
     if (!this.container) {
@@ -68,7 +93,8 @@ class extends React.Component<IDailyGraphProps, IDailyGraphState> {
     return !(this.props.graph_id == nextProps.graph_id &&
         this.props.transactions === nextProps.transactions &&
         this.props.spendTarget === nextProps.spendTarget &&
-        this.props.onClickDate === nextProps.onClickDate);
+        this.props.onClickDate === nextProps.onClickDate &&
+        this.state.useSpread === nextState.useSpread);
   }
 
   public componentDidUpdate(prevProps: IDailyGraphProps): void {
@@ -103,77 +129,100 @@ class extends React.Component<IDailyGraphProps, IDailyGraphState> {
     min = min - .05 * yHeight;
 
     return (
-        <div className={classes.root} ref={(elt) => this.container = elt}>
-          <div style={{width: chartWidth, height: '100%'}}>
-            <Chart
-                chartType='LineChart'
-                columns={[
-                  {type: 'date', label: 'Date'},
-                  {type: 'number', label: '-'},
-                  {type: 'number', label: 'Dollars'},
-                  {type: 'string', role: 'tooltip' as GoogleDataTableColumnRoleType, p: {html: true}},
-                ]}
-                rows={dataAsRows as GoogleDataTableCell[][]}
-                options={{
-                  chartArea: {
-                    top: 16,
-                    right: 80,
-                    bottom: 32,
-                    left: 16,
-                  },
-                  series: {
-                    0: {targetAxisIndex: 0, visibleInLegend: false, pointSize: 0, lineWidth: 0},
-                    1: {targetAxisIndex: 1},
-                  },
-                  colors: ['#3366cc', '#3366cc'],
-                  hAxis: {
-                    title: '',
-                    textStyle: {
-                      fontSize: 13,
+        <div className={classes.root}>
+          <div className={classes.controls}>
+            <FormControlLabel
+              control={
+                <Checkbox
+                  checked={this.state.useSpread}
+                  onChange={() => {
+                    this.setState({
+                      useSpread: !this.state.useSpread,
+                      shouldAnimate: true,
+                    });
+                  }}
+                  color='primary'
+                />
+              }
+              label='spread'
+            />
+          </div>
+          <div className={classes.chartContainer}  ref={(elt) => this.container = elt}>
+            <div style={{width: chartWidth, height: '100%'}}>
+              <Chart
+                  chartType='LineChart'
+                  columns={[
+                    {type: 'date', label: 'Date'},
+                    {type: 'number', label: '-'},
+                    {type: 'number', label: 'Dollars'},
+                    {type: 'string', role: 'tooltip' as GoogleDataTableColumnRoleType, p: {html: true}},
+                  ]}
+                  rows={dataAsRows as GoogleDataTableCell[][]}
+                  options={{
+                    chartArea: {
+                      top: 16,
+                      right: 80,
+                      bottom: 32,
+                      left: 16,
                     },
-                  },
-                  vAxes: [
-                    {
-                      textPosition: 'none',
-                      viewWindow: {
-                        min,
-                        max,
-                      },
+                    series: {
+                      0: {targetAxisIndex: 0, visibleInLegend: false, pointSize: 0, lineWidth: 0},
+                      1: {targetAxisIndex: 1},
                     },
-                    {
+                    colors: ['#3366cc', '#3366cc'],
+                    hAxis: {
                       title: '',
-                      format: '¤#,###',
-                      textPosition: 'out',
                       textStyle: {
-                        fontSize: 16,
-                      },
-                      viewWindow: {
-                        min,
-                        max,
+                        fontSize: 13,
                       },
                     },
-                  ],
-                  legend: {position: 'none'},
-                  tooltip: {isHtml: true},
-                }}
-                graph_id={this.props.graph_id}
-                width='auto'
-                height='100%'
-                chartEvents={this.props.onClickDate
-                  ? [{
-                      eventName: 'select',
-                      callback: ({chartWrapper}) => {
-                        let selected = chartWrapper.getChart().getSelection();
-                        // This event also fires when de-selecting a point,
-                        // in which case, selected is an empty array.
-                        if (selected.length > 0) {
-                          let row = selected[0].row as number;
-                          this.props.onClickDate!(dataAsRows[row][0]);
-                        }
+                    vAxes: [
+                      {
+                        textPosition: 'none',
+                        viewWindow: {
+                          min,
+                          max,
+                        },
                       },
-                    }]
-                  : []}
-              />
+                      {
+                        title: '',
+                        format: '¤#,###',
+                        textPosition: 'out',
+                        textStyle: {
+                          fontSize: 16,
+                        },
+                        viewWindow: {
+                          min,
+                          max,
+                        },
+                      },
+                    ],
+                    legend: {position: 'none'},
+                    tooltip: {isHtml: true},
+                    animation: {
+                      duration: this.state.shouldAnimate ? 500 : 0,
+                      easing: 'out',
+                    },
+                  }}
+                  graph_id={this.props.graph_id}
+                  width='auto'
+                  height='100%'
+                  chartEvents={this.props.onClickDate
+                    ? [{
+                        eventName: 'select',
+                        callback: ({chartWrapper}) => {
+                          let selected = chartWrapper.getChart().getSelection();
+                          // This event also fires when de-selecting a point,
+                          // in which case, selected is an empty array.
+                          if (selected.length > 0) {
+                            let row = selected[0].row as number;
+                            this.props.onClickDate!(dataAsRows[row][0]);
+                          }
+                        },
+                      }]
+                    : []}
+                />
+            </div>
           </div>
         </div>);
   }
@@ -199,7 +248,7 @@ class extends React.Component<IDailyGraphProps, IDailyGraphState> {
 
     for (let transaction of this.props.transactions) {
       let spreadDuration = TransactionUtils.getSpreadDurationAsDays(transaction);
-      if (spreadDuration !== undefined) {
+      if (this.state.useSpread && spreadDuration !== undefined) {
         let spreadStartDate = moment(transaction.date);
         let spreadEndDate = moment.min(
             spreadStartDate.clone().add(spreadDuration - 1, 'days'),
