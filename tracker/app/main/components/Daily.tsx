@@ -9,7 +9,7 @@ import { ITransaction, Transaction, TransactionsActions, TransactionsTable, Tran
 import { fetchSettingsFromDropboxIfNeeded } from '../actions';
 import { IAppState, ISpendTarget } from '../Model';
 import DailyGraph from './DailyGraph';
-import MenuBar from './MenuBar';
+import MenuBarWithDrawer from './MenuBarWithDrawer';
 
 const styles = (theme: Theme) => createStyles({
   root: {
@@ -68,7 +68,7 @@ class extends React.Component<IDailyProps, IDailyState> {
 
     return (
       <div className={classes.root}>
-        <MenuBar title='Daily'/>
+        <MenuBarWithDrawer title='Daily'/>
 
         <DailyGraph
           graph_id='daily-spend-chart'

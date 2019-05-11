@@ -13,7 +13,7 @@ import { ThunkDispatch } from 'redux-thunk';
 import { ITransaction, Transaction, TransactionsActions, TransactionsTable, TransactionsTableHeadingRow, TransactionsTableSumRow, TransactionUtils } from '../../transactions';
 import { fetchSettingsFromDropboxIfNeeded } from '../actions';
 import { IAppState, ISpendTarget } from '../Model';
-import MenuBar from './MenuBar';
+import MenuBarWithDrawer from './MenuBarWithDrawer';
 import MonthlyGraph from './MonthlyGraph';
 import * as Pages from './RoutePaths';
 
@@ -106,7 +106,7 @@ class extends React.Component<IMonthlyProps, IMonthlyState> {
 
     return (
       <div className={classes.root}>
-        <MenuBar title='Monthly'/>
+        <MenuBarWithDrawer title='Monthly'/>
 
         <MonthlyGraph
           graph_id='monthly-budget-chart'
