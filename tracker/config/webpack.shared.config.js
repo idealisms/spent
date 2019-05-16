@@ -5,7 +5,6 @@ module.exports = (options) => ({
   entry: options.entry,
   output: Object.assign({
     path: path.resolve(process.cwd(), 'build')
-    // , publicPath: '/',
   }, options.output),
   module: {
     rules: [
@@ -87,7 +86,11 @@ module.exports = (options) => ({
     }
   }, options.resolve),
 
+  optimization: options.optimization,
+
   devtool: options.devtool,
+
+  devServer: options.devServer,
 
   target: 'web',
 });
