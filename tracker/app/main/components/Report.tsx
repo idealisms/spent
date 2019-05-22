@@ -276,9 +276,10 @@ class extends React.Component<IReportProps, IReportState> {
 
     let startTime = window.performance.now();
     let output: JSX.Element[] = [];
-    const buildRenderTree = (ReportNodes: IReportNode[]): ReportRenderNode[] => {
+    const buildRenderTree = (reportNodes: IReportNode[]): ReportRenderNode[] => {
+      reportNodes = reportNodes || [];
       let renderNodes: ReportRenderNode[] = [];
-      for (let reportNode of ReportNodes) {
+      for (let reportNode of reportNodes) {
         let reportRenderNode: ReportRenderNode = {
           reportNode: reportNode,
           amountCents: 0,
@@ -293,6 +294,9 @@ class extends React.Component<IReportProps, IReportState> {
 
     let tagToRootReportRenderNode: Map<string, ReportRenderNode> = new Map();
     for (let renderNode of ReportRenderNodes) {
+      if (!renderNode.reportNode.tags) {
+        continue;
+      }
       for (let tag of renderNode.reportNode.tags) {
         if (tagToRootReportRenderNode.has(tag)) {
           return [
@@ -311,6 +315,9 @@ class extends React.Component<IReportProps, IReportState> {
       node.amountCents += transaction.amount_cents;
       let subnodes = [];
       for (let subnode of node.subcategories) {
+        if (!subnode.reportNode.tags) {
+          continue;
+        }
         for (let tag of subnode.reportNode.tags) {
           if (transaction.tags.indexOf(tag) != -1) {
             subnodes.push(subnode);
