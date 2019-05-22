@@ -9,7 +9,7 @@ import { connect } from 'react-redux';
 import { ThunkDispatch } from 'redux-thunk';
 import * as Transactions from '../../transactions';
 import { CloudState, IAppState } from '../Model';
-import MenuBar from './MenuBar';
+import EditorMenuBar from './EditorMenuBar';
 
 const styles = (theme: Theme) => createStyles({
   root: {
@@ -142,7 +142,7 @@ class extends React.Component<IEditorProps, IEditorState> {
 
     return (
       <div className={classes.root}>
-        <MenuBar
+        <EditorMenuBar
             title='Editor'
             selectedTransactions={this.state.selectedTransactions}
             cloudState={this.props.cloudState}

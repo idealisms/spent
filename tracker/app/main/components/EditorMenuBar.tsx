@@ -34,20 +34,20 @@ const styles = (theme: Theme) => createStyles({
   },
 });
 
-interface IMenuBarProps extends WithStyles<typeof styles> {
+interface IEditorMenuBarProps extends WithStyles<typeof styles> {
   title: string;
-  selectedTransactions?: Map<string, Transactions.ITransaction>;
-  cloudState?: CloudState;
-  onSaveClick?: () => void;
-  onSelectedBackClick?: () => void;
-  onSelectedEditSaveClick?: (transaction: Transactions.ITransaction) => void;
-  onSelectedBatchEditTagsSaveClick?: (updatedTransactions: Transactions.ITransaction[]) => void;
-  onSelectedMergeSaveClick?: (transaction: Transactions.ITransaction) => void;
-  onSelectedDeleteClick?: (transactions: Map<string, Transactions.ITransaction>) => void;
-  onSelectedSplitSaveClick?: (transactions: Map<string, Transactions.ITransaction>) => void;
+  selectedTransactions: Map<string, Transactions.ITransaction>;
+  cloudState: CloudState;
+  onSaveClick: () => void;
+  onSelectedBackClick: () => void;
+  onSelectedEditSaveClick: (transaction: Transactions.ITransaction) => void;
+  onSelectedBatchEditTagsSaveClick: (updatedTransactions: Transactions.ITransaction[]) => void;
+  onSelectedMergeSaveClick: (transaction: Transactions.ITransaction) => void;
+  onSelectedDeleteClick: (transactions: Map<string, Transactions.ITransaction>) => void;
+  onSelectedSplitSaveClick: (transactions: Map<string, Transactions.ITransaction>) => void;
 }
 
-interface IMenuBarState {
+interface IEditorMenuBarState {
   isEditDialogOpen: boolean;
   isBatchEditTagsDialogOpen: boolean;
   isMergeDialogOpen: boolean;
@@ -55,10 +55,10 @@ interface IMenuBarState {
 }
 
 // TODO: Create new ReportMenuBar and rename this to EditorMenuBar.
-const MenuBar = withStyles(styles)(
-class extends React.Component<IMenuBarProps, IMenuBarState> {
+const EditorMenuBar = withStyles(styles)(
+class extends React.Component<IEditorMenuBarProps, IEditorMenuBarState> {
 
-  constructor(props: IMenuBarProps, context?: any) {
+  constructor(props: IEditorMenuBarProps, context?: any) {
     super(props, context);
     this.state = {
       isEditDialogOpen: false,
@@ -117,18 +117,17 @@ class extends React.Component<IMenuBarProps, IMenuBarState> {
                 ><DeleteIcon /></IconButton>
             </Tooltip>
           </span>
-        : (this.props.cloudState ?
-            <span>
-              <IconButton
-                  className={classes.whiteIconButton}
-                  disabled={this.props.cloudState != CloudState.Modified}
-                  onClick={this.props.onSaveClick}>{
-                this.props.cloudState == CloudState.Modified ? <CloudUploadIcon /> :
-                    (this.props.cloudState == CloudState.Uploading
-                        ? <CircularProgress size={24} thickness={4} />
-                        : <CloudDoneIcon />)
-              }</IconButton>
-            </span> : undefined);
+        : <span>
+            <IconButton
+                className={classes.whiteIconButton}
+                disabled={this.props.cloudState != CloudState.Modified}
+                onClick={this.props.onSaveClick}>{
+              this.props.cloudState == CloudState.Modified ? <CloudUploadIcon /> :
+                  (this.props.cloudState == CloudState.Uploading
+                      ? <CircularProgress size={24} thickness={4} />
+                      : <CloudDoneIcon />)
+            }</IconButton>
+          </span>;
 
     return (
         <MenuBarWithDrawer
@@ -138,25 +137,25 @@ class extends React.Component<IMenuBarProps, IMenuBarState> {
             iconElementLeft={iconElementLeft}
             iconElementRight={iconElementRight}
         >
-          {this.state.isEditDialogOpen && this.props.onSelectedEditSaveClick ?
+          {this.state.isEditDialogOpen ?
             <Transactions.EditTransactionDialog
                 transaction={this.props.selectedTransactions!.values().next().value}
                 onClose={() => this.setState({isEditDialogOpen: false})}
                 onSaveChanges={this.props.onSelectedEditSaveClick}
             /> : undefined}
-          {this.state.isBatchEditTagsDialogOpen && this.props.onSelectedBatchEditTagsSaveClick ?
+          {this.state.isBatchEditTagsDialogOpen ?
             <Transactions.BatchEditTagsDialog
                 transactions={selectedTransactionsArray}
                 onClose={() => this.setState({isBatchEditTagsDialogOpen: false})}
                 onSaveChanges={this.props.onSelectedBatchEditTagsSaveClick}
             /> : undefined}
-          {this.state.isMergeDialogOpen && this.props.onSelectedMergeSaveClick ?
+          {this.state.isMergeDialogOpen ?
             <Transactions.MergeTransactionDialog
                 transactions={selectedTransactionsArray}
                 onClose={() => this.setState({isMergeDialogOpen: false})}
                 onSaveChanges={this.props.onSelectedMergeSaveClick}
             /> : undefined}
-          {this.state.isSplitDialogOpen && this.props.onSelectedSplitSaveClick ?
+          {this.state.isSplitDialogOpen ?
             <Transactions.SplitTransactionDialog
                 transaction={this.props.selectedTransactions!.values().next().value}
                 onClose={() => this.setState({isSplitDialogOpen: false})}
@@ -167,7 +166,7 @@ class extends React.Component<IMenuBarProps, IMenuBarState> {
   }
 
   private handleShowEditDialog = (): void => {
-    if (!this.props.selectedTransactions || this.props.selectedTransactions.size != 1) {
+    if (this.props.selectedTransactions.size != 1) {
       return;
     }
     this.setState({
@@ -176,7 +175,7 @@ class extends React.Component<IMenuBarProps, IMenuBarState> {
   }
 
   private handleShowBatchEditTagsDialog = (): void => {
-    if (!this.props.selectedTransactions || this.props.selectedTransactions.size < 2) {
+    if (this.props.selectedTransactions.size < 2) {
       return;
     }
     this.setState({
@@ -185,7 +184,7 @@ class extends React.Component<IMenuBarProps, IMenuBarState> {
   }
 
   private handleShowMergeDialog = (): void => {
-    if (!this.props.selectedTransactions || this.props.selectedTransactions.size < 2) {
+    if (this.props.selectedTransactions.size < 2) {
       return;
     }
     this.setState({
@@ -194,7 +193,7 @@ class extends React.Component<IMenuBarProps, IMenuBarState> {
   }
 
   private handleShowSplitDialog = (): void => {
-    if (!this.props.selectedTransactions || this.props.selectedTransactions.size != 1) {
+    if (this.props.selectedTransactions.size != 1) {
       return;
     }
     this.setState({
@@ -203,4 +202,4 @@ class extends React.Component<IMenuBarProps, IMenuBarState> {
   }
 });
 
-export default MenuBar;
+export default EditorMenuBar;
