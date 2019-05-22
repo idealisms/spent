@@ -120,7 +120,7 @@ class extends React.Component<IMenuBarProps, IMenuBarState> {
         : (this.props.cloudState ?
             <span>
               <IconButton
-                  classes={{root: classes.whiteIconButton}}
+                  className={classes.whiteIconButton}
                   disabled={this.props.cloudState != CloudState.Modified}
                   onClick={this.props.onSaveClick}>{
                 this.props.cloudState == CloudState.Modified ? <CloudUploadIcon /> :

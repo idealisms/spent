@@ -23,7 +23,7 @@ import { IAppState } from '../Model';
 import * as Pages from './RoutePaths';
 
 const styles = (theme: Theme) => createStyles({
-  flexNone: {
+  root: {
     flex: 'none',
   },
   grow: {
@@ -88,17 +88,17 @@ const MenuBarWithDrawer = withStyles(styles)(
     let classes = this.props.classes;
     let selectedPage = this.props.location && this.props.location.pathname;
     return (
-      <div className={classes.flexNone}>
+      <div className={classes.root}>
         <AppBar position='static' className={classes.appBar}>
           <Toolbar>
             {this.props.iconElementLeft
               ? this.props.iconElementLeft
-              : <IconButton classes={{root: classes.whiteIconButton}} onClick={() => {
+              : <IconButton className={classes.whiteIconButton} onClick={() => {
                   this.handleToggle();
                 }}>
                   <MenuIcon />
                 </IconButton>}
-            <Typography variant='h6' classes={{root: classes.grow}} color='inherit'>{this.props.title}</Typography>
+            <Typography variant='h6' className={classes.grow} color='inherit'>{this.props.title}</Typography>
             {this.props.iconElementRight}
           </Toolbar>
         </AppBar>

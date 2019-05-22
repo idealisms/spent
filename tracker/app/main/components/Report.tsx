@@ -1,5 +1,6 @@
-import { createStyles, TextField, WithStyles } from '@material-ui/core';
+import { createStyles, Drawer, Hidden, TextField, WithStyles } from '@material-ui/core';
 import { Theme, withStyles } from '@material-ui/core/styles';
+import classNames from 'classnames';
 import { InlineDatePicker } from 'material-ui-pickers';
 import moment from 'moment';
 import * as React from 'react';
@@ -9,13 +10,49 @@ import { Category, ITransaction, TAG_TO_CATEGORY, Transaction, TransactionsTable
 import { fetchTransactionsFromDropboxIfNeeded } from '../../transactions/actions';
 import { fetchSettingsFromDropboxIfNeeded, saveSettingsToDropbox, updateSetting } from '../actions';
 import { CloudState, IAppState, IReportNode } from '../Model';
-import MenuBar from './MenuBar';
+import ReportMenuBar from './ReportMenuBar';
+
 
 const LOADING_TEXT = 'loading...';
 
 const styles = (theme: Theme) => createStyles({
+  root: {
+    display: 'flex',
+    flexDirection: 'column',
+    height: '100%',
+  },
+  contentAndDrawerContainer: {
+    display: 'flex',
+    flexGrow: 1,
+    overflow: 'auto',
+    alignItems: 'stretch',
+  },
+  content: {
+    flexGrow: 1,
+    overflow: 'auto',
+  },
+  drawer: {
+    width: 0,
+    flexShrink: 0,
+    overflow: 'hidden auto',
+    transition: theme.transitions.create('width', {
+      easing: theme.transitions.easing.easeOut,
+      duration: theme.transitions.duration.enteringScreen,
+    }),
+    '&.open': {
+      width: '420px',
+    },
+  },
+  drawerContentsContainer: {
+    width: '420px',
+  },
+  drawerPaper: {
+    width: '90%',
+    flexShrink: 0,
+  },
+  drawerContents: {
+  },
   controls: {
-    flex: 'none',
     padding: '16px',
     display: 'flex',
   },
@@ -83,6 +120,7 @@ interface IReportState {
   startDate: Date;
   endDate: Date;
   categoriesPretty: string;
+  isFilterDrawerOpen: boolean;
 }
 const Report = withStyles(styles)(
 class extends React.Component<IReportProps, IReportState> {
@@ -97,6 +135,7 @@ class extends React.Component<IReportProps, IReportState> {
       categoriesPretty: this.props.reportCategories.length
           ? JSON.stringify(this.props.reportCategories, null, 2)
           : LOADING_TEXT,
+      isFilterDrawerOpen: false,
     };
     this.props.fetchSettings();
     this.props.fetchTransactions();
@@ -129,14 +168,7 @@ class extends React.Component<IReportProps, IReportState> {
       maxDate = moment(this.props.transactions[0].date).toDate();
     }
 
-    return (
-      <div id='page-report'>
-        <MenuBar
-          title='Report'
-          cloudState={this.props.settingsCloudState}
-          onSaveClick={this.props.saveSettings}
-        />
-
+    let drawerContents = <div className={classes.drawerContents}>
         <div className={classes.controls}>
           <InlineDatePicker
             keyboard
@@ -160,23 +192,52 @@ class extends React.Component<IReportProps, IReportState> {
             mask={[/\d/, /\d/, /\d/, /\d/, '-', /\d/, /\d/, '-', /\d/, /\d/]}
           />
         </div>
-        <div className={classes.reportTrees}>
-          <TextField
-            InputProps={{classes: {input: classes.jsonCategories}}}
-            label='categories'
-            placeholder='e.g., {}'
-            multiline
-            variant='outlined'
-            value={this.state.categoriesPretty}
-            onChange={this.handleChangeReportJson}
-          />
-          <div className={classes.renderedTree}>
-            {renderedTree}
+      </div>;
+
+    return (
+      <div className={classes.root}>
+        <ReportMenuBar
+          cloudState={this.props.settingsCloudState}
+          onSaveClick={this.props.saveSettings}
+          onFilterClick={() => this.setState({isFilterDrawerOpen: !this.state.isFilterDrawerOpen})}
+        />
+
+        <div className={classes.contentAndDrawerContainer}>
+          <div className={classes.content}>
+            <div className={classes.reportTrees}>
+              <TextField
+                InputProps={{classes: {input: classes.jsonCategories}}}
+                label='categories'
+                placeholder='e.g., {}'
+                multiline
+                variant='outlined'
+                value={this.state.categoriesPretty}
+                onChange={this.handleChangeReportJson}
+              />
+              <div className={classes.renderedTree}>
+                {renderedTree}
+              </div>
+            </div>
+            <TransactionsTable classes={{root: classes.transactionsTable}}>
+              {rows}
+            </TransactionsTable>
           </div>
+          <Hidden smUp>
+            {/* Use a standard <Drawer> here for mobile. */}
+            <Drawer
+                anchor='right'
+                >
+              {drawerContents}
+            </Drawer>
+          </Hidden>
+          <Hidden xsDown>
+            <div className={classNames(classes.drawer, this.state.isFilterDrawerOpen && 'open')}>
+              <div className={classes.drawerContentsContainer}>
+                {drawerContents}
+              </div>
+            </div>
+          </Hidden>
         </div>
-        <TransactionsTable classes={{root: classes.transactionsTable}}>
-          {rows}
-        </TransactionsTable>
       </div>
     );
   }
