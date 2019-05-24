@@ -1,4 +1,4 @@
-import { createStyles, Drawer, Hidden, TextField, WithStyles } from '@material-ui/core';
+import { Button, createStyles, Drawer, Hidden, TextField, WithStyles } from '@material-ui/core';
 import { Theme, withStyles } from '@material-ui/core/styles';
 import classNames from 'classnames';
 import { InlineDatePicker } from 'material-ui-pickers';
@@ -51,27 +51,25 @@ const styles = (theme: Theme) => createStyles({
     flexShrink: 0,
   },
   drawerContents: {
+    padding: '16px',
   },
   controls: {
-    padding: '16px',
     display: 'flex',
   },
-  reportTrees: {
-    display: 'flex',
-    flexWrap: 'wrap',
-    '& > div': {
-      flex: '1 1 0',
-      margin: '16px',
-      minWidth: '300px',
-    },
-  },
-  jsonCategories: {
+  jsonCategoriesInput: {
     minHeight: '360px',
     maxHeight: '600px',
   },
+  jsonCategoriesTextField: {
+    width: '100%',
+    marginTop: '16px',
+  },
+  saveButton: {
+    marginTop: '16px',
+  },
   renderedTree: {
-    // 37px more than #json-categories.
-    maxHeight: '637px',
+    maxHeight: '600px',
+    margin: '16px',
     overflow: 'auto',
     '& > .row': {
       lineHeight: '24px',
@@ -192,31 +190,39 @@ class extends React.Component<IReportProps, IReportState> {
             mask={[/\d/, /\d/, /\d/, /\d/, '-', /\d/, /\d/, '-', /\d/, /\d/]}
           />
         </div>
+        <TextField
+          className={classes.jsonCategoriesTextField}
+          InputProps={{classes: {
+            input: classes.jsonCategoriesInput,
+          }}}
+          label='categories'
+          placeholder='e.g., {}'
+          multiline
+          variant='outlined'
+          value={this.state.categoriesPretty}
+          onChange={this.handleChangeReportJson}
+        />
+        <Button
+            variant='contained'
+            color='primary'
+            className={classes.saveButton}
+            disabled={this.props.settingsCloudState == CloudState.Done}
+            onClick={this.props.saveSettings}>
+          Save
+        </Button>
       </div>;
 
     return (
       <div className={classes.root}>
         <ReportMenuBar
           cloudState={this.props.settingsCloudState}
-          onSaveClick={this.props.saveSettings}
           onFilterClick={() => this.setState({isFilterDrawerOpen: !this.state.isFilterDrawerOpen})}
         />
 
         <div className={classes.contentAndDrawerContainer}>
           <div className={classes.content}>
-            <div className={classes.reportTrees}>
-              <TextField
-                InputProps={{classes: {input: classes.jsonCategories}}}
-                label='categories'
-                placeholder='e.g., {}'
-                multiline
-                variant='outlined'
-                value={this.state.categoriesPretty}
-                onChange={this.handleChangeReportJson}
-              />
-              <div className={classes.renderedTree}>
-                {renderedTree}
-              </div>
+            <div className={classes.renderedTree}>
+              {renderedTree}
             </div>
             <TransactionsTable classes={{root: classes.transactionsTable}}>
               {rows}
