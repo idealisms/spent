@@ -48,7 +48,8 @@ const styles = (theme: Theme) => createStyles({
   },
   drawerPaper: {
     width: '90%',
-    flexShrink: 0,
+    maxWidth: '420px',
+    minWidth: '16px',
   },
   drawerContents: {
     padding: '16px',
@@ -232,7 +233,9 @@ class extends React.Component<IReportProps, IReportState> {
             {/* Use a standard <Drawer> here for mobile. */}
             <Drawer
                 anchor='right'
-                >
+                classes={{paper: classes.drawerPaper}}
+                open={this.state.isFilterDrawerOpen}
+                onClose={() => this.setState({isFilterDrawerOpen: false})}>
               {drawerContents}
             </Drawer>
           </Hidden>
