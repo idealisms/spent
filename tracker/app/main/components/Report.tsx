@@ -1,7 +1,6 @@
-import { Button, createStyles, Drawer, Hidden, TextField, WithStyles } from '@material-ui/core';
+import { Button, createStyles, Drawer, FormControl, Hidden, InputLabel, MenuItem, Select, TextField, WithStyles } from '@material-ui/core';
 import { Theme, withStyles } from '@material-ui/core/styles';
 import classNames from 'classnames';
-import { InlineDatePicker } from 'material-ui-pickers';
 import moment from 'moment';
 import * as React from 'react';
 import { connect } from 'react-redux';
@@ -56,6 +55,7 @@ const styles = (theme: Theme) => createStyles({
   },
   controls: {
     display: 'flex',
+    marginTop: '16px',
   },
   jsonCategoriesInput: {
     minHeight: '360px',
@@ -101,6 +101,13 @@ type ReportRenderNode = {
   subcategories: ReportRenderNode[],
 };
 
+interface IDateOption {
+  name: string;
+  startDate: moment.Moment;
+  endDate: moment.Moment;
+  description: string;
+}
+
 interface IReportOwnProps extends WithStyles<typeof styles> {
 }
 interface IReportAppStateProps {
@@ -118,6 +125,7 @@ type IReportProps = IReportOwnProps & IReportAppStateProps & IReportDispatchProp
 interface IReportState {
   startDate: Date;
   endDate: Date;
+  selectValue: string;
   categoriesPretty: string;
   isFilterDrawerOpen: boolean;
 }
@@ -131,6 +139,7 @@ class extends React.Component<IReportProps, IReportState> {
     this.state = {
       startDate: startDate,
       endDate: endDate,
+      selectValue: 'lastyear',
       categoriesPretty: this.props.reportCategories.length
           ? JSON.stringify(this.props.reportCategories, null, 2)
           : LOADING_TEXT,
@@ -160,35 +169,36 @@ class extends React.Component<IReportProps, IReportState> {
         );
       });
 
-    let minDate = moment(this.state.startDate).toDate();
-    let maxDate = moment(this.state.endDate).toDate();
-    if (this.props.transactions.length > 0) {
-      minDate = moment(this.props.transactions.slice(-1)[0].date).toDate();
-      maxDate = moment(this.props.transactions[0].date).toDate();
-    }
+    let dateOptions = this.getDateOptions();
 
     let drawerContents = <div className={classes.drawerContents}>
+        <div>
+          <FormControl>
+            <InputLabel htmlFor='date-select'>Date Range</InputLabel>
+            <Select
+              value={this.state.selectValue}
+              onChange={this.handleDateChange}
+              inputProps={{
+                id: 'date-select',
+              }}
+            >
+              {dateOptions.map((dateOption) => (
+                <MenuItem value={dateOption.name}>{dateOption.description}</MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+        </div>
         <div className={classes.controls}>
-          <InlineDatePicker
-            keyboard
+          <TextField
             label='Start date'
-            minDate={minDate}
-            maxDate={maxDate}
-            value={this.state.startDate}
-            onChange={this.handleChangeStartDate}
-            format='YYYY-MM-DD'
-            mask={[/\d/, /\d/, /\d/, /\d/, '-', /\d/, /\d/, '-', /\d/, /\d/]}
+            value={moment(this.state.startDate).format('YYYY-MM-DD')}
+            disabled
           />
-          <InlineDatePicker
-            keyboard
+          <TextField
             label='End date'
-            minDate={minDate}
-            maxDate={maxDate}
-            value={this.state.endDate}
+            value={moment(this.state.endDate).format('YYYY-MM-DD')}
             style={{marginLeft: '24px'}}
-            onChange={this.handleChangeEndDate}
-            format='YYYY-MM-DD'
-            mask={[/\d/, /\d/, /\d/, /\d/, '-', /\d/, /\d/, '-', /\d/, /\d/]}
+            disabled
           />
         </div>
         <TextField
@@ -251,20 +261,22 @@ class extends React.Component<IReportProps, IReportState> {
     );
   }
 
-  public handleChangeStartDate = (m: moment.Moment): void => {
-    this.setState({
-      startDate: m.toDate(),
-    });
+  public handleDateChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
+    let dateOptions = this.getDateOptions();
+    for (let dateOption of dateOptions) {
+      if (dateOption.name == event.target.value) {
+        this.setState({
+          startDate: dateOption.startDate.toDate(),
+          endDate: dateOption.endDate.toDate(),
+          selectValue: dateOption.name,
+        });
+        break;
+      }
+    }
   }
 
-  public handleChangeEndDate = (m: moment.Moment): void => {
-    this.setState({
-      endDate: m.toDate(),
-    });
-  }
-
-  public handleChangeReportJson = (event: React.ChangeEvent<{}>): void => {
-    let categoriesPretty = (event.target as HTMLTextAreaElement).value;
+  public handleChangeReportJson = (event: React.ChangeEvent<HTMLTextAreaElement>): void => {
+    let categoriesPretty = event.target.value;
     let categories;
     try {
       categories = JSON.parse(categoriesPretty);
@@ -275,6 +287,96 @@ class extends React.Component<IReportProps, IReportState> {
     this.setState({
       categoriesPretty: categoriesPretty,
     });
+  }
+
+  private getDateOptions = () => {
+    let dateOptions: IDateOption[] = [];
+    let startYear = 2018;  // TODO: Move this to settings.
+    const lastDay = moment().subtract(1, 'day').startOf('day');
+    // Year to date (2019)
+    dateOptions.push({
+      name: 'thisyear',
+      startDate: lastDay.clone().month(0).date(1),
+      endDate: lastDay,
+      description: `Year to date (${lastDay.year()})`,
+    });
+    // Last year (2018)
+    dateOptions.push({
+      name: 'lastyear',
+      startDate: lastDay.clone().subtract(1, 'year').month(0).date(1),
+      endDate: lastDay.clone().subtract(1, 'year').month(11).date(31),
+      description: `Last year (${lastDay.year() - 1})`,
+    });
+    // previous years
+    for (let year = lastDay.year() - 2; year >= startYear; year--) {
+      dateOptions.push({
+        name: year.toString(),
+        startDate: lastDay.clone().year(year).month(0).date(1),
+        endDate: lastDay.clone().year(year).month(11).date(31),
+        description: year.toString(),
+      });
+    }
+    // Last month (Apr 2019)
+    dateOptions.push({
+      name: 'lastmonth',
+      startDate: lastDay.clone().subtract(1, 'month').date(1),
+      endDate: lastDay.clone().date(1).subtract(1, 'day'),
+      description: `Last month (${lastDay.clone().subtract(1, 'month').format('MMM YYYY')})`,
+    });
+    // Month to date (May 2019)
+    dateOptions.push({
+      name: 'thismonth',
+      startDate: lastDay.clone().date(1),
+      endDate: lastDay.clone(),
+      description: `Month to date (${lastDay.format('MMM YYYY')})`,
+    });
+    // Last 30 days
+    dateOptions.push({
+      name: 'last30',
+      startDate: lastDay.clone().subtract(30, 'day'),
+      endDate: lastDay.clone(),
+      description: `Last 30 days`,
+    });
+    // Last week
+    dateOptions.push({
+      name: 'lastweek',
+      startDate: lastDay.clone().day(-7),  // last Sunday
+      endDate: lastDay.clone().day(-7).add(6, 'day'),
+      description: `Last week (Sun - Sat)`,
+    });
+    // Last 7 days
+    dateOptions.push({
+      name: 'last7',
+      startDate: lastDay.clone().subtract(7, 'day'),
+      endDate: lastDay.clone(),
+      description: `Last 7 days`,
+    });
+    // quarters
+    for (let year = lastDay.year(); year >= startYear; year--) {
+      for (let quarter = 3; quarter >= 0; quarter--) {
+        let startMonth = quarter * 3;
+        if (year == lastDay.year() && startMonth > lastDay.month()) {
+          continue;
+        }
+
+        let endMonth = startMonth + 2;
+        dateOptions.push({
+          name: `${year}Q${quarter + 1}`,
+          startDate: moment().year(year).month(startMonth).date(1),
+          endDate: moment().year(year).month(endMonth + 1).date(1).subtract(1, 'day'),
+          description: `${year} Q${quarter + 1}`,
+        });
+      }
+    }
+    // Last 90 days
+    dateOptions.push({
+      name: `last90`,
+      startDate: lastDay.clone().subtract(90, 'day'),
+      endDate: lastDay,
+      description: `Last 90 days`,
+    });
+
+    return dateOptions;
   }
 
   // Builds the tree to be rendered.
