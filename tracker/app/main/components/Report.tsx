@@ -1,4 +1,4 @@
-import { Button, createStyles, Drawer, FormControl, Hidden, InputLabel, MenuItem, Select, TextField, WithStyles } from '@material-ui/core';
+import { createStyles, Drawer, Hidden, WithStyles } from '@material-ui/core';
 import { Theme, withStyles } from '@material-ui/core/styles';
 import classNames from 'classnames';
 import moment from 'moment';
@@ -9,6 +9,7 @@ import { Category, ITransaction, TAG_TO_CATEGORY, Transaction, TransactionsTable
 import { fetchTransactionsFromDropboxIfNeeded } from '../../transactions/actions';
 import { fetchSettingsFromDropboxIfNeeded, saveSettingsToDropbox, updateSetting } from '../actions';
 import { CloudState, IAppState, IReportNode } from '../Model';
+import ReportFilterDrawer from './ReportFilterDrawer';
 import ReportMenuBar from './ReportMenuBar';
 
 
@@ -50,24 +51,6 @@ const styles = (theme: Theme) => createStyles({
     maxWidth: '420px',
     minWidth: '16px',
   },
-  drawerContents: {
-    padding: '16px',
-  },
-  controls: {
-    display: 'flex',
-    marginTop: '16px',
-  },
-  jsonCategoriesInput: {
-    minHeight: '360px',
-    maxHeight: '600px',
-  },
-  jsonCategoriesTextField: {
-    width: '100%',
-    marginTop: '16px',
-  },
-  saveButton: {
-    marginTop: '16px',
-  },
   renderedTree: {
     maxHeight: '600px',
     margin: '16px',
@@ -100,13 +83,6 @@ type ReportRenderNode = {
   transactions: ITransaction[],
   subcategories: ReportRenderNode[],
 };
-
-interface IDateOption {
-  name: string;
-  startDate: moment.Moment;
-  endDate: moment.Moment;
-  description: string;
-}
 
 interface IReportOwnProps extends WithStyles<typeof styles> {
 }
@@ -169,60 +145,21 @@ class extends React.Component<IReportProps, IReportState> {
         );
       });
 
-    let dateOptions = this.getDateOptions();
-
-    let drawerContents = <div className={classes.drawerContents}>
-        <div>
-          <FormControl>
-            <InputLabel htmlFor='date-select'>Date Range</InputLabel>
-            <Select
-              value={this.state.selectValue}
-              onChange={this.handleDateChange}
-              inputProps={{
-                id: 'date-select',
-              }}
-            >
-              {dateOptions.map((dateOption) => (
-                <MenuItem key={dateOption.name} value={dateOption.name}>{dateOption.description}</MenuItem>
-              ))}
-            </Select>
-          </FormControl>
-        </div>
-        <div className={classes.controls}>
-          <TextField
-            label='Start date'
-            value={moment(this.state.startDate).format('YYYY-MM-DD')}
-            disabled
-          />
-          <TextField
-            label='End date'
-            value={moment(this.state.endDate).format('YYYY-MM-DD')}
-            style={{marginLeft: '24px'}}
-            disabled
-          />
-        </div>
-        <TextField
-          className={classes.jsonCategoriesTextField}
-          InputProps={{classes: {
-            input: classes.jsonCategoriesInput,
-          }}}
-          label='categories'
-          placeholder='e.g., {}'
-          multiline
-          variant='outlined'
-          value={this.state.categoriesPretty}
-          onChange={this.handleChangeReportJson}
-        />
-        <Button
-            variant='contained'
-            color='primary'
-            className={classes.saveButton}
-            disabled={this.props.settingsCloudState == CloudState.Done}
-            onClick={this.props.saveSettings}>
-          Save
-        </Button>
-      </div>;
-
+    let drawerContents = <ReportFilterDrawer
+        startDate={this.state.startDate}
+        endDate={this.state.endDate}
+        selectValue={this.state.selectValue}
+        settingsCloudState={this.props.settingsCloudState}
+        saveSettings={this.props.saveSettings}
+        categoriesPretty={this.state.categoriesPretty}
+        updateReportCategories={this.props.updateReportCategories}
+        setDate={(startDate, endDate, selectValue) => this.setState({
+            startDate,
+            endDate,
+            selectValue,
+          })}
+        setCategoriesPretty={(categoriesPretty) => this.setState({categoriesPretty})}
+       />;
     return (
       <div className={classes.root}>
         <ReportMenuBar
@@ -258,124 +195,6 @@ class extends React.Component<IReportProps, IReportState> {
         </div>
       </div>
     );
-  }
-
-  public handleDateChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
-    let dateOptions = this.getDateOptions();
-    for (let dateOption of dateOptions) {
-      if (dateOption.name == event.target.value) {
-        this.setState({
-          startDate: dateOption.startDate.toDate(),
-          endDate: dateOption.endDate.toDate(),
-          selectValue: dateOption.name,
-        });
-        break;
-      }
-    }
-  }
-
-  public handleChangeReportJson = (event: React.ChangeEvent<HTMLTextAreaElement>): void => {
-    let categoriesPretty = event.target.value;
-    let categories;
-    try {
-      categories = JSON.parse(categoriesPretty);
-      this.props.updateReportCategories(categories);
-    } catch (e) {
-      // If there's a parse error, don't update categories.
-    }
-    this.setState({
-      categoriesPretty: categoriesPretty,
-    });
-  }
-
-  private getDateOptions = () => {
-    let dateOptions: IDateOption[] = [];
-    let startYear = 2018;  // TODO: Move this to settings.
-    const lastDay = moment().subtract(1, 'day').startOf('day');
-    // Year to date (2019)
-    dateOptions.push({
-      name: 'thisyear',
-      startDate: lastDay.clone().month(0).date(1),
-      endDate: lastDay,
-      description: `Year to date (${lastDay.year()})`,
-    });
-    // Last year (2018)
-    dateOptions.push({
-      name: 'lastyear',
-      startDate: lastDay.clone().subtract(1, 'year').month(0).date(1),
-      endDate: lastDay.clone().subtract(1, 'year').month(11).date(31),
-      description: `Last year (${lastDay.year() - 1})`,
-    });
-    // previous years
-    for (let year = lastDay.year() - 2; year >= startYear; year--) {
-      dateOptions.push({
-        name: year.toString(),
-        startDate: lastDay.clone().year(year).month(0).date(1),
-        endDate: lastDay.clone().year(year).month(11).date(31),
-        description: year.toString(),
-      });
-    }
-    // Last month (Apr 2019)
-    dateOptions.push({
-      name: 'lastmonth',
-      startDate: lastDay.clone().subtract(1, 'month').date(1),
-      endDate: lastDay.clone().date(1).subtract(1, 'day'),
-      description: `Last month (${lastDay.clone().subtract(1, 'month').format('MMM YYYY')})`,
-    });
-    // Month to date (May 2019)
-    dateOptions.push({
-      name: 'thismonth',
-      startDate: lastDay.clone().date(1),
-      endDate: lastDay.clone(),
-      description: `Month to date (${lastDay.format('MMM YYYY')})`,
-    });
-    // Last 30 days
-    dateOptions.push({
-      name: 'last30',
-      startDate: lastDay.clone().subtract(30, 'day'),
-      endDate: lastDay.clone(),
-      description: `Last 30 days`,
-    });
-    // Last week
-    dateOptions.push({
-      name: 'lastweek',
-      startDate: lastDay.clone().day(-7),  // last Sunday
-      endDate: lastDay.clone().day(-7).add(6, 'day'),
-      description: `Last week (Sun - Sat)`,
-    });
-    // Last 7 days
-    dateOptions.push({
-      name: 'last7',
-      startDate: lastDay.clone().subtract(7, 'day'),
-      endDate: lastDay.clone(),
-      description: `Last 7 days`,
-    });
-    // quarters
-    for (let year = lastDay.year(); year >= startYear; year--) {
-      for (let quarter = 3; quarter >= 0; quarter--) {
-        let startMonth = quarter * 3;
-        if (year == lastDay.year() && startMonth > lastDay.month()) {
-          continue;
-        }
-
-        let endMonth = startMonth + 2;
-        dateOptions.push({
-          name: `${year}Q${quarter + 1}`,
-          startDate: moment().year(year).month(startMonth).date(1),
-          endDate: moment().year(year).month(endMonth + 1).date(1).subtract(1, 'day'),
-          description: `${year} Q${quarter + 1}`,
-        });
-      }
-    }
-    // Last 90 days
-    dateOptions.push({
-      name: `last90`,
-      startDate: lastDay.clone().subtract(90, 'day'),
-      endDate: lastDay,
-      description: `Last 90 days`,
-    });
-
-    return dateOptions;
   }
 
   // Builds the tree to be rendered.
