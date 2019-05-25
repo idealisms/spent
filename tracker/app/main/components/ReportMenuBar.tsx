@@ -3,7 +3,6 @@ import IconButton from '@material-ui/core/IconButton';
 import { Theme, withStyles } from '@material-ui/core/styles';
 import FilterListIcon from '@material-ui/icons/FilterList';
 import * as React from 'react';
-import { CloudState } from '../Model';
 import MenuBarWithDrawer from './MenuBarWithDrawer';
 
 const styles = (theme: Theme) => createStyles({
@@ -20,7 +19,6 @@ const styles = (theme: Theme) => createStyles({
 });
 
 interface IReportMenuBarProps extends WithStyles<typeof styles> {
-  cloudState: CloudState;
   onFilterClick: () => void;
 }
 
@@ -32,9 +30,6 @@ class extends React.Component<IReportMenuBarProps, IReportMenuBarState> {
 
   constructor(props: IReportMenuBarProps, context?: any) {
     super(props, context);
-    this.state = {
-      isFilterDrawerOpen: false,
-    };
   }
 
   public render(): JSX.Element {

@@ -226,7 +226,6 @@ class extends React.Component<IReportProps, IReportState> {
     return (
       <div className={classes.root}>
         <ReportMenuBar
-          cloudState={this.props.settingsCloudState}
           onFilterClick={() => this.setState({isFilterDrawerOpen: !this.state.isFilterDrawerOpen})}
         />
 
