@@ -183,7 +183,7 @@ class extends React.Component<IReportProps, IReportState> {
               }}
             >
               {dateOptions.map((dateOption) => (
-                <MenuItem value={dateOption.name}>{dateOption.description}</MenuItem>
+                <MenuItem key={dateOption.name} value={dateOption.name}>{dateOption.description}</MenuItem>
               ))}
             </Select>
           </FormControl>
