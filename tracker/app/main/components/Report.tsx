@@ -8,7 +8,8 @@ import { ThunkDispatch } from 'redux-thunk';
 import { Category, ITransaction, TAG_TO_CATEGORY, Transaction, TransactionsTable, TransactionUtils } from '../../transactions';
 import { fetchTransactionsFromDropboxIfNeeded } from '../../transactions/actions';
 import { fetchSettingsFromDropboxIfNeeded, saveSettingsToDropbox, updateSetting } from '../actions';
-import { CloudState, IAppState, IReportNode } from '../Model';
+import { CloudState, IAppState, IChartNode, IReportNode } from '../Model';
+import ReportChart from './ReportChart';
 import ReportFilterDrawer from './ReportFilterDrawer';
 import ReportMenuBar from './ReportMenuBar';
 
@@ -138,7 +139,7 @@ class extends React.Component<IReportProps, IReportState> {
     let classes = this.props.classes;
     let filteredTransactions = TransactionUtils.filterTransactionsByDate(
         this.props.transactions, this.state.startDate, this.state.endDate);
-    let [unmatchedTransactions, renderedTree] = this.buildTree(filteredTransactions);
+    let [unmatchedTransactions, renderedTree, chartData] = this.buildTree(filteredTransactions);
     let rows = unmatchedTransactions.map(t => {
         return (
           <Transaction transaction={t} key={t.id}/>
@@ -168,6 +169,9 @@ class extends React.Component<IReportProps, IReportState> {
 
         <div className={classes.contentAndDrawerContainer}>
           <div className={classes.content}>
+            <ReportChart
+                chartData={chartData} />
+
             <div className={classes.renderedTree}>
               {renderedTree}
             </div>
@@ -198,9 +202,9 @@ class extends React.Component<IReportProps, IReportState> {
   }
 
   // Builds the tree to be rendered.
-  private buildTree = (transactions: ITransaction[]): [ITransaction[], JSX.Element] => {
+  private buildTree = (transactions: ITransaction[]): [ITransaction[], JSX.Element, IChartNode[]] => {
     if (!this.props.reportCategories.length) {
-      return [[], <div key='loading'>Loading...</div>];
+      return [[], <div key='loading'>Loading...</div>, []];
     }
 
     let startTime = window.performance.now();
@@ -219,10 +223,10 @@ class extends React.Component<IReportProps, IReportState> {
       }
       return renderNodes;
     };
-    let ReportRenderNodes = buildRenderTree(this.props.reportCategories);
+    let reportRenderNodes = buildRenderTree(this.props.reportCategories);
 
     let tagToRootReportRenderNode: Map<string, ReportRenderNode> = new Map();
-    for (let renderNode of ReportRenderNodes) {
+    for (let renderNode of reportRenderNodes) {
       if (!renderNode.reportNode.tags) {
         continue;
       }
@@ -233,7 +237,8 @@ class extends React.Component<IReportProps, IReportState> {
               <div>Error, tag appears twice.
                 {tag} in {tagToRootReportRenderNode.get(tag)!.reportNode.title}
                 and {renderNode.reportNode.title}.
-              </div>];
+              </div>,
+              []];
         }
         tagToRootReportRenderNode.set(tag, renderNode);
       }
@@ -284,7 +289,9 @@ class extends React.Component<IReportProps, IReportState> {
     // console.log(ReportRenderNodes);
 
     let buildTime = window.performance.now();
-    const buildDom = (renderNodes: ReportRenderNode[], depth: number, outputDom: JSX.Element[]): void => {
+    let outputChartData: IChartNode[] = [];
+    const buildDom = (
+        renderNodes: ReportRenderNode[], depth: number, outputDom: JSX.Element[], chartData: IChartNode[]): void => {
       renderNodes.sort((lhs, rhs) => {
         if (lhs.amountCents == rhs.amountCents) {
           return 0;
@@ -300,10 +307,16 @@ class extends React.Component<IReportProps, IReportState> {
               <span className='amount'>${TransactionUtils.formatAmountNumber(renderNode.amountCents)}</span>
               {renderNode.reportNode.title} from {renderNode.transactions.length} transaction(s)
             </div>);
-        buildDom(renderNode.subcategories, depth + 1, outputDom);
+        let chartDatum = {
+          title: renderNode.reportNode.title,
+          amount_cents: renderNode.amountCents,
+          subcategories: [],
+        };
+        chartData.push(chartDatum);
+        buildDom(renderNode.subcategories, depth + 1, outputDom, chartDatum.subcategories);
       }
     };
-    buildDom(ReportRenderNodes, 0, output);
+    buildDom(reportRenderNodes, 0, output, outputChartData);
 
     let domTime = window.performance.now();
     return [
@@ -312,7 +325,8 @@ class extends React.Component<IReportProps, IReportState> {
         {output}
         <div className='info'>Build time: {(buildTime - startTime).toFixed(2)}ms</div>
         <div className='info'>DOM time: {(domTime - buildTime).toFixed(2)}ms</div>
-      </React.Fragment>];
+      </React.Fragment>,
+      outputChartData];
   }
 });
 

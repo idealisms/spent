@@ -20,6 +20,15 @@ export interface IReportNode {
 }
 
 /**
+ * Used on the report page for rendering a chart.
+ */
+export interface IChartNode {
+  title: string;
+  amount_cents: number;
+  subcategories: IChartNode[];
+}
+
+/**
  * Used to track a spending target.
  *
  * For example, can be used to track a total budget,
