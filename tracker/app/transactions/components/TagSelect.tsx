@@ -6,6 +6,7 @@ import { connect } from 'react-redux';
 import Select from 'react-select';
 import { OptionProps } from 'react-select/lib/components/Option';
 import CreatableSelect from 'react-select/lib/Creatable';
+import { Props } from 'react-select/lib/Select';
 import { ValueType } from 'react-select/lib/types';
 import { IAppState } from '../../main';
 import { ITransaction, TAG_TO_CATEGORY } from '../Model';
@@ -74,13 +75,17 @@ class extends React.Component<ITagSelectProps, ITagSelectState> {
     let Option = this.getOptionClass(tagMap);
     let MultiValueLabel = this.getMultiValueLabelClass();
 
-    let componentProps = {
+    let componentProps: Props = {
       // Pass through props.
       className: this.props.className,
       isDisabled: this.props.isDisabled,
       createOptionPosition: this.props.createOptionPosition,
       placeholder: this.props.placeholder,
       autoFocus: this.props.autoFocus,
+      menuPortalTarget: document.body,
+      menuPosition: 'absolute',
+      // Dialogs are children of document.body with a zIndex of 1300.
+      styles: { menuPortal: base => ({ ...base, zIndex: 2000 }) },
 
       components: {Option, MultiValueLabel},
       isMulti: true,
