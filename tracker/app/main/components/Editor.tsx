@@ -1,6 +1,8 @@
 import { createStyles, TextField, WithStyles } from '@material-ui/core';
 import CircularProgress from '@material-ui/core/CircularProgress';
+import Fab from '@material-ui/core/Fab';
 import { Theme, withStyles } from '@material-ui/core/styles';
+import AddIcon from '@material-ui/icons/Add';
 import { InlineDatePicker } from 'material-ui-pickers';
 import memoize from 'memoize-one';
 import moment from 'moment';
@@ -51,6 +53,11 @@ const styles = (theme: Theme) => createStyles({
         marginBottom: '4px !important',
       },
     },
+    '& .fab': {
+      position: 'absolute',
+      right: '16px',
+      bottom: '16px',
+    },
   },
   transactionsTable: {
     flex: 1,
@@ -83,6 +90,7 @@ interface IEditorState {
   selectedTransactions: Map<string, Transactions.ITransaction>;
   tagFilters: string[];
   searchQuery: string;
+  isAddDialogOpen: boolean;
 }
 
 const Editor = withStyles(styles)(
@@ -101,6 +109,7 @@ class extends React.Component<IEditorProps, IEditorState> {
       selectedTransactions: new Map(),
       tagFilters: [],
       searchQuery: '',
+      isAddDialogOpen: false,
     };
     this.props.fetchTransactions();
   }
@@ -196,6 +205,18 @@ class extends React.Component<IEditorProps, IEditorState> {
             onChange={this.handleChangeSearch}
             value={this.state.searchQuery}
           />
+          <Fab
+              color='primary'
+              aria-label='Add'
+              className='fab'
+              onClick={() => this.setState({isAddDialogOpen: true})}>
+            <AddIcon />
+          </Fab>
+          {this.state.isAddDialogOpen ?
+            <Transactions.AddTransactionDialog
+                onClose={() => this.setState({isAddDialogOpen: false})}
+                onSaveChanges={this.handleAddTransaction}
+            /> : undefined}
         </div>
         {this.props.transactions.length
             ? <Transactions.TransactionsTable
@@ -270,6 +291,23 @@ class extends React.Component<IEditorProps, IEditorState> {
     }
     this.setState({
       selectedTransactions: selectedTransactions,
+    });
+  }
+
+  private handleAddTransaction = (transaction: Transactions.ITransaction): void => {
+    let transactions = [
+      transaction,
+      ...this.props.transactions,
+    ];
+    transactions.sort(Transactions.TransactionUtils.compareTransactions);
+    this.props.updateTransactions(transactions);
+
+    let transactionDate = moment(transaction.date).toDate();
+    this.setState({
+      tagFilters: [],
+      searchQuery: '',
+      startDate: this.state.startDate > transactionDate ? transactionDate : this.state.startDate,
+      endDate: this.state.endDate < transactionDate ? transactionDate : this.state.endDate,
     });
   }
 
