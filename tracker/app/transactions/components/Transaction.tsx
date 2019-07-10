@@ -54,6 +54,10 @@ export const styles = (theme: Theme) => createStyles({
     '&.credit': {
       color: 'green',
     },
+    width: '80px',
+    // This causes text to overflow to the left, keeping
+    // the numbers right aligned.
+    direction: 'rtl',
   },
   category: {
     marginLeft: '16px',
