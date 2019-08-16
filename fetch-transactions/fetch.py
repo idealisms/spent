@@ -36,6 +36,8 @@ def download(settings, days=7):
 
     accounts = inst.accounts()
     for account in accounts:
+        if hasattr(account, 'account_type'):  # bank account
+            continue
         card_id = str(account.number)
         filename = os.path.join(DOWNLOAD_DIR, 'Card{}--{}.ofx'.format(
             card_id[-4:],
