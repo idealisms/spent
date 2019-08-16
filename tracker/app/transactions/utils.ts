@@ -261,7 +261,7 @@ export function filterTransactions(
 }
 
 export function getTags(transactions: ITransaction[]): Set<string> {
-  let tagSet = new Set();
+  let tagSet: Set<string> = new Set();
   for (let transaction of transactions) {
     for (let tag of transaction.tags) {
       tagSet.add(tag);
