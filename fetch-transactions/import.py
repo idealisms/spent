@@ -18,6 +18,9 @@ def read_transactions(filename):
     card_number = m.group(1)
     with open(filename) as fileobj:
         ofx = ofxparse.OfxParser.parse(fileobj)
+        if not hasattr(ofx, 'account'):
+            print('no account, skipping', filename)
+            return []
         for t in ofx.account.statement.transactions:
             transactions.append({
                 'id': str(t.id),
