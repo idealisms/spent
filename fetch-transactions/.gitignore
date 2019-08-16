@@ -3,6 +3,7 @@ downloads
 node_modules
 screenshots
 user-data
+*.py[cod]
 
 # python venv
 bin
