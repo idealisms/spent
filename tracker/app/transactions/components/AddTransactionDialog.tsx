@@ -6,7 +6,8 @@ import DialogContent from '@material-ui/core/DialogContent';
 import DialogTitle from '@material-ui/core/DialogTitle';
 import { Theme, withStyles } from '@material-ui/core/styles';
 import TextField from '@material-ui/core/TextField';
-import { InlineDatePicker } from 'material-ui-pickers';
+import { KeyboardDatePicker } from '@material-ui/pickers';
+import { MaterialUiPickersDate } from '@material-ui/pickers/typings/date';
 import moment from 'moment';
 import * as React from 'react';
 import { ITransaction } from '../Model';
@@ -100,15 +101,14 @@ class extends React.Component<IAddTransactionDialogProps, IAddTransactionDialogS
         <DialogTitle>{'Add Transaction'}</DialogTitle>
         <DialogContent>
           <div className={classes.flexRow}>
-            <InlineDatePicker
+            <KeyboardDatePicker
                 className={classes.datepicker}
-                keyboard
                 label='Date'
                 value={this.state.date}
                 maxDate={moment().startOf('day').toDate()}
-                onChange={(m: moment.Moment) => this.setState({date: m.toDate()})}
+                onChange={(d: MaterialUiPickersDate) => d ? this.setState({date: d.toDate()}) : null}
                 format='YYYY-MM-DD'
-                mask={[/\d/, /\d/, /\d/, /\d/, '-', /\d/, /\d/, '-', /\d/, /\d/]}
+                // mask={[/\d/, /\d/, /\d/, /\d/, '-', /\d/, /\d/, '-', /\d/, /\d/]}
                 />
 
             <div className={classes.amountFlexItem}>

@@ -9,6 +9,7 @@
     "strict": true,
     "strictNullChecks": true,
     "noUnusedLocals": true,
+    // "noUnusedParameters": true,
     "outDir": "build",
     "allowSyntheticDefaultImports": true,
     "esModuleInterop": true

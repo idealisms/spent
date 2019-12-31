@@ -112,7 +112,7 @@ class extends React.Component<IReportFilterDrawerProps, IReportFilterDrawerState
         </Button>
       </div>);
   }
-  public handleDateChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
+  public handleDateChange = (event: React.ChangeEvent<any>) => {
     let dateOptions = this.getDateOptions();
     for (let dateOption of dateOptions) {
       if (dateOption.name == event.target.value) {

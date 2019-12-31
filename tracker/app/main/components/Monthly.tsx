@@ -136,7 +136,7 @@ class extends React.Component<IMonthlyProps, IMonthlyState> {
     );
   }
 
-  public handleSelectSpendTarget = (event: React.ChangeEvent<HTMLSelectElement>): void => {
+  public handleSelectSpendTarget = (event: React.ChangeEvent<any>): void => {
     let spendTargetName = event.target.value;
     this.props.navigateTo(Pages.MonthlyPage + `?t=${encodeURIComponent(spendTargetName)}`);
   }

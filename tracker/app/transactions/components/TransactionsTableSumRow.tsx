@@ -1,5 +1,6 @@
 import { createStyles, WithStyles } from '@material-ui/core';
 import { Theme, withStyles } from '@material-ui/core/styles';
+import { CSSProperties } from '@material-ui/core/styles/withStyles';
 import CheckBoxIcon from '@material-ui/icons/CheckBox';
 import CheckBoxOutlineBlankIcon from '@material-ui/icons/CheckBoxOutlineBlank';
 import * as React from 'react';
@@ -9,10 +10,11 @@ import { styles } from './Transaction';
 
 const headerStyles = (theme: Theme) => {
   let mergedStyles = styles(theme);
-  mergedStyles.row.color = theme.palette.text.secondary;
-  mergedStyles.date.visibility = 'hidden';
-  mergedStyles.category.marginTop = '4px';
-  mergedStyles.category.color = theme.palette.text.secondary;
+  (mergedStyles.row as CSSProperties).color = theme.palette.text.secondary;
+  (mergedStyles.date as CSSProperties).visibility = 'hidden';
+  let category = mergedStyles.category as CSSProperties;
+  category.marginTop = '4px';
+  category.color = theme.palette.text.secondary;
   return createStyles(mergedStyles);
 };
 

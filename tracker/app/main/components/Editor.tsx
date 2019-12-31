@@ -3,7 +3,8 @@ import CircularProgress from '@material-ui/core/CircularProgress';
 import Fab from '@material-ui/core/Fab';
 import { Theme, withStyles } from '@material-ui/core/styles';
 import AddIcon from '@material-ui/icons/Add';
-import { InlineDatePicker } from 'material-ui-pickers';
+import { KeyboardDatePicker } from '@material-ui/pickers';
+import { MaterialUiPickersDate } from '@material-ui/pickers/typings/date';
 import memoize from 'memoize-one';
 import moment from 'moment';
 import * as React from 'react';
@@ -165,27 +166,25 @@ class extends React.Component<IEditorProps, IEditorState> {
         />
 
         <div className={classes.controls}>
-          <InlineDatePicker
+          <KeyboardDatePicker
             className='datepicker'
-            keyboard
             label='Start date'
             minDate={minDate}
             maxDate={maxDate}
             value={this.state.startDate}
             onChange={this.handleChangeStartDate}
             format='YYYY-MM-DD'
-            mask={[/\d/, /\d/, /\d/, /\d/, '-', /\d/, /\d/, '-', /\d/, /\d/]}
+            // mask={[/\d/, /\d/, /\d/, /\d/, '-', /\d/, /\d/, '-', /\d/, /\d/]}
           />
-          <InlineDatePicker
+          <KeyboardDatePicker
             className='datepicker'
-            keyboard
             label='End date'
             minDate={minDate}
             maxDate={maxDate}
             value={this.state.endDate}
             onChange={this.handleChangeEndDate}
             format='YYYY-MM-DD'
-            mask={[/\d/, /\d/, /\d/, /\d/, '-', /\d/, /\d/, '-', /\d/, /\d/]}
+            // mask={[/\d/, /\d/, /\d/, /\d/, '-', /\d/, /\d/, '-', /\d/, /\d/]}
           />
 
           <Transactions.TagSelect
@@ -233,16 +232,22 @@ class extends React.Component<IEditorProps, IEditorState> {
     </div>);
   }
 
-  private handleChangeStartDate = (m: moment.Moment): void => {
-    let startDate = m.toDate();
+  private handleChangeStartDate = (d: MaterialUiPickersDate): void => {
+    if (!d) {
+      return;
+    }
+    let startDate = d.toDate();
     this.setState({
       startDate,
       selectedTransactions: new Map(),
     });
   }
 
-  private handleChangeEndDate = (m: moment.Moment): void => {
-    let endDate = m.toDate();
+  private handleChangeEndDate = (d: MaterialUiPickersDate): void => {
+    if (!d) {
+      return;
+    }
+    let endDate = d.toDate();
     this.setState({
       endDate,
       selectedTransactions: new Map(),

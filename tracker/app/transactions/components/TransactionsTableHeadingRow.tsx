@@ -1,12 +1,13 @@
-import { createStyles, WithStyles } from '@material-ui/core';
-import { Theme, withStyles } from '@material-ui/core/styles';
+import { createStyles, Theme, withStyles, WithStyles } from '@material-ui/core/styles';
+import { CSSProperties } from '@material-ui/core/styles/withStyles';
 import * as React from 'react';
 import { styles } from './Transaction';
 
 const rowStyles = (theme: Theme) => {
   let mergedStyles = styles(theme);
-  mergedStyles.row.padding = '0 16px';
-  mergedStyles.row.color = theme.palette.text.primary;
+  let row = mergedStyles.row as CSSProperties;
+  row.padding = '0 16px';
+  row.color = theme.palette.text.primary;
   return createStyles(mergedStyles);
 };
 
