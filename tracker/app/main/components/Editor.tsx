@@ -42,7 +42,7 @@ const styles = (theme: Theme) => createStyles({
     },
     '& .datepicker': {
       flex: '1 0 140px',
-      maxWidth: '160px',
+      maxWidth: '164px',
     },
     '& .tagselect': {
       flex: '10 1 140px',
