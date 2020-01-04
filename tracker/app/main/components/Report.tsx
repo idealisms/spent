@@ -10,7 +10,7 @@ import { fetchTransactionsFromDropboxIfNeeded } from '../../transactions/actions
 import { fetchSettingsFromDropboxIfNeeded, saveSettingsToDropbox, updateSetting } from '../actions';
 import { CloudState, IAppState, IChartNode, IReportNode } from '../Model';
 import ReportChart from './ReportChart';
-import ReportFilterDrawer from './ReportFilterDrawer';
+import { IDateRange, ReportFilterDrawer } from './ReportFilterDrawer';
 import ReportMenuBar from './ReportMenuBar';
 
 
@@ -100,9 +100,8 @@ interface IReportDispatchProps {
 }
 type IReportProps = IReportOwnProps & IReportAppStateProps & IReportDispatchProps;
 interface IReportState {
-  startDate: Date;
-  endDate: Date;
-  selectValue: string;
+  dateRange: IDateRange;
+  compareDateRange?: IDateRange;
   categoriesPretty: string;
   isFilterDrawerOpen: boolean;
 }
@@ -110,13 +109,15 @@ const Report = withStyles(styles)(
 class extends React.Component<IReportProps, IReportState> {
   constructor(props: IReportProps, context?: any) {
     super(props, context);
-    let startDate = moment().year(moment().year() - 1).month(0).date(1).toDate();
-    let endDate = moment().year(moment().year() - 1).month(11).date(31).toDate();
+    let startDate = moment().year(moment().year() - 1).month(0).date(1);
+    let endDate = moment().year(moment().year() - 1).month(11).date(31);
 
     this.state = {
-      startDate: startDate,
-      endDate: endDate,
-      selectValue: 'lastyear',
+      dateRange: {
+        name: 'lastyear',
+        startDate,
+        endDate,
+      },
       categoriesPretty: this.props.reportCategories.length
           ? JSON.stringify(this.props.reportCategories, null, 2)
           : LOADING_TEXT,
@@ -138,7 +139,8 @@ class extends React.Component<IReportProps, IReportState> {
   public render(): React.ReactElement<object> {
     let classes = this.props.classes;
     let filteredTransactions = TransactionUtils.filterTransactionsByDate(
-        this.props.transactions, this.state.startDate, this.state.endDate);
+        this.props.transactions, this.state.dateRange.startDate.toDate(),
+        this.state.dateRange.endDate.toDate());
     let [unmatchedTransactions, renderedTree, chartData] = this.buildTree(filteredTransactions);
     let rows = unmatchedTransactions.map(t => {
         return (
@@ -147,17 +149,15 @@ class extends React.Component<IReportProps, IReportState> {
       });
 
     let drawerContents = <ReportFilterDrawer
-        startDate={this.state.startDate}
-        endDate={this.state.endDate}
-        selectValue={this.state.selectValue}
+        dateRange={this.state.dateRange}
+        compareDateRange={this.state.compareDateRange}
         settingsCloudState={this.props.settingsCloudState}
         saveSettings={this.props.saveSettings}
         categoriesPretty={this.state.categoriesPretty}
         updateReportCategories={this.props.updateReportCategories}
-        setDate={(startDate, endDate, selectValue) => this.setState({
-            startDate,
-            endDate,
-            selectValue,
+        setDate={(dateRange, compareDateRange) => this.setState({
+            dateRange,
+            compareDateRange,
           })}
         setCategoriesPretty={(categoriesPretty) => this.setState({categoriesPretty})}
        />;

@@ -20,8 +20,7 @@ const ReportChart = withStyles(styles)(
 class extends React.Component<IReportChartProps, IReportChartState> {
   constructor(props: IReportChartProps, context?: any) {
     super(props, context);
-    this.state = {
-    };
+    this.state = {};
   }
 
   public render(): React.ReactElement<object> {

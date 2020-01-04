@@ -8,6 +8,13 @@ const styles = (theme: Theme) => createStyles({
   drawerContents: {
     padding: '16px',
   },
+  dateRangeContainer: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    '& > div': {
+      flex: '0 0 auto',
+    },
+  },
   controls: {
     display: 'flex',
     marginTop: '16px',
@@ -25,30 +32,34 @@ const styles = (theme: Theme) => createStyles({
   },
 });
 
-interface IDateOption {
+export interface IDateRange {
   name: string;
   startDate: moment.Moment;
   endDate: moment.Moment;
+}
+
+interface IDateOption extends IDateRange {
   description: string;
 }
 
 interface IReportFilterDrawerProps extends WithStyles<typeof styles> {
-  startDate: Date;
-  endDate: Date;
-  selectValue: string;
+  dateRange: IDateRange;
+  compareDateRange?: IDateRange;
   settingsCloudState: CloudState;
   saveSettings: () => void;
   categoriesPretty: string;
   updateReportCategories: (categories: IReportNode[]) => void;
-  setDate: (startDate: Date, endDate: Date, selectValue: string) => void;
+  setDate: (dateRange: IDateRange, compareDateRange?: IDateRange) => void;
   setCategoriesPretty: (categoriesPretty: string) => void;
 }
 
 interface IReportFilterDrawerState {
 }
 
-const ReportFilterDrawer = withStyles(styles)(
+export const ReportFilterDrawer = withStyles(styles)(
 class extends React.Component<IReportFilterDrawerProps, IReportFilterDrawerState> {
+
+  private START_YEAR: number = 2018;  // TODO: Move this to settings.
 
   constructor(props: IReportFilterDrawerProps, context?: any) {
     super(props, context);
@@ -58,15 +69,18 @@ class extends React.Component<IReportFilterDrawerProps, IReportFilterDrawerState
     let classes = this.props.classes;
 
     let dateOptions = this.getDateOptions();
+    let compareDateOptions = this.getCompareDateOptions(
+        this.props.dateRange.startDate, this.props.dateRange.endDate);
 
     return (
       <div className={classes.drawerContents}>
-        <div>
+        <div className={classes.dateRangeContainer}>
           <FormControl>
             <InputLabel htmlFor='date-select'>Date Range</InputLabel>
             <Select
-              value={this.props.selectValue}
-              onChange={this.handleDateChange}
+              value={this.props.dateRange.name}
+              onChange={(event: React.ChangeEvent<any>) => this.handleDateChange(
+                  event.target.value, this.props.compareDateRange && this.props.compareDateRange.name)}
               inputProps={{
                 id: 'date-select',
               }}
@@ -76,16 +90,30 @@ class extends React.Component<IReportFilterDrawerProps, IReportFilterDrawerState
               ))}
             </Select>
           </FormControl>
+          <FormControl>
+            <InputLabel htmlFor='compare-date-select'>Compare To</InputLabel>
+            <Select
+              value={this.props.compareDateRange ? this.props.compareDateRange.name : ''}
+              onChange={(event: React.ChangeEvent<any>) => this.handleDateChange(this.props.dateRange.name, event.target.value)}
+              inputProps={{
+                id: 'compare-date-select',
+              }}
+            >
+              {compareDateOptions.map((dateOption) => (
+                <MenuItem key={dateOption.name} value={dateOption.name}>{dateOption.description}</MenuItem>
+              ))}
+            </Select>
+          </FormControl>
         </div>
         <div className={classes.controls}>
           <TextField
             label='Start date'
-            value={moment(this.props.startDate).format('YYYY-MM-DD')}
+            value={moment(this.props.dateRange.startDate).format('YYYY-MM-DD')}
             disabled
           />
           <TextField
             label='End date'
-            value={moment(this.props.endDate).format('YYYY-MM-DD')}
+            value={moment(this.props.dateRange.endDate).format('YYYY-MM-DD')}
             style={{marginLeft: '24px'}}
             disabled
           />
@@ -112,15 +140,23 @@ class extends React.Component<IReportFilterDrawerProps, IReportFilterDrawerState
         </Button>
       </div>);
   }
-  public handleDateChange = (event: React.ChangeEvent<any>) => {
+  public handleDateChange = (name: string, compareName?: string) => {
     let dateOptions = this.getDateOptions();
     for (let dateOption of dateOptions) {
-      if (dateOption.name == event.target.value) {
-        this.props.setDate(
-          dateOption.startDate.toDate(),
-          dateOption.endDate.toDate(),
-          dateOption.name,
-        );
+      if (dateOption.name == name) {
+        let compareDateOption;
+        if (compareName) {
+          let compareDateOptions = this.getCompareDateOptions(
+              dateOption.startDate, dateOption.endDate);
+          for (let cDateOption of compareDateOptions) {
+            if (cDateOption.name == compareName) {
+              compareDateOption = cDateOption;
+              break;
+            }
+          }
+        }
+
+        this.props.setDate(dateOption, compareDateOption);
         break;
       }
     }
@@ -138,9 +174,14 @@ class extends React.Component<IReportFilterDrawerProps, IReportFilterDrawerState
     this.props.setCategoriesPretty(categoriesPretty);
   }
 
+  /**
+   * Returns a list of options for the date selector.
+   *
+   * The names include 'thisyear', 'lastyear', 'YYYY', 'lastmonth',
+   * 'thismonth', 'last30', 'lastweek', 'last7', 'YYYYQq', 'last90'.
+   */
   private getDateOptions = () => {
     let dateOptions: IDateOption[] = [];
-    let startYear = 2018;  // TODO: Move this to settings.
     const lastDay = moment().subtract(1, 'day').startOf('day');
     // Year to date (2019)
     dateOptions.push({
@@ -157,7 +198,7 @@ class extends React.Component<IReportFilterDrawerProps, IReportFilterDrawerState
       description: `Last year (${lastDay.year() - 1})`,
     });
     // previous years
-    for (let year = lastDay.year() - 2; year >= startYear; year--) {
+    for (let year = lastDay.year() - 2; year >= this.START_YEAR; year--) {
       dateOptions.push({
         name: year.toString(),
         startDate: lastDay.clone().year(year).month(0).date(1),
@@ -201,7 +242,7 @@ class extends React.Component<IReportFilterDrawerProps, IReportFilterDrawerState
       description: `Last 7 days`,
     });
     // quarters
-    for (let year = lastDay.year(); year >= startYear; year--) {
+    for (let year = lastDay.year(); year >= this.START_YEAR; year--) {
       for (let quarter = 3; quarter >= 0; quarter--) {
         let startMonth = quarter * 3;
         if (year == lastDay.year() && startMonth > lastDay.month()) {
@@ -227,6 +268,29 @@ class extends React.Component<IReportFilterDrawerProps, IReportFilterDrawerState
 
     return dateOptions;
   }
+
+  private getCompareDateOptions = (startDate: moment.Moment, endDate: moment.Moment) => {
+    let dateOptions: IDateOption[] = [];
+    const lastDay = moment().subtract(1, 'day').startOf('day');
+
+    if (startDate.year() == endDate.year() && startDate.dayOfYear() == 1 &&
+        endDate.clone().add(1, 'day').dayOfYear() == 1) {
+      for (let year = lastDay.year() - 1; year >= this.START_YEAR; year--) {
+        if (year == startDate.year()) {
+          continue;
+        }
+        dateOptions.push({
+          name: year.toString(),
+          startDate: lastDay.clone().year(year).month(0).date(1),
+          endDate: lastDay.clone().year(year).month(11).date(31),
+          description: year.toString(),
+        });
+      }
+    }
+
+    return dateOptions;
+  }
+
 });
 
 export default ReportFilterDrawer;
