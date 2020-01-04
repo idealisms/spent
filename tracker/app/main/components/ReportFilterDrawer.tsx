@@ -22,6 +22,7 @@ const styles = (theme: Theme) => createStyles({
   jsonCategoriesInput: {
     minHeight: '360px',
     maxHeight: '600px',
+    overflow: 'auto !important',
   },
   jsonCategoriesTextField: {
     width: '100%',

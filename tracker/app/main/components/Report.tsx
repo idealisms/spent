@@ -69,6 +69,9 @@ const styles = (theme: Theme) => createStyles({
       marginRight: '16px',
       width: '90px',
     },
+    '& > .total': {
+      color: 'rgba(0, 0, 0, .3)',
+    },
     '& > .info': {
       color: 'rgba(0, 0, 0, .3)',
       fontSize: 'small',
@@ -318,10 +321,16 @@ class extends React.Component<IReportProps, IReportState> {
     };
     buildDom(reportRenderNodes, 0, output, outputChartData);
 
+    let total = 0;
+    for (let chartData of outputChartData) {
+      total += chartData.amount_cents;
+    }
+
     let domTime = window.performance.now();
     return [
       unmatchedTransactions,
       <React.Fragment>
+        <div className='total'>${TransactionUtils.formatAmountNumber(total)}</div>
         {output}
         <div className='info'>Build time: {(buildTime - startTime).toFixed(2)}ms</div>
         <div className='info'>DOM time: {(domTime - buildTime).toFixed(2)}ms</div>
