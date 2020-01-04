@@ -7,7 +7,7 @@ import { connect } from 'react-redux';
 import { ThunkDispatch } from 'redux-thunk';
 import { ITransaction, Transaction, TransactionsActions, TransactionsTable, TransactionUtils } from '../../transactions';
 import { fetchSettingsFromDropboxIfNeeded } from '../actions';
-import { IAppState, ISpendTarget } from '../Model';
+import { IAppState, IDailySpendTarget } from '../Model';
 import DailyGraph from './DailyGraph';
 import MenuBarWithDrawer from './MenuBarWithDrawer';
 
@@ -26,13 +26,13 @@ const styles = (theme: Theme) => createStyles({
 
 type filterTransactionsFunction = (
     transactions: ITransaction[],
-    spendTarget?: ISpendTarget) => ITransaction[];
+    spendTarget: IDailySpendTarget) => ITransaction[];
 
 interface IDailyOwnProps extends WithStyles<typeof styles> {
 }
 interface IDailyAppStateProps {
   transactions: ITransaction[];
-  spendTargets: ISpendTarget[];
+  dailySpendTarget: IDailySpendTarget;
 }
 interface IDailyDispatchProps {
   fetchTransactions: () => void;
@@ -55,11 +55,8 @@ class extends React.Component<IDailyProps, IDailyState> {
 
   public render(): React.ReactElement<object> {
     let classes = this.props.classes;
-    let spendTarget = this.props.spendTargets.length > 0
-        ? this.props.spendTargets[0]
-        : undefined;
     let filteredTransactions = this.filterTransactions(
-        this.props.transactions, spendTarget);
+        this.props.transactions, this.props.dailySpendTarget);
     let rows = filteredTransactions.map(t => {
         return (
           <Transaction transaction={t} key={t.id}/>
@@ -74,7 +71,7 @@ class extends React.Component<IDailyProps, IDailyState> {
           graph_id='daily-spend-chart'
           transactions={filteredTransactions}
           onClickDate={this.scrollDateIntoView}
-          spendTarget={spendTarget}
+          spendTarget={this.props.dailySpendTarget}
           />
 
         <TransactionsTable
@@ -88,14 +85,8 @@ class extends React.Component<IDailyProps, IDailyState> {
   }
 
   public scrollDateIntoView = (date: Date): void => {
-    let spendTarget = this.props.spendTargets.length > 0
-        ? this.props.spendTargets[0]
-        : undefined;
-    if (!spendTarget) {
-      return;
-    }
     let filteredTransactions = this.filterTransactions(
-        this.props.transactions, spendTarget);
+        this.props.transactions, this.props.dailySpendTarget);
 
     for (let rowNum = 0; rowNum < filteredTransactions.length; ++rowNum) {
       let t = filteredTransactions[rowNum];
@@ -110,15 +101,13 @@ class extends React.Component<IDailyProps, IDailyState> {
 
   // tslint:disable-next-line:member-ordering (this is a function, not a field)
   private filterTransactions: filterTransactionsFunction = memoize<filterTransactionsFunction>(
-      (transactions, spendTarget?) => {
-          if (transactions.length == 0 || !spendTarget) {
+      (transactions, spendTarget) => {
+          if (transactions.length == 0 || spendTarget.targets.length == 0) {
             return [];
           }
 
-          let startDate = moment(spendTarget.startDate).toDate();
-          let endDate = spendTarget.endDate
-              ? moment(spendTarget.endDate).toDate()
-              : moment(this.props.transactions[0].date).toDate();
+          let startDate = moment(spendTarget.targets[0].startDate).toDate();
+          let endDate = moment(this.props.transactions[0].date).toDate();
           return TransactionUtils.filterTransactions(
               transactions,
               {
@@ -134,7 +123,7 @@ class extends React.Component<IDailyProps, IDailyState> {
 
 const mapStateToProps = (state: IAppState): IDailyAppStateProps => ({
   transactions: state.transactions.transactions,
-  spendTargets: state.settings.settings.spendTargets,
+  dailySpendTarget: state.settings.settings.dailySpendTarget,
 });
 const mapDispatchToProps = (dispatch: ThunkDispatch<IAppState, null, any>): IDailyDispatchProps => ({
   fetchTransactions: () => {

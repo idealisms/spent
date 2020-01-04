@@ -7,7 +7,7 @@ import * as React from 'react';
 import { Chart } from 'react-google-charts';
 import { GoogleDataTableCell, GoogleDataTableColumnRoleType } from 'react-google-charts/dist/types';
 import { ITransaction, TransactionUtils } from '../../transactions';
-import { ISpendTarget } from '../Model';
+import { IDailySpendTarget } from '../Model';
 
 const styles = (theme: Theme) => createStyles({
   root: {
@@ -59,7 +59,7 @@ type PerDayTransactions = {
 interface IDailyGraphProps extends WithStyles<typeof styles> {
   graph_id: string;
   transactions: ITransaction[];
-  spendTarget?: ISpendTarget;
+  spendTarget: IDailySpendTarget;
   onClickDate?: (date: Date) => void;
 }
 interface IDailyGraphState {
@@ -230,16 +230,22 @@ class extends React.Component<IDailyGraphProps, IDailyGraphState> {
   private buildDataMap = () => {
     let dataMapByDate: { [s: string]: PerDayTransactions; } = {};
 
-    if (!this.props.transactions.length || !this.props.spendTarget) {
+    if (!this.props.transactions.length || !this.props.spendTarget.targets.length) {
       return dataMapByDate;
     }
 
-    let startDate = this.props.spendTarget.startDate;
-    let endDate = this.props.spendTarget.endDate
-        ? this.props.spendTarget.endDate : this.props.transactions[0].date;
+    const targets = this.props.spendTarget.targets;
+    const startDates = targets.map((spendTarget) => moment(spendTarget.startDate));
+    const endDate = moment(this.props.transactions[0].date);
 
-    let dailyBudgetCents = this.props.spendTarget!.targetAnnualCents / 365;
-    for (let m = moment(startDate); m.isSameOrBefore(moment(endDate)); m = m.add(1, 'days')) {
+    let targetIndex = 0;
+    for (let m = startDates[0].clone(); m.isSameOrBefore(endDate); m.add(1, 'days')) {
+      if (targetIndex + 1 < targets.length) {
+        if (startDates[targetIndex + 1].isSameOrBefore(m)) {
+          ++targetIndex;
+        }
+      }
+      const dailyBudgetCents = targets[targetIndex].targetAnnualCents / 365;
       dataMapByDate[m.format('YYYY-MM-DD')] = [{
         amountCents: -dailyBudgetCents,
         description: 'daily budget',
@@ -252,7 +258,7 @@ class extends React.Component<IDailyGraphProps, IDailyGraphState> {
         let spreadStartDate = moment(transaction.date);
         let spreadEndDate = moment.min(
             spreadStartDate.clone().add(spreadDuration - 1, 'days'),
-            moment(endDate));
+            endDate);
         for (let m = spreadStartDate; m.isSameOrBefore(spreadEndDate); m = m.add(1, 'days')) {
           dataMapByDate[m.format('YYYY-MM-DD')].push({
             amountCents: transaction.amount_cents / spreadDuration,

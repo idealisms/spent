@@ -28,6 +28,24 @@ export interface IChartNode {
   subcategories: IChartNode[];
 }
 
+export interface IDailySpendTarget {
+  startBalanceCents: number;
+  targets: {
+    targetAnnualCents: number,
+    /** YYYY-MM-DD */
+    startDate: string,
+  }[];
+
+  tags: {
+    /** A transaction is included if it has any of these tags. */
+    include: string[];
+    /** A transaction is excluded if it has any of these tags. */
+    exclude: string[];
+  };
+  /** Optional field for arbitrary notes. */
+  notes?: string;
+}
+
 /**
  * Used to track a spending target.
  *
@@ -57,6 +75,8 @@ export interface ISpendTarget {
 
 export interface ISettings {
   reportCategories: IReportNode[];
+  dailySpendTarget: IDailySpendTarget;
+  /** These are shown on the Monthly page. */
   spendTargets: ISpendTarget[];
 }
 

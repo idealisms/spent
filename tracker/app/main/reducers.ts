@@ -14,6 +14,14 @@ const initialState: ISettingsState = {
   settings: {
     reportCategories: [],
     spendTargets: [],
+    dailySpendTarget: {
+      startBalanceCents: 0,
+      targets: [],
+      tags: {
+        include: [],
+        exclude: [],
+      },
+    },
   },
 };
 
