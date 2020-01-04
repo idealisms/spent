@@ -280,7 +280,7 @@ class extends React.Component<IReportProps, IReportState> {
           renderNodes.push(node);
         }
       }
-      if (renderNodes.length == 0) {
+      if (!renderNodes.length) {
         unmatchedTransactions.push(transaction);
       } else if (renderNodes.length > 1) {
         multipleCategoriesTransactions.push(transaction);

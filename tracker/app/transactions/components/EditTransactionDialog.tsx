@@ -85,7 +85,7 @@ class extends React.Component<IEditTransactionDialogProps, IEditTransactionDialo
               value={this.state.tags}
               allowNewTags
               className='textfield'
-              autoFocus={this.state.tags.length == 0}
+              autoFocus={!this.state.tags.length}
               placeholder='e.g. food, restaurant'
               /><br />
 

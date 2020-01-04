@@ -154,8 +154,7 @@ class extends React.Component<IAddTransactionDialogProps, IAddTransactionDialogS
   }
 
   private saveDisabled = () => {
-    return this.state.amountCents == 0
-        || this.state.description.trim().length == 0;
+    return this.state.amountCents == 0 || !this.state.description.trim();
   }
 
   private handleBlurAmount = (input: HTMLInputElement) => {

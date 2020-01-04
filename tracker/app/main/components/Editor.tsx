@@ -117,7 +117,7 @@ class extends React.Component<IEditorProps, IEditorState> {
 
   public componentDidUpdate(prevProps: IEditorProps): void {
     if (this.props.transactions !== prevProps.transactions) {
-      if (prevProps.transactions.length == 0) {
+      if (!prevProps.transactions.length) {
         const transactions = this.props.transactions;
         this.setState({
             startDate: moment(transactions[transactions.length - 1].date).toDate(),
@@ -352,7 +352,7 @@ class extends React.Component<IEditorProps, IEditorState> {
         t = Object.assign({}, transaction);
         t.id = Transactions.TransactionUtils.generateUUID();
         t.transactions = [...transaction.transactions];
-        if (transaction.transactions && transaction.transactions.length == 0) {
+        if (transaction.transactions && !transaction.transactions.length) {
           t.transactions.push(transaction);
         }
 

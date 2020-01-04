@@ -102,7 +102,7 @@ class extends React.Component<IDailyProps, IDailyState> {
   // tslint:disable-next-line:member-ordering (this is a function, not a field)
   private filterTransactions: filterTransactionsFunction = memoize<filterTransactionsFunction>(
       (transactions, spendTarget) => {
-          if (transactions.length == 0 || spendTarget.targets.length == 0) {
+          if (!transactions.length || !spendTarget.targets.length) {
             return [];
           }
 

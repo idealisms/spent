@@ -279,7 +279,7 @@ class extends React.Component<IDailyGraphProps, IDailyGraphState> {
 
   private formatDataAsRows = (dataMapByDate: { [s: string]: PerDayTransactions; }): [Date, number|null, number, string][] => {
     let dates = Object.keys(dataMapByDate).sort();
-    if (dates.length == 0) {
+    if (!dates.length) {
       return [[moment().toDate(), 0, 0, '']];
     }
 

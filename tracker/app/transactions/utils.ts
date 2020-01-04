@@ -238,7 +238,7 @@ export function filterTransactions(
     let tagsExclude = new Set(filters.tagsExcludeAny);
     filteredTransactions = filteredTransactions.filter(transaction => {
       let intersection = transaction.tags.filter(tag => tagsExclude.has(tag));
-      return intersection.length == 0;
+      return !intersection.length;
     });
   }
 
