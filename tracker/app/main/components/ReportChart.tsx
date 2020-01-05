@@ -2,8 +2,6 @@ import { createStyles, WithStyles } from '@material-ui/core';
 import { Theme, withStyles } from '@material-ui/core/styles';
 import * as React from 'react';
 import { Chart } from 'react-google-charts';
-import * as TransactionUtils from '../../transactions/utils';
-import { IChartNode } from '../Model';
 
 const styles = (theme: Theme) => createStyles({
   root: {
@@ -12,7 +10,7 @@ const styles = (theme: Theme) => createStyles({
 });
 
 interface IReportChartProps extends WithStyles<typeof styles> {
-  chartData: IChartNode[];
+  chartData: Array<any>[];
 }
 interface IReportChartState {
 }
@@ -26,22 +24,9 @@ class extends React.Component<IReportChartProps, IReportChartState> {
   public render(): React.ReactElement<object> {
     let classes = this.props.classes;
 
-    let data = [];
-    data.push(['Category', 'Amount', { role: 'annotation', type: 'string' }]);
-    for (let chartNode of this.props.chartData) {
-      if (chartNode.amount_cents <= 0) {
-        continue;
-      }
-      data.push([
-        chartNode.title,
-        chartNode.amount_cents / 100.0,
-        TransactionUtils.formatAmountNumber(chartNode.amount_cents),
-      ]);
-    }
-
     let loadingPlaceholder = <div style={{height: '60%', padding: '16px'}}>Loading . . .</div>;
 
-    if (data.length == 1) {
+    if (this.props.chartData.length <= 1) {
       return loadingPlaceholder;
     }
 
@@ -51,7 +36,7 @@ class extends React.Component<IReportChartProps, IReportChartState> {
             style={{height: '60%'}}
             chartType='BarChart'
             loader={loadingPlaceholder}
-            data={data}
+            data={this.props.chartData}
             options={{
               bars: 'horizontal',
               bar: { groupWidth: '90%' },

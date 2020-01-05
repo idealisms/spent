@@ -144,7 +144,17 @@ class extends React.Component<IReportProps, IReportState> {
     let filteredTransactions = TransactionUtils.filterTransactionsByDate(
         this.props.transactions, this.state.dateRange.startDate.toDate(),
         this.state.dateRange.endDate.toDate());
-    let [unmatchedTransactions, renderedTree, chartData] = this.buildTree(filteredTransactions);
+    let [unmatchedTransactions, renderedTree, chartNodes] = this.buildTree(filteredTransactions);
+
+    let compareChartNodes: IChartNode[] = [];
+    if (this.state.compareDateRange) {
+      filteredTransactions = TransactionUtils.filterTransactionsByDate(
+          this.props.transactions, this.state.compareDateRange.startDate.toDate(),
+          this.state.compareDateRange.endDate.toDate());
+      compareChartNodes = this.buildTree(filteredTransactions)[2];
+    }
+
+    let chartData = this.buildChartDataTable(chartNodes, compareChartNodes);
     let rows = unmatchedTransactions.map(t => {
         return (
           <Transaction transaction={t} key={t.id}/>
@@ -172,8 +182,7 @@ class extends React.Component<IReportProps, IReportState> {
 
         <div className={classes.contentAndDrawerContainer}>
           <div className={classes.content}>
-            <ReportChart
-                chartData={chartData} />
+            <ReportChart chartData={chartData} />
 
             <div className={classes.renderedTree}>
               {renderedTree}
@@ -336,6 +345,62 @@ class extends React.Component<IReportProps, IReportState> {
         <div className='info'>DOM time: {(domTime - buildTime).toFixed(2)}ms</div>
       </React.Fragment>,
       outputChartData];
+  }
+
+  private buildChartDataTable = (chartData: IChartNode[], compareChartData: IChartNode[]) => {
+    type DataCell = string | number | { role: 'annotation', type: 'string' };
+    type DataRow = DataCell[];
+    let data: DataRow[] = [];
+    data.push(['Category', this.state.dateRange.name, { role: 'annotation', type: 'string' }]);
+    for (let chartNode of chartData) {
+      if (chartNode.amount_cents <= 0) {
+        continue;
+      }
+      data.push([
+        chartNode.title,
+        chartNode.amount_cents / 100.0,
+        TransactionUtils.formatAmountNumber(chartNode.amount_cents),
+      ]);
+    }
+
+    if (this.state.compareDateRange) {
+      let columnTitle = this.state.compareDateRange.name;
+      let compareMap: Map<string, number> = new Map();
+      compareChartData.forEach((chartNode) => {
+        if (chartNode.amount_cents > 0) {
+          compareMap.set(chartNode.title, chartNode.amount_cents);
+        }
+      });
+      data.forEach((dataRow, index) => {
+        if (index == 0) {
+          dataRow.push(columnTitle);
+          dataRow.push({ role: 'annotation', type: 'string' });
+        } else {
+          let category = dataRow[0] as string;
+          let amountCents = compareMap.get(category) || 0;
+          dataRow.push(amountCents / 100);
+          dataRow.push(TransactionUtils.formatAmountNumber(amountCents));
+          compareMap.delete(category);
+        }
+      });
+      // If there are categories in the compare data that wasn't in the base
+      // data, add entries for those at the end.
+      if (compareMap.size > 0) {
+        for (let chartNode of compareChartData) {
+          if (compareMap.has(chartNode.title)) {
+            data.push([
+              chartNode.title,
+              0,
+              '0.00',
+              chartNode.amount_cents / 100,
+              TransactionUtils.formatAmountNumber(chartNode.amount_cents),
+            ]);
+          }
+        }
+      }
+    }
+
+    return data;
   }
 });
 
