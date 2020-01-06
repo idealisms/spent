@@ -36,10 +36,12 @@ const styles = (theme: Theme) => createStyles({
     width: 0,
     flexShrink: 0,
     overflow: 'hidden auto',
-    transition: theme.transitions.create('width', {
-      easing: theme.transitions.easing.easeOut,
-      duration: theme.transitions.duration.enteringScreen,
-    }),
+    // Disable the transition because it causes the chart to be
+    // incorrectly sized (and it's slow);
+    // transition: theme.transitions.create('width', {
+    //   easing: theme.transitions.easing.easeOut,
+    //   duration: theme.transitions.duration.enteringScreen,
+    // }),
     '&.open': {
       width: '420px',
     },
