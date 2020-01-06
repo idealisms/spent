@@ -114,8 +114,8 @@ const Report = withStyles(styles)(
 class extends React.Component<IReportProps, IReportState> {
   constructor(props: IReportProps, context?: any) {
     super(props, context);
-    let startDate = moment().year(moment().year() - 1).month(0).date(1);
-    let endDate = moment().year(moment().year() - 1).month(11).date(31);
+    let startDate = moment().year(moment().year() - 1).month(0).date(1).startOf('day');
+    let endDate = moment().year(moment().year() - 1).month(11).date(31).startOf('day');
 
     this.state = {
       dateRange: {

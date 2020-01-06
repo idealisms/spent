@@ -267,16 +267,17 @@ class extends React.Component<IReportFilterDrawerProps, IReportFilterDrawerState
     for (let year = lastDay.year(); year >= this.START_YEAR; year--) {
       for (let quarter = 3; quarter >= 0; quarter--) {
         let startMonth = quarter * 3;
-        if (year == lastDay.year() && startMonth > lastDay.month()) {
+        let startDate = moment().year(year).month(startMonth).date(1).startOf('day');
+        let endDate = startDate.clone().month(startMonth + 3).subtract(1, 'day');
+        if (endDate.isAfter(lastDay)) {
           continue;
         }
 
-        let endMonth = startMonth + 2;
         dateOptions.push({
           name: `${year}Q${quarter + 1}`,
           chartColumnName: `${year} Q${quarter + 1}`,
-          startDate: moment().year(year).month(startMonth).date(1),
-          endDate: moment().year(year).month(endMonth + 1).date(1).subtract(1, 'day'),
+          startDate,
+          endDate,
           description: `${year} Q${quarter + 1}`,
         });
       }
@@ -299,10 +300,11 @@ class extends React.Component<IReportFilterDrawerProps, IReportFilterDrawerState
    */
   private getCompareDateOptions = (startDate: moment.Moment, endDate: moment.Moment) => {
     let dateOptions: IDateOption[] = [];
+    const lastDay = moment().subtract(1, 'day').startOf('day');
 
     if (startDate.year() == endDate.year() && startDate.dayOfYear() == 1 &&
         endDate.clone().add(1, 'day').dayOfYear() == 1) {
-      const lastDay = moment().subtract(1, 'day').startOf('day');
+      // Create entries for year comparisons.
       for (let year = lastDay.year() - 1; year >= this.START_YEAR; year--) {
         if (year == startDate.year()) {
           continue;
@@ -314,6 +316,27 @@ class extends React.Component<IReportFilterDrawerProps, IReportFilterDrawerState
           endDate: lastDay.clone().year(year).month(11).date(31),
           description: year.toString(),
         });
+      }
+    } else if (startDate.month() % 3 == 0 && startDate.date() == 1 &&
+        endDate.isSame(startDate.clone().add(3, 'month').subtract(1, 'day'), 'day')) {
+      // Create entries for quarter comparisons
+      for (let year = lastDay.year(); year >= this.START_YEAR; year--) {
+        for (let quarter = 3; quarter >= 0; quarter--) {
+          let startMonth = quarter * 3;
+          let compareStartDate =  moment().year(year).month(startMonth).date(1).startOf('day');
+          let compareEndDate = compareStartDate.clone().month(startMonth + 3).subtract(1, 'day');
+          if (compareEndDate.isAfter(lastDay) || compareEndDate.isSame(endDate, 'day')) {
+            continue;
+          }
+
+          dateOptions.push({
+            name: `${year}Q${quarter + 1}`,
+            chartColumnName: `${year} Q${quarter + 1}`,
+            startDate: compareStartDate,
+            endDate: compareEndDate,
+            description: `${year} Q${quarter + 1}`,
+          });
+        }
       }
     }
 
