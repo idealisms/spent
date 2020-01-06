@@ -33,13 +33,12 @@ class extends React.Component<IReportChartProps, IReportChartState> {
     return (
         <Chart
             className={classes.root}
-            style={{height: '60%'}}
+            style={{height: '90%'}}
             chartType='BarChart'
             loader={loadingPlaceholder}
             data={this.props.chartData}
             options={{
               bars: 'horizontal',
-              bar: { groupWidth: '90%' },
               legend: { position: 'none' },
               chartArea: { left: 'auto', top: 16, right: 48, bottom: 48 },
               hAxis: {

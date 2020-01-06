@@ -351,7 +351,7 @@ class extends React.Component<IReportProps, IReportState> {
 
   private buildChartDataTable = (chartData: IChartNode[], compareChartData: IChartNode[]) => {
     type DataCell = string | number | { role: 'annotation', type: 'string' };
-    type DataRow = DataCell[];
+    type DataRow = [DataCell, DataCell, DataCell];
     let data: DataRow[] = [];
     data.push(['Category', this.state.dateRange.name, { role: 'annotation', type: 'string' }]);
     for (let chartNode of chartData) {
@@ -373,15 +373,16 @@ class extends React.Component<IReportProps, IReportState> {
           compareMap.set(chartNode.title, chartNode.amount_cents);
         }
       });
+      // When showing 2 bars, remove the annotations because the graph
+      // can get very busy. We do this by replacing the annotation column
+      // with the compare data.
       data.forEach((dataRow, index) => {
         if (index == 0) {
-          dataRow.push(columnTitle);
-          dataRow.push({ role: 'annotation', type: 'string' });
+          dataRow[2] = columnTitle;
         } else {
           let category = dataRow[0] as string;
           let amountCents = compareMap.get(category) || 0;
-          dataRow.push(amountCents / 100);
-          dataRow.push(TransactionUtils.formatAmountNumber(amountCents));
+          dataRow[2] = amountCents / 100;
           compareMap.delete(category);
         }
       });
@@ -393,9 +394,7 @@ class extends React.Component<IReportProps, IReportState> {
             data.push([
               chartNode.title,
               0,
-              '0.00',
               chartNode.amount_cents / 100,
-              TransactionUtils.formatAmountNumber(chartNode.amount_cents),
             ]);
           }
         }
