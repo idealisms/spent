@@ -9,12 +9,15 @@ const styles = (theme: Theme) => createStyles({
     padding: '16px',
   },
   dateRangeContainer: {
+    display: 'flex',
   },
   dateSelect: {
+    flex: '0 1 auto',
     width: '228px',
     marginRight: '16px',
   },
   compareDateSelect: {
+    flex: '0 1 auto',
     width: '144px',
   },
   compareMenu: {
