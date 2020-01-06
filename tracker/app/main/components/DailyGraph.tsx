@@ -54,6 +54,7 @@ type PerDayTransactions = {
   amountCents: number,
   description: string,
   notes?: string,
+  daysLeft?: string;
 }[];
 
 interface IDailyGraphProps extends WithStyles<typeof styles> {
@@ -259,11 +260,13 @@ class extends React.Component<IDailyGraphProps, IDailyGraphState> {
         let spreadEndDate = moment.min(
             spreadStartDate.clone().add(spreadDuration - 1, 'days'),
             endDate);
-        for (let m = spreadStartDate; m.isSameOrBefore(spreadEndDate); m = m.add(1, 'days')) {
+        for (let m = spreadStartDate.clone(); m.isSameOrBefore(spreadEndDate); m.add(1, 'days')) {
+          let daysLeft = spreadDuration - 1 - m.diff(spreadStartDate, 'days');
           dataMapByDate[m.format('YYYY-MM-DD')].push({
             amountCents: transaction.amount_cents / spreadDuration,
             description: transaction.description,
             notes: transaction.notes,
+            daysLeft: !daysLeft ? 'last day!' : (daysLeft == 1 ? '1 day left' : `${daysLeft} days left`),
           });
         }
       } else {
@@ -294,7 +297,8 @@ class extends React.Component<IDailyGraphProps, IDailyGraphState> {
         currentTotal += transaction.amountCents;
         let amount = TransactionUtils.formatAmountNumber(transaction.amountCents);
         let notes = transaction.notes ? ` - <span class='notes'>${transaction.notes}</span>` : '';
-        toolTipHtml += `<tr><td>${amount}</td><td>${transaction.description} ${notes}</td></tr>`;
+        let daysLeft = transaction.daysLeft ? ` <span class='notes'>(${transaction.daysLeft})</span>` : '';
+        toolTipHtml += `<tr><td>${amount}</td><td>${transaction.description}${notes}${daysLeft}</td></tr>`;
       }
       toolTipHtml += '</table>';
 
