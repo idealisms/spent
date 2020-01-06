@@ -9,10 +9,17 @@ const styles = (theme: Theme) => createStyles({
     padding: '16px',
   },
   dateRangeContainer: {
-    display: 'flex',
-    justifyContent: 'space-between',
-    '& > div': {
-      flex: '0 0 auto',
+  },
+  dateSelect: {
+    width: '228px',
+    marginRight: '16px',
+  },
+  compareDateSelect: {
+    width: '144px',
+  },
+  compareMenu: {
+    '& li[data-value=""]': {
+      color: 'rgba(0, 0, 0, .54)',
     },
   },
   controls: {
@@ -77,7 +84,7 @@ class extends React.Component<IReportFilterDrawerProps, IReportFilterDrawerState
     return (
       <div className={classes.drawerContents}>
         <div className={classes.dateRangeContainer}>
-          <FormControl>
+          <FormControl className={classes.dateSelect}>
             <InputLabel htmlFor='date-select'>Date Range</InputLabel>
             <Select
               value={this.props.dateRange.name}
@@ -92,14 +99,18 @@ class extends React.Component<IReportFilterDrawerProps, IReportFilterDrawerState
               ))}
             </Select>
           </FormControl>
-          <FormControl>
+          <FormControl className={classes.compareDateSelect}>
             <InputLabel htmlFor='compare-date-select'>Compare To</InputLabel>
             <Select
               value={this.props.compareDateRange ? this.props.compareDateRange.name : ''}
-              onChange={(event: React.ChangeEvent<any>) => this.handleDateChange(this.props.dateRange.name, event.target.value)}
+              onChange={(event: React.ChangeEvent<any>) => this.handleDateChange(this.props.dateRange.name, event.target.value.trim())}
               inputProps={{
                 id: 'compare-date-select',
               }}
+              MenuProps={{
+                className: classes.compareMenu,
+              }}
+              disabled={!compareDateOptions.length}
             >
               {compareDateOptions.map((dateOption) => (
                 <MenuItem key={dateOption.name} value={dateOption.name}>{dateOption.description}</MenuItem>
@@ -282,12 +293,16 @@ class extends React.Component<IReportFilterDrawerProps, IReportFilterDrawerState
     return dateOptions;
   }
 
+  /**
+   * Returns a list of date options that we can compare against.
+   * We can only do comparisons across years or quarters.
+   */
   private getCompareDateOptions = (startDate: moment.Moment, endDate: moment.Moment) => {
     let dateOptions: IDateOption[] = [];
-    const lastDay = moment().subtract(1, 'day').startOf('day');
 
     if (startDate.year() == endDate.year() && startDate.dayOfYear() == 1 &&
         endDate.clone().add(1, 'day').dayOfYear() == 1) {
+      const lastDay = moment().subtract(1, 'day').startOf('day');
       for (let year = lastDay.year() - 1; year >= this.START_YEAR; year--) {
         if (year == startDate.year()) {
           continue;
@@ -300,6 +315,17 @@ class extends React.Component<IReportFilterDrawerProps, IReportFilterDrawerState
           description: year.toString(),
         });
       }
+    }
+
+    // Add a -none- option so the user can clear the comparison list.
+    if (dateOptions.length) {
+      dateOptions.unshift({
+        name: '',
+        chartColumnName: '',
+        startDate: moment(),
+        endDate: moment(),
+        description: '-none-',
+      });
     }
 
     return dateOptions;
