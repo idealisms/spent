@@ -35,6 +35,7 @@ const styles = (theme: Theme) => createStyles({
 
 export interface IDateRange {
   name: string;
+  chartColumnName: string;
   startDate: moment.Moment;
   endDate: moment.Moment;
 }
@@ -187,6 +188,7 @@ class extends React.Component<IReportFilterDrawerProps, IReportFilterDrawerState
     // Year to date (2019)
     dateOptions.push({
       name: 'thisyear',
+      chartColumnName: lastDay.format('YYYY'),
       startDate: lastDay.clone().month(0).date(1),
       endDate: lastDay,
       description: `Year to date (${lastDay.year()})`,
@@ -194,6 +196,7 @@ class extends React.Component<IReportFilterDrawerProps, IReportFilterDrawerState
     // Last year (2018)
     dateOptions.push({
       name: 'lastyear',
+      chartColumnName: (lastDay.year() - 1).toString(),
       startDate: lastDay.clone().subtract(1, 'year').month(0).date(1),
       endDate: lastDay.clone().subtract(1, 'year').month(11).date(31),
       description: `Last year (${lastDay.year() - 1})`,
@@ -202,6 +205,7 @@ class extends React.Component<IReportFilterDrawerProps, IReportFilterDrawerState
     for (let year = lastDay.year() - 2; year >= this.START_YEAR; year--) {
       dateOptions.push({
         name: year.toString(),
+        chartColumnName: year.toString(),
         startDate: lastDay.clone().year(year).month(0).date(1),
         endDate: lastDay.clone().year(year).month(11).date(31),
         description: year.toString(),
@@ -210,6 +214,7 @@ class extends React.Component<IReportFilterDrawerProps, IReportFilterDrawerState
     // Last month (Apr 2019)
     dateOptions.push({
       name: 'lastmonth',
+      chartColumnName: lastDay.clone().subtract(1, 'month').format('YYYY/MM'),
       startDate: lastDay.clone().subtract(1, 'month').date(1),
       endDate: lastDay.clone().date(1).subtract(1, 'day'),
       description: `Last month (${lastDay.clone().subtract(1, 'month').format('MMM YYYY')})`,
@@ -217,6 +222,7 @@ class extends React.Component<IReportFilterDrawerProps, IReportFilterDrawerState
     // Month to date (May 2019)
     dateOptions.push({
       name: 'thismonth',
+      chartColumnName: lastDay.format('YYYY/MM'),
       startDate: lastDay.clone().date(1),
       endDate: lastDay.clone(),
       description: `Month to date (${lastDay.format('MMM YYYY')})`,
@@ -224,22 +230,26 @@ class extends React.Component<IReportFilterDrawerProps, IReportFilterDrawerState
     // Last 30 days
     dateOptions.push({
       name: 'last30',
-      startDate: lastDay.clone().subtract(30, 'day'),
+      chartColumnName: `${lastDay.clone().subtract(29, 'day').format('MMM D')} to ${lastDay.format('MMM D')}`,
+      startDate: lastDay.clone().subtract(29, 'day'),
       endDate: lastDay.clone(),
       description: `Last 30 days`,
     });
     // Last week
+    const lastSunday = lastDay.clone().day(-7);
     dateOptions.push({
       name: 'lastweek',
-      startDate: lastDay.clone().day(-7),  // last Sunday
-      endDate: lastDay.clone().day(-7).add(6, 'day'),
+      chartColumnName: `${lastSunday.format('MMM D')} to ${lastDay.clone().add(6, 'day').format('MMM D')}`,
+      startDate: lastSunday,
+      endDate: lastSunday.clone().add(6, 'day'),
       description: `Last week (Sun - Sat)`,
     });
     // Last 7 days
     dateOptions.push({
       name: 'last7',
-      startDate: lastDay.clone().subtract(7, 'day'),
-      endDate: lastDay.clone(),
+      chartColumnName: `${lastDay.clone().subtract(6, 'day').format('MMM D')} to ${lastDay.format('MMM D')}`,
+      startDate: lastDay.clone().subtract(6, 'day'),
+      endDate: lastDay,
       description: `Last 7 days`,
     });
     // quarters
@@ -253,6 +263,7 @@ class extends React.Component<IReportFilterDrawerProps, IReportFilterDrawerState
         let endMonth = startMonth + 2;
         dateOptions.push({
           name: `${year}Q${quarter + 1}`,
+          chartColumnName: `${year} Q${quarter + 1}`,
           startDate: moment().year(year).month(startMonth).date(1),
           endDate: moment().year(year).month(endMonth + 1).date(1).subtract(1, 'day'),
           description: `${year} Q${quarter + 1}`,
@@ -262,7 +273,8 @@ class extends React.Component<IReportFilterDrawerProps, IReportFilterDrawerState
     // Last 90 days
     dateOptions.push({
       name: `last90`,
-      startDate: lastDay.clone().subtract(90, 'day'),
+      chartColumnName: `${lastDay.clone().subtract(89, 'day').format('MMM D')} to ${lastDay.format('MMM D')}`,
+      startDate: lastDay.clone().subtract(89, 'day'),
       endDate: lastDay,
       description: `Last 90 days`,
     });
@@ -282,6 +294,7 @@ class extends React.Component<IReportFilterDrawerProps, IReportFilterDrawerState
         }
         dateOptions.push({
           name: year.toString(),
+          chartColumnName: year.toString(),
           startDate: lastDay.clone().year(year).month(0).date(1),
           endDate: lastDay.clone().year(year).month(11).date(31),
           description: year.toString(),

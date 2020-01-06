@@ -120,6 +120,7 @@ class extends React.Component<IReportProps, IReportState> {
     this.state = {
       dateRange: {
         name: 'lastyear',
+        chartColumnName: endDate.year().toString(),
         startDate,
         endDate,
       },
@@ -353,7 +354,7 @@ class extends React.Component<IReportProps, IReportState> {
     type DataCell = string | number | { role: 'annotation', type: 'string' };
     type DataRow = [DataCell, DataCell, DataCell];
     let data: DataRow[] = [];
-    data.push(['Category', this.state.dateRange.name, { role: 'annotation', type: 'string' }]);
+    data.push(['Category', this.state.dateRange.chartColumnName, { role: 'annotation', type: 'string' }]);
     for (let chartNode of chartData) {
       if (chartNode.amount_cents <= 0) {
         continue;
@@ -366,7 +367,7 @@ class extends React.Component<IReportProps, IReportState> {
     }
 
     if (this.state.compareDateRange) {
-      let columnTitle = this.state.compareDateRange.name;
+      let columnTitle = this.state.compareDateRange.chartColumnName;
       let compareMap: Map<string, number> = new Map();
       compareChartData.forEach((chartNode) => {
         if (chartNode.amount_cents > 0) {
