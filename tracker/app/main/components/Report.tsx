@@ -351,10 +351,10 @@ class extends React.Component<IReportProps, IReportState> {
   }
 
   private buildChartDataTable = (chartData: IChartNode[], compareChartData: IChartNode[]) => {
-    type DataCell = string | number | { role: 'annotation', type: 'string' };
-    type DataRow = [DataCell, DataCell, DataCell];
+    type DataCell = string | number;
+    type DataRow = [DataCell, DataCell, DataCell?];
     let data: DataRow[] = [];
-    data.push(['Category', this.state.dateRange.chartColumnName, { role: 'annotation', type: 'string' }]);
+    data.push(['Category', this.state.dateRange.chartColumnName]);
     for (let chartNode of chartData) {
       if (chartNode.amount_cents <= 0) {
         continue;
@@ -362,7 +362,6 @@ class extends React.Component<IReportProps, IReportState> {
       data.push([
         chartNode.title,
         chartNode.amount_cents / 100.0,
-        TransactionUtils.formatAmountNumber(chartNode.amount_cents),
       ]);
     }
 
@@ -374,16 +373,13 @@ class extends React.Component<IReportProps, IReportState> {
           compareMap.set(chartNode.title, chartNode.amount_cents);
         }
       });
-      // When showing 2 bars, remove the annotations because the graph
-      // can get very busy. We do this by replacing the annotation column
-      // with the compare data.
       data.forEach((dataRow, index) => {
         if (index == 0) {
-          dataRow[2] = columnTitle;
+          dataRow.push(columnTitle);
         } else {
           let category = dataRow[0] as string;
           let amountCents = compareMap.get(category) || 0;
-          dataRow[2] = amountCents / 100;
+          dataRow.push(amountCents / 100);
           compareMap.delete(category);
         }
       });
