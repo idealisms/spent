@@ -46,7 +46,8 @@ const styles = (theme: Theme) => createStyles({
     flexShrink: 0,
     overflow: 'hidden auto',
     // Disable the transition because it causes the chart to be
-    // incorrectly sized (and it's slow);
+    // incorrectly sized (the chart only resizes once at the first
+    // frame of the animation).
     // transition: theme.transitions.create('width', {
     //   easing: theme.transitions.easing.easeOut,
     //   duration: theme.transitions.duration.enteringScreen,
