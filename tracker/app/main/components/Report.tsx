@@ -159,20 +159,45 @@ class extends React.Component<IReportProps, IReportState> {
         this.state.dateRange.endDate.toDate());
     let [unmatchedTransactions, renderedTree, chartNodes] = this.buildTree(filteredTransactions);
 
+    let compareUnmatchedTransactions: ITransaction[] = [];
+    let compareRenderTree: JSX.Element;
     let compareChartNodes: IChartNode[] = [];
     if (this.state.compareDateRange) {
       filteredTransactions = TransactionUtils.filterTransactionsByDate(
           this.props.transactions, this.state.compareDateRange.startDate.toDate(),
           this.state.compareDateRange.endDate.toDate());
-      compareChartNodes = this.buildTree(filteredTransactions)[2];
+      [compareUnmatchedTransactions, compareRenderTree, compareChartNodes] = this.buildTree(filteredTransactions);
     }
 
     let chartData = this.buildChartDataTable(chartNodes, compareChartNodes);
-    let rows = unmatchedTransactions.map(t => {
-        return (
-          <Transaction transaction={t} key={t.id}/>
-        );
-      });
+    let tabs = [
+      <Tab label={`${this.state.dateRange.chartColumnName} Categories`} />,
+      <Tab label={`${this.state.dateRange.chartColumnName} Uncategorized`} />,
+    ];
+
+    let tabContents = [
+      <div className={classes.renderedTree} hidden={this.state.tabIndex != 0}>
+        {renderedTree}
+      </div>,
+      <TransactionsTable classes={{root: classes.transactionsTable}} hidden={this.state.tabIndex != 1}>
+        {unmatchedTransactions.map(t => <Transaction transaction={t} key={t.id}/>)}
+      </TransactionsTable>,
+    ];
+
+    if (this.state.compareDateRange) {
+      tabs.push(
+        <Tab label={`${this.state.compareDateRange.chartColumnName} Categories`} />,
+        <Tab label={`${this.state.compareDateRange.chartColumnName} Uncategorized`} />,
+      );
+      tabContents.push(
+        <div className={classes.renderedTree} hidden={this.state.tabIndex != 2}>
+          {compareRenderTree!}
+        </div>,
+        <TransactionsTable classes={{root: classes.transactionsTable}} hidden={this.state.tabIndex != 3}>
+          {compareUnmatchedTransactions.map(t => <Transaction transaction={t} key={t.id}/>)}
+        </TransactionsTable>,
+      );
+    }
 
     let drawerContents = <ReportFilterDrawer
         dateRange={this.state.dateRange}
@@ -181,10 +206,14 @@ class extends React.Component<IReportProps, IReportState> {
         saveSettings={this.props.saveSettings}
         categoriesPretty={this.state.categoriesPretty}
         updateReportCategories={this.props.updateReportCategories}
-        setDate={(dateRange, compareDateRange) => this.setState({
-            dateRange,
-            compareDateRange,
-          })}
+        setDate={(dateRange, compareDateRange) => {
+            let tabIndex = !compareDateRange && this.state.tabIndex >= 2 ? 0 : this.state.tabIndex;
+            this.setState({
+                dateRange,
+                compareDateRange,
+                tabIndex,
+            });
+          }}
         setCategoriesPretty={(categoriesPretty) => this.setState({categoriesPretty})}
        />;
     return (
@@ -203,21 +232,15 @@ class extends React.Component<IReportProps, IReportState> {
                 onChange={(event: React.ChangeEvent<{}>, tabIndex: number) => {
                   this.setState({tabIndex});
                 }}
-                variant='fullWidth'
+                variant='scrollable'
+                scrollButtons='auto'
                 indicatorColor='primary'
-                textColor='primary'
-              >
-              <Tab label={`${this.state.dateRange.chartColumnName} Categories`} />
-              <Tab label={`${this.state.dateRange.chartColumnName} Not Categorized`} />
+                textColor='primary'>
+              {tabs}
             </Tabs>
 
             <div className={classes.tables}>
-              <div className={classes.renderedTree} hidden={this.state.tabIndex != 0}>
-                {renderedTree}
-              </div>
-              <TransactionsTable classes={{root: classes.transactionsTable}} hidden={this.state.tabIndex != 1}>
-                {rows}
-              </TransactionsTable>
+              {tabContents}
             </div>
           </div>
           <Hidden smUp>
