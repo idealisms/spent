@@ -170,35 +170,38 @@ class extends React.Component<IReportProps, IReportState> {
       [compareUnmatchedTransactions, compareRenderTree, compareChartNodes] = this.buildTree(filteredTransactions);
     }
 
-    let chartData = this.buildChartDataTable(chartNodes, compareChartNodes);
+    let columnName = this.state.dateRange.chartColumnName;
     let tabs = [
-      <Tab label={`${this.state.dateRange.chartColumnName} Categories`} />,
-      <Tab label={`${this.state.dateRange.chartColumnName} Uncategorized`} />,
+      <Tab key={`tab-${columnName}-cat`} label={`${columnName} Categories`} />,
+      <Tab key={`tab-${columnName}-uncat`} label={`${columnName} Uncategorized`} />,
     ];
 
     let tabContents = [
-      <div className={classes.renderedTree} hidden={this.state.tabIndex != 0}>
+      <div key={`tree-${columnName}`} className={classes.renderedTree} hidden={this.state.tabIndex != 0}>
         {renderedTree}
       </div>,
-      <TransactionsTable classes={{root: classes.transactionsTable}} hidden={this.state.tabIndex != 1}>
+      <TransactionsTable key={`table-${columnName}`} classes={{root: classes.transactionsTable}} hidden={this.state.tabIndex != 1}>
         {unmatchedTransactions.map(t => <Transaction transaction={t} key={t.id}/>)}
       </TransactionsTable>,
     ];
 
     if (this.state.compareDateRange) {
+      columnName = this.state.compareDateRange.chartColumnName;
       tabs.push(
-        <Tab label={`${this.state.compareDateRange.chartColumnName} Categories`} />,
-        <Tab label={`${this.state.compareDateRange.chartColumnName} Uncategorized`} />,
+        <Tab key={`tab-${columnName}-cat`} label={`${columnName} Categories`} />,
+        <Tab key={`tab-${columnName}-cat`} label={`${columnName} Uncategorized`} />,
       );
       tabContents.push(
-        <div className={classes.renderedTree} hidden={this.state.tabIndex != 2}>
+        <div key={`tree-${columnName}`} className={classes.renderedTree} hidden={this.state.tabIndex != 2}>
           {compareRenderTree!}
         </div>,
-        <TransactionsTable classes={{root: classes.transactionsTable}} hidden={this.state.tabIndex != 3}>
+        <TransactionsTable key={`table-${columnName}`} classes={{root: classes.transactionsTable}} hidden={this.state.tabIndex != 3}>
           {compareUnmatchedTransactions.map(t => <Transaction transaction={t} key={t.id}/>)}
         </TransactionsTable>,
       );
     }
+
+    let chartData = this.buildChartDataTable(chartNodes, compareChartNodes);
 
     let drawerContents = <ReportFilterDrawer
         dateRange={this.state.dateRange}
