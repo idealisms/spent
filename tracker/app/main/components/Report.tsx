@@ -1,4 +1,4 @@
-import { createStyles, Drawer, Hidden, WithStyles } from '@material-ui/core';
+import { createStyles, Drawer, Hidden, Tab, Tabs, WithStyles } from '@material-ui/core';
 import { Theme, withStyles } from '@material-ui/core/styles';
 import classNames from 'classnames';
 import moment from 'moment';
@@ -29,8 +29,17 @@ const styles = (theme: Theme) => createStyles({
     alignItems: 'stretch',
   },
   content: {
-    flexGrow: 1,
+    width: 'calc(100% - 420px)',
+    flex: '0 1 100%',
+    display: 'flex',
+    flexDirection: 'column',
+  },
+  tables: {
     overflow: 'auto',
+    flex: '1 1 0',
+  },
+  tabs: {
+    backgroundColor: '#eee',
   },
   drawer: {
     width: 0,
@@ -47,7 +56,8 @@ const styles = (theme: Theme) => createStyles({
     },
   },
   drawerContentsContainer: {
-    width: '420px',
+    width: '419px',
+    borderLeft: '1px solid rgba(0, 0, 0, 0.12)',
   },
   drawerPaper: {
     width: '90%',
@@ -55,9 +65,7 @@ const styles = (theme: Theme) => createStyles({
     minWidth: '16px',
   },
   renderedTree: {
-    maxHeight: '600px',
     margin: '16px',
-    overflow: 'auto',
     '& > .row': {
       lineHeight: '24px',
       borderRadius: '4px',
@@ -107,6 +115,7 @@ type IReportProps = IReportOwnProps & IReportAppStateProps & IReportDispatchProp
 interface IReportState {
   dateRange: IDateRange;
   compareDateRange?: IDateRange;
+  tabIndex: number;
   categoriesPretty: string;
   isFilterDrawerOpen: boolean;
 }
@@ -124,6 +133,7 @@ class extends React.Component<IReportProps, IReportState> {
         startDate,
         endDate,
       },
+      tabIndex: 0,
       categoriesPretty: this.props.reportCategories.length
           ? JSON.stringify(this.props.reportCategories, null, 2)
           : LOADING_TEXT,
@@ -187,12 +197,28 @@ class extends React.Component<IReportProps, IReportState> {
           <div className={classes.content}>
             <ReportChart chartData={chartData} />
 
-            <div className={classes.renderedTree}>
-              {renderedTree}
+            <Tabs
+                className={classes.tabs}
+                value={this.state.tabIndex}
+                onChange={(event: React.ChangeEvent<{}>, tabIndex: number) => {
+                  this.setState({tabIndex});
+                }}
+                variant='fullWidth'
+                indicatorColor='primary'
+                textColor='primary'
+              >
+              <Tab label={`${this.state.dateRange.chartColumnName} Categories`} />
+              <Tab label={`${this.state.dateRange.chartColumnName} Not Categorized`} />
+            </Tabs>
+
+            <div className={classes.tables}>
+              <div className={classes.renderedTree} hidden={this.state.tabIndex != 0}>
+                {renderedTree}
+              </div>
+              <TransactionsTable classes={{root: classes.transactionsTable}} hidden={this.state.tabIndex != 1}>
+                {rows}
+              </TransactionsTable>
             </div>
-            <TransactionsTable classes={{root: classes.transactionsTable}}>
-              {rows}
-            </TransactionsTable>
           </div>
           <Hidden smUp>
             {/* Use a standard <Drawer> here for mobile. */}

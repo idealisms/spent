@@ -19,6 +19,8 @@ interface ITransactionsTableProps extends WithStyles<typeof styles> {
   lazyRender?: boolean;
   /** The index to scroll into view. */
   scrollToRow?: number;
+  /** If true, hides the component. */
+  hidden?: boolean;
 }
 interface ITransactionsTableState {
   containerHeight: number;
@@ -69,6 +71,7 @@ class extends React.Component<ITransactionsTableProps, ITransactionsTableState> 
     return (
         <div
             className={classes.root}
+            hidden={this.props.hidden}
             ref={(elt) => this.container = elt}
             onScroll={this.handleScroll}>
           {shouldRenderChildren && this.renderChildren()}
