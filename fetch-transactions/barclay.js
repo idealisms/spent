@@ -56,6 +56,20 @@ async function getFrameMatchingUrl(page, urlSubstring) {
   console.log('Finding login frame...');
   let loginFrame = await getFrameMatchingUrl(page, 'https://www.barclaycardus.com/servicing/authenticate/home');
 
+  if (!loginFrame) {
+    let hrefElement = await page.$x("//a[contains(text(), 'Cardmember Login')]");
+    if (hrefElement.length > 0) {
+      console.log(hrefElement[0]);
+      await hrefElement[0].click();
+      console.log('Trying to click "Cardmember login", waiting for login frame again.');
+      await page.screenshot({path: filenameGenerator.next().value});
+
+      loginFrame = await getFrameMatchingUrl(page, 'https://www.barclaycardus.com/servicing/authenticate/home');
+      await page.screenshot({path: filenameGenerator.next().value});
+      console.log('Login frame:', loginFrame);
+    }
+  }
+
   console.log('Logging in...');
   await loginFrame.waitForSelector('#username');
   await loginFrame.type('#username', config.BARCLAY.username);
