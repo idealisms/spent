@@ -62,6 +62,7 @@ def main():
     download(config.CHASE)
     # download(config.CHASE2)
     download(config.CHASE3)
+    download(config.CHASE4)
 
 
 if __name__ == '__main__':
