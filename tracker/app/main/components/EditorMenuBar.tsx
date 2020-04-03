@@ -130,13 +130,14 @@ class extends React.Component<IEditorMenuBarProps, IEditorMenuBarState> {
           </span>;
 
     return (
-        <MenuBarWithDrawer
-            classes={{appBar: numSelectedTransactions ? classes.appBarSelected
-                                                      : classes.appBar}}
-            title={title}
-            iconElementLeft={iconElementLeft}
-            iconElementRight={iconElementRight}
-        >
+        <React.Fragment>
+          <MenuBarWithDrawer
+              classes={{appBar: numSelectedTransactions ? classes.appBarSelected
+                                                        : classes.appBar}}
+              title={title}
+              iconElementLeft={iconElementLeft}
+              iconElementRight={iconElementRight}
+          />
           {this.state.isEditDialogOpen ?
             <Transactions.EditTransactionDialog
                 transaction={this.props.selectedTransactions!.values().next().value}
@@ -161,7 +162,7 @@ class extends React.Component<IEditorMenuBarProps, IEditorMenuBarState> {
                 onClose={() => this.setState({isSplitDialogOpen: false})}
                 onSaveChanges={this.props.onSelectedSplitSaveClick}
             /> : undefined}
-        </MenuBarWithDrawer>
+        </React.Fragment>
     );
   }
 

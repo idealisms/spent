@@ -144,7 +144,6 @@ const MenuBarWithDrawer = withStyles(styles)(
             </ListItem>
           </List>
         </Drawer>
-        {this.props.children}
       </div>
     );
   }
