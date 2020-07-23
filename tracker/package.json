@@ -5,11 +5,13 @@
   "main": "index.js",
   "license": "UNLICENSED",
   "scripts": {
+    "build:webpack:dev": "NODE_ENV=development webpack --mode=development --config config/webpack.dev.config.js  --progress --profile --colors",
     "build:webpack": "NODE_ENV=production webpack --mode=production --config config/webpack.prod.config.js  --progress --profile --colors",
     "build": "npm run clean && npm run build:webpack",
     "clean": "rimraf build",
     "deploy": "npm run build && scp -r build/* pi3:~/projects/quant/spent/",
     "start": "npm run clean && webpack-dev-server --mode=development --config config/webpack.dev.config.js --progress --profile --colors",
+    "start:deno": "deno run --allow-net --allow-read=build server/server.ts",
     "test": "npm run clean && jest",
     "test:watch": "npm test -- --watch"
   },

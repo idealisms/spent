@@ -18,6 +18,7 @@
     "build",
     "config",
     "node_modules",
-    "dev_server.js"
+    "dev_server.js",
+    "server"
   ]
 }
