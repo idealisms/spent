@@ -23,7 +23,7 @@ export function formatAmountNumber(amountCentsNumber: number): string {
   let numCommas = parseInt(
       ((dollars.length - 1) / 3).toString(), 10);
   for (let c = numCommas * 3; c > 0; c -= 3) {
-      dollars = `${dollars.substr(0, dollars.length - c)},${dollars.substr(dollars.length - c)}`;
+    dollars = `${dollars.substr(0, dollars.length - c)},${dollars.substr(dollars.length - c)}`;
   }
   let centsString = amountCents.substr(digits - 2);
   if (centsString.length == 1) {
@@ -31,7 +31,7 @@ export function formatAmountNumber(amountCentsNumber: number): string {
   }
   let amount = `${dollars}.${centsString}`;
   if (isNegative) {
-      amount = `(${amount})`;
+    amount = `(${amount})`;
   }
   return amount;
 }
@@ -122,16 +122,16 @@ export function categoryToEmoji(category: Category): string {
   }
 }
 
-export function generateUUID(crypto_: Crypto = crypto): string {
+export function generateUUID(crypto: Crypto = window.crypto): string {
   // From https://stackoverflow.com/a/8472700
   let buf = new Uint16Array(10);
-  crypto_.getRandomValues(buf);
+  crypto.getRandomValues(buf);
   let S4 = function(num: number): string {
-      let ret = num.toString(16);
-      while (ret.length < 4) {
-          ret = '0' + ret;
-      }
-      return ret;
+    let ret = num.toString(16);
+    while (ret.length < 4) {
+      ret = '0' + ret;
+    }
+    return ret;
   };
 
   // We can't use buf.map because it returns another Uint16Array, but

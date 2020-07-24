@@ -26,7 +26,29 @@ module.exports = {
         "@typescript-eslint/tslint"
     ],
     "rules": {
-        "@typescript-eslint/class-name-casing": "error",
+        "@typescript-eslint/naming-convention": [
+            "error",
+            {
+                "selector": "default",
+                "format": ["camelCase"]
+            },
+            {
+                "selector": "variable",
+                "format": ["camelCase", "UPPER_CASE"]
+            },
+            {
+                "selector": "class",
+                "format": ["PascalCase"],
+            },
+            {
+                "selector": "interface",
+                "format": ["PascalCase"],
+                "custom": {
+                    "regex": "^I[A-Z]",
+                    "match": true
+                }
+            }
+        ],
         "@typescript-eslint/dot-notation": "error",
         "@typescript-eslint/explicit-member-accessibility": [
             "error",
@@ -39,29 +61,19 @@ module.exports = {
             2,
             {
                 "CallExpression": {
-                    "arguments": "first"
+                    "arguments": 2
                 },
                 "FunctionDeclaration": {
-                    "parameters": "first"
+                    "parameters": 2
                 },
                 "FunctionExpression": {
-                    "parameters": "first"
-                }
+                    "parameters": 2
+                },
+                "SwitchCase": 1,
             }
         ],
-        "@typescript-eslint/interface-name-prefix": "error",
         "@typescript-eslint/member-delimiter-style": [
             "error",
-            {
-                "multiline": {
-                    "delimiter": "none",
-                    "requireLast": true
-                },
-                "singleline": {
-                    "delimiter": "semi",
-                    "requireLast": false
-                }
-            }
         ],
         "@typescript-eslint/member-ordering": "error",
         "@typescript-eslint/no-empty-function": "error",
@@ -101,9 +113,6 @@ module.exports = {
         "guard-for-in": "error",
         "id-blacklist": "off",
         "id-match": "off",
-        "jsdoc/check-alignment": "error",
-        "jsdoc/check-indentation": "error",
-        "jsdoc/newline-after-description": "error",
         "max-len": [
             "error",
             {
