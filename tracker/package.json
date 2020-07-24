@@ -14,7 +14,7 @@
     "start:deno": "deno run --allow-net --allow-read=build server/server.ts",
     "test": "npm run clean && jest",
     "test:watch": "npm test -- --watch",
-    "lint": "eslint -c .eslintrc.js --ext .ts app"
+    "lint": "eslint -c .eslintrc.js --ext .ts,.tsx app"
   },
   "bugs": {
     "url": "https://github.com/idealisms/spent/issues"

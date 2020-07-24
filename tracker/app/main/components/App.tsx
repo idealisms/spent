@@ -29,22 +29,22 @@ const NoMatch = () => (
 );
 
 const App = withStyles(styles)(
-class extends React.Component<object, object> {
-  public render(): React.ReactElement<object> {
+    class extends React.Component<object, object> {
+      public render(): React.ReactElement<object> {
 
-    return (
-        <Switch>
-          <Route exact path={Pages.HomePage}>
-            <Redirect to={Pages.DailyPage} />
-          </Route>
-          <Route exact path={Pages.DailyPage} component={Daily} />
-          <Route exact path={Pages.EditorPage} component={Editor} />
-          <Route exact path={Pages.MonthlyPage} component={Monthly} />
-          <Route exact path={Pages.ReportPage} component={Report} />
-          <Route component={NoMatch}/>
-        </Switch>
-      );
-  }
-});
+        return (
+          <Switch>
+            <Route exact path={Pages.HomePage}>
+              <Redirect to={Pages.DailyPage} />
+            </Route>
+            <Route exact path={Pages.DailyPage} component={Daily} />
+            <Route exact path={Pages.EditorPage} component={Editor} />
+            <Route exact path={Pages.MonthlyPage} component={Monthly} />
+            <Route exact path={Pages.ReportPage} component={Report} />
+            <Route component={NoMatch}/>
+          </Switch>
+        );
+      }
+    });
 
 export default App;

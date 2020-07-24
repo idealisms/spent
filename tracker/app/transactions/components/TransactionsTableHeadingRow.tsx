@@ -16,16 +16,16 @@ interface ITransactionsTableSumRowProps extends WithStyles<typeof rowStyles> {
 interface ITransactionsTableSumRowState {
 }
 const TransactionsTableHeadingRow = withStyles(rowStyles)(
-class extends React.Component<ITransactionsTableSumRowProps, ITransactionsTableSumRowState> {
+    class extends React.Component<ITransactionsTableSumRowProps, ITransactionsTableSumRowState> {
 
-  public render(): React.ReactElement<object> {
-    let classes = this.props.classes;
+      public render(): React.ReactElement<object> {
+        let classes = this.props.classes;
 
-    return (
-      <div className={classes.row}>
-        {this.props.children}
-      </div>);
-  }
-});
+        return (
+          <div className={classes.row}>
+            {this.props.children}
+          </div>);
+      }
+    });
 
 export default TransactionsTableHeadingRow;

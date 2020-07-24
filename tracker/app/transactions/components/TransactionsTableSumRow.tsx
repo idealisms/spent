@@ -27,40 +27,40 @@ interface ITransactionsTableSumRowProps extends WithStyles<typeof headerStyles> 
 interface ITransactionsTableSumRowState {
 }
 const TransactionsTableSumRow = withStyles(headerStyles)(
-class extends React.Component<ITransactionsTableSumRowProps, ITransactionsTableSumRowState> {
+    class extends React.Component<ITransactionsTableSumRowProps, ITransactionsTableSumRowState> {
 
-  public render(): React.ReactElement<object> {
-    let classes = this.props.classes;
+      public render(): React.ReactElement<object> {
+        let classes = this.props.classes;
 
-    let totalAmount = this.props.transactions.reduce(
-        (total, transaction) => total + transaction.amount_cents, 0);
-    let isCredit = totalAmount < 0;
-    let description = this.props.description || (
-        this.props.transactions.length == 1
+        let totalAmount = this.props.transactions.reduce(
+            (total, transaction) => total + transaction.amount_cents, 0);
+        let isCredit = totalAmount < 0;
+        let description = this.props.description || (
+          this.props.transactions.length == 1
             ? '1 transaction'
             : `${this.props.transactions.length} transactions`);
-    return (
-      <div
-          className={classes.row}>
-        <div className={classes.date}><span className='y'>2000-</span>01-01</div>
-        <div className={classes.amount + (isCredit ? ' credit' : '')}>{formatAmountNumber(totalAmount)}</div>
-        {this.props.onSelectAllClick
-          ? <div
+        return (
+          <div
+            className={classes.row}>
+            <div className={classes.date}><span className='y'>2000-</span>01-01</div>
+            <div className={classes.amount + (isCredit ? ' credit' : '')}>{formatAmountNumber(totalAmount)}</div>
+            {this.props.onSelectAllClick
+              ? <div
                 className={classes.category + ' editable'}
                 title='Select All'
                 onClick={this.handleSelectAllClick}>
-              {this.props.selectAllChecked ? <CheckBoxIcon /> : <CheckBoxOutlineBlankIcon />}
-            </div>
-          : <div className={classes.category}></div>}
-        <div className={classes.description}>{description}</div>
-    </div>);
-  }
+                {this.props.selectAllChecked ? <CheckBoxIcon /> : <CheckBoxOutlineBlankIcon />}
+              </div>
+              : <div className={classes.category}></div>}
+            <div className={classes.description}>{description}</div>
+          </div>);
+      }
 
-  private handleSelectAllClick = (): void => {
-    if (this.props.onSelectAllClick) {
-      this.props.onSelectAllClick(!this.props.selectAllChecked);
-    }
-  }
-});
+      private handleSelectAllClick = (): void => {
+        if (this.props.onSelectAllClick) {
+          this.props.onSelectAllClick(!this.props.selectAllChecked);
+        }
+      };
+    });
 
 export default TransactionsTableSumRow;

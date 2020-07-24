@@ -93,10 +93,10 @@ const styles = (theme: Theme) => createStyles({
   },
 });
 type ReportRenderNode = {
-  reportNode: IReportNode,
-  amountCents: number,
-  transactions: ITransaction[],
-  subcategories: ReportRenderNode[],
+  reportNode: IReportNode;
+  amountCents: number;
+  transactions: ITransaction[];
+  subcategories: ReportRenderNode[];
 };
 
 interface IReportOwnProps extends WithStyles<typeof styles> {
@@ -121,289 +121,289 @@ interface IReportState {
   isFilterDrawerOpen: boolean;
 }
 const Report = withStyles(styles)(
-class extends React.Component<IReportProps, IReportState> {
-  constructor(props: IReportProps, context?: any) {
-    super(props, context);
-    let startDate = moment().year(moment().year() - 1).month(0).date(1).startOf('day');
-    let endDate = moment().year(moment().year() - 1).month(11).date(31).startOf('day');
+    class extends React.Component<IReportProps, IReportState> {
+      constructor(props: IReportProps, context?: any) {
+        super(props, context);
+        let startDate = moment().year(moment().year() - 1).month(0).date(1).startOf('day');
+        let endDate = moment().year(moment().year() - 1).month(11).date(31).startOf('day');
 
-    this.state = {
-      dateRange: {
-        name: 'lastyear',
-        chartColumnName: endDate.year().toString(),
-        startDate,
-        endDate,
-      },
-      tabIndex: 0,
-      categoriesPretty: this.props.reportCategories.length
-          ? JSON.stringify(this.props.reportCategories, null, 2)
-          : LOADING_TEXT,
-      isFilterDrawerOpen: false,
-    };
-    this.props.fetchSettings();
-    this.props.fetchTransactions();
-  }
+        this.state = {
+          dateRange: {
+            name: 'lastyear',
+            chartColumnName: endDate.year().toString(),
+            startDate,
+            endDate,
+          },
+          tabIndex: 0,
+          categoriesPretty: this.props.reportCategories.length
+            ? JSON.stringify(this.props.reportCategories, null, 2)
+            : LOADING_TEXT,
+          isFilterDrawerOpen: false,
+        };
+        this.props.fetchSettings();
+        this.props.fetchTransactions();
+      }
 
-  public componentDidUpdate(prevProps: IReportProps): void {
-    // Update the editable textarea once settings load.
-    if (this.state.categoriesPretty == LOADING_TEXT && this.props.reportCategories) {
-      this.setState({
-        categoriesPretty: JSON.stringify(this.props.reportCategories, null, 2),
-      });
-    }
-  }
+      public componentDidUpdate(prevProps: IReportProps): void {
+        // Update the editable textarea once settings load.
+        if (this.state.categoriesPretty == LOADING_TEXT && this.props.reportCategories) {
+          this.setState({
+            categoriesPretty: JSON.stringify(this.props.reportCategories, null, 2),
+          });
+        }
+      }
 
-  public render(): React.ReactElement<object> {
-    let classes = this.props.classes;
-    let filteredTransactions = TransactionUtils.filterTransactionsByDate(
-        this.props.transactions, this.state.dateRange.startDate.toDate(),
-        this.state.dateRange.endDate.toDate());
-    let [unmatchedTransactions, renderedTree, chartNodes] = this.buildTree(filteredTransactions);
+      public render(): React.ReactElement<object> {
+        let classes = this.props.classes;
+        let filteredTransactions = TransactionUtils.filterTransactionsByDate(
+            this.props.transactions, this.state.dateRange.startDate.toDate(),
+            this.state.dateRange.endDate.toDate());
+        let [unmatchedTransactions, renderedTree, chartNodes] = this.buildTree(filteredTransactions);
 
-    let compareUnmatchedTransactions: ITransaction[] = [];
-    let compareRenderTree: JSX.Element;
-    let compareChartNodes: IChartNode[] = [];
-    if (this.state.compareDateRange) {
-      filteredTransactions = TransactionUtils.filterTransactionsByDate(
-          this.props.transactions, this.state.compareDateRange.startDate.toDate(),
-          this.state.compareDateRange.endDate.toDate());
-      [compareUnmatchedTransactions, compareRenderTree, compareChartNodes] = this.buildTree(filteredTransactions);
-    }
+        let compareUnmatchedTransactions: ITransaction[] = [];
+        let compareRenderTree: JSX.Element;
+        let compareChartNodes: IChartNode[] = [];
+        if (this.state.compareDateRange) {
+          filteredTransactions = TransactionUtils.filterTransactionsByDate(
+              this.props.transactions, this.state.compareDateRange.startDate.toDate(),
+              this.state.compareDateRange.endDate.toDate());
+          [compareUnmatchedTransactions, compareRenderTree, compareChartNodes] = this.buildTree(filteredTransactions);
+        }
 
-    let columnName = this.state.dateRange.chartColumnName;
-    let tabs = [
-      <Tab key={`tab-${columnName}-cat`} label={`${columnName} Categories`} />,
-      <Tab key={`tab-${columnName}-uncat`} label={`${columnName} Uncategorized`} />,
-    ];
+        let columnName = this.state.dateRange.chartColumnName;
+        let tabs = [
+          <Tab key={`tab-${columnName}-cat`} label={`${columnName} Categories`} />,
+          <Tab key={`tab-${columnName}-uncat`} label={`${columnName} Uncategorized`} />,
+        ];
 
-    let tabContents = [
-      <div key={`tree-${columnName}`} className={classes.renderedTree} hidden={this.state.tabIndex != 0}>
-        {renderedTree}
-      </div>,
-      <TransactionsTable key={`table-${columnName}`} classes={{root: classes.transactionsTable}} hidden={this.state.tabIndex != 1}>
-        {unmatchedTransactions.map(t => <Transaction transaction={t} key={t.id}/>)}
-      </TransactionsTable>,
-    ];
+        let tabContents = [
+          <div key={`tree-${columnName}`} className={classes.renderedTree} hidden={this.state.tabIndex != 0}>
+            {renderedTree}
+          </div>,
+          <TransactionsTable key={`table-${columnName}`} classes={{root: classes.transactionsTable}} hidden={this.state.tabIndex != 1}>
+            {unmatchedTransactions.map(t => <Transaction transaction={t} key={t.id}/>)}
+          </TransactionsTable>,
+        ];
 
-    if (this.state.compareDateRange) {
-      columnName = this.state.compareDateRange.chartColumnName;
-      tabs.push(
-        <Tab key={`tab-${columnName}-cat`} label={`${columnName} Categories`} />,
-        <Tab key={`tab-${columnName}-cat`} label={`${columnName} Uncategorized`} />,
-      );
-      tabContents.push(
-        <div key={`tree-${columnName}`} className={classes.renderedTree} hidden={this.state.tabIndex != 2}>
-          {compareRenderTree!}
-        </div>,
-        <TransactionsTable key={`table-${columnName}`} classes={{root: classes.transactionsTable}} hidden={this.state.tabIndex != 3}>
-          {compareUnmatchedTransactions.map(t => <Transaction transaction={t} key={t.id}/>)}
-        </TransactionsTable>,
-      );
-    }
+        if (this.state.compareDateRange) {
+          columnName = this.state.compareDateRange.chartColumnName;
+          tabs.push(
+              <Tab key={`tab-${columnName}-cat`} label={`${columnName} Categories`} />,
+              <Tab key={`tab-${columnName}-cat`} label={`${columnName} Uncategorized`} />,
+          );
+          tabContents.push(
+              <div key={`tree-${columnName}`} className={classes.renderedTree} hidden={this.state.tabIndex != 2}>
+                {compareRenderTree!}
+              </div>,
+              <TransactionsTable key={`table-${columnName}`} classes={{root: classes.transactionsTable}} hidden={this.state.tabIndex != 3}>
+                {compareUnmatchedTransactions.map(t => <Transaction transaction={t} key={t.id}/>)}
+              </TransactionsTable>,
+          );
+        }
 
-    let chartData = this.buildChartDataTable(chartNodes, compareChartNodes);
+        let chartData = this.buildChartDataTable(chartNodes, compareChartNodes);
 
-    let drawerContents = <ReportFilterDrawer
-        dateRange={this.state.dateRange}
-        compareDateRange={this.state.compareDateRange}
-        settingsCloudState={this.props.settingsCloudState}
-        saveSettings={this.props.saveSettings}
-        categoriesPretty={this.state.categoriesPretty}
-        updateReportCategories={this.props.updateReportCategories}
-        setDate={(dateRange, compareDateRange) => {
+        let drawerContents = <ReportFilterDrawer
+          dateRange={this.state.dateRange}
+          compareDateRange={this.state.compareDateRange}
+          settingsCloudState={this.props.settingsCloudState}
+          saveSettings={this.props.saveSettings}
+          categoriesPretty={this.state.categoriesPretty}
+          updateReportCategories={this.props.updateReportCategories}
+          setDate={(dateRange, compareDateRange) => {
             let tabIndex = !compareDateRange && this.state.tabIndex >= 2 ? 0 : this.state.tabIndex;
             this.setState({
-                dateRange,
-                compareDateRange,
-                tabIndex,
+              dateRange,
+              compareDateRange,
+              tabIndex,
             });
           }}
-        setCategoriesPretty={(categoriesPretty) => this.setState({categoriesPretty})}
-       />;
-    return (
-      <div className={classes.root}>
-        <ReportMenuBar
-          onFilterClick={() => this.setState({isFilterDrawerOpen: !this.state.isFilterDrawerOpen})}
-        />
+          setCategoriesPretty={(categoriesPretty) => this.setState({categoriesPretty})}
+        />;
+        return (
+          <div className={classes.root}>
+            <ReportMenuBar
+              onFilterClick={() => this.setState({isFilterDrawerOpen: !this.state.isFilterDrawerOpen})}
+            />
 
-        <div className={classes.contentAndDrawerContainer}>
-          <div className={classes.content}>
-            <ReportChart chartData={chartData} />
+            <div className={classes.contentAndDrawerContainer}>
+              <div className={classes.content}>
+                <ReportChart chartData={chartData} />
 
-            <Tabs
-                className={classes.tabs}
-                value={this.state.tabIndex}
-                onChange={(event: React.ChangeEvent<{}>, tabIndex: number) => {
-                  this.setState({tabIndex});
-                }}
-                variant='scrollable'
-                scrollButtons='auto'
-                indicatorColor='primary'
-                textColor='primary'>
-              {tabs}
-            </Tabs>
+                <Tabs
+                  className={classes.tabs}
+                  value={this.state.tabIndex}
+                  onChange={(event: React.ChangeEvent<{}>, tabIndex: number) => {
+                    this.setState({tabIndex});
+                  }}
+                  variant='scrollable'
+                  scrollButtons='auto'
+                  indicatorColor='primary'
+                  textColor='primary'>
+                  {tabs}
+                </Tabs>
 
-            <div className={classes.tables}>
-              {tabContents}
+                <div className={classes.tables}>
+                  {tabContents}
+                </div>
+              </div>
+              <Hidden smUp>
+                {/* Use a standard <Drawer> here for mobile. */}
+                <Drawer
+                  anchor='right'
+                  classes={{paper: classes.drawerPaper}}
+                  open={this.state.isFilterDrawerOpen}
+                  onClose={() => this.setState({isFilterDrawerOpen: false})}>
+                  {drawerContents}
+                </Drawer>
+              </Hidden>
+              <Hidden xsDown>
+                <div className={classNames(classes.drawer, this.state.isFilterDrawerOpen && 'open')}>
+                  <div className={classes.drawerContentsContainer}>
+                    {drawerContents}
+                  </div>
+                </div>
+              </Hidden>
             </div>
           </div>
-          <Hidden smUp>
-            {/* Use a standard <Drawer> here for mobile. */}
-            <Drawer
-                anchor='right'
-                classes={{paper: classes.drawerPaper}}
-                open={this.state.isFilterDrawerOpen}
-                onClose={() => this.setState({isFilterDrawerOpen: false})}>
-              {drawerContents}
-            </Drawer>
-          </Hidden>
-          <Hidden xsDown>
-            <div className={classNames(classes.drawer, this.state.isFilterDrawerOpen && 'open')}>
-              <div className={classes.drawerContentsContainer}>
-                {drawerContents}
-              </div>
-            </div>
-          </Hidden>
-        </div>
-      </div>
-    );
-  }
+        );
+      }
 
-  // Builds the tree to be rendered.
-  private buildTree = (transactions: ITransaction[]): [ITransaction[], JSX.Element, IChartNode[]] => {
-    if (!this.props.reportCategories.length) {
-      return [[], <div key='loading'>Loading...</div>, []];
-    }
+      // Builds the tree to be rendered.
+      private buildTree = (transactions: ITransaction[]): [ITransaction[], JSX.Element, IChartNode[]] => {
+        if (!this.props.reportCategories.length) {
+          return [[], <div key='loading'>Loading...</div>, []];
+        }
 
-    let startTime = window.performance.now();
-    let output: JSX.Element[] = [];
-    const buildRenderTree = (reportNodes: IReportNode[]): ReportRenderNode[] => {
-      reportNodes = reportNodes || [];
-      let renderNodes: ReportRenderNode[] = [];
-      for (let reportNode of reportNodes) {
-        let reportRenderNode: ReportRenderNode = {
-          reportNode: reportNode,
-          amountCents: 0,
-          transactions: [],
-          subcategories: buildRenderTree(reportNode.subcategories),
+        let startTime = window.performance.now();
+        let output: JSX.Element[] = [];
+        const buildRenderTree = (reportNodes: IReportNode[]): ReportRenderNode[] => {
+          reportNodes = reportNodes || [];
+          let renderNodes: ReportRenderNode[] = [];
+          for (let reportNode of reportNodes) {
+            let reportRenderNode: ReportRenderNode = {
+              reportNode: reportNode,
+              amountCents: 0,
+              transactions: [],
+              subcategories: buildRenderTree(reportNode.subcategories),
+            };
+            renderNodes.push(reportRenderNode);
+          }
+          return renderNodes;
         };
-        renderNodes.push(reportRenderNode);
-      }
-      return renderNodes;
-    };
-    let reportRenderNodes = buildRenderTree(this.props.reportCategories);
+        let reportRenderNodes = buildRenderTree(this.props.reportCategories);
 
-    let tagToRootReportRenderNode: Map<string, ReportRenderNode> = new Map();
-    for (let renderNode of reportRenderNodes) {
-      if (!renderNode.reportNode.tags) {
-        continue;
-      }
-      for (let tag of renderNode.reportNode.tags) {
-        if (tagToRootReportRenderNode.has(tag)) {
-          return [
-              [],
-              <div>Error, tag appears twice.
-                {tag} in {tagToRootReportRenderNode.get(tag)!.reportNode.title}
+        let tagToRootReportRenderNode: Map<string, ReportRenderNode> = new Map();
+        for (let renderNode of reportRenderNodes) {
+          if (!renderNode.reportNode.tags) {
+            continue;
+          }
+          for (let tag of renderNode.reportNode.tags) {
+            if (tagToRootReportRenderNode.has(tag)) {
+              return [
+                [],
+                <div>Error, tag appears twice.
+                  {tag} in {tagToRootReportRenderNode.get(tag)!.reportNode.title}
                 and {renderNode.reportNode.title}.
-              </div>,
-              []];
-        }
-        tagToRootReportRenderNode.set(tag, renderNode);
-      }
-    }
-
-    const addTransactionToRenderNode = (transaction: ITransaction, node: ReportRenderNode): void => {
-      node.transactions.push(transaction);
-      node.amountCents += transaction.amount_cents;
-      let subnodes = [];
-      for (let subnode of node.subcategories) {
-        if (!subnode.reportNode.tags) {
-          continue;
-        }
-        for (let tag of subnode.reportNode.tags) {
-          if (transaction.tags.indexOf(tag) != -1) {
-            subnodes.push(subnode);
-            break;
+                </div>,
+                []];
+            }
+            tagToRootReportRenderNode.set(tag, renderNode);
           }
         }
-      }
-      if (subnodes.length > 1) {
-        output.push(<div key={transaction.id}>
+
+        const addTransactionToRenderNode = (transaction: ITransaction, node: ReportRenderNode): void => {
+          node.transactions.push(transaction);
+          node.amountCents += transaction.amount_cents;
+          let subnodes = [];
+          for (let subnode of node.subcategories) {
+            if (!subnode.reportNode.tags) {
+              continue;
+            }
+            for (let tag of subnode.reportNode.tags) {
+              if (transaction.tags.indexOf(tag) != -1) {
+                subnodes.push(subnode);
+                break;
+              }
+            }
+          }
+          if (subnodes.length > 1) {
+            output.push(<div key={transaction.id}>
             Multiple subnodes of {node.reportNode.title}: {transaction.description} ({transaction.tags.join(', ')})</div>);
-      } else if (subnodes.length == 1) {
-        addTransactionToRenderNode(transaction, subnodes[0]);
-      }
-    };
-
-    let unmatchedTransactions: ITransaction[] = [];
-    let multipleCategoriesTransactions: ITransaction[] = [];
-    for (let transaction of transactions) {
-      let renderNodes = [];
-      for (let tag of transaction.tags) {
-        let node = tagToRootReportRenderNode.get(tag);
-        if (node && renderNodes.indexOf(node) == -1) {
-          renderNodes.push(node);
-        }
-      }
-      if (!renderNodes.length) {
-        unmatchedTransactions.push(transaction);
-      } else if (renderNodes.length > 1) {
-        multipleCategoriesTransactions.push(transaction);
-      } else {
-        addTransactionToRenderNode(transaction, renderNodes[0]);
-      }
-    }
-
-    // console.log(ReportRenderNodes);
-
-    let buildTime = window.performance.now();
-    let outputChartData: IChartNode[] = [];
-    const buildDom = (
-        renderNodes: ReportRenderNode[], depth: number, outputDom: JSX.Element[], chartData: IChartNode[]): void => {
-      renderNodes.sort((lhs, rhs) => {
-        if (lhs.amountCents == rhs.amountCents) {
-          return 0;
-        }
-        return lhs.amountCents > rhs.amountCents ? -1 : 1;
-      });
-      for (let renderNode of renderNodes) {
-        outputDom.push(
-            <div
-                key={`${renderNode.reportNode.title}-${renderNode.amountCents}`}
-                className='row'
-                style={{marginLeft: (depth * 32) + 'px'}}>
-              <span className='amount'>${TransactionUtils.formatAmountNumber(renderNode.amountCents)}</span>
-              {renderNode.reportNode.title} from {renderNode.transactions.length} transaction(s)
-            </div>);
-        let chartDatum = {
-          title: renderNode.reportNode.title,
-          amount_cents: renderNode.amountCents,
-          subcategories: [],
+          } else if (subnodes.length == 1) {
+            addTransactionToRenderNode(transaction, subnodes[0]);
+          }
         };
-        chartData.push(chartDatum);
-        buildDom(renderNode.subcategories, depth + 1, outputDom, chartDatum.subcategories);
-      }
-    };
-    buildDom(reportRenderNodes, 0, output, outputChartData);
 
-    let total = 0;
-    for (let chartData of outputChartData) {
-      total += chartData.amount_cents;
-    }
+        let unmatchedTransactions: ITransaction[] = [];
+        let multipleCategoriesTransactions: ITransaction[] = [];
+        for (let transaction of transactions) {
+          let renderNodes = [];
+          for (let tag of transaction.tags) {
+            let node = tagToRootReportRenderNode.get(tag);
+            if (node && renderNodes.indexOf(node) == -1) {
+              renderNodes.push(node);
+            }
+          }
+          if (!renderNodes.length) {
+            unmatchedTransactions.push(transaction);
+          } else if (renderNodes.length > 1) {
+            multipleCategoriesTransactions.push(transaction);
+          } else {
+            addTransactionToRenderNode(transaction, renderNodes[0]);
+          }
+        }
 
-    let domTime = window.performance.now();
-    return [
-      unmatchedTransactions,
-      <React.Fragment>
-        <div className='total'>${TransactionUtils.formatAmountNumber(total)}</div>
-        {output}
-        <div className='info'>Build time: {(buildTime - startTime).toFixed(2)}ms</div>
-        <div className='info'>DOM time: {(domTime - buildTime).toFixed(2)}ms</div>
-      </React.Fragment>,
-      outputChartData];
-  }
+        // console.log(ReportRenderNodes);
 
-  private buildChartDataTable = (chartData: IChartNode[], compareChartData: IChartNode[]) => {
+        let buildTime = window.performance.now();
+        let outputChartData: IChartNode[] = [];
+        const buildDom = (
+            renderNodes: ReportRenderNode[], depth: number, outputDom: JSX.Element[], chartData: IChartNode[]): void => {
+          renderNodes.sort((lhs, rhs) => {
+            if (lhs.amountCents == rhs.amountCents) {
+              return 0;
+            }
+            return lhs.amountCents > rhs.amountCents ? -1 : 1;
+          });
+          for (let renderNode of renderNodes) {
+            outputDom.push(
+                <div
+                  key={`${renderNode.reportNode.title}-${renderNode.amountCents}`}
+                  className='row'
+                  style={{marginLeft: (depth * 32) + 'px'}}>
+                  <span className='amount'>${TransactionUtils.formatAmountNumber(renderNode.amountCents)}</span>
+                  {renderNode.reportNode.title} from {renderNode.transactions.length} transaction(s)
+                </div>);
+            let chartDatum = {
+              title: renderNode.reportNode.title,
+              amount_cents: renderNode.amountCents,
+              subcategories: [],
+            };
+            chartData.push(chartDatum);
+            buildDom(renderNode.subcategories, depth + 1, outputDom, chartDatum.subcategories);
+          }
+        };
+        buildDom(reportRenderNodes, 0, output, outputChartData);
+
+        let total = 0;
+        for (let chartData of outputChartData) {
+          total += chartData.amount_cents;
+        }
+
+        let domTime = window.performance.now();
+        return [
+          unmatchedTransactions,
+          <React.Fragment>
+            <div className='total'>${TransactionUtils.formatAmountNumber(total)}</div>
+            {output}
+            <div className='info'>Build time: {(buildTime - startTime).toFixed(2)}ms</div>
+            <div className='info'>DOM time: {(domTime - buildTime).toFixed(2)}ms</div>
+          </React.Fragment>,
+          outputChartData];
+      };
+
+      private buildChartDataTable = (chartData: IChartNode[], compareChartData: IChartNode[]) => {
     type DataCell = string | number;
     type DataRow = [DataCell, DataCell, DataCell?];
     let data: DataRow[] = [];
@@ -452,8 +452,8 @@ class extends React.Component<IReportProps, IReportState> {
     }
 
     return data;
-  }
-});
+      };
+    });
 
 const mapStateToProps = (state: IAppState): IReportAppStateProps => ({
   reportCategories: state.settings.settings.reportCategories,

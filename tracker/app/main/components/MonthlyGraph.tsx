@@ -21,14 +21,14 @@ interface IMonthlyGraphProps extends WithStyles<typeof styles> {
 interface IMonthlyGraphState {
 }
 const MonthlyGraph = withStyles(styles)(
-class extends React.Component<IMonthlyGraphProps, IMonthlyGraphState> {
+    class extends React.Component<IMonthlyGraphProps, IMonthlyGraphState> {
 
-  public render(): React.ReactElement<object> {
-    let classes = this.props.classes;
+      public render(): React.ReactElement<object> {
+        let classes = this.props.classes;
 
-    return (
-        <div className={classes.root}>
-          <Chart
+        return (
+          <div className={classes.root}>
+            <Chart
               chartType='ComboChart'
               columns={[
                 {label: 'Date', type: 'date'},
@@ -65,8 +65,8 @@ class extends React.Component<IMonthlyGraphProps, IMonthlyGraphState> {
               width='auto'
               height='100%'
             />
-        </div>);
-  }
-});
+          </div>);
+      }
+    });
 
 export default MonthlyGraph;

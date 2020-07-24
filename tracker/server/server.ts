@@ -1,4 +1,4 @@
-import { Application, send } from "https://deno.land/x/oak/mod.ts";
+import { Application, send } from 'https://deno.land/x/oak/mod.ts';
 
 // Valid paths for our single page app.
 const paths = [
@@ -24,13 +24,13 @@ app.use(async (ctx) => {
   const path = paths.indexOf(ctx.request.url.pathname) != -1 ? '/' : ctx.request.url.pathname;
   await send(ctx, path, {
     root: './build',
-    index: "index.html",
+    index: 'index.html',
   });
 });
 
 
 app.use((ctx) => {
-  ctx.response.body = "not found";
+  ctx.response.body = 'not found';
 });
 
 await app.listen({ port: 8000 });

@@ -43,86 +43,86 @@ interface IMergeTransactionDialogState {
   transactions: ITransaction[];
 }
 const MergeTransactionDialog = withStyles(styles)(
-class extends React.Component<IMergeTransactionDialogProps, IMergeTransactionDialogState> {
+    class extends React.Component<IMergeTransactionDialogProps, IMergeTransactionDialogState> {
 
-  constructor(props: IMergeTransactionDialogProps, context?: any) {
-    super(props, context);
-    let sortedTransactions = [...props.transactions];
-    sortedTransactions.sort(compareTransactions);
-    this.state = {
-      transactions: sortedTransactions,
-    };
-  }
+      constructor(props: IMergeTransactionDialogProps, context?: any) {
+        super(props, context);
+        let sortedTransactions = [...props.transactions];
+        sortedTransactions.sort(compareTransactions);
+        this.state = {
+          transactions: sortedTransactions,
+        };
+      }
 
-  public render(): React.ReactElement<object> {
-    let classes = this.props.classes;
-    let rows: JSX.Element[] = [];
-    for (let transaction of this.state.transactions) {
-      let label =
+      public render(): React.ReactElement<object> {
+        let classes = this.props.classes;
+        let rows: JSX.Element[] = [];
+        for (let transaction of this.state.transactions) {
+          let label =
           <TransactionsTable>
             <Transaction
-                transaction={transaction}
-                hideDate
-                hideTags
-                classes={{
-                    row: classes.transactionRow,
-                    description: classes.transactionDescription,
-                    amount: classes.transactionAmount,
-                }} />
+              transaction={transaction}
+              hideDate
+              hideTags
+              classes={{
+                row: classes.transactionRow,
+                description: classes.transactionDescription,
+                amount: classes.transactionAmount,
+              }} />
           </TransactionsTable>;
-      rows.push(
-          <FormControlLabel
-              key={'radio-' + transaction.id}
-              value={transaction.id}
-              label={label}
-              control={<Radio color='primary'/>}
-              className={classes.mergeRadioButton} />,
-      );
-    }
+          rows.push(
+              <FormControlLabel
+                key={'radio-' + transaction.id}
+                value={transaction.id}
+                label={label}
+                control={<Radio color='primary'/>}
+                className={classes.mergeRadioButton} />,
+          );
+        }
 
-    return <Dialog
-            open
-            onClose={this.props.onClose}
-            scroll='paper'>
-        <DialogTitle>{'Choose transaction to merge into'}</DialogTitle>
-        <DialogContent>
-        <RadioGroup
-            name='merge-group'
-            onChange={(event: any, transactionId: string) => this.handleChangeSelection(transactionId)}>
-          {rows}
-        </RadioGroup>
-        </DialogContent>
-        <DialogActions>
-          <Button color='primary' onClick={this.props.onClose}>Cancel</Button>
-          <Button
+        return <Dialog
+          open
+          onClose={this.props.onClose}
+          scroll='paper'>
+          <DialogTitle>{'Choose transaction to merge into'}</DialogTitle>
+          <DialogContent>
+            <RadioGroup
+              name='merge-group'
+              onChange={(event: any, transactionId: string) => this.handleChangeSelection(transactionId)}>
+              {rows}
+            </RadioGroup>
+          </DialogContent>
+          <DialogActions>
+            <Button color='primary' onClick={this.props.onClose}>Cancel</Button>
+            <Button
               color='primary'
               disabled={!this.state.selectedTransactionId}
               onClick={() => this.handleMerge() }>
             Merge
-          </Button>
-        </DialogActions>
-      </Dialog>;
-  }
-
-  private handleChangeSelection(transactionId: string): void {
-    this.setState({
-      selectedTransactionId: transactionId,
-    });
-  }
-
-  private handleMerge(): void {
-    let selectedTransaction: ITransaction | undefined = undefined;
-    for (let transaction of this.state.transactions) {
-      if (transaction.id == this.state.selectedTransactionId) {
-        selectedTransaction = transaction;
+            </Button>
+          </DialogActions>
+        </Dialog>;
       }
-    }
-    if (selectedTransaction) {
-      this.props.onSaveChanges(selectedTransaction);
-    }
 
-    this.props.onClose();
-  }
-});
+      private handleChangeSelection(transactionId: string): void {
+        this.setState({
+          selectedTransactionId: transactionId,
+        });
+      }
+
+      private handleMerge(): void {
+        let selectedTransaction: ITransaction | undefined = undefined;
+        for (let transaction of this.state.transactions) {
+          if (transaction.id == this.state.selectedTransactionId) {
+            selectedTransaction = transaction;
+          }
+        }
+        if (selectedTransaction) {
+          this.props.onSaveChanges(selectedTransaction);
+        }
+
+        this.props.onClose();
+      }
+    });
 
 export default MergeTransactionDialog;

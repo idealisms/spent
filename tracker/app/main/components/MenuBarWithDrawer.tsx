@@ -75,88 +75,88 @@ interface IMenuBarWithDrawerState {
 }
 
 const MenuBarWithDrawer = withStyles(styles)(
-  class extends React.Component<IMenuBarWithDrawerProps, IMenuBarWithDrawerState> {
+    class extends React.Component<IMenuBarWithDrawerProps, IMenuBarWithDrawerState> {
 
-  constructor(props: IMenuBarWithDrawerProps, context?: any) {
-    super(props, context);
-    this.state = {
-      isDrawerOpen: false,
-    };
-  }
+      constructor(props: IMenuBarWithDrawerProps, context?: any) {
+        super(props, context);
+        this.state = {
+          isDrawerOpen: false,
+        };
+      }
 
-  public render(): JSX.Element {
-    let classes = this.props.classes;
-    let selectedPage = this.props.location && this.props.location.pathname;
-    return (
-      <div className={classes.root}>
-        <AppBar position='static' className={classes.appBar}>
-          <Toolbar>
-            {this.props.iconElementLeft
-              ? this.props.iconElementLeft
-              : <IconButton className={classes.whiteIconButton} onClick={() => {
-                  this.handleToggle();
-                }}>
-                  <MenuIcon />
-                </IconButton>}
-            <Typography variant='h6' className={classes.grow} color='inherit'>{this.props.title}</Typography>
-            {this.props.iconElementRight}
-          </Toolbar>
-        </AppBar>
+      public render(): JSX.Element {
+        let classes = this.props.classes;
+        let selectedPage = this.props.location && this.props.location.pathname;
+        return (
+          <div className={classes.root}>
+            <AppBar position='static' className={classes.appBar}>
+              <Toolbar>
+                {this.props.iconElementLeft
+                  ? this.props.iconElementLeft
+                  : <IconButton className={classes.whiteIconButton} onClick={() => {
+                    this.handleToggle();
+                  }}>
+                    <MenuIcon />
+                  </IconButton>}
+                <Typography variant='h6' className={classes.grow} color='inherit'>{this.props.title}</Typography>
+                {this.props.iconElementRight}
+              </Toolbar>
+            </AppBar>
 
-        <Drawer classes={{paper: classes.drawerPaper}}  open={this.state.isDrawerOpen}
-            onClose={() => this.setState({isDrawerOpen: false})}>
-          <div className={classes.drawerHeader}>
-            <div className={classes.drawerHeaderIcon}>📈</div>
-            <Typography variant='h6' color='inherit'>Spent</Typography>
+            <Drawer classes={{paper: classes.drawerPaper}}  open={this.state.isDrawerOpen}
+              onClose={() => this.setState({isDrawerOpen: false})}>
+              <div className={classes.drawerHeader}>
+                <div className={classes.drawerHeaderIcon}>📈</div>
+                <Typography variant='h6' color='inherit'>Spent</Typography>
+              </div>
+              <List>
+                <ListItem
+                  key='Daily'
+                  button
+                  selected={selectedPage === Pages.DailyPage}
+                  onClick={() => this.handleNavigate(Pages.DailyPage)}>
+                  <ListItemIcon><TimelineIcon color={selectedPage === Pages.DailyPage ? 'primary' : 'inherit'} /></ListItemIcon>
+                  <ListItemText classes={{primary: classes.drawerItemText}} primary='Daily' />
+                </ListItem>
+                <ListItem
+                  key='Monthly'
+                  button
+                  selected={selectedPage === Pages.MonthlyPage}
+                  onClick={() => this.handleNavigate(Pages.MonthlyPage)}>
+                  <ListItemIcon><BarChartIcon color={selectedPage === Pages.MonthlyPage ? 'primary' : 'inherit'} /></ListItemIcon>
+                  <ListItemText classes={{primary: classes.drawerItemText}} primary='Monthly' />
+                </ListItem>
+                <ListItem
+                  key='Editor'
+                  button
+                  selected={selectedPage === Pages.EditorPage}
+                  onClick={() => this.handleNavigate(Pages.EditorPage)}>
+                  <ListItemIcon><EditIcon color={selectedPage === Pages.EditorPage ? 'primary' : 'inherit'} /></ListItemIcon>
+                  <ListItemText classes={{primary: classes.drawerItemText}} primary='Editor' />
+                </ListItem>
+                <ListItem
+                  key='Report'
+                  button
+                  selected={selectedPage === Pages.ReportPage}
+                  onClick={() => this.handleNavigate(Pages.ReportPage)}>
+                  <ListItemIcon><CategoryIcon color={selectedPage === Pages.ReportPage ? 'primary' : 'inherit'} /></ListItemIcon>
+                  <ListItemText classes={{primary: classes.drawerItemText}} primary='Report' />
+                </ListItem>
+              </List>
+            </Drawer>
           </div>
-          <List>
-            <ListItem
-                key='Daily'
-                button
-                selected={selectedPage === Pages.DailyPage}
-                onClick={() => this.handleNavigate(Pages.DailyPage)}>
-              <ListItemIcon><TimelineIcon color={selectedPage === Pages.DailyPage ? 'primary' : 'inherit'} /></ListItemIcon>
-              <ListItemText classes={{primary: classes.drawerItemText}} primary='Daily' />
-            </ListItem>
-            <ListItem
-                key='Monthly'
-                button
-                selected={selectedPage === Pages.MonthlyPage}
-                onClick={() => this.handleNavigate(Pages.MonthlyPage)}>
-              <ListItemIcon><BarChartIcon color={selectedPage === Pages.MonthlyPage ? 'primary' : 'inherit'} /></ListItemIcon>
-              <ListItemText classes={{primary: classes.drawerItemText}} primary='Monthly' />
-            </ListItem>
-            <ListItem
-                key='Editor'
-                button
-                selected={selectedPage === Pages.EditorPage}
-                onClick={() => this.handleNavigate(Pages.EditorPage)}>
-              <ListItemIcon><EditIcon color={selectedPage === Pages.EditorPage ? 'primary' : 'inherit'} /></ListItemIcon>
-              <ListItemText classes={{primary: classes.drawerItemText}} primary='Editor' />
-            </ListItem>
-            <ListItem
-                key='Report'
-                button
-                selected={selectedPage === Pages.ReportPage}
-                onClick={() => this.handleNavigate(Pages.ReportPage)}>
-              <ListItemIcon><CategoryIcon color={selectedPage === Pages.ReportPage ? 'primary' : 'inherit'} /></ListItemIcon>
-              <ListItemText classes={{primary: classes.drawerItemText}} primary='Report' />
-            </ListItem>
-          </List>
-        </Drawer>
-      </div>
-    );
-  }
+        );
+      }
 
-  private handleToggle = () => {
-    this.setState({isDrawerOpen: !this.state.isDrawerOpen});
-  }
+      private handleToggle = () => {
+        this.setState({isDrawerOpen: !this.state.isDrawerOpen});
+      };
 
-  private handleNavigate = (path: string) => {
-    this.props.navigateTo(path);
-    this.setState({isDrawerOpen: false});
-  }
-});
+      private handleNavigate = (path: string) => {
+        this.props.navigateTo(path);
+        this.setState({isDrawerOpen: false});
+      };
+    });
 
 const mapStateToProps = (state: IAppState): IMenuBarWithDrawerAppStateProps => {
   return {

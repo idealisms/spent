@@ -25,8 +25,8 @@ const styles = (theme: Theme) => createStyles({
 });
 
 type filterTransactionsFunction = (
-    transactions: ITransaction[],
-    spendTarget: IDailySpendTarget) => ITransaction[];
+  transactions: ITransaction[],
+  spendTarget: IDailySpendTarget) => ITransaction[];
 
 interface IDailyOwnProps extends WithStyles<typeof styles> {
 }
@@ -44,82 +44,82 @@ interface IDailyState {
 }
 
 const Daily = withStyles(styles)(
-class extends React.Component<IDailyProps, IDailyState> {
-  constructor(props: IDailyProps, context?: any) {
-    super(props, context);
+    class extends React.Component<IDailyProps, IDailyState> {
+      constructor(props: IDailyProps, context?: any) {
+        super(props, context);
 
-    this.state = {};
-    this.props.fetchTransactions();
-    this.props.fetchSettings();
-  }
-
-  public render(): React.ReactElement<object> {
-    let classes = this.props.classes;
-    let filteredTransactions = this.filterTransactions(
-        this.props.transactions, this.props.dailySpendTarget);
-    let rows = filteredTransactions.map(t => {
-        return (
-          <Transaction transaction={t} key={t.id}/>
-        );
-      });
-
-    return (
-      <div className={classes.root}>
-        <MenuBarWithDrawer title='Daily'/>
-
-        <DailyGraph
-          graph_id='daily-spend-chart'
-          transactions={filteredTransactions}
-          onClickDate={this.scrollDateIntoView}
-          spendTarget={this.props.dailySpendTarget}
-          />
-
-        <TransactionsTable
-            classes={{root: classes.transactionsTable}}
-            lazyRender
-            scrollToRow={this.state.scrollToRow}>
-          {rows}
-        </TransactionsTable>
-      </div>
-    );
-  }
-
-  public scrollDateIntoView = (date: Date): void => {
-    let filteredTransactions = this.filterTransactions(
-        this.props.transactions, this.props.dailySpendTarget);
-
-    for (let rowNum = 0; rowNum < filteredTransactions.length; ++rowNum) {
-      let t = filteredTransactions[rowNum];
-      if (moment(t.date).isSameOrBefore(date)) {
-        this.setState({
-          scrollToRow: rowNum,
-        });
-        break;
+        this.state = {};
+        this.props.fetchTransactions();
+        this.props.fetchSettings();
       }
-    }
-  }
 
-  // tslint:disable-next-line:member-ordering (this is a function, not a field)
-  private filterTransactions: filterTransactionsFunction = memoize<filterTransactionsFunction>(
-      (transactions, spendTarget) => {
-          if (!transactions.length || !spendTarget.targets.length) {
-            return [];
-          }
-
-          let startDate = moment(spendTarget.targets[0].startDate).toDate();
-          let endDate = moment(this.props.transactions[0].date).toDate();
-          return TransactionUtils.filterTransactions(
-              transactions,
-              {
-                startDate,
-                endDate,
-                tagsIncludeAny: spendTarget && spendTarget.tags.include,
-                tagsExcludeAny: spendTarget && spendTarget.tags.exclude,
-              },
+      public render(): React.ReactElement<object> {
+        let classes = this.props.classes;
+        let filteredTransactions = this.filterTransactions(
+            this.props.transactions, this.props.dailySpendTarget);
+        let rows = filteredTransactions.map(t => {
+          return (
+            <Transaction transaction={t} key={t.id}/>
           );
-      },
-  );
-});
+        });
+
+        return (
+          <div className={classes.root}>
+            <MenuBarWithDrawer title='Daily'/>
+
+            <DailyGraph
+              graph_id='daily-spend-chart'
+              transactions={filteredTransactions}
+              onClickDate={this.scrollDateIntoView}
+              spendTarget={this.props.dailySpendTarget}
+            />
+
+            <TransactionsTable
+              classes={{root: classes.transactionsTable}}
+              lazyRender
+              scrollToRow={this.state.scrollToRow}>
+              {rows}
+            </TransactionsTable>
+          </div>
+        );
+      }
+
+      public scrollDateIntoView = (date: Date): void => {
+        let filteredTransactions = this.filterTransactions(
+            this.props.transactions, this.props.dailySpendTarget);
+
+        for (let rowNum = 0; rowNum < filteredTransactions.length; ++rowNum) {
+          let t = filteredTransactions[rowNum];
+          if (moment(t.date).isSameOrBefore(date)) {
+            this.setState({
+              scrollToRow: rowNum,
+            });
+            break;
+          }
+        }
+      };
+
+      // tslint:disable-next-line:member-ordering (this is a function, not a field)
+      private filterTransactions: filterTransactionsFunction = memoize<filterTransactionsFunction>(
+          (transactions, spendTarget) => {
+            if (!transactions.length || !spendTarget.targets.length) {
+              return [];
+            }
+
+            let startDate = moment(spendTarget.targets[0].startDate).toDate();
+            let endDate = moment(this.props.transactions[0].date).toDate();
+            return TransactionUtils.filterTransactions(
+                transactions,
+                {
+                  startDate,
+                  endDate,
+                  tagsIncludeAny: spendTarget && spendTarget.tags.include,
+                  tagsExcludeAny: spendTarget && spendTarget.tags.exclude,
+                },
+            );
+          },
+      );
+    });
 
 const mapStateToProps = (state: IAppState): IDailyAppStateProps => ({
   transactions: state.transactions.transactions,

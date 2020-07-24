@@ -26,29 +26,29 @@ interface IReportMenuBarState {
 }
 
 const ReportMenuBar = withStyles(styles)(
-class extends React.Component<IReportMenuBarProps, IReportMenuBarState> {
+    class extends React.Component<IReportMenuBarProps, IReportMenuBarState> {
 
-  constructor(props: IReportMenuBarProps, context?: any) {
-    super(props, context);
-  }
+      constructor(props: IReportMenuBarProps, context?: any) {
+        super(props, context);
+      }
 
-  public render(): JSX.Element {
-    let classes = this.props.classes;
+      public render(): JSX.Element {
+        let classes = this.props.classes;
 
-    let iconElementRight = (
-        <IconButton className={classes.whiteIconButton} onClick={this.props.onFilterClick}>
-          <FilterListIcon />
-        </IconButton>
-    );
+        let iconElementRight = (
+          <IconButton className={classes.whiteIconButton} onClick={this.props.onFilterClick}>
+            <FilterListIcon />
+          </IconButton>
+        );
 
-    return (
-        <MenuBarWithDrawer
+        return (
+          <MenuBarWithDrawer
             title='Report'
             iconElementRight={iconElementRight}
             classes={{root: classes.zIndexOne}}
-        />
-    );
-  }
-});
+          />
+        );
+      }
+    });
 
 export default ReportMenuBar;
