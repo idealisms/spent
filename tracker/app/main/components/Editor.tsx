@@ -407,7 +407,7 @@ const Editor = withStyles(styles)(
         });
       };
 
-      // tslint:disable-next-line:member-ordering (this is a function, not a field)
+      // eslint-disable-next-line @typescript-eslint/member-ordering
       private filterTransactions: filterTransactionsFunction = memoize<filterTransactionsFunction>(
           (transactions, startDate, endDate, tagFilters, searchQuery) => {
             return Transactions.TransactionUtils.filterTransactions(

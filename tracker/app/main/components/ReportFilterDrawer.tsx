@@ -71,7 +71,7 @@ interface IReportFilterDrawerState {
 export const ReportFilterDrawer = withStyles(styles)(
     class extends React.Component<IReportFilterDrawerProps, IReportFilterDrawerState> {
 
-      private START_YEAR: number = 2018;  // TODO: Move this to settings.
+      private readonly START_YEAR: number = 2018;  // TODO: Move this to settings.
 
       constructor(props: IReportFilterDrawerProps, context?: any) {
         super(props, context);

@@ -23,7 +23,6 @@ module.exports = {
   },
   'plugins': [
     '@typescript-eslint',
-    '@typescript-eslint/tslint',
   ],
   'rules': {
     '@typescript-eslint/naming-convention': [
@@ -36,6 +35,7 @@ module.exports = {
         'selector': 'variable',
         'format': [
           'camelCase',
+          'PascalCase',  // variables that represent a class/component.
         ],
       },
       {
@@ -48,6 +48,14 @@ module.exports = {
         'format': [
           'camelCase',
           'snake_case',  // compat with the transactions.json file format.
+          'PascalCase',  // Some CSS/HTML properties
+        ],
+      },
+      {
+        'selector': 'property',
+        'modifiers': ['readonly'],
+        'format': [
+          'UPPER_CASE',  // Some CSS/HTML properties
         ],
       },
       {
@@ -72,13 +80,19 @@ module.exports = {
       },
       {
         'selector': 'typeAlias',
-        'format': ['PascalCase'],
+        'format': [
+          'PascalCase',
+          'camelCase',
+        ],
       },
     ],
     '@typescript-eslint/explicit-member-accessibility': [
       'error',
       {
         'accessibility': 'explicit',
+        'overrides': {
+          'constructors': 'no-public',
+        },
       },
     ],
     '@typescript-eslint/indent': [

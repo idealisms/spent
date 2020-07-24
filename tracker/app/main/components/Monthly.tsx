@@ -9,8 +9,8 @@ import moment from 'moment';
 import * as React from 'react';
 import { connect } from 'react-redux';
 import { ThunkDispatch } from 'redux-thunk';
-// tslint:disable-next-line:max-line-length
-import { ITransaction, Transaction, TransactionsActions, TransactionsTable, TransactionsTableHeadingRow, TransactionsTableSumRow, TransactionUtils } from '../../transactions';
+import { ITransaction, Transaction, TransactionsActions, TransactionsTable, TransactionsTableHeadingRow, TransactionsTableSumRow,
+  TransactionUtils } from '../../transactions';
 import { fetchSettingsFromDropboxIfNeeded } from '../actions';
 import { IAppState, ISpendTarget } from '../Model';
 import MenuBarWithDrawer from './MenuBarWithDrawer';

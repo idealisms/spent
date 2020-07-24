@@ -18,8 +18,8 @@ serviceWorker.register();
 const history = createBrowserHistory();
 
 const store: Store<IAppState> = (process.env.NODE_ENV !== 'production')
-  ? (require('./store.dev') as any).configureStore(history)
-  : (require('./store.prod') as any).configureStore(history);
+  ? (require('./store.dev') as any).configureStore(history)  // eslint-disable-line @typescript-eslint/no-var-requires
+  : (require('./store.prod') as any).configureStore(history);  // eslint-disable-line @typescript-eslint/no-var-requires
 
 ReactDOM.render(
     <Provider store={store}>
