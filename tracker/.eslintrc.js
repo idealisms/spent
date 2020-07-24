@@ -34,7 +34,21 @@ module.exports = {
             },
             {
                 "selector": "variable",
-                "format": ["camelCase", "UPPER_CASE"]
+                "format": [
+                    "camelCase",
+                ],
+            },
+            {
+                "selector": "variable",
+                "modifiers": ["const"],
+                "format": ["UPPER_CASE", "camelCase"],
+            },
+            {
+                "selector": "property",
+                "format": [
+                    "camelCase",
+                    "snake_case",  // compat with the transactions.json file format.
+                ],
             },
             {
                 "selector": "class",
@@ -47,7 +61,19 @@ module.exports = {
                     "regex": "^I[A-Z]",
                     "match": true
                 }
-            }
+            },
+            {
+                "selector": "enum",
+                "format": ["PascalCase"],
+            },
+            {
+                "selector": "enumMember",
+                "format": ["UPPER_CASE", "PascalCase"],
+            },
+            {
+                "selector": "typeAlias",
+                "format": ["PascalCase"],
+            },
         ],
         "@typescript-eslint/dot-notation": "error",
         "@typescript-eslint/explicit-member-accessibility": [

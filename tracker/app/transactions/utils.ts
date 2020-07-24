@@ -126,7 +126,7 @@ export function generateUUID(crypto: Crypto = window.crypto): string {
   // From https://stackoverflow.com/a/8472700
   let buf = new Uint16Array(10);
   crypto.getRandomValues(buf);
-  let S4 = function(num: number): string {
+  let s4 = function(num: number): string {
     let ret = num.toString(16);
     while (ret.length < 4) {
       ret = '0' + ret;
@@ -136,7 +136,7 @@ export function generateUUID(crypto: Crypto = window.crypto): string {
 
   // We can't use buf.map because it returns another Uint16Array, but
   // we want an array of hex strings.
-  return Array.from(buf).map(S4).join('');
+  return Array.from(buf).map(s4).join('');
 }
 
 function searchByDate(transactions: ITransaction[], date: string, isStart: boolean): number {

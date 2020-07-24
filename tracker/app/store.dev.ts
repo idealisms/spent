@@ -19,16 +19,17 @@ export function configureStore(history: History): Store<IAppState> {
   const routingMiddleware = routerMiddleware(history);
   const composeEnhancers = (window as any).__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;
   const enhancers = composeEnhancers(
-    applyMiddleware(
-      routingMiddleware,
-      thunkMiddleware,
-      loggerMiddleware),
+      applyMiddleware(
+          routingMiddleware,
+          thunkMiddleware,
+          loggerMiddleware),
   );
 
   const store = createStore(createRootReducer(history), enhancers);
 
   if (module.hot) {
     module.hot.accept('./main/reducers', () => {
+      // eslint-disable-next-line @typescript-eslint/no-var-requires
       const nextRootReducer: any = require('./main/reducers').rootReducer;
       store.replaceReducer(nextRootReducer);
     });
