@@ -41,7 +41,7 @@ module.exports = {
             {
                 "selector": "variable",
                 "modifiers": ["const"],
-                "format": ["UPPER_CASE", "camelCase"],
+                "format": ["UPPER_CASE", "camelCase", "PascalCase"],
             },
             {
                 "selector": "property",

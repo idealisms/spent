@@ -31,9 +31,9 @@ export interface IChartNode {
 export interface IDailySpendTarget {
   startBalanceCents: number;
   targets: {
-    targetAnnualCents: number,
+    targetAnnualCents: number;
     /** YYYY-MM-DD */
-    startDate: string,
+    startDate: string;
   }[];
 
   tags: {
