@@ -1,4 +1,5 @@
 import { Application, send } from 'https://deno.land/x/oak/mod.ts';
+import { FileWatcher } from './fileWatcher.ts';
 
 // Valid paths for our single page app.
 const paths = [
@@ -9,6 +10,10 @@ const paths = [
 ];
 
 const isDev = Deno.env.get('NODE_ENV') == 'development';
+
+if (isDev) {
+  new FileWatcher().listen();
+}
 
 const app = new Application();
 // For future server side handling.
@@ -30,7 +35,6 @@ app.use(async (ctx) => {
     index: 'index.html',
   });
 });
-
 
 app.use((ctx) => {
   ctx.response.body = 'not found';

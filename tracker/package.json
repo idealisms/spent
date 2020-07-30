@@ -5,13 +5,14 @@
   "main": "index.js",
   "license": "UNLICENSED",
   "scripts": {
-    "build:webpack:dev": "NODE_ENV=development webpack --mode=development --config config/webpack.dev.config.js  --progress --profile --colors",
-    "build:webpack": "NODE_ENV=production webpack --mode=production --config config/webpack.prod.config.js  --progress --profile --colors",
+    "build:webpack": "NODE_ENV=production webpack --mode=production --config config/webpack.prod.config.js --progress --profile --colors",
     "build": "npm run clean && npm run build:webpack",
     "clean": "rimraf build",
     "deploy": "npm run build && scp -r build/* pi3:~/projects/quant/spent/",
+    "watch": "NODE_ENV=development webpack --mode=development --config config/webpack.dev.config.js --watch --progress --profile --colors",
     "start": "npm run clean && webpack-dev-server --mode=development --config config/webpack.dev.config.js --progress --profile --colors",
-    "start:deno": "npm run build:webpack:dev && NODE_ENV=development deno run --allow-net --allow-env --allow-read=build server/server.ts",
+    "start:deno": "npm run clean && mkdir build && NODE_ENV=development deno run --allow-net --allow-env --allow-run --allow-read=build server/server.ts",
+    "start:deno:prod": "NODE_ENV=production deno run --allow-net --allow-env --allow-read=build server/server.ts",
     "test": "npm run clean && jest",
     "test:watch": "npm test -- --watch",
     "lint": "eslint -c .eslintrc.js --ext .ts,.tsx app"
