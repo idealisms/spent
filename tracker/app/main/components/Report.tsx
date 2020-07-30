@@ -16,7 +16,7 @@ import ReportMenuBar from './ReportMenuBar';
 
 const LOADING_TEXT = 'loading...';
 
-const styles = (theme: Theme) => createStyles({
+const styles = (_theme: Theme) => createStyles({
   root: {
     display: 'flex',
     flexDirection: 'column',
@@ -121,7 +121,7 @@ interface IReportState {
   isFilterDrawerOpen: boolean;
 }
 const Report = withStyles(styles)(
-    class extends React.Component<IReportProps, IReportState> {
+    class Component extends React.Component<IReportProps, IReportState> {
       constructor(props: IReportProps, context?: any) {
         super(props, context);
         let startDate = moment().year(moment().year() - 1).month(0).date(1).startOf('day');
@@ -144,7 +144,7 @@ const Report = withStyles(styles)(
         this.props.fetchTransactions();
       }
 
-      public componentDidUpdate(prevProps: IReportProps): void {
+      public componentDidUpdate(_prevProps: IReportProps): void {
         // Update the editable textarea once settings load.
         if (this.state.categoriesPretty == LOADING_TEXT && this.props.reportCategories) {
           this.setState({
@@ -153,7 +153,7 @@ const Report = withStyles(styles)(
         }
       }
 
-      public render(): React.ReactElement<object> {
+      public render(): React.ReactElement<Record<string, unknown>> {
         let classes = this.props.classes;
         let filteredTransactions = TransactionUtils.filterTransactionsByDate(
             this.props.transactions, this.state.dateRange.startDate.toDate(),
@@ -161,7 +161,7 @@ const Report = withStyles(styles)(
         let [unmatchedTransactions, renderedTree, chartNodes] = this.buildTree(filteredTransactions);
 
         let compareUnmatchedTransactions: ITransaction[] = [];
-        let compareRenderTree: JSX.Element;
+        let compareRenderTree: JSX.Element = <div />;
         let compareChartNodes: IChartNode[] = [];
         if (this.state.compareDateRange) {
           filteredTransactions = TransactionUtils.filterTransactionsByDate(
@@ -193,7 +193,7 @@ const Report = withStyles(styles)(
           );
           tabContents.push(
               <div key={`tree-${columnName}`} className={classes.renderedTree} hidden={this.state.tabIndex != 2}>
-                {compareRenderTree!}
+                {compareRenderTree}
               </div>,
               <TransactionsTable key={`table-${columnName}`} classes={{root: classes.transactionsTable}} hidden={this.state.tabIndex != 3}>
                 {compareUnmatchedTransactions.map(t => <Transaction transaction={t} key={t.id}/>)}
@@ -233,7 +233,7 @@ const Report = withStyles(styles)(
                 <Tabs
                   className={classes.tabs}
                   value={this.state.tabIndex}
-                  onChange={(event: React.ChangeEvent<{}>, tabIndex: number) => {
+                  onChange={(_event: React.ChangeEvent<unknown>, tabIndex: number) => {
                     this.setState({tabIndex});
                   }}
                   variant='scrollable'
@@ -299,11 +299,12 @@ const Report = withStyles(styles)(
             continue;
           }
           for (let tag of renderNode.reportNode.tags) {
-            if (tagToRootReportRenderNode.has(tag)) {
+            const reportRenderNode = tagToRootReportRenderNode.get(tag);
+            if (reportRenderNode) {
               return [
                 [],
-                <div>Error, tag appears twice.
-                  {tag} in {tagToRootReportRenderNode.get(tag)!.reportNode.title}
+                <div key='msg'>Error, tag appears twice.
+                  {tag} in {reportRenderNode.reportNode.title}
                 and {renderNode.reportNode.title}.
                 </div>,
                 []];
@@ -394,7 +395,7 @@ const Report = withStyles(styles)(
         let domTime = window.performance.now();
         return [
           unmatchedTransactions,
-          <React.Fragment>
+          <React.Fragment key='msg'>
             <div className='total'>${TransactionUtils.formatAmountNumber(total)}</div>
             {output}
             <div className='info'>Build time: {(buildTime - startTime).toFixed(2)}ms</div>

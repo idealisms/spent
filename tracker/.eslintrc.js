@@ -17,6 +17,12 @@ module.exports = {
     'browser': true,
     'es6': true,
   },
+  'extends': [
+    'eslint:recommended',
+    'plugin:@typescript-eslint/eslint-recommended',
+    'plugin:@typescript-eslint/recommended',
+    'plugin:react/recommended',
+  ],
   'parser': '@typescript-eslint/parser',
   'parserOptions': {
     'sourceType': 'module',
@@ -42,6 +48,11 @@ module.exports = {
         'selector': 'variable',
         'modifiers': ['const'],
         'format': ['UPPER_CASE', 'camelCase', 'PascalCase'],
+      },
+      {
+        'selector': 'parameter',
+        'format': ['camelCase'],
+        leadingUnderscore: 'allow',
       },
       {
         'selector': 'property',
@@ -120,6 +131,11 @@ module.exports = {
     '@typescript-eslint/no-inferrable-types': 'off',
     '@typescript-eslint/no-require-imports': 'off',
     '@typescript-eslint/no-unused-expressions': 'error',
+    '@typescript-eslint/no-unused-vars': [
+      'warn', {
+        'argsIgnorePattern': '^_',
+      },
+    ],
     '@typescript-eslint/no-var-requires': 'error',
     '@typescript-eslint/prefer-namespace-keyword': 'error',
     '@typescript-eslint/quotes': [
@@ -132,7 +148,9 @@ module.exports = {
     '@typescript-eslint/semi': [
       'error',
     ],
+    '@typescript-eslint/no-empty-interface': 'off',
     '@typescript-eslint/type-annotation-spacing': 'error',
+    '@typescript-eslint/explicit-module-boundary-types': 'off',
     'brace-style': [
       'error',
       '1tbs',
@@ -206,6 +224,7 @@ module.exports = {
     'no-underscore-dangle': 'off',
     'no-unused-labels': 'error',
     'no-var': 'error',
+    'prefer-const': 'off',
     'radix': 'error',
     'spaced-comment': [
       'error',

@@ -54,7 +54,7 @@ export const fetchSettingsFromDropbox = (): ThunkAction<void, IAppState, null, S
     try {
       const file = await dbx.filesDownload({ path: '/settings.json' });
       let fr = new FileReader();
-      fr.addEventListener('load', ev => {
+      fr.addEventListener('load', _event => {
         let settings: ISettings = JSON.parse((fr.result as string));
         dispatch(receivedSettingsFromDropbox(settings));
       });

@@ -5,7 +5,7 @@ import FilterListIcon from '@material-ui/icons/FilterList';
 import * as React from 'react';
 import MenuBarWithDrawer from './MenuBarWithDrawer';
 
-const styles = (theme: Theme) => createStyles({
+const styles = (_theme: Theme) => createStyles({
   // This is used to ensure that the appbar shadow is above the content.
   zIndexOne: {
     zIndex: 1,
@@ -26,7 +26,7 @@ interface IReportMenuBarState {
 }
 
 const ReportMenuBar = withStyles(styles)(
-    class extends React.Component<IReportMenuBarProps, IReportMenuBarState> {
+    class Component extends React.Component<IReportMenuBarProps, IReportMenuBarState> {
 
       constructor(props: IReportMenuBarProps, context?: any) {
         super(props, context);

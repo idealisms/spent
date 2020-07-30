@@ -21,7 +21,7 @@ export enum BatchEditTagsAction {
   RemoveTags = 'remove',
 }
 
-const styles = (theme: Theme) => createStyles({
+const styles = (_theme: Theme) => createStyles({
   dialogPaper: {
     margin: '16px',
   },
@@ -48,7 +48,7 @@ interface IBatchEditTagsDialogState {
   tags: string[];
 }
 const BatchEditTagsDialog = withStyles(styles)(
-    class extends React.Component<IBatchEditTagsDialogProps, IBatchEditTagsDialogState> {
+    class Component extends React.Component<IBatchEditTagsDialogProps, IBatchEditTagsDialogState> {
 
       constructor(props: IBatchEditTagsDialogProps, context?: any) {
         super(props, context);
@@ -59,7 +59,7 @@ const BatchEditTagsDialog = withStyles(styles)(
         };
       }
 
-      public render(): React.ReactElement<object> {
+      public render(): React.ReactElement<Record<string, unknown>> {
         let classes = this.props.classes;
         let rows = this.props.transactions.map((t) => {
           return (
@@ -123,7 +123,7 @@ const BatchEditTagsDialog = withStyles(styles)(
         </Dialog>;
       }
 
-      private handleChangeAction = (event: any, action: string) => {
+      private handleChangeAction = (_event: any, action: string) => {
         this.setState({
           action: action as BatchEditTagsAction,
         });

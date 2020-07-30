@@ -9,7 +9,7 @@ import { GoogleDataTableCell, GoogleDataTableColumnRoleType } from 'react-google
 import { ITransaction, TransactionUtils } from '../../transactions';
 import { IDailySpendTarget } from '../Model';
 
-const styles = (theme: Theme) => createStyles({
+const styles = (_theme: Theme) => createStyles({
   root: {
     position: 'relative',
     flex: '0 1 400px',
@@ -61,14 +61,14 @@ interface IDailyGraphProps extends WithStyles<typeof styles> {
   graph_id: string;
   transactions: ITransaction[];
   spendTarget: IDailySpendTarget;
-  onClickDate?: (date: Date) => void;
+  onClickDate: (date: Date) => void;
 }
 interface IDailyGraphState {
   useSpread: boolean;
   shouldAnimate: boolean;
 }
 const DailyGraph = withStyles(styles)(
-    class extends React.Component<IDailyGraphProps, IDailyGraphState> {
+    class Component extends React.Component<IDailyGraphProps, IDailyGraphState> {
       private container: HTMLElement|null = null;
 
       constructor(props: IDailyGraphProps, context?: any) {
@@ -104,7 +104,7 @@ const DailyGraph = withStyles(styles)(
         }
       }
 
-      public render(): React.ReactElement<object> {
+      public render(): React.ReactElement<Record<string, unknown>> {
         let classes = this.props.classes;
 
         // console.time('graph');
@@ -208,20 +208,18 @@ const DailyGraph = withStyles(styles)(
                   graph_id={this.props.graph_id}
                   width='auto'
                   height='100%'
-                  chartEvents={this.props.onClickDate
-                    ? [{
-                      eventName: 'select',
-                      callback: ({chartWrapper}) => {
-                        let selected = chartWrapper.getChart().getSelection();
-                        // This event also fires when de-selecting a point,
-                        // in which case, selected is an empty array.
-                        if (selected.length > 0) {
-                          let row = selected[0].row as number;
-                          this.props.onClickDate!(dataAsRows[row][0]);
-                        }
-                      },
-                    }]
-                    : []}
+                  chartEvents={[{
+                    eventName: 'select',
+                    callback: ({chartWrapper}) => {
+                      let selected = chartWrapper.getChart().getSelection();
+                      // This event also fires when de-selecting a point,
+                      // in which case, selected is an empty array.
+                      if (selected.length > 0) {
+                        let row = selected[0].row as number;
+                        this.props.onClickDate(dataAsRows[row][0]);
+                      }
+                    },
+                  }]}
                 />
               </div>
             </div>
@@ -289,7 +287,7 @@ const DailyGraph = withStyles(styles)(
         // We want the y-axis on the right side only. To do this, we create a
         // fake data set for the left y-axis.
         let dataAsRows: [Date, number|null, number, string][] = [];
-        let currentTotal = this.props.spendTarget!.startBalanceCents;
+        let currentTotal = this.props.spendTarget.startBalanceCents;
         for (let m = moment(dates[0]); m.isSameOrBefore(moment(dates[dates.length - 1])); m = m.add(1, 'days')) {
           let currentDate = m.format('YYYY-MM-DD');
           let toolTipHtml = '<table>';

@@ -12,7 +12,7 @@ import { compareTransactions, generateUUID } from '../utils';
 import Transaction from './Transaction';
 import TransactionsTable from './TransactionsTable';
 
-const styles = (theme: Theme) => createStyles({
+const styles = (_theme: Theme) => createStyles({
   amount: {
     flex: '0 0 80px',
     // This fixes the vertical alignment of the input.
@@ -45,7 +45,7 @@ type ISplitTransactionDialogState = {
 };
 
 const SplitTransactionDialog = withStyles(styles)(
-    class extends React.Component<ISplitTransactionDialogProps, ISplitTransactionDialogState> {
+    class Component extends React.Component<ISplitTransactionDialogProps, ISplitTransactionDialogState> {
 
       constructor(props: ISplitTransactionDialogProps, context?: any) {
         super(props, context);
@@ -90,7 +90,7 @@ const SplitTransactionDialog = withStyles(styles)(
         };
       }
 
-      public render(): React.ReactElement<object> {
+      public render(): React.ReactElement<Record<string, unknown>> {
         let classes = this.props.classes;
         let totalAmountCents = 0;
         this.state.transactions.map((t) => totalAmountCents += t.amount_cents);

@@ -16,7 +16,7 @@ import * as Transactions from '../../transactions';
 import { CloudState } from '../Model';
 import MenuBarWithDrawer from './MenuBarWithDrawer';
 
-const styles = (theme: Theme) => createStyles({
+const styles = (_theme: Theme) => createStyles({
   tooltip: {
     marginLeft: '36px',
   },
@@ -56,7 +56,7 @@ interface IEditorMenuBarState {
 
 // TODO: Create new ReportMenuBar and rename this to EditorMenuBar.
 const EditorMenuBar = withStyles(styles)(
-    class extends React.Component<IEditorMenuBarProps, IEditorMenuBarState> {
+    class Component extends React.Component<IEditorMenuBarProps, IEditorMenuBarState> {
 
       constructor(props: IEditorMenuBarProps, context?: any) {
         super(props, context);
@@ -113,7 +113,11 @@ const EditorMenuBar = withStyles(styles)(
             ><CallSplitIcon /></IconButton></span>
             </Tooltip>
             <Tooltip title='Delete' placement='bottom-end'><IconButton
-              onClick={() => this.props.onSelectedDeleteClick!(this.props.selectedTransactions!)}
+              onClick={() => {
+                if (this.props.onSelectedDeleteClick && this.props.selectedTransactions) {
+                  this.props.onSelectedDeleteClick(this.props.selectedTransactions);
+                }
+              }}
             ><DeleteIcon /></IconButton>
             </Tooltip>
           </span>
@@ -138,9 +142,9 @@ const EditorMenuBar = withStyles(styles)(
               iconElementLeft={iconElementLeft}
               iconElementRight={iconElementRight}
             />
-            {this.state.isEditDialogOpen ?
+            {this.state.isEditDialogOpen && this.props.selectedTransactions ?
               <Transactions.EditTransactionDialog
-                transaction={this.props.selectedTransactions!.values().next().value}
+                transaction={this.props.selectedTransactions.values().next().value}
                 onClose={() => this.setState({isEditDialogOpen: false})}
                 onSaveChanges={this.props.onSelectedEditSaveClick}
               /> : undefined}
@@ -156,9 +160,9 @@ const EditorMenuBar = withStyles(styles)(
                 onClose={() => this.setState({isMergeDialogOpen: false})}
                 onSaveChanges={this.props.onSelectedMergeSaveClick}
               /> : undefined}
-            {this.state.isSplitDialogOpen ?
+            {this.state.isSplitDialogOpen && this.props.selectedTransactions ?
               <Transactions.SplitTransactionDialog
-                transaction={this.props.selectedTransactions!.values().next().value}
+                transaction={this.props.selectedTransactions.values().next().value}
                 onClose={() => this.setState({isSplitDialogOpen: false})}
                 onSaveChanges={this.props.onSelectedSplitSaveClick}
               /> : undefined}

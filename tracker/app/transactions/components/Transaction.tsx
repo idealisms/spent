@@ -81,9 +81,9 @@ interface ITransactionProps extends WithStyles<typeof styles> {
   amountFragment?: JSX.Element;
 }
 const Transaction = withStyles(styles)(
-    class extends React.Component<ITransactionProps, object> {
+    class Component extends React.Component<ITransactionProps, Record<string, unknown>> {
 
-      public render(): React.ReactElement<object> {
+      public render(): React.ReactElement<Record<string, unknown>> {
         let classes = this.props.classes;
         let isCredit = this.props.transaction.amount_cents < 0;
         let categoryEmoji = '🙅';
@@ -114,7 +114,11 @@ const Transaction = withStyles(styles)(
             <div
               className={classes.category + (this.props.onCategoryClick ? ' editable' : '')}
               title={categoryName}
-              onClick={this.props.onCategoryClick ? () => this.props.onCategoryClick!(this.props.transaction) : undefined}
+              onClick={() => {
+                if (this.props.onCategoryClick) {
+                  this.props.onCategoryClick(this.props.transaction);
+                }
+              }}
             >{this.props.isSelected ? <CheckBoxIcon /> : categoryEmoji}</div>
             <div className={classes.description}>
               {this.props.transaction.description}

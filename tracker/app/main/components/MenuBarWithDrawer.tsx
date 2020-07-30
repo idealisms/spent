@@ -22,7 +22,7 @@ import { Dispatch } from 'redux';
 import { IAppState } from '../Model';
 import * as Pages from './RoutePaths';
 
-const styles = (theme: Theme) => createStyles({
+const styles = (_theme: Theme) => createStyles({
   root: {
     flex: 'none',
   },
@@ -75,7 +75,7 @@ interface IMenuBarWithDrawerState {
 }
 
 const MenuBarWithDrawer = withStyles(styles)(
-    class extends React.Component<IMenuBarWithDrawerProps, IMenuBarWithDrawerState> {
+    class Component extends React.Component<IMenuBarWithDrawerProps, IMenuBarWithDrawerState> {
 
       constructor(props: IMenuBarWithDrawerProps, context?: any) {
         super(props, context);
@@ -165,7 +165,7 @@ const mapStateToProps = (state: IAppState): IMenuBarWithDrawerAppStateProps => {
 };
 
 const mapDispatchToProps = (dispatch: Dispatch): IMenuBarWithDrawerDispatchProps => ({
-  navigateTo: (location: string, state?: LocationState) => {
+  navigateTo: (location: string) => {
     dispatch(push(location));
   },
 });

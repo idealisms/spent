@@ -11,7 +11,7 @@ import { IAppState, IDailySpendTarget } from '../Model';
 import DailyGraph from './DailyGraph';
 import MenuBarWithDrawer from './MenuBarWithDrawer';
 
-const styles = (theme: Theme) => createStyles({
+const styles = (_theme: Theme) => createStyles({
   root: {
     height: '100%',
     display: 'flex',
@@ -44,7 +44,7 @@ interface IDailyState {
 }
 
 const Daily = withStyles(styles)(
-    class extends React.Component<IDailyProps, IDailyState> {
+    class Component extends React.Component<IDailyProps, IDailyState> {
       constructor(props: IDailyProps, context?: any) {
         super(props, context);
 
@@ -53,7 +53,7 @@ const Daily = withStyles(styles)(
         this.props.fetchSettings();
       }
 
-      public render(): React.ReactElement<object> {
+      public render(): React.ReactElement<Record<string, unknown>> {
         let classes = this.props.classes;
         let filteredTransactions = this.filterTransactions(
             this.props.transactions, this.props.dailySpendTarget);

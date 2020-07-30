@@ -14,7 +14,7 @@ import * as Transactions from '../../transactions';
 import { CloudState, IAppState } from '../Model';
 import EditorMenuBar from './EditorMenuBar';
 
-const styles = (theme: Theme) => createStyles({
+const styles = (_theme: Theme) => createStyles({
   root: {
     height: '100%',
     display: 'flex',
@@ -95,7 +95,7 @@ interface IEditorState {
 }
 
 const Editor = withStyles(styles)(
-    class extends React.Component<IEditorProps, IEditorState> {
+    class Component extends React.Component<IEditorProps, IEditorState> {
       constructor(props: IEditorProps, context?: any) {
         super(props, context);
 
@@ -127,7 +127,7 @@ const Editor = withStyles(styles)(
         }
       }
 
-      public render(): React.ReactElement<object> {
+      public render(): React.ReactElement<Record<string, unknown>> {
         let classes = this.props.classes;
         let visibleTransactions = this.filterTransactions(
             this.props.transactions, this.state.startDate, this.state.endDate, this.state.tagFilters, this.state.searchQuery);

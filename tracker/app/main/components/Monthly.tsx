@@ -17,7 +17,7 @@ import MenuBarWithDrawer from './MenuBarWithDrawer';
 import MonthlyGraph from './MonthlyGraph';
 import * as Pages from './RoutePaths';
 
-const styles = (theme: Theme) => createStyles({
+const styles = (_theme: Theme) => createStyles({
   root: {
     height: '100%',
     display: 'flex',
@@ -62,7 +62,7 @@ interface IMonthlyState {
 }
 
 const Monthly = withStyles(styles)(
-    class extends React.Component<IMonthlyProps, IMonthlyState> {
+    class Component extends React.Component<IMonthlyProps, IMonthlyState> {
       constructor(props: IMonthlyProps, context?: any) {
         super(props, context);
         this.state = {};
@@ -70,7 +70,7 @@ const Monthly = withStyles(styles)(
         this.props.fetchSettings();
       }
 
-      public render(): React.ReactElement<object> {
+      public render(): React.ReactElement<Record<string, unknown>> {
         let classes = this.props.classes;
         let spendTarget;
 
@@ -169,13 +169,13 @@ const Monthly = withStyles(styles)(
           } else {
             monthlyTransactionsMap.set(month, [t]);
           }
-          monthlySpendingMap.set(month, monthlySpendingMap.get(month)! - t.amount_cents);
+          monthlySpendingMap.set(month, (monthlySpendingMap.get(month) || 0) - t.amount_cents);
         });
 
         // Now convert monthlySpendingMap to be a rolling total.
         [...monthlySpendingMap.keys()].sort().reduce(
             (total: number, month: string): number => {
-              let monthlySpend = monthlySpendingMap.get(month)!;
+              let monthlySpend = monthlySpendingMap.get(month) || 0;
               total += monthlySpend;
               monthlySpendingMap.set(month, total);
               data.push([
@@ -228,7 +228,7 @@ const Monthly = withStyles(styles)(
                 original_line: '',
                 date: `${month}-01`,
                 tags: [],
-                amount_cents: monthlySpendingMap.get(month)!,
+                amount_cents: monthlySpendingMap.get(month) || 0,
                 transactions: [],
               }]}
             description='balance'

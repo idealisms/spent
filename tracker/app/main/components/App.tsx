@@ -9,7 +9,7 @@ import Monthly from './Monthly';
 import Report from './Report';
 import * as Pages from './RoutePaths';
 
-const styles = (theme: Theme) => createStyles({
+const styles = (_theme: Theme) => createStyles({
   '@global': {
     html: {
       height: '100%',
@@ -29,8 +29,8 @@ const NoMatch = () => (
 );
 
 const App = withStyles(styles)(
-    class extends React.Component<object, object> {
-      public render(): React.ReactElement<object> {
+    class Component extends React.Component<Record<string, unknown>, Record<string, unknown>> {
+      public render(): React.ReactElement<Record<string, unknown>> {
 
         return (
           <Switch>

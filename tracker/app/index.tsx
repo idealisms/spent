@@ -11,7 +11,7 @@ import { App, IAppState } from './main';
 import { theme } from './muiTheme';
 import * as serviceWorker from './serviceWorker';
 
-declare const require: (name: String) => any;
+declare const require: (name: string) => any;
 
 serviceWorker.register();
 

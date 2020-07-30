@@ -4,7 +4,7 @@ import * as React from 'react';
 import { CloudState, IReportNode } from '../Model';
 import moment = require('moment');
 
-const styles = (theme: Theme) => createStyles({
+const styles = (_theme: Theme) => createStyles({
   drawerContents: {
     padding: '16px',
   },
@@ -69,7 +69,7 @@ interface IReportFilterDrawerState {
 }
 
 export const ReportFilterDrawer = withStyles(styles)(
-    class extends React.Component<IReportFilterDrawerProps, IReportFilterDrawerState> {
+    class Component extends React.Component<IReportFilterDrawerProps, IReportFilterDrawerState> {
 
       private readonly START_YEAR: number = 2018;  // TODO: Move this to settings.
 

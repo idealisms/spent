@@ -14,7 +14,7 @@ import { compareTransactions } from '../utils';
 import Transaction from './Transaction';
 import TransactionsTable from './TransactionsTable';
 
-const styles = (theme: Theme) => createStyles({
+const styles = (_theme: Theme) => createStyles({
   mergeRadioButton: {
     '& > div': {
       align: 'center',
@@ -43,7 +43,7 @@ interface IMergeTransactionDialogState {
   transactions: ITransaction[];
 }
 const MergeTransactionDialog = withStyles(styles)(
-    class extends React.Component<IMergeTransactionDialogProps, IMergeTransactionDialogState> {
+    class Component extends React.Component<IMergeTransactionDialogProps, IMergeTransactionDialogState> {
 
       constructor(props: IMergeTransactionDialogProps, context?: any) {
         super(props, context);
@@ -54,7 +54,7 @@ const MergeTransactionDialog = withStyles(styles)(
         };
       }
 
-      public render(): React.ReactElement<object> {
+      public render(): React.ReactElement<Record<string, unknown>> {
         let classes = this.props.classes;
         let rows: JSX.Element[] = [];
         for (let transaction of this.state.transactions) {
@@ -88,7 +88,7 @@ const MergeTransactionDialog = withStyles(styles)(
           <DialogContent>
             <RadioGroup
               name='merge-group'
-              onChange={(event: any, transactionId: string) => this.handleChangeSelection(transactionId)}>
+              onChange={(_event: any, transactionId: string) => this.handleChangeSelection(transactionId)}>
               {rows}
             </RadioGroup>
           </DialogContent>

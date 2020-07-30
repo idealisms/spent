@@ -4,7 +4,7 @@ import * as React from 'react';
 
 const ROW_HEIGHT = 48;
 
-const styles = (theme: Theme) => createStyles({
+const styles = (_theme: Theme) => createStyles({
   root: {
     // The border rendered on the bottom of each row takes 1px.
     lineHeight: `${ROW_HEIGHT - 1}px`,
@@ -27,7 +27,7 @@ interface ITransactionsTableState {
   scrollTop: number;
 }
 const TransactionsTable = withStyles(styles)(
-    class extends React.Component<ITransactionsTableProps, ITransactionsTableState> {
+    class Component extends React.Component<ITransactionsTableProps, ITransactionsTableState> {
       private container: HTMLElement|null = null;
 
       constructor(props: ITransactionsTableProps, context?: any) {
@@ -64,7 +64,7 @@ const TransactionsTable = withStyles(styles)(
         }
       }
 
-      public render(): React.ReactElement<object> {
+      public render(): React.ReactElement<Record<string, unknown>> {
         let classes = this.props.classes;
         let shouldRenderChildren = !this.props.lazyRender || this.state.containerHeight != -1;
 
@@ -89,7 +89,7 @@ const TransactionsTable = withStyles(styles)(
         });
       };
 
-      private handleScroll = (event: React.UIEvent<HTMLDivElement>) => {
+      private handleScroll = (_event: React.UIEvent<HTMLDivElement>) => {
         if (!this.container) {
           console.log('container not set (handleScroll)');
           return;

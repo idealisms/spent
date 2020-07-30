@@ -9,7 +9,7 @@ interface IHotModule {
   hot?: { accept: (path: string, callback: () => void) => void };
 }
 
-declare const require: (name: String) => any;
+declare const require: (name: string) => any;
 declare const module: IHotModule;
 
 const loggerMiddleware = createLogger();

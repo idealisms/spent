@@ -12,7 +12,7 @@ import TagSelect from './TagSelect';
 import Transaction from './Transaction';
 import TransactionsTable from './TransactionsTable';
 
-const styles = (theme: Theme) => createStyles({
+const styles = (_theme: Theme) => createStyles({
   dialogRoot: {
     '@media (max-height: 380px)': {
       marginTop: '-40px',
@@ -48,7 +48,7 @@ interface IEditTransactionDialogState {
   notesValue: string;
 }
 const EditTransactionDialog = withStyles(styles)(
-    class extends React.Component<IEditTransactionDialogProps, IEditTransactionDialogState> {
+    class Component extends React.Component<IEditTransactionDialogProps, IEditTransactionDialogState> {
 
       constructor(props: IEditTransactionDialogProps, context?: any) {
         super(props, context);
@@ -58,7 +58,7 @@ const EditTransactionDialog = withStyles(styles)(
         };
       }
 
-      public render(): React.ReactElement<object> {
+      public render(): React.ReactElement<Record<string, unknown>> {
         let classes = this.props.classes;
         let transaction: ITransaction = this.props.transaction;
         return <Dialog
@@ -112,7 +112,7 @@ const EditTransactionDialog = withStyles(styles)(
         });
       };
 
-      private handleKeyPress = (e: React.KeyboardEvent<{}>): void => {
+      private handleKeyPress = (e: React.KeyboardEvent<HTMLDivElement>): void => {
         // charCode 13 is the Enter key.
         if (e.charCode == 13) {
           this.handleSave();

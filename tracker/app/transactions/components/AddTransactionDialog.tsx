@@ -15,7 +15,7 @@ import { generateUUID } from '../utils';
 import TagSelect from './TagSelect';
 
 
-const styles = (theme: Theme) => createStyles({
+const styles = (_theme: Theme) => createStyles({
   dialogRoot: {
     '@media (max-height: 380px)': {
       marginTop: '-40px',
@@ -76,7 +76,7 @@ interface IAddTransactionDialogState {
 
 }
 const AddTransactionDialog = withStyles(styles)(
-    class extends React.Component<IAddTransactionDialogProps, IAddTransactionDialogState> {
+    class Component extends React.Component<IAddTransactionDialogProps, IAddTransactionDialogState> {
 
       constructor(props: IAddTransactionDialogProps, context?: any) {
         super(props, context);
@@ -90,7 +90,7 @@ const AddTransactionDialog = withStyles(styles)(
         };
       }
 
-      public render(): React.ReactElement<object> {
+      public render(): React.ReactElement<Record<string, unknown>> {
         let classes = this.props.classes;
         return <Dialog
           open
@@ -180,7 +180,7 @@ const AddTransactionDialog = withStyles(styles)(
         });
       };
 
-      private handleKeyPress = (e: React.KeyboardEvent<{}>): void => {
+      private handleKeyPress = (e: React.KeyboardEvent<HTMLDivElement>): void => {
         // charCode 13 is the Enter key.
         if (e.charCode == 13 && !this.saveDisabled()) {
           this.handleSave();

@@ -12,7 +12,7 @@ import { IAppState } from '../../main';
 import { ITransaction, TAG_TO_CATEGORY } from '../Model';
 import { categoryToEmoji } from '../utils';
 
-const styles = (theme: Theme) => createStyles({
+const styles = (_theme: Theme) => createStyles({
   option: {
     display: 'flex !important',
     flexDirection: 'row',
@@ -57,9 +57,9 @@ type ITagSelectProps = ITagSelectOwnProps & ITagSelectPassThroughProps & ITagSel
 interface ITagSelectState {
 }
 const TagSelect = withStyles(styles)(
-    class extends React.Component<ITagSelectProps, ITagSelectState> {
+    class Component extends React.Component<ITagSelectProps, ITagSelectState> {
 
-      public render(): React.ReactElement<object> {
+      public render(): React.ReactElement<Record<string, unknown>> {
         let transactions = this.props.transactions || this.props.allTransactions;
 
         let tagMap: Map<string, number> = new Map();
@@ -106,7 +106,7 @@ const TagSelect = withStyles(styles)(
         }
       }
 
-      private handleChangeTags = (tags: ValueType<{label: string; value: string}>, action: any): void => {
+      private handleChangeTags = (tags: ValueType<{label: string; value: string}>, _action: any): void => {
         this.setState({
           tags,
         });

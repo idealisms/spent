@@ -3,7 +3,7 @@ import { Theme, withStyles } from '@material-ui/core/styles';
 import * as React from 'react';
 import { Chart } from 'react-google-charts';
 
-const styles = (theme: Theme) => createStyles({
+const styles = (_theme: Theme) => createStyles({
   chartContainer: {
     width: '100%',
     height: '50%',
@@ -17,13 +17,13 @@ interface IReportChartProps extends WithStyles<typeof styles> {
 interface IReportChartState {
 }
 const ReportChart = withStyles(styles)(
-    class extends React.Component<IReportChartProps, IReportChartState> {
+    class Component extends React.Component<IReportChartProps, IReportChartState> {
       constructor(props: IReportChartProps, context?: any) {
         super(props, context);
         this.state = {};
       }
 
-      public render(): React.ReactElement<object> {
+      public render(): React.ReactElement<Record<string, unknown>> {
         let classes = this.props.classes;
 
         let loadingPlaceholder = <div style={{height: '60%', padding: '16px'}}>Loading . . .</div>;

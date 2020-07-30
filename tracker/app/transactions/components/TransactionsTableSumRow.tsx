@@ -27,9 +27,9 @@ interface ITransactionsTableSumRowProps extends WithStyles<typeof headerStyles> 
 interface ITransactionsTableSumRowState {
 }
 const TransactionsTableSumRow = withStyles(headerStyles)(
-    class extends React.Component<ITransactionsTableSumRowProps, ITransactionsTableSumRowState> {
+    class Component extends React.Component<ITransactionsTableSumRowProps, ITransactionsTableSumRowState> {
 
-      public render(): React.ReactElement<object> {
+      public render(): React.ReactElement<Record<string, unknown>> {
         let classes = this.props.classes;
 
         let totalAmount = this.props.transactions.reduce(
@@ -61,6 +61,7 @@ const TransactionsTableSumRow = withStyles(headerStyles)(
           this.props.onSelectAllClick(!this.props.selectAllChecked);
         }
       };
-    });
+    }
+);
 
 export default TransactionsTableSumRow;

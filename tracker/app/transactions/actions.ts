@@ -57,7 +57,7 @@ export const fetchTransactionsFromDropboxIfNeeded = (): ThunkAction<void, IAppSt
     try {
       const file = await dbx.filesDownload({ path: '/transactions.json' });
       let fr = new FileReader();
-      fr.addEventListener('load', ev => {
+      fr.addEventListener('load', _event => {
         let transactions: ITransaction[] = JSON.parse((fr.result as string));
         dispatch(receivedTransactionsFromDropbox(transactions));
       });

@@ -16,9 +16,9 @@ interface ITransactionsTableSumRowProps extends WithStyles<typeof rowStyles> {
 interface ITransactionsTableSumRowState {
 }
 const TransactionsTableHeadingRow = withStyles(rowStyles)(
-    class extends React.Component<ITransactionsTableSumRowProps, ITransactionsTableSumRowState> {
+    class Component extends React.Component<ITransactionsTableSumRowProps, ITransactionsTableSumRowState> {
 
-      public render(): React.ReactElement<object> {
+      public render(): React.ReactElement<Record<string, unknown>> {
         let classes = this.props.classes;
 
         return (

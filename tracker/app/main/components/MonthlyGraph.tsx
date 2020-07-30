@@ -4,7 +4,7 @@ import * as React from 'react';
 import { Chart } from 'react-google-charts';
 import { GoogleDataTableCell } from 'react-google-charts/dist/types';
 
-const styles = (theme: Theme) => createStyles({
+const styles = (_theme: Theme) => createStyles({
   root: {
     flex: '0 1 400px',
     padding: '8px 16px',
@@ -21,9 +21,9 @@ interface IMonthlyGraphProps extends WithStyles<typeof styles> {
 interface IMonthlyGraphState {
 }
 const MonthlyGraph = withStyles(styles)(
-    class extends React.Component<IMonthlyGraphProps, IMonthlyGraphState> {
+    class Component extends React.Component<IMonthlyGraphProps, IMonthlyGraphState> {
 
-      public render(): React.ReactElement<object> {
+      public render(): React.ReactElement<Record<string, unknown>> {
         let classes = this.props.classes;
 
         return (
