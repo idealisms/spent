@@ -73,7 +73,6 @@ interface IAddTransactionDialogState {
   description: string;
   tags: string[];
   notes: string;
-
 }
 const AddTransactionDialog = withStyles(styles)(
     class Component extends React.Component<IAddTransactionDialogProps, IAddTransactionDialogState> {
