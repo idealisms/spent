@@ -23,8 +23,13 @@ function* screenshotFilename() {
 
 async function getFrameMatchingUrl(page, urlSubstring) {
   for (let frame of page.frames()) {
+    // Sometimes calls to get the frame title hang (maybe the frame isn't
+    // fully created?). Skip those frames (they won't have a url).
+    if (frame.url().length == 0) {
+      continue;
+    }
     let title = await frame.title();
-    let fullUrl = await frame.evaluate('window.location.href');
+    let fullUrl = frame.url();
     console.log(`  ${title}: ${fullUrl}`);
     if (fullUrl.indexOf(urlSubstring) != -1) {
       return frame;
