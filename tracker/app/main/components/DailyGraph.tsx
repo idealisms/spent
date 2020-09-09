@@ -344,7 +344,7 @@ const DailyGraph = withStyles(styles)(
         // We want the y-axis on the right side only. To do this, we create a
         // fake data set for the left y-axis.
         let dataAsRows: [Date, number | null, number, string][] = [];
-        let currentTotal = this.props.spendTarget.startBalanceCents;
+        let currentTotal = -this.props.spendTarget.startBalanceCents;
         for (
           let m = moment(dates[0]);
           m.isSameOrBefore(moment(dates[dates.length - 1]));
@@ -353,7 +353,7 @@ const DailyGraph = withStyles(styles)(
           let currentDate = m.format('YYYY-MM-DD');
           let toolTipHtml = '<table>';
           for (let transaction of dataMapByDate[currentDate]) {
-            currentTotal += transaction.amountCents;
+            currentTotal -= transaction.amountCents;
             let amount = TransactionUtils.formatAmountNumber(
                 transaction.amountCents
             );
