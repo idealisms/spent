@@ -15,7 +15,7 @@
     "start:deno:prod": "NODE_ENV=production deno run --allow-net --allow-env --allow-read=build server/server.ts",
     "test": "npm run clean && jest",
     "test:watch": "npm test -- --watch",
-    "lint": "eslint -c .eslintrc.js --ext .ts,.tsx app"
+    "prettier": "prettier --write . && eslint -c .eslintrc.js --fix --ext .ts,.tsx app"
   },
   "bugs": {
     "url": "https://github.com/idealisms/spent/issues"
@@ -66,6 +66,7 @@
     "express": "^4.15.3",
     "html-webpack-plugin": "^3.2.0",
     "jest": "^24.9.0",
+    "prettier": "^2.1.1",
     "react-hot-loader": "^3.1.3",
     "react-test-renderer": "^16.2.0",
     "react-transform-catch-errors": "^1.0.2",
@@ -110,5 +111,9 @@
   },
   "resolutions": {
     "dot-prop": "^5.1.1"
+  },
+  "prettier": {
+    "singleQuote": true,
+    "arrowParens": "avoid"
   }
 }
