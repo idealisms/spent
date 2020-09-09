@@ -53,9 +53,9 @@ export const TAG_TO_CATEGORY: Map<string, Category> = new Map([
   ['flowers', Category.HomeAndElectronics],
   ['furniture', Category.HomeAndElectronics],
   ['household goods', Category.HomeAndElectronics],
-  ['printing', Category.HomeAndElectronics],  // Or maybe RecurringExpenses renamed as ServiceFee?
+  ['printing', Category.HomeAndElectronics], // Or maybe RecurringExpenses renamed as ServiceFee?
   ['plants', Category.HomeAndElectronics],
-  ['shipping', Category.HomeAndElectronics],  // Or maybe RecurringExpenses renamed as ServiceFee?
+  ['shipping', Category.HomeAndElectronics], // Or maybe RecurringExpenses renamed as ServiceFee?
   ['credit card reward', Category.Income],
   ['dividend', Category.Income],
   ['income', Category.Income],

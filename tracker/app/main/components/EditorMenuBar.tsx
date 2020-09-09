@@ -16,23 +16,23 @@ import * as Transactions from '../../transactions';
 import { CloudState } from '../Model';
 import MenuBarWithDrawer from './MenuBarWithDrawer';
 
-const styles = (_theme: Theme) => createStyles({
-  tooltip: {
-    marginLeft: '36px',
-  },
-  whiteIconButton: {
-    '& svg': {
-      fill: '#fff',
-      color: '#fff',
+const styles = (_theme: Theme) =>
+  createStyles({
+    tooltip: {
+      marginLeft: '36px',
     },
-  },
-  appBar: {
-  },
-  appBarSelected: {
-    backgroundColor: '#fff',
-    color: 'rgba(0, 0, 0, .54)',
-  },
-});
+    whiteIconButton: {
+      '& svg': {
+        fill: '#fff',
+        color: '#fff',
+      },
+    },
+    appBar: {},
+    appBarSelected: {
+      backgroundColor: '#fff',
+      color: 'rgba(0, 0, 0, .54)',
+    },
+  });
 
 interface IEditorMenuBarProps extends WithStyles<typeof styles> {
   title: string;
@@ -41,10 +41,16 @@ interface IEditorMenuBarProps extends WithStyles<typeof styles> {
   onSaveClick: () => void;
   onSelectedBackClick: () => void;
   onSelectedEditSaveClick: (transaction: Transactions.ITransaction) => void;
-  onSelectedBatchEditTagsSaveClick: (updatedTransactions: Transactions.ITransaction[]) => void;
+  onSelectedBatchEditTagsSaveClick: (
+    updatedTransactions: Transactions.ITransaction[]
+  ) => void;
   onSelectedMergeSaveClick: (transaction: Transactions.ITransaction) => void;
-  onSelectedDeleteClick: (transactions: Map<string, Transactions.ITransaction>) => void;
-  onSelectedSplitSaveClick: (transactions: Map<string, Transactions.ITransaction>) => void;
+  onSelectedDeleteClick: (
+    transactions: Map<string, Transactions.ITransaction>
+  ) => void;
+  onSelectedSplitSaveClick: (
+    transactions: Map<string, Transactions.ITransaction>
+  ) => void;
 }
 
 interface IEditorMenuBarState {
@@ -56,8 +62,10 @@ interface IEditorMenuBarState {
 
 // TODO: Create new ReportMenuBar and rename this to EditorMenuBar.
 const EditorMenuBar = withStyles(styles)(
-    class Component extends React.Component<IEditorMenuBarProps, IEditorMenuBarState> {
-
+    class Component extends React.Component<
+    IEditorMenuBarProps,
+    IEditorMenuBarState
+    > {
       constructor(props: IEditorMenuBarProps, context?: any) {
         super(props, context);
         this.state = {
@@ -70,7 +78,9 @@ const EditorMenuBar = withStyles(styles)(
 
       public render(): JSX.Element {
         let classes = this.props.classes;
-        let selectedTransactionsArray = this.props.selectedTransactions ? [...this.props.selectedTransactions.values()] : [];
+        let selectedTransactionsArray = this.props.selectedTransactions
+          ? [...this.props.selectedTransactions.values()]
+          : [];
 
         let numSelectedTransactions = selectedTransactionsArray.length;
         let title = this.props.title;
@@ -80,92 +90,144 @@ const EditorMenuBar = withStyles(styles)(
           title = numSelectedTransactions + ' items';
         }
 
-        let iconElementLeft = numSelectedTransactions
-          ? <IconButton onClick={() => {
-            if (this.props.onSelectedBackClick) {
-              this.props.onSelectedBackClick();
-            }
-          }}>
+        let iconElementLeft = numSelectedTransactions ? (
+          <IconButton
+            onClick={() => {
+              if (this.props.onSelectedBackClick) {
+                this.props.onSelectedBackClick();
+              }
+            }}
+          >
             <ArrowBackIcon />
           </IconButton>
-          : undefined;
+        ) : undefined;
 
-        let iconElementRight = numSelectedTransactions
-          ? <span>
-            <Tooltip classes={{tooltip: classes.tooltip}} title='Edit'><span><IconButton
-              disabled={numSelectedTransactions > 1}
-              onClick={this.handleShowEditDialog}
-            ><EditIcon /></IconButton></span>
+        let iconElementRight = numSelectedTransactions ? (
+          <span>
+            <Tooltip classes={{ tooltip: classes.tooltip }} title="Edit">
+              <span>
+                <IconButton
+                  disabled={numSelectedTransactions > 1}
+                  onClick={this.handleShowEditDialog}
+                >
+                  <EditIcon />
+                </IconButton>
+              </span>
             </Tooltip>
-            <Tooltip classes={{tooltip: classes.tooltip}} title='Batch Edit Tags'><span><IconButton
-              disabled={numSelectedTransactions === 1}
-              onClick={this.handleShowBatchEditTagsDialog}
-            ><LabelIcon /></IconButton></span>
+            <Tooltip
+              classes={{ tooltip: classes.tooltip }}
+              title="Batch Edit Tags"
+            >
+              <span>
+                <IconButton
+                  disabled={numSelectedTransactions === 1}
+                  onClick={this.handleShowBatchEditTagsDialog}
+                >
+                  <LabelIcon />
+                </IconButton>
+              </span>
             </Tooltip>
-            <Tooltip classes={{tooltip: classes.tooltip}} title='Merge'><span><IconButton
-              disabled={numSelectedTransactions === 1}
-              onClick={this.handleShowMergeDialog}
-            ><CallMergeIcon /></IconButton></span>
+            <Tooltip classes={{ tooltip: classes.tooltip }} title="Merge">
+              <span>
+                <IconButton
+                  disabled={numSelectedTransactions === 1}
+                  onClick={this.handleShowMergeDialog}
+                >
+                  <CallMergeIcon />
+                </IconButton>
+              </span>
             </Tooltip>
-            <Tooltip classes={{tooltip: classes.tooltip}} title='Split'><span><IconButton
-              disabled={numSelectedTransactions > 1}
-              onClick={this.handleShowSplitDialog}
-            ><CallSplitIcon /></IconButton></span>
+            <Tooltip classes={{ tooltip: classes.tooltip }} title="Split">
+              <span>
+                <IconButton
+                  disabled={numSelectedTransactions > 1}
+                  onClick={this.handleShowSplitDialog}
+                >
+                  <CallSplitIcon />
+                </IconButton>
+              </span>
             </Tooltip>
-            <Tooltip title='Delete' placement='bottom-end'><IconButton
-              onClick={() => {
-                if (this.props.onSelectedDeleteClick && this.props.selectedTransactions) {
-                  this.props.onSelectedDeleteClick(this.props.selectedTransactions);
-                }
-              }}
-            ><DeleteIcon /></IconButton>
+            <Tooltip title="Delete" placement="bottom-end">
+              <IconButton
+                onClick={() => {
+                  if (
+                    this.props.onSelectedDeleteClick &&
+                  this.props.selectedTransactions
+                  ) {
+                    this.props.onSelectedDeleteClick(
+                        this.props.selectedTransactions
+                    );
+                  }
+                }}
+              >
+                <DeleteIcon />
+              </IconButton>
             </Tooltip>
           </span>
-          : <span>
+        ) : (
+          <span>
             <IconButton
               className={classes.whiteIconButton}
               disabled={this.props.cloudState != CloudState.Modified}
-              onClick={this.props.onSaveClick}>{
-                this.props.cloudState == CloudState.Modified ? <CloudUploadIcon /> :
-                  (this.props.cloudState == CloudState.Uploading
-                    ? <CircularProgress size={24} thickness={4} />
-                    : <CloudDoneIcon />)
-              }</IconButton>
-          </span>;
+              onClick={this.props.onSaveClick}
+            >
+              {this.props.cloudState == CloudState.Modified ? (
+                <CloudUploadIcon />
+              ) : this.props.cloudState == CloudState.Uploading ? (
+                <CircularProgress size={24} thickness={4} />
+              ) : (
+                <CloudDoneIcon />
+              )}
+            </IconButton>
+          </span>
+        );
 
         return (
           <React.Fragment>
             <MenuBarWithDrawer
-              classes={{appBar: numSelectedTransactions ? classes.appBarSelected
-                : classes.appBar}}
+              classes={{
+                appBar: numSelectedTransactions
+                  ? classes.appBarSelected
+                  : classes.appBar,
+              }}
               title={title}
               iconElementLeft={iconElementLeft}
               iconElementRight={iconElementRight}
             />
-            {this.state.isEditDialogOpen && this.props.selectedTransactions ?
+            {this.state.isEditDialogOpen && this.props.selectedTransactions ? (
               <Transactions.EditTransactionDialog
-                transaction={this.props.selectedTransactions.values().next().value}
-                onClose={() => this.setState({isEditDialogOpen: false})}
+                transaction={
+                  this.props.selectedTransactions.values().next().value
+                }
+                onClose={() => this.setState({ isEditDialogOpen: false })}
                 onSaveChanges={this.props.onSelectedEditSaveClick}
-              /> : undefined}
-            {this.state.isBatchEditTagsDialogOpen ?
+              />
+            ) : undefined}
+            {this.state.isBatchEditTagsDialogOpen ? (
               <Transactions.BatchEditTagsDialog
                 transactions={selectedTransactionsArray}
-                onClose={() => this.setState({isBatchEditTagsDialogOpen: false})}
+                onClose={() =>
+                  this.setState({ isBatchEditTagsDialogOpen: false })
+                }
                 onSaveChanges={this.props.onSelectedBatchEditTagsSaveClick}
-              /> : undefined}
-            {this.state.isMergeDialogOpen ?
+              />
+            ) : undefined}
+            {this.state.isMergeDialogOpen ? (
               <Transactions.MergeTransactionDialog
                 transactions={selectedTransactionsArray}
-                onClose={() => this.setState({isMergeDialogOpen: false})}
+                onClose={() => this.setState({ isMergeDialogOpen: false })}
                 onSaveChanges={this.props.onSelectedMergeSaveClick}
-              /> : undefined}
-            {this.state.isSplitDialogOpen && this.props.selectedTransactions ?
+              />
+            ) : undefined}
+            {this.state.isSplitDialogOpen && this.props.selectedTransactions ? (
               <Transactions.SplitTransactionDialog
-                transaction={this.props.selectedTransactions.values().next().value}
-                onClose={() => this.setState({isSplitDialogOpen: false})}
+                transaction={
+                  this.props.selectedTransactions.values().next().value
+                }
+                onClose={() => this.setState({ isSplitDialogOpen: false })}
                 onSaveChanges={this.props.onSelectedSplitSaveClick}
-              /> : undefined}
+              />
+            ) : undefined}
           </React.Fragment>
         );
       }
@@ -205,6 +267,7 @@ const EditorMenuBar = withStyles(styles)(
           isSplitDialogOpen: true,
         });
       };
-    });
+    }
+);
 
 export default EditorMenuBar;

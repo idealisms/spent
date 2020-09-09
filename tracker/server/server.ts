@@ -2,12 +2,7 @@ import { Application, send } from 'https://deno.land/x/oak/mod.ts';
 import { FileWatcher } from './fileWatcher.ts';
 
 // Valid paths for our single page app.
-const paths = [
-  '/daily',
-  '/monthly',
-  '/editor',
-  '/report',
-];
+const paths = ['/daily', '/monthly', '/editor', '/report'];
 
 const isDev = Deno.env.get('NODE_ENV') == 'development';
 
@@ -27,8 +22,11 @@ const app = new Application();
 // app.use(router.routes());
 // app.use(router.allowedMethods());
 
-app.use(async (ctx) => {
-  const path = paths.indexOf(ctx.request.url.pathname) != -1 ? '/' : ctx.request.url.pathname;
+app.use(async ctx => {
+  const path =
+    paths.indexOf(ctx.request.url.pathname) != -1
+      ? '/'
+      : ctx.request.url.pathname;
   // TODO: If isDev, inject JS into the index.html file.
   await send(ctx, path, {
     root: './build',
@@ -36,7 +34,7 @@ app.use(async (ctx) => {
   });
 });
 
-app.use((ctx) => {
+app.use(ctx => {
   ctx.response.body = 'not found';
 });
 

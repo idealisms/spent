@@ -13,96 +13,91 @@ https://github.com/typescript-eslint/tslint-to-eslint-config/blob/master/docs/FA
 Happy linting! 💖
 */
 module.exports = {
-  'env': {
-    'browser': true,
-    'es6': true,
+  env: {
+    browser: true,
+    es6: true,
   },
-  'extends': [
+  extends: [
     'eslint:recommended',
     'plugin:@typescript-eslint/eslint-recommended',
     'plugin:@typescript-eslint/recommended',
     'plugin:react/recommended',
   ],
-  'parser': '@typescript-eslint/parser',
-  'parserOptions': {
-    'sourceType': 'module',
+  parser: '@typescript-eslint/parser',
+  parserOptions: {
+    sourceType: 'module',
   },
-  'plugins': [
-    '@typescript-eslint',
-  ],
-  'rules': {
+  plugins: ['@typescript-eslint'],
+  rules: {
     '@typescript-eslint/naming-convention': [
       'error',
       {
-        'selector': 'default',
-        'format': ['camelCase'],
+        selector: 'default',
+        format: ['camelCase'],
       },
       {
-        'selector': 'variable',
-        'format': [
+        selector: 'variable',
+        format: [
           'camelCase',
-          'PascalCase',  // variables that represent a class/component.
+          'PascalCase', // variables that represent a class/component.
         ],
       },
       {
-        'selector': 'variable',
-        'modifiers': ['const'],
-        'format': ['UPPER_CASE', 'camelCase', 'PascalCase'],
+        selector: 'variable',
+        modifiers: ['const'],
+        format: ['UPPER_CASE', 'camelCase', 'PascalCase'],
       },
       {
-        'selector': 'parameter',
-        'format': ['camelCase'],
+        selector: 'parameter',
+        format: ['camelCase'],
         leadingUnderscore: 'allow',
       },
       {
-        'selector': 'property',
-        'format': [
+        selector: 'property',
+        format: [
           'camelCase',
-          'snake_case',  // compat with the transactions.json file format.
-          'PascalCase',  // Some CSS/HTML properties
+          'snake_case', // compat with the transactions.json file format.
+          'PascalCase', // Some CSS/HTML properties
         ],
       },
       {
-        'selector': 'property',
-        'modifiers': ['readonly'],
-        'format': [
-          'UPPER_CASE',  // Some CSS/HTML properties
+        selector: 'property',
+        modifiers: ['readonly'],
+        format: [
+          'UPPER_CASE', // Some CSS/HTML properties
         ],
       },
       {
-        'selector': 'class',
-        'format': ['PascalCase'],
+        selector: 'class',
+        format: ['PascalCase'],
       },
       {
-        'selector': 'interface',
-        'format': ['PascalCase'],
-        'custom': {
-          'regex': '^I[A-Z]',
-          'match': true,
+        selector: 'interface',
+        format: ['PascalCase'],
+        custom: {
+          regex: '^I[A-Z]',
+          match: true,
         },
       },
       {
-        'selector': 'enum',
-        'format': ['PascalCase'],
+        selector: 'enum',
+        format: ['PascalCase'],
       },
       {
-        'selector': 'enumMember',
-        'format': ['UPPER_CASE', 'PascalCase'],
+        selector: 'enumMember',
+        format: ['UPPER_CASE', 'PascalCase'],
       },
       {
-        'selector': 'typeAlias',
-        'format': [
-          'PascalCase',
-          'camelCase',
-        ],
+        selector: 'typeAlias',
+        format: ['PascalCase', 'camelCase'],
       },
     ],
     '@typescript-eslint/explicit-member-accessibility': [
       'error',
       {
-        'accessibility': 'explicit',
-        'overrides': {
-          'constructors': 'no-public',
+        accessibility: 'explicit',
+        overrides: {
+          constructors: 'no-public',
         },
       },
     ],
@@ -110,21 +105,19 @@ module.exports = {
       'error',
       2,
       {
-        'CallExpression': {
-          'arguments': 2,
+        CallExpression: {
+          arguments: 2,
         },
-        'FunctionDeclaration': {
-          'parameters': 2,
+        FunctionDeclaration: {
+          parameters: 2,
         },
-        'FunctionExpression': {
-          'parameters': 2,
+        FunctionExpression: {
+          parameters: 2,
         },
-        'SwitchCase': 1,
+        SwitchCase: 1,
       },
     ],
-    '@typescript-eslint/member-delimiter-style': [
-      'error',
-    ],
+    '@typescript-eslint/member-delimiter-style': ['error'],
     '@typescript-eslint/member-ordering': 'error',
     '@typescript-eslint/no-empty-function': 'error',
     '@typescript-eslint/no-explicit-any': 'off',
@@ -132,8 +125,9 @@ module.exports = {
     '@typescript-eslint/no-require-imports': 'off',
     '@typescript-eslint/no-unused-expressions': 'error',
     '@typescript-eslint/no-unused-vars': [
-      'warn', {
-        'argsIgnorePattern': '^_',
+      'warn',
+      {
+        argsIgnorePattern: '^_',
       },
     ],
     '@typescript-eslint/no-var-requires': 'error',
@@ -142,38 +136,27 @@ module.exports = {
       'error',
       'single',
       {
-        'avoidEscape': true,
+        avoidEscape: true,
       },
     ],
-    '@typescript-eslint/semi': [
-      'error',
-    ],
+    '@typescript-eslint/semi': ['error'],
     '@typescript-eslint/no-empty-interface': 'off',
     '@typescript-eslint/type-annotation-spacing': 'error',
     '@typescript-eslint/explicit-module-boundary-types': 'off',
-    'brace-style': [
-      'error',
-      '1tbs',
-    ],
-    'camelcase': 'off',
-    'comma-dangle': [
-      'error',
-      'always-multiline',
-    ],
-    'curly': 'error',
+    'brace-style': ['error', '1tbs'],
+    camelcase: 'off',
+    'comma-dangle': ['error', 'always-multiline'],
+    curly: 'error',
     'default-case': 'error',
     'eol-last': 'error',
-    'eqeqeq': [
-      'off',
-      'smart',
-    ],
+    eqeqeq: ['off', 'smart'],
     'guard-for-in': 'error',
     'id-blacklist': 'off',
     'id-match': 'off',
     'max-len': [
       'error',
       {
-        'code': 140,
+        code: 140,
       },
     ],
     'no-bitwise': 'error',
@@ -182,7 +165,7 @@ module.exports = {
     'no-console': [
       'off',
       {
-        'allow': [
+        allow: [
           'log',
           'dirxml',
           'warn',
@@ -217,7 +200,7 @@ module.exports = {
     'no-shadow': [
       'error',
       {
-        'hoist': 'all',
+        hoist: 'all',
       },
     ],
     'no-trailing-spaces': 'error',
@@ -225,14 +208,12 @@ module.exports = {
     'no-unused-labels': 'error',
     'no-var': 'error',
     'prefer-const': 'off',
-    'radix': 'error',
+    radix: 'error',
     'spaced-comment': [
       'error',
       'always',
       {
-        'markers': [
-          '/',
-        ],
+        markers: ['/'],
       },
     ],
   },

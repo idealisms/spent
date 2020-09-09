@@ -17,19 +17,20 @@ serviceWorker.register();
 
 const history = createBrowserHistory();
 
-const store: Store<IAppState> = (process.env.NODE_ENV !== 'production')
-  ? (require('./store.dev') as any).configureStore(history)  // eslint-disable-line @typescript-eslint/no-var-requires
-  : (require('./store.prod') as any).configureStore(history);  // eslint-disable-line @typescript-eslint/no-var-requires
+const store: Store<IAppState> =
+  process.env.NODE_ENV !== 'production'
+    ? (require('./store.dev') as any).configureStore(history) // eslint-disable-line @typescript-eslint/no-var-requires
+    : (require('./store.prod') as any).configureStore(history); // eslint-disable-line @typescript-eslint/no-var-requires
 
 ReactDOM.render(
     <Provider store={store}>
       <MuiThemeProvider theme={theme}>
         <ConnectedRouter history={history}>
           <MuiPickersUtilsProvider utils={MomentUtils}>
-            <App/>
+            <App />
           </MuiPickersUtilsProvider>
         </ConnectedRouter>
       </MuiThemeProvider>
     </Provider>,
-    document.getElementById('app'),
+    document.getElementById('app')
 );

@@ -7,7 +7,7 @@ export class FileWatcher {
     Deno.run({
       cmd: ['yarn', 'watch'],
     });
-    this.watcher = Deno.watchFs('./build', {recursive: true});
+    this.watcher = Deno.watchFs('./build', { recursive: true });
   }
 
   public async listen() {

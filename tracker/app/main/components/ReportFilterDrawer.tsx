@@ -1,47 +1,57 @@
-import { Button, createStyles, FormControl, InputLabel, MenuItem, Select, TextField, WithStyles } from '@material-ui/core';
+import {
+  Button,
+  createStyles,
+  FormControl,
+  InputLabel,
+  MenuItem,
+  Select,
+  TextField,
+  WithStyles,
+} from '@material-ui/core';
 import { Theme, withStyles } from '@material-ui/core/styles';
 import * as React from 'react';
 import { CloudState, IReportNode } from '../Model';
 import moment = require('moment');
 
-const styles = (_theme: Theme) => createStyles({
-  drawerContents: {
-    padding: '16px',
-  },
-  dateRangeContainer: {
-    display: 'flex',
-  },
-  dateSelect: {
-    flex: '0 1 auto',
-    width: '228px',
-    marginRight: '16px',
-  },
-  compareDateSelect: {
-    flex: '0 1 auto',
-    width: '144px',
-  },
-  compareMenu: {
-    '& li[data-value=""]': {
-      color: 'rgba(0, 0, 0, .54)',
+const styles = (_theme: Theme) =>
+  createStyles({
+    drawerContents: {
+      padding: '16px',
     },
-  },
-  controls: {
-    display: 'flex',
-    marginTop: '16px',
-  },
-  jsonCategoriesInput: {
-    minHeight: '360px',
-    maxHeight: '600px',
-    overflow: 'auto !important',
-  },
-  jsonCategoriesTextField: {
-    width: '100%',
-    marginTop: '16px',
-  },
-  saveButton: {
-    marginTop: '16px',
-  },
-});
+    dateRangeContainer: {
+      display: 'flex',
+    },
+    dateSelect: {
+      flex: '0 1 auto',
+      width: '228px',
+      marginRight: '16px',
+    },
+    compareDateSelect: {
+      flex: '0 1 auto',
+      width: '144px',
+    },
+    compareMenu: {
+      '& li[data-value=""]': {
+        color: 'rgba(0, 0, 0, .54)',
+      },
+    },
+    controls: {
+      display: 'flex',
+      marginTop: '16px',
+    },
+    jsonCategoriesInput: {
+      minHeight: '360px',
+      maxHeight: '600px',
+      overflow: 'auto !important',
+    },
+    jsonCategoriesTextField: {
+      width: '100%',
+      marginTop: '16px',
+    },
+    saveButton: {
+      marginTop: '16px',
+    },
+  });
 
 export interface IDateRange {
   name: string;
@@ -65,13 +75,14 @@ interface IReportFilterDrawerProps extends WithStyles<typeof styles> {
   setCategoriesPretty: (categoriesPretty: string) => void;
 }
 
-interface IReportFilterDrawerState {
-}
+interface IReportFilterDrawerState {}
 
 export const ReportFilterDrawer = withStyles(styles)(
-    class Component extends React.Component<IReportFilterDrawerProps, IReportFilterDrawerState> {
-
-      private readonly START_YEAR: number = 2018;  // TODO: Move this to settings.
+    class Component extends React.Component<
+    IReportFilterDrawerProps,
+    IReportFilterDrawerState
+    > {
+      private readonly START_YEAR: number = 2018; // TODO: Move this to settings.
 
       constructor(props: IReportFilterDrawerProps, context?: any) {
         super(props, context);
@@ -82,31 +93,49 @@ export const ReportFilterDrawer = withStyles(styles)(
 
         let dateOptions = this.getDateOptions();
         let compareDateOptions = this.getCompareDateOptions(
-            this.props.dateRange.startDate, this.props.dateRange.endDate);
+            this.props.dateRange.startDate,
+            this.props.dateRange.endDate
+        );
 
         return (
           <div className={classes.drawerContents}>
             <div className={classes.dateRangeContainer}>
               <FormControl className={classes.dateSelect}>
-                <InputLabel htmlFor='date-select'>Date Range</InputLabel>
+                <InputLabel htmlFor="date-select">Date Range</InputLabel>
                 <Select
                   value={this.props.dateRange.name}
-                  onChange={(event: React.ChangeEvent<any>) => this.handleDateChange(
-                      event.target.value, this.props.compareDateRange && this.props.compareDateRange.name)}
+                  onChange={(event: React.ChangeEvent<any>) =>
+                    this.handleDateChange(
+                        event.target.value,
+                        this.props.compareDateRange &&
+                      this.props.compareDateRange.name
+                    )
+                  }
                   inputProps={{
                     id: 'date-select',
                   }}
                 >
-                  {dateOptions.map((dateOption) => (
-                    <MenuItem key={dateOption.name} value={dateOption.name}>{dateOption.description}</MenuItem>
+                  {dateOptions.map(dateOption => (
+                    <MenuItem key={dateOption.name} value={dateOption.name}>
+                      {dateOption.description}
+                    </MenuItem>
                   ))}
                 </Select>
               </FormControl>
               <FormControl className={classes.compareDateSelect}>
-                <InputLabel htmlFor='compare-date-select'>Compare To</InputLabel>
+                <InputLabel htmlFor="compare-date-select">Compare To</InputLabel>
                 <Select
-                  value={this.props.compareDateRange ? this.props.compareDateRange.name : ''}
-                  onChange={(event: React.ChangeEvent<any>) => this.handleDateChange(this.props.dateRange.name, event.target.value.trim())}
+                  value={
+                    this.props.compareDateRange
+                      ? this.props.compareDateRange.name
+                      : ''
+                  }
+                  onChange={(event: React.ChangeEvent<any>) =>
+                    this.handleDateChange(
+                        this.props.dateRange.name,
+                        event.target.value.trim()
+                    )
+                  }
                   inputProps={{
                     id: 'compare-date-select',
                   }}
@@ -115,46 +144,54 @@ export const ReportFilterDrawer = withStyles(styles)(
                   }}
                   disabled={!compareDateOptions.length}
                 >
-                  {compareDateOptions.map((dateOption) => (
-                    <MenuItem key={dateOption.name} value={dateOption.name}>{dateOption.description}</MenuItem>
+                  {compareDateOptions.map(dateOption => (
+                    <MenuItem key={dateOption.name} value={dateOption.name}>
+                      {dateOption.description}
+                    </MenuItem>
                   ))}
                 </Select>
               </FormControl>
             </div>
             <div className={classes.controls}>
               <TextField
-                label='Start date'
-                value={moment(this.props.dateRange.startDate).format('YYYY-MM-DD')}
+                label="Start date"
+                value={moment(this.props.dateRange.startDate).format(
+                    'YYYY-MM-DD'
+                )}
                 disabled
               />
               <TextField
-                label='End date'
+                label="End date"
                 value={moment(this.props.dateRange.endDate).format('YYYY-MM-DD')}
-                style={{marginLeft: '24px'}}
+                style={{ marginLeft: '24px' }}
                 disabled
               />
             </div>
             <TextField
               className={classes.jsonCategoriesTextField}
-              InputProps={{classes: {
-                input: classes.jsonCategoriesInput,
-              }}}
-              label='categories'
-              placeholder='e.g., {}'
+              InputProps={{
+                classes: {
+                  input: classes.jsonCategoriesInput,
+                },
+              }}
+              label="categories"
+              placeholder="e.g., {}"
               multiline
-              variant='outlined'
+              variant="outlined"
               value={this.props.categoriesPretty}
               onChange={this.handleChangeReportJson}
             />
             <Button
-              variant='contained'
-              color='primary'
+              variant="contained"
+              color="primary"
               className={classes.saveButton}
               disabled={this.props.settingsCloudState == CloudState.Done}
-              onClick={this.props.saveSettings}>
-          Save
+              onClick={this.props.saveSettings}
+            >
+            Save
             </Button>
-          </div>);
+          </div>
+        );
       }
       public handleDateChange = (name: string, compareName?: string) => {
         let dateOptions = this.getDateOptions();
@@ -163,7 +200,9 @@ export const ReportFilterDrawer = withStyles(styles)(
             let compareDateOption;
             if (compareName) {
               let compareDateOptions = this.getCompareDateOptions(
-                  dateOption.startDate, dateOption.endDate);
+                  dateOption.startDate,
+                  dateOption.endDate
+              );
               for (let cDateOption of compareDateOptions) {
                 if (cDateOption.name == compareName) {
                   compareDateOption = cDateOption;
@@ -178,24 +217,26 @@ export const ReportFilterDrawer = withStyles(styles)(
         }
       };
 
-      public handleChangeReportJson = (event: React.ChangeEvent<HTMLTextAreaElement>): void => {
+      public handleChangeReportJson = (
+          event: React.ChangeEvent<HTMLTextAreaElement>
+      ): void => {
         let categoriesPretty = event.target.value;
         let categories;
         try {
           categories = JSON.parse(categoriesPretty);
           this.props.updateReportCategories(categories);
         } catch (e) {
-          // If there's a parse error, don't update categories.
+        // If there's a parse error, don't update categories.
         }
         this.props.setCategoriesPretty(categoriesPretty);
       };
 
       /**
-   * Returns a list of options for the date selector.
-   *
-   * The names include 'thisyear', 'lastyear', 'YYYY', 'lastmonth',
-   * 'thismonth', 'last30', 'lastweek', 'last7', 'YYYYQq', 'last90'.
-   */
+     * Returns a list of options for the date selector.
+     *
+     * The names include 'thisyear', 'lastyear', 'YYYY', 'lastmonth',
+     * 'thismonth', 'last30', 'lastweek', 'last7', 'YYYYQq', 'last90'.
+     */
       private getDateOptions = () => {
         let dateOptions: IDateOption[] = [];
         const lastDay = moment().subtract(1, 'day').startOf('day');
@@ -231,7 +272,10 @@ export const ReportFilterDrawer = withStyles(styles)(
           chartColumnName: lastDay.clone().subtract(1, 'month').format('YYYY/MM'),
           startDate: lastDay.clone().subtract(1, 'month').date(1),
           endDate: lastDay.clone().date(1).subtract(1, 'day'),
-          description: `Last month (${lastDay.clone().subtract(1, 'month').format('MMM YYYY')})`,
+          description: `Last month (${lastDay
+            .clone()
+            .subtract(1, 'month')
+            .format('MMM YYYY')})`,
         });
         // Month to date (May 2019)
         dateOptions.push({
@@ -244,7 +288,10 @@ export const ReportFilterDrawer = withStyles(styles)(
         // Last 30 days
         dateOptions.push({
           name: 'last30',
-          chartColumnName: `${lastDay.clone().subtract(29, 'day').format('MMM D')} to ${lastDay.format('MMM D')}`,
+          chartColumnName: `${lastDay
+            .clone()
+            .subtract(29, 'day')
+            .format('MMM D')} to ${lastDay.format('MMM D')}`,
           startDate: lastDay.clone().subtract(29, 'day'),
           endDate: lastDay.clone(),
           description: 'Last 30 days',
@@ -253,7 +300,9 @@ export const ReportFilterDrawer = withStyles(styles)(
         const lastSunday = lastDay.clone().day(-7);
         dateOptions.push({
           name: 'lastweek',
-          chartColumnName: `${lastSunday.format('MMM D')} to ${lastDay.clone().add(6, 'day').format('MMM D')}`,
+          chartColumnName: `${lastSunday.format(
+              'MMM D'
+          )} to ${lastDay.clone().add(6, 'day').format('MMM D')}`,
           startDate: lastSunday,
           endDate: lastSunday.clone().add(6, 'day'),
           description: 'Last week (Sun - Sat)',
@@ -261,7 +310,10 @@ export const ReportFilterDrawer = withStyles(styles)(
         // Last 7 days
         dateOptions.push({
           name: 'last7',
-          chartColumnName: `${lastDay.clone().subtract(6, 'day').format('MMM D')} to ${lastDay.format('MMM D')}`,
+          chartColumnName: `${lastDay
+            .clone()
+            .subtract(6, 'day')
+            .format('MMM D')} to ${lastDay.format('MMM D')}`,
           startDate: lastDay.clone().subtract(6, 'day'),
           endDate: lastDay,
           description: 'Last 7 days',
@@ -270,8 +322,15 @@ export const ReportFilterDrawer = withStyles(styles)(
         for (let year = lastDay.year(); year >= this.START_YEAR; year--) {
           for (let quarter = 3; quarter >= 0; quarter--) {
             let startMonth = quarter * 3;
-            let startDate = moment().year(year).month(startMonth).date(1).startOf('day');
-            let endDate = startDate.clone().month(startMonth + 3).subtract(1, 'day');
+            let startDate = moment()
+              .year(year)
+              .month(startMonth)
+              .date(1)
+              .startOf('day');
+            let endDate = startDate
+              .clone()
+              .month(startMonth + 3)
+              .subtract(1, 'day');
             if (endDate.isAfter(lastDay)) {
               continue;
             }
@@ -288,7 +347,10 @@ export const ReportFilterDrawer = withStyles(styles)(
         // Last 90 days
         dateOptions.push({
           name: 'last90',
-          chartColumnName: `${lastDay.clone().subtract(89, 'day').format('MMM D')} to ${lastDay.format('MMM D')}`,
+          chartColumnName: `${lastDay
+            .clone()
+            .subtract(89, 'day')
+            .format('MMM D')} to ${lastDay.format('MMM D')}`,
           startDate: lastDay.clone().subtract(89, 'day'),
           endDate: lastDay,
           description: 'Last 90 days',
@@ -298,16 +360,22 @@ export const ReportFilterDrawer = withStyles(styles)(
       };
 
       /**
-   * Returns a list of date options that we can compare against.
-   * We can only do comparisons across years or quarters.
-   */
-      private getCompareDateOptions = (startDate: moment.Moment, endDate: moment.Moment) => {
+     * Returns a list of date options that we can compare against.
+     * We can only do comparisons across years or quarters.
+     */
+      private getCompareDateOptions = (
+          startDate: moment.Moment,
+          endDate: moment.Moment
+      ) => {
         let dateOptions: IDateOption[] = [];
         const lastDay = moment().subtract(1, 'day').startOf('day');
 
-        if (startDate.year() == endDate.year() && startDate.dayOfYear() == 1 &&
-        endDate.clone().add(1, 'day').dayOfYear() == 1) {
-          // Create entries for year comparisons.
+        if (
+          startDate.year() == endDate.year() &&
+        startDate.dayOfYear() == 1 &&
+        endDate.clone().add(1, 'day').dayOfYear() == 1
+        ) {
+        // Create entries for year comparisons.
           for (let year = lastDay.year() - 1; year >= this.START_YEAR; year--) {
             if (year == startDate.year()) {
               continue;
@@ -320,15 +388,31 @@ export const ReportFilterDrawer = withStyles(styles)(
               description: year.toString(),
             });
           }
-        } else if (startDate.month() % 3 == 0 && startDate.date() == 1 &&
-        endDate.isSame(startDate.clone().add(3, 'month').subtract(1, 'day'), 'day')) {
-          // Create entries for quarter comparisons
+        } else if (
+          startDate.month() % 3 == 0 &&
+        startDate.date() == 1 &&
+        endDate.isSame(
+            startDate.clone().add(3, 'month').subtract(1, 'day'),
+            'day'
+        )
+        ) {
+        // Create entries for quarter comparisons
           for (let year = lastDay.year(); year >= this.START_YEAR; year--) {
             for (let quarter = 3; quarter >= 0; quarter--) {
               let startMonth = quarter * 3;
-              let compareStartDate =  moment().year(year).month(startMonth).date(1).startOf('day');
-              let compareEndDate = compareStartDate.clone().month(startMonth + 3).subtract(1, 'day');
-              if (compareEndDate.isAfter(lastDay) || compareEndDate.isSame(endDate, 'day')) {
+              let compareStartDate = moment()
+                .year(year)
+                .month(startMonth)
+                .date(1)
+                .startOf('day');
+              let compareEndDate = compareStartDate
+                .clone()
+                .month(startMonth + 3)
+                .subtract(1, 'day');
+              if (
+                compareEndDate.isAfter(lastDay) ||
+              compareEndDate.isSame(endDate, 'day')
+              ) {
                 continue;
               }
 
@@ -356,7 +440,7 @@ export const ReportFilterDrawer = withStyles(styles)(
 
         return dateOptions;
       };
-
-    });
+    }
+);
 
 export default ReportFilterDrawer;

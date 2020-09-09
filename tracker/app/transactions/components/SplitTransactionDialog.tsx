@@ -12,23 +12,24 @@ import { compareTransactions, generateUUID } from '../utils';
 import Transaction from './Transaction';
 import TransactionsTable from './TransactionsTable';
 
-const styles = (_theme: Theme) => createStyles({
-  amount: {
-    flex: '0 0 80px',
-    // This fixes the vertical alignment of the input.
-    paddingTop: '8px',
-    '& input': {
-      textAlign: 'right',
+const styles = (_theme: Theme) =>
+  createStyles({
+    amount: {
+      flex: '0 0 80px',
+      // This fixes the vertical alignment of the input.
+      paddingTop: '8px',
+      '& input': {
+        textAlign: 'right',
+      },
     },
-  },
-  dialogContent: {
-    padding: 0,
-    margin: '0 24px 24px',
-  },
-  transactionRow: {
-    borderBottom: 'none',
-  },
-});
+    dialogContent: {
+      padding: 0,
+      margin: '0 24px 24px',
+    },
+    transactionRow: {
+      borderBottom: 'none',
+    },
+  });
 
 interface ISplitTransactionDialogProps extends WithStyles<typeof styles> {
   transaction: ITransaction;
@@ -45,8 +46,10 @@ type ISplitTransactionDialogState = {
 };
 
 const SplitTransactionDialog = withStyles(styles)(
-    class Component extends React.Component<ISplitTransactionDialogProps, ISplitTransactionDialogState> {
-
+    class Component extends React.Component<
+    ISplitTransactionDialogProps,
+    ISplitTransactionDialogState
+    > {
       constructor(props: ISplitTransactionDialogProps, context?: any) {
         super(props, context);
         let transactions: ISplitTransactionRow[] = [];
@@ -74,14 +77,18 @@ const SplitTransactionDialog = withStyles(styles)(
               original_line: props.transaction.original_line,
               date: props.transaction.date,
               tags: [...props.transaction.tags],
-              amount_cents: props.transaction.amount_cents - Math.round(props.transaction.amount_cents / 2),
+              amount_cents:
+              props.transaction.amount_cents -
+              Math.round(props.transaction.amount_cents / 2),
               transactions: [],
               source: `split:${props.transaction.id}`,
               notes: props.transaction.notes,
             },
           ];
         }
-        transactions.map((t) => t.amountString = this.formatAmountNumeric(t.amount_cents));
+        transactions.map(
+            t => (t.amountString = this.formatAmountNumeric(t.amount_cents))
+        );
 
         this.state = {
           transactions,
@@ -93,13 +100,13 @@ const SplitTransactionDialog = withStyles(styles)(
       public render(): React.ReactElement<Record<string, unknown>> {
         let classes = this.props.classes;
         let totalAmountCents = 0;
-        this.state.transactions.map((t) => totalAmountCents += t.amount_cents);
+        this.state.transactions.map(t => (totalAmountCents += t.amount_cents));
 
         let rows: JSX.Element[] = [];
         for (let transaction of this.state.transactions) {
           rows.push(
               <Transaction
-                classes={{row: classes.transactionRow}}
+                classes={{ row: classes.transactionRow }}
                 transaction={transaction}
                 key={`split-${transaction.id}`}
                 hideDate
@@ -111,34 +118,43 @@ const SplitTransactionDialog = withStyles(styles)(
                       className={classes.amount}
                       value={transaction.amountString}
                       name={transaction.id}
-                      onChange={(event) => this.handleChange(event.target as HTMLInputElement)}
-                      onBlur={(event) => this.handleBlur(event.target as HTMLInputElement)}
-                      disabled={this.state.wasMerged} />
-                  </React.Fragment>}
-              />);
+                      onChange={event =>
+                        this.handleChange(event.target as HTMLInputElement)
+                      }
+                      onBlur={event =>
+                        this.handleBlur(event.target as HTMLInputElement)
+                      }
+                      disabled={this.state.wasMerged}
+                    />
+                  </React.Fragment>
+                }
+              />
+          );
         }
 
-        return <Dialog
-          open
-          onClose={this.props.onClose}
-          scroll='paper'
-        >
-          <DialogTitle>{'Choose transaction to split into'}</DialogTitle>
-          <DialogContent className={classes.dialogContent}>
-            <TransactionsTable>
-              {rows}
-            </TransactionsTable>
-          </DialogContent>
-          <DialogActions>
-            <Button color='primary' onClick={this.props.onClose}>Cancel</Button>
-            <Button
-              color='primary'
-              disabled={this.state.isEditing || (totalAmountCents != this.props.transaction.amount_cents)}
-              onClick={() => this.handleSplit() }>
-            Split
-            </Button>
-          </DialogActions>
-        </Dialog>;
+        return (
+          <Dialog open onClose={this.props.onClose} scroll="paper">
+            <DialogTitle>{'Choose transaction to split into'}</DialogTitle>
+            <DialogContent className={classes.dialogContent}>
+              <TransactionsTable>{rows}</TransactionsTable>
+            </DialogContent>
+            <DialogActions>
+              <Button color="primary" onClick={this.props.onClose}>
+              Cancel
+              </Button>
+              <Button
+                color="primary"
+                disabled={
+                  this.state.isEditing ||
+                totalAmountCents != this.props.transaction.amount_cents
+                }
+                onClick={() => this.handleSplit()}
+              >
+              Split
+              </Button>
+            </DialogActions>
+          </Dialog>
+        );
       }
 
       private handleChange(input: HTMLInputElement): void {
@@ -174,10 +190,15 @@ const SplitTransactionDialog = withStyles(styles)(
         let value = Math.round(Number(input.value) * 100);
         if (!isNaN(value)) {
           modifiedTransaction.amount_cents = value;
-          otherTransaction.amount_cents = this.props.transaction.amount_cents - value;
-          otherTransaction.amountString = this.formatAmountNumeric(otherTransaction.amount_cents);
+          otherTransaction.amount_cents =
+          this.props.transaction.amount_cents - value;
+          otherTransaction.amountString = this.formatAmountNumeric(
+              otherTransaction.amount_cents
+          );
         }
-        modifiedTransaction.amountString = this.formatAmountNumeric(modifiedTransaction.amount_cents);
+        modifiedTransaction.amountString = this.formatAmountNumeric(
+            modifiedTransaction.amount_cents
+        );
 
         this.setState({
           transactions: this.state.transactions,
@@ -206,6 +227,7 @@ const SplitTransactionDialog = withStyles(styles)(
         }
         return amount;
       }
-    });
+    }
+);
 
 export default SplitTransactionDialog;

@@ -1,7 +1,10 @@
 import moment from 'moment';
 import { Category, ITransaction, TAG_TO_CATEGORY } from './Model';
 
-export function shouldExclude(transaction: ITransaction, excludeTags: Set<string>): boolean {
+export function shouldExclude(
+    transaction: ITransaction,
+    excludeTags: Set<string>
+): boolean {
   for (let tag of transaction.tags) {
     if (excludeTags.has(tag)) {
       return true;
@@ -20,10 +23,11 @@ export function formatAmountNumber(amountCentsNumber: number): string {
   let amountCents = Math.abs(amountCentsNumber).toString();
   let digits = amountCents.length;
   let dollars = amountCents.substr(0, digits - 2) || '0';
-  let numCommas = parseInt(
-      ((dollars.length - 1) / 3).toString(), 10);
+  let numCommas = parseInt(((dollars.length - 1) / 3).toString(), 10);
   for (let c = numCommas * 3; c > 0; c -= 3) {
-    dollars = `${dollars.substr(0, dollars.length - c)},${dollars.substr(dollars.length - c)}`;
+    dollars = `${dollars.substr(0, dollars.length - c)},${dollars.substr(
+        dollars.length - c
+    )}`;
   }
   let centsString = amountCents.substr(digits - 2);
   if (centsString.length == 1) {
@@ -37,7 +41,10 @@ export function formatAmountNumber(amountCentsNumber: number): string {
 }
 
 // This sorts in decending order by date, then ascending order by description.
-export function compareTransactions(lhs: ITransaction, rhs: ITransaction): number {
+export function compareTransactions(
+    lhs: ITransaction,
+    rhs: ITransaction
+): number {
   if (lhs.date < rhs.date) {
     return 1;
   } else if (lhs.date > rhs.date) {
@@ -68,7 +75,9 @@ export function getCategory(transaction: ITransaction): Category {
   if (categories.length === 1) {
     return categories[0];
   } else if (categories.length > 1) {
-    throw Error('multiple categories: ' + categories.map(cat => Category[cat]).join(', '));
+    throw Error(
+        'multiple categories: ' + categories.map(cat => Category[cat]).join(', ')
+    );
   }
   return Category.Other;
 }
@@ -126,7 +135,7 @@ export function generateUUID(crypto: Crypto = window.crypto): string {
   // From https://stackoverflow.com/a/8472700
   let buf = new Uint16Array(10);
   crypto.getRandomValues(buf);
-  let s4 = function(num: number): string {
+  let s4 = function (num: number): string {
     let ret = num.toString(16);
     while (ret.length < 4) {
       ret = '0' + ret;
@@ -139,7 +148,11 @@ export function generateUUID(crypto: Crypto = window.crypto): string {
   return Array.from(buf).map(s4).join('');
 }
 
-function searchByDate(transactions: ITransaction[], date: string, isStart: boolean): number {
+function searchByDate(
+    transactions: ITransaction[],
+    date: string,
+    isStart: boolean
+): number {
   let hi = 0;
   let lo = transactions.length - 1;
   while (lo > hi) {
@@ -147,8 +160,11 @@ function searchByDate(transactions: ITransaction[], date: string, isStart: boole
     let transactionDate = transactions[mid].date;
     if (transactionDate == date) {
       let scanDirection = isStart ? 1 : -1;
-      while (mid + scanDirection >= 0 && mid + scanDirection <= transactions.length - 1
-          && transactions[mid + scanDirection].date == transactionDate) {
+      while (
+        mid + scanDirection >= 0 &&
+        mid + scanDirection <= transactions.length - 1 &&
+        transactions[mid + scanDirection].date == transactionDate
+      ) {
         mid += scanDirection;
       }
       return mid;
@@ -172,7 +188,11 @@ function searchByDate(transactions: ITransaction[], date: string, isStart: boole
 
 // Returns transactions between the two provided dates (inclusive). This assumes the
 // transactions are sorted from most recent to oldest.
-export function filterTransactionsByDate(transactions: ITransaction[], startDate: Date, endDate: Date): ITransaction[] {
+export function filterTransactionsByDate(
+    transactions: ITransaction[],
+    startDate: Date,
+    endDate: Date
+): ITransaction[] {
   // 20-30ms for filter with conversion to Date objects.
   // 3-4ms for filter with string comparisons.
   // 2-4ms with binary search.
@@ -206,7 +226,8 @@ export interface IFilters {
  */
 export function filterTransactions(
     transactions: ITransaction[],
-    filters: IFilters): ITransaction[] {
+    filters: IFilters
+): ITransaction[] {
   if (!transactions.length) {
     return [];
   }
@@ -214,8 +235,10 @@ export function filterTransactions(
   if (filters.startDate || filters.endDate) {
     filteredTransactions = filterTransactionsByDate(
         filteredTransactions,
-        filters.startDate || moment(transactions[transactions.length - 1].date).toDate(),
-        filters.endDate || moment(transactions[0].date).toDate());
+        filters.startDate ||
+        moment(transactions[transactions.length - 1].date).toDate(),
+        filters.endDate || moment(transactions[0].date).toDate()
+    );
   }
 
   if (filters.tagsIncludeAll && filters.tagsIncludeAll.length > 0) {
@@ -234,7 +257,7 @@ export function filterTransactions(
     });
   }
 
-  if (filters.tagsExcludeAny &&  filters.tagsExcludeAny.length > 0) {
+  if (filters.tagsExcludeAny && filters.tagsExcludeAny.length > 0) {
     let tagsExclude = new Set(filters.tagsExcludeAny);
     filteredTransactions = filteredTransactions.filter(transaction => {
       let intersection = transaction.tags.filter(tag => tagsExclude.has(tag));
@@ -248,8 +271,10 @@ export function filterTransactions(
       let descriptionLowerCase = transaction.description.toLowerCase();
       let notesLowerCase = (transaction.notes || '').toLowerCase();
       for (let token of tokens) {
-        if (descriptionLowerCase.indexOf(token) == -1 &&
-            notesLowerCase.indexOf(token) == -1) {
+        if (
+          descriptionLowerCase.indexOf(token) == -1 &&
+          notesLowerCase.indexOf(token) == -1
+        ) {
           return false;
         }
       }
@@ -270,7 +295,9 @@ export function getTags(transactions: ITransaction[]): Set<string> {
   return tagSet;
 }
 
-export function getSpreadDurationAsDays(transaction: ITransaction): number | undefined {
+export function getSpreadDurationAsDays(
+    transaction: ITransaction
+): number | undefined {
   for (let tag of transaction.tags) {
     if (tag.startsWith('spread:')) {
       let durationString = tag.split(':')[1];

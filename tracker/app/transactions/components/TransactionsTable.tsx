@@ -4,14 +4,15 @@ import * as React from 'react';
 
 const ROW_HEIGHT = 48;
 
-const styles = (_theme: Theme) => createStyles({
-  root: {
-    // The border rendered on the bottom of each row takes 1px.
-    lineHeight: `${ROW_HEIGHT - 1}px`,
-    // This allows overflow: auto to work on iOS.
-    WebkitOverflowScrolling: 'touch',
-  },
-});
+const styles = (_theme: Theme) =>
+  createStyles({
+    root: {
+      // The border rendered on the bottom of each row takes 1px.
+      lineHeight: `${ROW_HEIGHT - 1}px`,
+      // This allows overflow: auto to work on iOS.
+      WebkitOverflowScrolling: 'touch',
+    },
+  });
 interface ITransactionsTableProps extends WithStyles<typeof styles> {
   /** This only works if the height can be computed without rendering the
    *  rows (e.g., a fixed height or flex child).
@@ -27,8 +28,11 @@ interface ITransactionsTableState {
   scrollTop: number;
 }
 const TransactionsTable = withStyles(styles)(
-    class Component extends React.Component<ITransactionsTableProps, ITransactionsTableState> {
-      private container: HTMLElement|null = null;
+    class Component extends React.Component<
+    ITransactionsTableProps,
+    ITransactionsTableState
+    > {
+      private container: HTMLElement | null = null;
 
       constructor(props: ITransactionsTableProps, context?: any) {
         super(props, context);
@@ -66,16 +70,19 @@ const TransactionsTable = withStyles(styles)(
 
       public render(): React.ReactElement<Record<string, unknown>> {
         let classes = this.props.classes;
-        let shouldRenderChildren = !this.props.lazyRender || this.state.containerHeight != -1;
+        let shouldRenderChildren =
+        !this.props.lazyRender || this.state.containerHeight != -1;
 
         return (
           <div
             className={classes.root}
             hidden={this.props.hidden}
-            ref={(elt) => this.container = elt}
-            onScroll={this.handleScroll}>
+            ref={elt => (this.container = elt)}
+            onScroll={this.handleScroll}
+          >
             {shouldRenderChildren && this.renderChildren()}
-          </div>);
+          </div>
+        );
       }
 
       private handleWindowResize = () => {
@@ -111,22 +118,33 @@ const TransactionsTable = withStyles(styles)(
         let numRows = React.Children.count(this.props.children);
 
         // Make sure we haven't scrolled past the bottom of the table.
-        let maxScrollTop = Math.max(0, ROW_HEIGHT * numRows - this.state.containerHeight);
+        let maxScrollTop = Math.max(
+            0,
+            ROW_HEIGHT * numRows - this.state.containerHeight
+        );
         if (this.state.scrollTop > maxScrollTop) {
           this.container.scrollTop = maxScrollTop;
         }
 
         let rowsBefore = Math.floor(this.state.scrollTop / ROW_HEIGHT);
-        let rowsToShow = Math.min(numRows, Math.ceil(this.state.containerHeight / ROW_HEIGHT) + 2);
+        let rowsToShow = Math.min(
+            numRows,
+            Math.ceil(this.state.containerHeight / ROW_HEIGHT) + 2
+        );
         let rowsAfter = Math.max(0, numRows - rowsBefore - rowsToShow);
 
         return (
           <React.Fragment>
-            <div style={{height: `${rowsBefore * ROW_HEIGHT}px`}}></div>
-            {React.Children.toArray(this.props.children).slice(rowsBefore, rowsBefore + rowsToShow)}
-            <div style={{height: `${rowsAfter * ROW_HEIGHT}px`}}></div>
-          </React.Fragment>);
+            <div style={{ height: `${rowsBefore * ROW_HEIGHT}px` }}></div>
+            {React.Children.toArray(this.props.children).slice(
+                rowsBefore,
+                rowsBefore + rowsToShow
+            )}
+            <div style={{ height: `${rowsAfter * ROW_HEIGHT}px` }}></div>
+          </React.Fragment>
+        );
       };
-    });
+    }
+);
 
 export default TransactionsTable;

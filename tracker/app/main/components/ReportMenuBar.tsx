@@ -5,29 +5,31 @@ import FilterListIcon from '@material-ui/icons/FilterList';
 import * as React from 'react';
 import MenuBarWithDrawer from './MenuBarWithDrawer';
 
-const styles = (_theme: Theme) => createStyles({
-  // This is used to ensure that the appbar shadow is above the content.
-  zIndexOne: {
-    zIndex: 1,
-  },
-  whiteIconButton: {
-    '& svg': {
-      fill: '#fff',
-      color: '#fff',
+const styles = (_theme: Theme) =>
+  createStyles({
+    // This is used to ensure that the appbar shadow is above the content.
+    zIndexOne: {
+      zIndex: 1,
     },
-  },
-});
+    whiteIconButton: {
+      '& svg': {
+        fill: '#fff',
+        color: '#fff',
+      },
+    },
+  });
 
 interface IReportMenuBarProps extends WithStyles<typeof styles> {
   onFilterClick: () => void;
 }
 
-interface IReportMenuBarState {
-}
+interface IReportMenuBarState {}
 
 const ReportMenuBar = withStyles(styles)(
-    class Component extends React.Component<IReportMenuBarProps, IReportMenuBarState> {
-
+    class Component extends React.Component<
+    IReportMenuBarProps,
+    IReportMenuBarState
+    > {
       constructor(props: IReportMenuBarProps, context?: any) {
         super(props, context);
       }
@@ -36,19 +38,23 @@ const ReportMenuBar = withStyles(styles)(
         let classes = this.props.classes;
 
         let iconElementRight = (
-          <IconButton className={classes.whiteIconButton} onClick={this.props.onFilterClick}>
+          <IconButton
+            className={classes.whiteIconButton}
+            onClick={this.props.onFilterClick}
+          >
             <FilterListIcon />
           </IconButton>
         );
 
         return (
           <MenuBarWithDrawer
-            title='Report'
+            title="Report"
             iconElementRight={iconElementRight}
-            classes={{root: classes.zIndexOne}}
+            classes={{ root: classes.zIndexOne }}
           />
         );
       }
-    });
+    }
+);
 
 export default ReportMenuBar;

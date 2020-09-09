@@ -4,36 +4,38 @@ import * as React from 'react';
 import { Chart } from 'react-google-charts';
 import { GoogleDataTableCell } from 'react-google-charts/dist/types';
 
-const styles = (_theme: Theme) => createStyles({
-  root: {
-    flex: '0 1 400px',
-    padding: '8px 16px',
-    maxHeight: 'calc(50% - 64px)',
-    '@media (max-width: 420px)': {
-      paddingBottom: '0',
+const styles = (_theme: Theme) =>
+  createStyles({
+    root: {
+      flex: '0 1 400px',
+      padding: '8px 16px',
+      maxHeight: 'calc(50% - 64px)',
+      '@media (max-width: 420px)': {
+        paddingBottom: '0',
+      },
     },
-  },
-});
+  });
 interface IMonthlyGraphProps extends WithStyles<typeof styles> {
   data: [Date, number, number][];
   graph_id: string;
 }
-interface IMonthlyGraphState {
-}
+interface IMonthlyGraphState {}
 const MonthlyGraph = withStyles(styles)(
-    class Component extends React.Component<IMonthlyGraphProps, IMonthlyGraphState> {
-
+    class Component extends React.Component<
+    IMonthlyGraphProps,
+    IMonthlyGraphState
+    > {
       public render(): React.ReactElement<Record<string, unknown>> {
         let classes = this.props.classes;
 
         return (
           <div className={classes.root}>
             <Chart
-              chartType='ComboChart'
+              chartType="ComboChart"
               columns={[
-                {label: 'Date', type: 'date'},
-                {label: 'Spent', type: 'number'},
-                {label: 'Balance', type: 'number'},
+                { label: 'Date', type: 'date' },
+                { label: 'Spent', type: 'number' },
+                { label: 'Balance', type: 'number' },
               ]}
               rows={this.props.data as GoogleDataTableCell[][]}
               options={{
@@ -59,14 +61,16 @@ const MonthlyGraph = withStyles(styles)(
                     fontSize: 16,
                   },
                 },
-                legend: {position: 'none'},
+                legend: { position: 'none' },
               }}
               graph_id={this.props.graph_id}
-              width='auto'
-              height='100%'
+              width="auto"
+              height="100%"
             />
-          </div>);
+          </div>
+        );
       }
-    });
+    }
+);
 
 export default MonthlyGraph;

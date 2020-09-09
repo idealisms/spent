@@ -15,11 +15,5 @@
     "allowSyntheticDefaultImports": true,
     "esModuleInterop": true
   },
-  "exclude": [
-    "build",
-    "config",
-    "node_modules",
-    "dev_server.js",
-    "server"
-  ]
+  "exclude": ["build", "config", "node_modules", "dev_server.js", "server"]
 }

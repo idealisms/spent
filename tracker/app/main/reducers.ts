@@ -25,7 +25,10 @@ const initialState: ISettingsState = {
   },
 };
 
-export const settingsReducer: Reducer<ISettingsState, SettingsAction> = (state = initialState, action) => {
+export const settingsReducer: Reducer<ISettingsState, SettingsAction> = (
+    state = initialState,
+    action
+) => {
   switch (action.type) {
     case ActionType.REQUEST_SETTINGS_FROM_DROPBOX:
       return {
@@ -75,10 +78,9 @@ export const settingsReducer: Reducer<ISettingsState, SettingsAction> = (state =
   }
 };
 
-
-
-export const createRootReducer = (history: History) => combineReducers({
-  router: connectRouter(history),
-  settings: settingsReducer,
-  transactions: transactionsReducer,
-});
+export const createRootReducer = (history: History) =>
+  combineReducers({
+    router: connectRouter(history),
+    settings: settingsReducer,
+    transactions: transactionsReducer,
+  });

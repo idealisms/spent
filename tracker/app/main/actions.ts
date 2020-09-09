@@ -23,7 +23,10 @@ export const receivedSettingsFromDropbox = (settings?: ISettings) => ({
   settings: settings,
 });
 
-export const updateSetting = (key: keyof ISettings, value: ISettings[keyof ISettings]) => ({
+export const updateSetting = (
+    key: keyof ISettings,
+    value: ISettings[keyof ISettings]
+) => ({
   type: ActionType.UPDATE_SETTING as typeof ActionType.UPDATE_SETTING,
   key,
   value,
@@ -37,17 +40,21 @@ export const finishedSaveSettingsToDropbox = (success: boolean) => ({
   success,
 });
 
-export type SettingsAction = (
-  ReturnType<typeof requestSettingsFromDropbox> |
-  ReturnType<typeof receivedSettingsFromDropbox> |
-  ReturnType<typeof updateSetting> |
-  ReturnType<typeof requestSaveSettingsToDropbox> |
-  ReturnType<typeof finishedSaveSettingsToDropbox>
-);
+export type SettingsAction =
+  | ReturnType<typeof requestSettingsFromDropbox>
+  | ReturnType<typeof receivedSettingsFromDropbox>
+  | ReturnType<typeof updateSetting>
+  | ReturnType<typeof requestSaveSettingsToDropbox>
+  | ReturnType<typeof finishedSaveSettingsToDropbox>;
 
 // Async actions
-export const fetchSettingsFromDropbox = (): ThunkAction<void, IAppState, null, SettingsAction> => {
-  return async (dispatch) => {
+export const fetchSettingsFromDropbox = (): ThunkAction<
+void,
+IAppState,
+null,
+SettingsAction
+> => {
+  return async dispatch => {
     dispatch(requestSettingsFromDropbox());
 
     let dbx = new Dropbox.Dropbox({ accessToken: ACCESS_TOKEN, fetch });
@@ -55,7 +62,7 @@ export const fetchSettingsFromDropbox = (): ThunkAction<void, IAppState, null, S
       const file = await dbx.filesDownload({ path: '/settings.json' });
       let fr = new FileReader();
       fr.addEventListener('load', _event => {
-        let settings: ISettings = JSON.parse((fr.result as string));
+        let settings: ISettings = JSON.parse(fr.result as string);
         dispatch(receivedSettingsFromDropbox(settings));
       });
       fr.addEventListener('error', ev => {
@@ -70,7 +77,12 @@ export const fetchSettingsFromDropbox = (): ThunkAction<void, IAppState, null, S
   };
 };
 
-export const fetchSettingsFromDropboxIfNeeded = (): ThunkAction<void, IAppState, null, SettingsAction> => {
+export const fetchSettingsFromDropboxIfNeeded = (): ThunkAction<
+void,
+IAppState,
+null,
+SettingsAction
+> => {
   return async (dispatch, getState) => {
     let state = getState();
     if (state.settings.lastUpdated == 0) {
@@ -79,7 +91,12 @@ export const fetchSettingsFromDropboxIfNeeded = (): ThunkAction<void, IAppState,
   };
 };
 
-export const saveSettingsToDropbox = (): ThunkAction<void, IAppState, null, SettingsAction> => {
+export const saveSettingsToDropbox = (): ThunkAction<
+void,
+IAppState,
+null,
+SettingsAction
+> => {
   return async (dispatch, getState) => {
     dispatch(requestSaveSettingsToDropbox());
 
@@ -87,7 +104,7 @@ export const saveSettingsToDropbox = (): ThunkAction<void, IAppState, null, Sett
     let filesCommitInfo = {
       contents: JSON.stringify(getState().settings.settings, null, 2),
       path: '/settings.json',
-      mode: {'.tag': 'overwrite'} as DropboxTypes.files.WriteModeOverwrite,
+      mode: { '.tag': 'overwrite' } as DropboxTypes.files.WriteModeOverwrite,
       autorename: false,
       mute: false,
     };

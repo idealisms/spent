@@ -19,7 +19,9 @@ export enum ActionType {
 export const requestTransactionsFromDropbox = () => ({
   type: ActionType.REQUEST_TRANSACTIONS_FROM_DROPBOX as typeof ActionType.REQUEST_TRANSACTIONS_FROM_DROPBOX,
 });
-export const receivedTransactionsFromDropbox = (transactions?: ITransaction[]) => ({
+export const receivedTransactionsFromDropbox = (
+    transactions?: ITransaction[]
+) => ({
   type: ActionType.RECEIVED_TRANSACTIONS_FROM_DROPBOX as typeof ActionType.RECEIVED_TRANSACTIONS_FROM_DROPBOX,
   transactions,
 });
@@ -37,16 +39,20 @@ export const finishedSaveTransactionsToDropbox = (success: boolean) => ({
   success,
 });
 
-export type TransactionsAction = (
-  ReturnType<typeof requestTransactionsFromDropbox> |
-  ReturnType<typeof receivedTransactionsFromDropbox> |
-  ReturnType<typeof updateTransactions> |
-  ReturnType<typeof requestSaveTransactionsToDropbox> |
-  ReturnType<typeof finishedSaveTransactionsToDropbox>
-);
+export type TransactionsAction =
+  | ReturnType<typeof requestTransactionsFromDropbox>
+  | ReturnType<typeof receivedTransactionsFromDropbox>
+  | ReturnType<typeof updateTransactions>
+  | ReturnType<typeof requestSaveTransactionsToDropbox>
+  | ReturnType<typeof finishedSaveTransactionsToDropbox>;
 
 // Async actions
-export const fetchTransactionsFromDropboxIfNeeded = (): ThunkAction<void, IAppState, null, TransactionsAction> => {
+export const fetchTransactionsFromDropboxIfNeeded = (): ThunkAction<
+void,
+IAppState,
+null,
+TransactionsAction
+> => {
   return async (dispatch, getState) => {
     let state = getState();
     if (state.transactions.lastUpdated != 0) {
@@ -58,7 +64,7 @@ export const fetchTransactionsFromDropboxIfNeeded = (): ThunkAction<void, IAppSt
       const file = await dbx.filesDownload({ path: '/transactions.json' });
       let fr = new FileReader();
       fr.addEventListener('load', _event => {
-        let transactions: ITransaction[] = JSON.parse((fr.result as string));
+        let transactions: ITransaction[] = JSON.parse(fr.result as string);
         dispatch(receivedTransactionsFromDropbox(transactions));
       });
       fr.addEventListener('error', ev => {
@@ -76,7 +82,12 @@ export const fetchTransactionsFromDropboxIfNeeded = (): ThunkAction<void, IAppSt
   };
 };
 
-export const saveTransactionsToDropbox = (): ThunkAction<void, IAppState, null, TransactionsAction> => {
+export const saveTransactionsToDropbox = (): ThunkAction<
+void,
+IAppState,
+null,
+TransactionsAction
+> => {
   return async (dispatch, getState) => {
     dispatch(requestSaveTransactionsToDropbox());
 
@@ -84,7 +95,7 @@ export const saveTransactionsToDropbox = (): ThunkAction<void, IAppState, null, 
     let filesCommitInfo = {
       contents: JSON.stringify(getState().transactions.transactions),
       path: '/transactions.json',
-      mode: {'.tag': 'overwrite'} as DropboxTypes.files.WriteModeOverwrite,
+      mode: { '.tag': 'overwrite' } as DropboxTypes.files.WriteModeOverwrite,
       autorename: false,
       mute: false,
     };

@@ -1,4 +1,9 @@
-import { createStyles, Theme, withStyles, WithStyles } from '@material-ui/core/styles';
+import {
+  createStyles,
+  Theme,
+  withStyles,
+  WithStyles,
+} from '@material-ui/core/styles';
 import { CSSProperties } from '@material-ui/core/styles/withStyles';
 import * as React from 'react';
 import { styles } from './Transaction';
@@ -11,21 +16,19 @@ const rowStyles = (theme: Theme) => {
   return createStyles(mergedStyles);
 };
 
-interface ITransactionsTableSumRowProps extends WithStyles<typeof rowStyles> {
-}
-interface ITransactionsTableSumRowState {
-}
+interface ITransactionsTableSumRowProps extends WithStyles<typeof rowStyles> {}
+interface ITransactionsTableSumRowState {}
 const TransactionsTableHeadingRow = withStyles(rowStyles)(
-    class Component extends React.Component<ITransactionsTableSumRowProps, ITransactionsTableSumRowState> {
-
+    class Component extends React.Component<
+    ITransactionsTableSumRowProps,
+    ITransactionsTableSumRowState
+    > {
       public render(): React.ReactElement<Record<string, unknown>> {
         let classes = this.props.classes;
 
-        return (
-          <div className={classes.row}>
-            {this.props.children}
-          </div>);
+        return <div className={classes.row}>{this.props.children}</div>;
       }
-    });
+    }
+);
 
 export default TransactionsTableHeadingRow;

@@ -14,53 +14,53 @@ import { ITransaction } from '../Model';
 import { generateUUID } from '../utils';
 import TagSelect from './TagSelect';
 
-
-const styles = (_theme: Theme) => createStyles({
-  dialogRoot: {
-    '@media (max-height: 380px)': {
-      marginTop: '-40px',
-      marginBottom: '-40px',
+const styles = (_theme: Theme) =>
+  createStyles({
+    dialogRoot: {
+      '@media (max-height: 380px)': {
+        marginTop: '-40px',
+        marginBottom: '-40px',
+      },
     },
-  },
-  dialogPaper: {
-    width: 'calc(100% - 64px)',
-  },
-  flexRow: {
-    display: 'flex',
-    alignItems: 'baseline',
-    flexWrap: 'wrap',
-    justifyContent: 'space-between',
-    margin: '0 -8px',
-    '& > *': {
-      margin: '0 8px 16px',
+    dialogPaper: {
+      width: 'calc(100% - 64px)',
     },
-  },
-  datepicker: {
-    flex: '1 0 140px',
-    maxWidth: '164px',
-  },
-  tagselect: {
-    flex: '3 0 200px',
-  },
-  description: {
-    flex: '1 1 200px',
-  },
-  notes: {
-    flex: '1 1 200px',
-  },
-  amountFlexItem: {
-    flex: '0 0 auto',
-    display: 'flex',
-    alignItems: 'baseline',
-    maxWidth: '90px',
-  },
-  amount: {
-    flex: '0 0 80px',
-    '& input': {
-      textAlign: 'right',
+    flexRow: {
+      display: 'flex',
+      alignItems: 'baseline',
+      flexWrap: 'wrap',
+      justifyContent: 'space-between',
+      margin: '0 -8px',
+      '& > *': {
+        margin: '0 8px 16px',
+      },
     },
-  },
-});
+    datepicker: {
+      flex: '1 0 140px',
+      maxWidth: '164px',
+    },
+    tagselect: {
+      flex: '3 0 200px',
+    },
+    description: {
+      flex: '1 1 200px',
+    },
+    notes: {
+      flex: '1 1 200px',
+    },
+    amountFlexItem: {
+      flex: '0 0 auto',
+      display: 'flex',
+      alignItems: 'baseline',
+      maxWidth: '90px',
+    },
+    amount: {
+      flex: '0 0 80px',
+      '& input': {
+        textAlign: 'right',
+      },
+    },
+  });
 
 interface IAddTransactionDialogProps extends WithStyles<typeof styles> {
   onClose: () => void;
@@ -75,8 +75,10 @@ interface IAddTransactionDialogState {
   notes: string;
 }
 const AddTransactionDialog = withStyles(styles)(
-    class Component extends React.Component<IAddTransactionDialogProps, IAddTransactionDialogState> {
-
+    class Component extends React.Component<
+    IAddTransactionDialogProps,
+    IAddTransactionDialogState
+    > {
       constructor(props: IAddTransactionDialogProps, context?: any) {
         super(props, context);
         this.state = {
@@ -91,65 +93,85 @@ const AddTransactionDialog = withStyles(styles)(
 
       public render(): React.ReactElement<Record<string, unknown>> {
         let classes = this.props.classes;
-        return <Dialog
-          open
-          onClose={this.props.onClose}
-          scroll='paper'
-          classes={{root: classes.dialogRoot, paper: classes.dialogPaper}}
-        >
-          <DialogTitle>{'Add Transaction'}</DialogTitle>
-          <DialogContent>
-            <div className={classes.flexRow}>
-              <KeyboardDatePicker
-                className={classes.datepicker}
-                label='Date'
-                value={this.state.date}
-                maxDate={moment().startOf('day').toDate()}
-                onChange={(d: MaterialUiPickersDate) => d ? this.setState({date: d.toDate()}) : null}
-                format='YYYY-MM-DD'
+        return (
+          <Dialog
+            open
+            onClose={this.props.onClose}
+            scroll="paper"
+            classes={{ root: classes.dialogRoot, paper: classes.dialogPaper }}
+          >
+            <DialogTitle>{'Add Transaction'}</DialogTitle>
+            <DialogContent>
+              <div className={classes.flexRow}>
+                <KeyboardDatePicker
+                  className={classes.datepicker}
+                  label="Date"
+                  value={this.state.date}
+                  maxDate={moment().startOf('day').toDate()}
+                  onChange={(d: MaterialUiPickersDate) =>
+                    d ? this.setState({ date: d.toDate() }) : null
+                  }
+                  format="YYYY-MM-DD"
                 // mask={[/\d/, /\d/, /\d/, /\d/, '-', /\d/, /\d/, '-', /\d/, /\d/]}
-              />
+                />
 
-              <div className={classes.amountFlexItem}>
-                <div>$</div>
+                <div className={classes.amountFlexItem}>
+                  <div>$</div>
+                  <TextField
+                    className={classes.amount}
+                    placeholder="1.00"
+                    value={this.state.amount}
+                    autoFocus
+                    onChange={(event: React.ChangeEvent<HTMLInputElement>) =>
+                      this.setState({ amount: event.target.value })
+                    }
+                    onBlur={event =>
+                      this.handleBlurAmount(event.target as HTMLInputElement)
+                    }
+                  />
+                </div>
+
                 <TextField
-                  className={classes.amount}
-                  placeholder='1.00'
-                  value={this.state.amount}
-                  autoFocus
-                  onChange={(event: React.ChangeEvent<HTMLInputElement>) => this.setState({amount: event.target.value})}
-                  onBlur={(event) => this.handleBlurAmount(event.target as HTMLInputElement)}
+                  className={classes.description}
+                  label="Description"
+                  defaultValue={this.state.description}
+                  onChange={(event: React.ChangeEvent<HTMLInputElement>) =>
+                    this.setState({ description: event.target.value })
+                  }
+                  onKeyPress={this.handleKeyPress}
+                />
+                <TagSelect
+                  className={classes.tagselect}
+                  onChange={this.handleChangeTagSelect}
+                  value={this.state.tags}
+                  allowNewTags
+                  placeholder="e.g. food, restaurant"
+                />
+                <TextField
+                  className={classes.notes}
+                  label="Notes"
+                  defaultValue={this.state.notes}
+                  onChange={(event: React.ChangeEvent<HTMLInputElement>) =>
+                    this.setState({ notes: event.target.value })
+                  }
+                  onKeyPress={this.handleKeyPress}
                 />
               </div>
-
-              <TextField
-                className={classes.description}
-                label='Description'
-                defaultValue={this.state.description}
-                onChange={(event: React.ChangeEvent<HTMLInputElement>) => this.setState({description: event.target.value})}
-                onKeyPress={this.handleKeyPress}
-              />
-              <TagSelect
-                className={classes.tagselect}
-                onChange={this.handleChangeTagSelect}
-                value={this.state.tags}
-                allowNewTags
-                placeholder='e.g. food, restaurant'
-              />
-              <TextField
-                className={classes.notes}
-                label='Notes'
-                defaultValue={this.state.notes}
-                onChange={(event: React.ChangeEvent<HTMLInputElement>) => this.setState({notes: event.target.value})}
-                onKeyPress={this.handleKeyPress}
-              />
-            </div>
-          </DialogContent>
-          <DialogActions>
-            <Button color='primary' onClick={this.props.onClose}>Cancel</Button>
-            <Button color='primary' disabled={this.saveDisabled()} onClick={this.handleSave}>Save</Button>
-          </DialogActions>
-        </Dialog>;
+            </DialogContent>
+            <DialogActions>
+              <Button color="primary" onClick={this.props.onClose}>
+              Cancel
+              </Button>
+              <Button
+                color="primary"
+                disabled={this.saveDisabled()}
+                onClick={this.handleSave}
+              >
+              Save
+              </Button>
+            </DialogActions>
+          </Dialog>
+        );
       }
 
       private saveDisabled = () => {
@@ -180,7 +202,7 @@ const AddTransactionDialog = withStyles(styles)(
       };
 
       private handleKeyPress = (e: React.KeyboardEvent<HTMLDivElement>): void => {
-        // charCode 13 is the Enter key.
+      // charCode 13 is the Enter key.
         if (e.charCode == 13 && !this.saveDisabled()) {
           this.handleSave();
         }
@@ -201,6 +223,7 @@ const AddTransactionDialog = withStyles(styles)(
         this.props.onSaveChanges(transaction);
         this.props.onClose();
       };
-    });
+    }
+);
 
 export default AddTransactionDialog;

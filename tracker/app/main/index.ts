@@ -3,4 +3,3 @@ import { IAppState, IReportNode } from './Model';
 import { createRootReducer } from './reducers';
 
 export { IAppState, IReportNode, App, createRootReducer };
-
