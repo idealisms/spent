@@ -54,10 +54,11 @@
     "@types/redux-devtools": "^3.0.45",
     "@types/redux-logger": "^3.0.7",
     "@types/redux-mock-store": "^0.0.13",
+    "@types/sha.js": "^2.4.0",
     "@typescript-eslint/eslint-plugin": "^3.7.0",
     "@typescript-eslint/eslint-plugin-tslint": "^3.7.0",
     "@typescript-eslint/parser": "^3.7.0",
-    "dropbox": "^4.0.3",
+    "dropbox": "^5.2.1",
     "enzyme": "^3.3.0",
     "enzyme-adapter-react-16": "^1.1.1",
     "eslint": "^7.5.0",
@@ -107,6 +108,7 @@
     "react-select": "^2.4.4",
     "redux": "^4.0.4",
     "redux-thunk": "^2.3.0",
+    "sha.js": "^2.4.11",
     "style-loader": "^0.21.0"
   },
   "resolutions": {
