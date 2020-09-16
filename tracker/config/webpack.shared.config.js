@@ -42,6 +42,7 @@ module.exports = (options) => ({
       }, {
         test: /\.json$/,
         include: options.srcs,
+        exclude: /node_modules/,
         loader: 'json-loader',
       }, {
         test: /\.(mp4|webm)$/,
