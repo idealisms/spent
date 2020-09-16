@@ -22,7 +22,7 @@ interface ITransaction {
 
 function loadFromDropbox(callback) {
   let filesDownloadArg = {
-    path: '/transactions.json',
+    path: '/spent tracker/transactions.json',
   };
   let dbx = new Dropbox({ accessToken: config.DROPBOX_ACCESS_TOKEN });
   dbx.filesDownload(filesDownloadArg)
@@ -261,7 +261,7 @@ function saveToDropbox(transactions) {
   return new Promise((resolve, reject) => {
     let filesCommitInfo = {
       contents: JSON.stringify(transactions),
-      path: '/transactions.json',
+      path: '/spent tracker/transactions.json',
       mode: {'.tag': 'overwrite'},
       autorename: false,
       mute: false,

@@ -7,7 +7,7 @@ import json
 import html
 
 DOWNLOAD_DIR = 'downloads'
-DROPBOX_PATH = '/transactions.json'
+DROPBOX_PATH = '/spent tracker/transactions.json'
 
 def read_transactions(filename):
     '''Reads transactions from a .ofx file.
