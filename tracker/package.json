@@ -82,7 +82,7 @@
     "webpack": "^4.42.1",
     "webpack-cli": "^3.3.11",
     "webpack-dev-middleware": "^3.7.2",
-    "webpack-dev-server": "^3.10.3",
+    "webpack-dev-server": "^3.11.0",
     "webpack-hot-middleware": "^2.25.0"
   },
   "dependencies": {
@@ -112,7 +112,8 @@
     "style-loader": "^0.21.0"
   },
   "resolutions": {
-    "dot-prop": "^5.1.1"
+    "dot-prop": "^5.1.1",
+    "selfsigned": "^1.10.8"
   },
   "prettier": {
     "singleQuote": true,
