@@ -2,12 +2,14 @@ import { createStyles } from '@material-ui/core';
 import { Theme, withStyles } from '@material-ui/core/styles';
 import * as React from 'react';
 import { Switch } from 'react-router';
-import { Redirect, Route } from 'react-router-dom';
+import { Route } from 'react-router-dom';
+import Auth from './Auth';
 import Daily from './Daily';
 import Editor from './Editor';
+import Login from './Login';
 import Monthly from './Monthly';
 import Report from './Report';
-import * as Pages from './RoutePaths';
+import * as Paths from './RoutePaths';
 
 const styles = (_theme: Theme) =>
   createStyles({
@@ -35,13 +37,12 @@ const App = withStyles(styles)(
       public render(): React.ReactElement<Record<string, unknown>> {
         return (
           <Switch>
-            <Route exact path={Pages.HomePage}>
-              <Redirect to={Pages.DailyPage} />
-            </Route>
-            <Route exact path={Pages.DailyPage} component={Daily} />
-            <Route exact path={Pages.EditorPage} component={Editor} />
-            <Route exact path={Pages.MonthlyPage} component={Monthly} />
-            <Route exact path={Pages.ReportPage} component={Report} />
+            <Route exact path={Paths.HomePage} component={Login} />
+            <Route exact path={Paths.AuthPage} component={Auth} />
+            <Route exact path={Paths.DailyPage} component={Daily} />
+            <Route exact path={Paths.EditorPage} component={Editor} />
+            <Route exact path={Paths.MonthlyPage} component={Monthly} />
+            <Route exact path={Paths.ReportPage} component={Report} />
             <Route component={NoMatch} />
           </Switch>
         );

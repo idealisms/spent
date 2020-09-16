@@ -2,11 +2,12 @@ import { connectRouter } from 'connected-react-router';
 import { History } from 'history';
 import { combineReducers, Reducer } from 'redux';
 import { transactionsReducer } from '../transactions';
+import { authReducer } from '../auth/reducers';
 import { ActionType, SettingsAction } from './actions';
 import { getDefaultCategories } from './components/Report';
 import { CloudState, ISettingsState } from './Model';
 
-const initialState: ISettingsState = {
+const initialSettingsState: ISettingsState = {
   isFetching: false,
   lastUpdated: 0,
   cloudState: CloudState.Done,
@@ -26,7 +27,7 @@ const initialState: ISettingsState = {
 };
 
 export const settingsReducer: Reducer<ISettingsState, SettingsAction> = (
-    state = initialState,
+    state = initialSettingsState,
     action
 ) => {
   switch (action.type) {
@@ -81,6 +82,7 @@ export const settingsReducer: Reducer<ISettingsState, SettingsAction> = (
 export const createRootReducer = (history: History) =>
   combineReducers({
     router: connectRouter(history),
+    auth: authReducer,
     settings: settingsReducer,
     transactions: transactionsReducer,
   });

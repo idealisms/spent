@@ -1,6 +1,5 @@
 import * as Dropbox from 'dropbox';
 import { ThunkAction } from 'redux-thunk';
-import { ACCESS_TOKEN } from '../config';
 import { IAppState, ISettings } from './Model';
 
 // Action types
@@ -54,12 +53,18 @@ IAppState,
 null,
 SettingsAction
 > => {
-  return async dispatch => {
+  return async (dispatch, getState) => {
     dispatch(requestSettingsFromDropbox());
 
-    let dbx = new Dropbox.Dropbox({ accessToken: ACCESS_TOKEN, fetch });
+    const state = getState();
+    let dbx = new Dropbox.Dropbox({
+      accessToken: state.auth.dropboxAccessToken,
+      fetch,
+    });
     try {
-      const file = await dbx.filesDownload({ path: '/settings.json' });
+      const file = await dbx.filesDownload({
+        path: '/Apps/quant-tc/settings.json',
+      });
       let fr = new FileReader();
       fr.addEventListener('load', _event => {
         let settings: ISettings = JSON.parse(fr.result as string);
@@ -100,10 +105,14 @@ SettingsAction
   return async (dispatch, getState) => {
     dispatch(requestSaveSettingsToDropbox());
 
-    let dbx = new Dropbox.Dropbox({ accessToken: ACCESS_TOKEN, fetch });
+    const state = getState();
+    let dbx = new Dropbox.Dropbox({
+      accessToken: state.auth.dropboxAccessToken,
+      fetch,
+    });
     let filesCommitInfo = {
-      contents: JSON.stringify(getState().settings.settings, null, 2),
-      path: '/settings.json',
+      contents: JSON.stringify(state.settings.settings, null, 2),
+      path: '/Apps/quant-tc/settings.json',
       mode: { '.tag': 'overwrite' } as DropboxTypes.files.WriteModeOverwrite,
       autorename: false,
       mute: false,

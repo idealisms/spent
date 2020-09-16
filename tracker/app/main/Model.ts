@@ -1,5 +1,6 @@
 import { RouterState } from 'connected-react-router';
 import { ITransactionsState } from '../transactions';
+import { IAuthState } from '../auth/Model';
 
 export enum CloudState {
   Done = 1,
@@ -91,6 +92,7 @@ export interface ISettingsState {
 
 export interface IAppState {
   router: RouterState;
+  auth: IAuthState;
   settings: ISettingsState;
   transactions: ITransactionsState;
 }

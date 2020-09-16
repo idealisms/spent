@@ -1,6 +1,5 @@
 import * as Dropbox from 'dropbox';
 import { ThunkAction } from 'redux-thunk';
-import { ACCESS_TOKEN } from '../config';
 import { IAppState } from '../main/Model';
 import { ITransaction } from './Model';
 
@@ -54,14 +53,19 @@ null,
 TransactionsAction
 > => {
   return async (dispatch, getState) => {
-    let state = getState();
+    const state = getState();
     if (state.transactions.lastUpdated != 0) {
       return;
     }
     dispatch(requestTransactionsFromDropbox());
-    let dbx = new Dropbox.Dropbox({ accessToken: ACCESS_TOKEN, fetch });
+    let dbx = new Dropbox.Dropbox({
+      accessToken: state.auth.dropboxAccessToken,
+      fetch,
+    });
     try {
-      const file = await dbx.filesDownload({ path: '/transactions.json' });
+      const file = await dbx.filesDownload({
+        path: '/Apps/quant-tc/transactions.json',
+      });
       let fr = new FileReader();
       fr.addEventListener('load', _event => {
         let transactions: ITransaction[] = JSON.parse(fr.result as string);
@@ -89,12 +93,16 @@ null,
 TransactionsAction
 > => {
   return async (dispatch, getState) => {
+    const state = getState();
     dispatch(requestSaveTransactionsToDropbox());
 
-    let dbx = new Dropbox.Dropbox({ accessToken: ACCESS_TOKEN, fetch: fetch });
+    let dbx = new Dropbox.Dropbox({
+      accessToken: state.auth.dropboxAccessToken,
+      fetch: fetch,
+    });
     let filesCommitInfo = {
-      contents: JSON.stringify(getState().transactions.transactions),
-      path: '/transactions.json',
+      contents: JSON.stringify(state.transactions.transactions),
+      path: '/Apps/quant-tc/transactions.json',
       mode: { '.tag': 'overwrite' } as DropboxTypes.files.WriteModeOverwrite,
       autorename: false,
       mute: false,
