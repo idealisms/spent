@@ -63,7 +63,7 @@ SettingsAction
     });
     try {
       const file = await dbx.filesDownload({
-        path: '/Apps/quant-tc/settings.json',
+        path: '/spent tracker/settings.json',
       });
       let fr = new FileReader();
       fr.addEventListener('load', _event => {
@@ -112,7 +112,7 @@ SettingsAction
     });
     let filesCommitInfo = {
       contents: JSON.stringify(state.settings.settings, null, 2),
-      path: '/Apps/quant-tc/settings.json',
+      path: '/spent tracker/settings.json',
       mode: { '.tag': 'overwrite' } as DropboxTypes.files.WriteModeOverwrite,
       autorename: false,
       mute: false,
