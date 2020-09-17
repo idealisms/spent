@@ -2,7 +2,7 @@
 const fs = require('fs');
 const cryptoNode = require('crypto');
 
-require('isomorphic-fetch');
+const fetch = require('node-fetch');
 const Dropbox = require('dropbox').Dropbox;
 
 const config = require('./config.js');
@@ -24,7 +24,7 @@ function loadFromDropbox(callback) {
   let filesDownloadArg = {
     path: '/spent tracker/transactions.json',
   };
-  let dbx = new Dropbox({ accessToken: config.DROPBOX_ACCESS_TOKEN });
+  let dbx = new Dropbox({ accessToken: config.DROPBOX_ACCESS_TOKEN, fetch: fetch });
   dbx.filesDownload(filesDownloadArg)
       .then(file => {
           let transactions: ITransaction[] = JSON.parse(file.fileBinary);
@@ -266,7 +266,7 @@ function saveToDropbox(transactions) {
       autorename: false,
       mute: false,
     };
-    let dbx = new Dropbox({ accessToken: config.DROPBOX_ACCESS_TOKEN });
+    let dbx = new Dropbox({ accessToken: config.DROPBOX_ACCESS_TOKEN, fetch: fetch });
     dbx.filesUpload(filesCommitInfo)
         .then(metadata => {
             console.log('Saved to Dropbox.');
