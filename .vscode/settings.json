@@ -1,0 +1,9 @@
+{
+  "eslint.packageManager": "yarn",
+  "eslint.workingDirectories": [
+    {
+			"directory": "./tracker",
+			"changeProcessCWD": true
+		}
+  ]
+}
