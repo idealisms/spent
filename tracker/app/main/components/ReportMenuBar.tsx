@@ -30,8 +30,8 @@ const ReportMenuBar = withStyles(styles)(
     IReportMenuBarProps,
     IReportMenuBarState
     > {
-      constructor(props: IReportMenuBarProps, context?: any) {
-        super(props, context);
+      constructor(props: IReportMenuBarProps) {
+        super(props);
       }
 
       public render(): JSX.Element {

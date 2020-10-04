@@ -52,8 +52,8 @@ interface IDailyState {
 
 const Daily = withStyles(styles)(
     class Component extends React.Component<IDailyProps, IDailyState> {
-      constructor(props: IDailyProps, context?: any) {
-        super(props, context);
+      constructor(props: IDailyProps) {
+        super(props);
 
         this.state = {};
         this.props.fetchTransactions();

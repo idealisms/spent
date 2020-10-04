@@ -66,8 +66,8 @@ const EditorMenuBar = withStyles(styles)(
     IEditorMenuBarProps,
     IEditorMenuBarState
     > {
-      constructor(props: IEditorMenuBarProps, context?: any) {
-        super(props, context);
+      constructor(props: IEditorMenuBarProps) {
+        super(props);
         this.state = {
           isEditDialogOpen: false,
           isBatchEditTagsDialogOpen: false,

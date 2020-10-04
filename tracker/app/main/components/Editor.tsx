@@ -99,8 +99,8 @@ interface IEditorState {
 
 const Editor = withStyles(styles)(
     class Component extends React.Component<IEditorProps, IEditorState> {
-      constructor(props: IEditorProps, context?: any) {
-        super(props, context);
+      constructor(props: IEditorProps) {
+        super(props);
 
         let transactions = this.props.transactions;
         this.state = {

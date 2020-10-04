@@ -34,8 +34,8 @@ const TransactionsTable = withStyles(styles)(
     > {
       private container: HTMLElement | null = null;
 
-      constructor(props: ITransactionsTableProps, context?: any) {
-        super(props, context);
+      constructor(props: ITransactionsTableProps) {
+        super(props);
         this.state = {
           containerHeight: -1,
           scrollTop: -1,

@@ -75,8 +75,8 @@ const DailyGraph = withStyles(styles)(
     class Component extends React.Component<IDailyGraphProps, IDailyGraphState> {
       private container: HTMLElement | null = null;
 
-      constructor(props: IDailyGraphProps, context?: any) {
-        super(props, context);
+      constructor(props: IDailyGraphProps) {
+        super(props);
         this.state = {
           useSpread: true,
           shouldAnimate: false,

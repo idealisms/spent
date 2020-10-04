@@ -50,8 +50,8 @@ const SplitTransactionDialog = withStyles(styles)(
     ISplitTransactionDialogProps,
     ISplitTransactionDialogState
     > {
-      constructor(props: ISplitTransactionDialogProps, context?: any) {
-        super(props, context);
+      constructor(props: ISplitTransactionDialogProps) {
+        super(props);
         let transactions: ISplitTransactionRow[] = [];
         let wasMerged = false;
         if ((props.transaction.transactions || []).length > 1) {

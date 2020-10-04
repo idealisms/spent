@@ -79,8 +79,8 @@ const AddTransactionDialog = withStyles(styles)(
     IAddTransactionDialogProps,
     IAddTransactionDialogState
     > {
-      constructor(props: IAddTransactionDialogProps, context?: any) {
-        super(props, context);
+      constructor(props: IAddTransactionDialogProps) {
+        super(props);
         this.state = {
           date: moment().startOf('day').toDate(),
           amount: '',

@@ -21,8 +21,8 @@ const ReportChart = withStyles(styles)(
     IReportChartProps,
     IReportChartState
     > {
-      constructor(props: IReportChartProps, context?: any) {
-        super(props, context);
+      constructor(props: IReportChartProps) {
+        super(props);
         this.state = {};
       }
 

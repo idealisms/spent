@@ -71,8 +71,8 @@ interface IMonthlyState {}
 
 const Monthly = withStyles(styles)(
     class Component extends React.Component<IMonthlyProps, IMonthlyState> {
-      constructor(props: IMonthlyProps, context?: any) {
-        super(props, context);
+      constructor(props: IMonthlyProps) {
+        super(props);
         this.state = {};
         this.props.fetchTransactions();
         this.props.fetchSettings();

@@ -81,8 +81,8 @@ const MenuBarWithDrawer = withStyles(styles)(
     IMenuBarWithDrawerProps,
     IMenuBarWithDrawerState
     > {
-      constructor(props: IMenuBarWithDrawerProps, context?: any) {
-        super(props, context);
+      constructor(props: IMenuBarWithDrawerProps) {
+        super(props);
         this.state = {
           isDrawerOpen: false,
         };

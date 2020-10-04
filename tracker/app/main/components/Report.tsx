@@ -141,8 +141,8 @@ interface IReportState {
 }
 const Report = withStyles(styles)(
     class Component extends React.Component<IReportProps, IReportState> {
-      constructor(props: IReportProps, context?: any) {
-        super(props, context);
+      constructor(props: IReportProps) {
+        super(props);
         let startDate = moment()
           .year(moment().year() - 1)
           .month(0)

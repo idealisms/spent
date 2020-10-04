@@ -48,8 +48,8 @@ const MergeTransactionDialog = withStyles(styles)(
     IMergeTransactionDialogProps,
     IMergeTransactionDialogState
     > {
-      constructor(props: IMergeTransactionDialogProps, context?: any) {
-        super(props, context);
+      constructor(props: IMergeTransactionDialogProps) {
+        super(props);
         let sortedTransactions = [...props.transactions];
         sortedTransactions.sort(compareTransactions);
         this.state = {

@@ -53,8 +53,8 @@ const EditTransactionDialog = withStyles(styles)(
     IEditTransactionDialogProps,
     IEditTransactionDialogState
     > {
-      constructor(props: IEditTransactionDialogProps, context?: any) {
-        super(props, context);
+      constructor(props: IEditTransactionDialogProps) {
+        super(props);
         this.state = {
           tags: [...this.props.transaction.tags],
           notesValue: props.transaction.notes || '',

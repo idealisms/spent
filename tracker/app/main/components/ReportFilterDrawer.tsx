@@ -84,8 +84,8 @@ export const ReportFilterDrawer = withStyles(styles)(
     > {
       private readonly START_YEAR: number = 2018; // TODO: Move this to settings.
 
-      constructor(props: IReportFilterDrawerProps, context?: any) {
-        super(props, context);
+      constructor(props: IReportFilterDrawerProps) {
+        super(props);
       }
 
       public render(): JSX.Element {

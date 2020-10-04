@@ -53,8 +53,8 @@ const BatchEditTagsDialog = withStyles(styles)(
     IBatchEditTagsDialogProps,
     IBatchEditTagsDialogState
     > {
-      constructor(props: IBatchEditTagsDialogProps, context?: any) {
-        super(props, context);
+      constructor(props: IBatchEditTagsDialogProps) {
+        super(props);
         let sortedTransactions = [...props.transactions];
         sortedTransactions.sort(TransactionUtils.compareTransactions);
         this.state = {
