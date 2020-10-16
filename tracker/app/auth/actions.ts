@@ -1,8 +1,14 @@
 import { ThunkAction } from 'redux-thunk';
 import { IAppState } from '../main/Model';
 import { AuthStatus } from './Model';
-import { fetchTransactionsFromDropboxIfNeeded, TransactionsAction } from '../transactions/actions';
-import { fetchSettingsFromDropboxIfNeeded, SettingsAction } from '../main/actions';
+import {
+  fetchTransactionsFromDropboxIfNeeded,
+  TransactionsAction,
+} from '../transactions/actions';
+import {
+  fetchSettingsFromDropboxIfNeeded,
+  SettingsAction,
+} from '../main/actions';
 
 // Action types
 export enum ActionType {
@@ -24,9 +30,9 @@ export const setAuthStatus = (authStatus: AuthStatus) => ({
   authStatus,
 });
 
-
-export type AuthAction = ReturnType<typeof setDropboxAccessToken>
-| ReturnType<typeof setAuthStatus>;
+export type AuthAction =
+  | ReturnType<typeof setDropboxAccessToken>
+  | ReturnType<typeof setAuthStatus>;
 
 // Async actions
 export const tryLogin = (): ThunkAction<
@@ -51,4 +57,3 @@ AuthAction | TransactionsAction | SettingsAction
     }
   };
 };
-

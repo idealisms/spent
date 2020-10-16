@@ -20,9 +20,7 @@ export enum ActionType {
 const requestTransactionsFromDropbox = () => ({
   type: ActionType.REQUEST_TRANSACTIONS_FROM_DROPBOX as typeof ActionType.REQUEST_TRANSACTIONS_FROM_DROPBOX,
 });
-const receivedTransactionsFromDropbox = (
-    transactions?: ITransaction[]
-) => ({
+const receivedTransactionsFromDropbox = (transactions?: ITransaction[]) => ({
   type: ActionType.RECEIVED_TRANSACTIONS_FROM_DROPBOX as typeof ActionType.RECEIVED_TRANSACTIONS_FROM_DROPBOX,
   transactions,
 });

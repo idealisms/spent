@@ -20,12 +20,7 @@ import {
   TransactionsTable,
   TransactionUtils,
 } from '../../transactions';
-import { fetchTransactionsFromDropboxIfNeeded } from '../../transactions/actions';
-import {
-  fetchSettingsFromDropboxIfNeeded,
-  saveSettingsToDropbox,
-  updateSetting,
-} from '../actions';
+import { saveSettingsToDropbox, updateSetting } from '../actions';
 import { CloudState, IAppState, IChartNode, IReportNode } from '../Model';
 import ReportChart from './ReportChart';
 import { IDateRange, ReportFilterDrawer } from './ReportFilterDrawer';
@@ -124,10 +119,8 @@ interface IReportAppStateProps {
   transactions: ITransaction[];
 }
 interface IReportDispatchProps {
-  fetchSettings: () => void;
   updateReportCategories: (categories: IReportNode[]) => void;
   saveSettings: () => void;
-  fetchTransactions: () => void;
 }
 type IReportProps = IReportOwnProps &
 IReportAppStateProps &
@@ -167,8 +160,6 @@ const Report = withStyles(styles)(
             : LOADING_TEXT,
           isFilterDrawerOpen: false,
         };
-        this.props.fetchSettings();
-        this.props.fetchTransactions();
       }
 
       public componentDidUpdate(_prevProps: IReportProps): void {
@@ -590,17 +581,11 @@ const mapStateToProps = (state: IAppState): IReportAppStateProps => ({
 const mapDispatchToProps = (
     dispatch: ThunkDispatch<IAppState, null, any>
 ): IReportDispatchProps => ({
-  fetchSettings: () => {
-    dispatch(fetchSettingsFromDropboxIfNeeded());
-  },
   updateReportCategories: categories => {
     dispatch(updateSetting('reportCategories', categories));
   },
   saveSettings: () => {
     dispatch(saveSettingsToDropbox());
-  },
-  fetchTransactions: () => {
-    dispatch(fetchTransactionsFromDropboxIfNeeded());
   },
 });
 export default connect(mapStateToProps, mapDispatchToProps)(Report);

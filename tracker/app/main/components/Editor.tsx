@@ -81,7 +81,6 @@ interface IEditorAppStateProps {
   cloudState: CloudState;
 }
 interface IEditorDispatchProps {
-  fetchTransactions: () => void;
   updateTransactions: (transactions: Transactions.ITransaction[]) => void;
   saveTransactions: () => void;
 }
@@ -115,7 +114,6 @@ const Editor = withStyles(styles)(
           searchQuery: '',
           isAddDialogOpen: false,
         };
-        this.props.fetchTransactions();
       }
 
       public componentDidUpdate(prevProps: IEditorProps): void {
@@ -488,11 +486,6 @@ const mapStateToProps = (state: IAppState): IEditorAppStateProps => ({
 const mapDispatchToProps = (
     dispatch: ThunkDispatch<IAppState, null, any>
 ): IEditorDispatchProps => ({
-  fetchTransactions: () => {
-    dispatch(
-        Transactions.TransactionsActions.fetchTransactionsFromDropboxIfNeeded()
-    );
-  },
   updateTransactions: transactions => {
     dispatch(Transactions.TransactionsActions.updateTransactions(transactions));
   },

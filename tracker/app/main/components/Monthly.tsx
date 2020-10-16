@@ -12,13 +12,11 @@ import { ThunkDispatch } from 'redux-thunk';
 import {
   ITransaction,
   Transaction,
-  TransactionsActions,
   TransactionsTable,
   TransactionsTableHeadingRow,
   TransactionsTableSumRow,
   TransactionUtils,
 } from '../../transactions';
-import { fetchSettingsFromDropboxIfNeeded } from '../actions';
 import { IAppState, ISpendTarget } from '../Model';
 import MenuBarWithDrawer from './MenuBarWithDrawer';
 import MonthlyGraph from './MonthlyGraph';
@@ -60,8 +58,6 @@ interface IMonthlyAppStateProps {
   location: Location;
 }
 interface IMonthlyDispatchProps {
-  fetchTransactions: () => void;
-  fetchSettings: () => void;
   navigateTo: (location: string) => void;
 }
 type IMonthlyProps = IMonthlyOwnProps &
@@ -74,8 +70,6 @@ const Monthly = withStyles(styles)(
       constructor(props: IMonthlyProps) {
         super(props);
         this.state = {};
-        this.props.fetchTransactions();
-        this.props.fetchSettings();
       }
 
       public render(): React.ReactElement<Record<string, unknown>> {
@@ -304,12 +298,6 @@ const mapStateToProps = (state: IAppState): IMonthlyAppStateProps => ({
 const mapDispatchToProps = (
     dispatch: ThunkDispatch<IAppState, null, any>
 ): IMonthlyDispatchProps => ({
-  fetchTransactions: () => {
-    dispatch(TransactionsActions.fetchTransactionsFromDropboxIfNeeded());
-  },
-  fetchSettings: () => {
-    dispatch(fetchSettingsFromDropboxIfNeeded());
-  },
   navigateTo: (location: string) => {
     dispatch(push(location));
   },

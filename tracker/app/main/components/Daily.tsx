@@ -8,11 +8,9 @@ import { ThunkDispatch } from 'redux-thunk';
 import {
   ITransaction,
   Transaction,
-  TransactionsActions,
   TransactionsTable,
   TransactionUtils,
 } from '../../transactions';
-import { fetchSettingsFromDropboxIfNeeded } from '../actions';
 import { IAppState, IDailySpendTarget } from '../Model';
 import DailyGraph from './DailyGraph';
 import MenuBarWithDrawer from './MenuBarWithDrawer';
@@ -41,10 +39,7 @@ interface IDailyAppStateProps {
   transactions: ITransaction[];
   dailySpendTarget: IDailySpendTarget;
 }
-interface IDailyDispatchProps {
-  fetchTransactions: () => void;
-  fetchSettings: () => void;
-}
+interface IDailyDispatchProps {}
 type IDailyProps = IDailyOwnProps & IDailyAppStateProps & IDailyDispatchProps;
 interface IDailyState {
   scrollToRow?: number;
@@ -56,8 +51,6 @@ const Daily = withStyles(styles)(
         super(props);
 
         this.state = {};
-        this.props.fetchTransactions();
-        this.props.fetchSettings();
       }
 
       public render(): React.ReactElement<Record<string, unknown>> {
@@ -134,14 +127,7 @@ const mapStateToProps = (state: IAppState): IDailyAppStateProps => ({
   dailySpendTarget: state.settings.settings.dailySpendTarget,
 });
 const mapDispatchToProps = (
-    dispatch: ThunkDispatch<IAppState, null, any>
-): IDailyDispatchProps => ({
-  fetchTransactions: () => {
-    dispatch(TransactionsActions.fetchTransactionsFromDropboxIfNeeded());
-  },
-  fetchSettings: () => {
-    dispatch(fetchSettingsFromDropboxIfNeeded());
-  },
-});
+    _dispatch: ThunkDispatch<IAppState, null, any>
+): IDailyDispatchProps => ({});
 
 export default connect(mapStateToProps, mapDispatchToProps)(Daily);
