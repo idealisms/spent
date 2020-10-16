@@ -1,8 +1,9 @@
 import { ActionType, AuthAction } from './actions';
-import { IAuthState } from './Model';
+import { AuthStatus, IAuthState } from './Model';
 import { Reducer } from 'redux';
 
 const initialAuthState: IAuthState = {
+  authStatus: AuthStatus.INIT,
   dropboxAccessToken: localStorage.getItem('dropboxToken') || '',
 };
 
@@ -15,6 +16,11 @@ export const authReducer: Reducer<IAuthState, AuthAction> = (
       return {
         ...state,
         dropboxAccessToken: action.token,
+      };
+    case ActionType.SET_AUTH_STATUS:
+      return {
+        ...state,
+        authStatus: action.authStatus,
       };
     default:
       return state;

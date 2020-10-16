@@ -3,13 +3,14 @@ import { Theme, withStyles } from '@material-ui/core/styles';
 import * as React from 'react';
 import { Switch } from 'react-router';
 import { Route } from 'react-router-dom';
+import AuthRoute from './AuthRoute';
 import Auth from './Auth';
 import Daily from './Daily';
 import Editor from './Editor';
 import Login from './Login';
 import Monthly from './Monthly';
 import Report from './Report';
-import * as Paths from './RoutePaths';
+import * as RoutePaths from './RoutePaths';
 
 const styles = (_theme: Theme) =>
   createStyles({
@@ -37,12 +38,12 @@ const App = withStyles(styles)(
       public render(): React.ReactElement<Record<string, unknown>> {
         return (
           <Switch>
-            <Route exact path={Paths.HomePage} component={Login} />
-            <Route exact path={Paths.AuthPage} component={Auth} />
-            <Route exact path={Paths.DailyPage} component={Daily} />
-            <Route exact path={Paths.EditorPage} component={Editor} />
-            <Route exact path={Paths.MonthlyPage} component={Monthly} />
-            <Route exact path={Paths.ReportPage} component={Report} />
+            <Route exact path={RoutePaths.HomePage} component={Login} />
+            <Route exact path={RoutePaths.AuthPage} component={Auth} />
+            <AuthRoute exact path={RoutePaths.DailyPage} component={Daily} />
+            <AuthRoute exact path={RoutePaths.EditorPage} component={Editor} />
+            <AuthRoute exact path={RoutePaths.MonthlyPage} component={Monthly} />
+            <AuthRoute exact path={RoutePaths.ReportPage} component={Report} />
             <Route component={NoMatch} />
           </Switch>
         );

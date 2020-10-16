@@ -2,6 +2,8 @@ import * as Dropbox from 'dropbox';
 import { ThunkAction } from 'redux-thunk';
 import { IAppState } from '../main/Model';
 import { ITransaction } from './Model';
+import { AuthAction, setAuthStatus } from '../auth/actions';
+import { AuthStatus } from '../auth/Model';
 
 // Action types
 export enum ActionType {
@@ -15,10 +17,10 @@ export enum ActionType {
 }
 
 // Action creators
-export const requestTransactionsFromDropbox = () => ({
+const requestTransactionsFromDropbox = () => ({
   type: ActionType.REQUEST_TRANSACTIONS_FROM_DROPBOX as typeof ActionType.REQUEST_TRANSACTIONS_FROM_DROPBOX,
 });
-export const receivedTransactionsFromDropbox = (
+const receivedTransactionsFromDropbox = (
     transactions?: ITransaction[]
 ) => ({
   type: ActionType.RECEIVED_TRANSACTIONS_FROM_DROPBOX as typeof ActionType.RECEIVED_TRANSACTIONS_FROM_DROPBOX,
@@ -30,10 +32,10 @@ export const updateTransactions = (transactions: ITransaction[]) => ({
   transactions,
 });
 
-export const requestSaveTransactionsToDropbox = () => ({
+const requestSaveTransactionsToDropbox = () => ({
   type: ActionType.REQUEST_SAVE_TRANSACTIONS_TO_DROPBOX as typeof ActionType.REQUEST_SAVE_TRANSACTIONS_TO_DROPBOX,
 });
-export const finishedSaveTransactionsToDropbox = (success: boolean) => ({
+const finishedSaveTransactionsToDropbox = (success: boolean) => ({
   type: ActionType.FINISHED_SAVE_TRANSACTIONS_TO_DROPBOX as typeof ActionType.FINISHED_SAVE_TRANSACTIONS_TO_DROPBOX,
   success,
 });
@@ -50,7 +52,7 @@ export const fetchTransactionsFromDropboxIfNeeded = (): ThunkAction<
 void,
 IAppState,
 null,
-TransactionsAction
+TransactionsAction | AuthAction
 > => {
   return async (dispatch, getState) => {
     const state = getState();
@@ -70,10 +72,12 @@ TransactionsAction
       fr.addEventListener('load', _event => {
         let transactions: ITransaction[] = JSON.parse(fr.result as string);
         dispatch(receivedTransactionsFromDropbox(transactions));
+        dispatch(setAuthStatus(AuthStatus.OK));
       });
       fr.addEventListener('error', ev => {
         console.log(ev);
         dispatch(receivedTransactionsFromDropbox());
+        dispatch(setAuthStatus(AuthStatus.NEEDS_LOGIN));
       });
       // NOTE: The Dropbox SDK specification does not include a fileBlob
       // field on the FileLinkMetadataReference type, so it is missing from
@@ -82,6 +86,7 @@ TransactionsAction
     } catch (error) {
       console.info(`transactions.json download failed, ignoring. ${error}`);
       dispatch(receivedTransactionsFromDropbox());
+      dispatch(setAuthStatus(AuthStatus.NEEDS_LOGIN));
     }
   };
 };
