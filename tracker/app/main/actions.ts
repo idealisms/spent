@@ -1,16 +1,14 @@
 import * as Dropbox from 'dropbox';
 import { ThunkAction } from 'redux-thunk';
-import { IAppState, ISettings } from './Model';
+import { CloudState, IAppState, ISettings } from './Model';
 
 // Action types
 export enum ActionType {
-  REQUEST_SETTINGS_FROM_DROPBOX = 'REQUEST_SETTINGS_FROM_DROPBOX',
   RECEIVED_SETTINGS_FROM_DROPBOX = 'RECEIVED_SETTINGS_FROM_DROPBOX',
 
   UPDATE_SETTING = 'UPDATE_SETTING',
 
-  REQUEST_SAVE_SETTINGS_TO_DROPBOX = 'REQUEST_SAVE_SETTINGS_TO_DROPBOX',
-  FINISHED_SAVE_SETTINGS_TO_DROPBOX = 'FINISHED_SAVE_SETTINGS_TO_DROPBOX',
+  SET_SETTINGS_CLOUD_STATE = 'SET_SETTINGS_CLOUD_STATE',
 }
 
 // Action creators
@@ -28,19 +26,15 @@ export const updateSetting = (
   value,
 });
 
-export const requestSaveSettingsToDropbox = () => ({
-  type: ActionType.REQUEST_SAVE_SETTINGS_TO_DROPBOX as typeof ActionType.REQUEST_SAVE_SETTINGS_TO_DROPBOX,
-});
-export const finishedSaveSettingsToDropbox = (success: boolean) => ({
-  type: ActionType.FINISHED_SAVE_SETTINGS_TO_DROPBOX as typeof ActionType.FINISHED_SAVE_SETTINGS_TO_DROPBOX,
-  success,
+const setCloudState = (cloudState: CloudState) => ({
+  type: ActionType.SET_SETTINGS_CLOUD_STATE as typeof ActionType.SET_SETTINGS_CLOUD_STATE,
+  cloudState,
 });
 
 export type SettingsAction =
   | ReturnType<typeof receivedSettingsFromDropbox>
   | ReturnType<typeof updateSetting>
-  | ReturnType<typeof requestSaveSettingsToDropbox>
-  | ReturnType<typeof finishedSaveSettingsToDropbox>;
+  | ReturnType<typeof setCloudState>;
 
 // Async actions
 export const fetchSettingsFromDropbox = (): ThunkAction<
@@ -97,7 +91,7 @@ null,
 SettingsAction
 > => {
   return async (dispatch, getState) => {
-    dispatch(requestSaveSettingsToDropbox());
+    dispatch(setCloudState(CloudState.Uploading));
 
     const state = getState();
     let dbx = new Dropbox.Dropbox({
@@ -114,10 +108,10 @@ SettingsAction
     try {
       const metadata = await dbx.filesUpload(filesCommitInfo);
       console.log(metadata);
-      dispatch(finishedSaveSettingsToDropbox(true));
+      dispatch(setCloudState(CloudState.Done));
     } catch (error) {
       console.info(`settings.json write failed. ${error}`);
-      dispatch(finishedSaveSettingsToDropbox(false));
+      dispatch(setCloudState(CloudState.Modified));
     }
   };
 };

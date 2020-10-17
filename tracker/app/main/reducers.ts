@@ -55,15 +55,10 @@ export const settingsReducer: Reducer<ISettingsState, SettingsAction> = (
           [action.key]: action.value,
         },
       };
-    case ActionType.REQUEST_SAVE_SETTINGS_TO_DROPBOX:
+    case ActionType.SET_SETTINGS_CLOUD_STATE:
       return {
         ...state,
-        cloudState: CloudState.Uploading,
-      };
-    case ActionType.FINISHED_SAVE_SETTINGS_TO_DROPBOX:
-      return {
-        ...state,
-        cloudState: action.success ? CloudState.Done : CloudState.Modified,
+        cloudState: action.cloudState,
       };
 
     default:

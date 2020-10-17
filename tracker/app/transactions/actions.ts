@@ -1,6 +1,6 @@
 import * as Dropbox from 'dropbox';
 import { ThunkAction } from 'redux-thunk';
-import { IAppState } from '../main/Model';
+import { CloudState, IAppState } from '../main/Model';
 import { ITransaction } from './Model';
 import { AuthAction, setAuthStatus } from '../auth/actions';
 import { AuthStatus } from '../auth/Model';
@@ -12,8 +12,7 @@ export enum ActionType {
 
   UPDATE_TRANSACTIONS = 'UPDATE_TRANSACTIONS',
 
-  REQUEST_SAVE_TRANSACTIONS_TO_DROPBOX = 'REQUEST_SAVE_TRANSACTIONS_TO_DROPBOX',
-  FINISHED_SAVE_TRANSACTIONS_TO_DROPBOX = 'FINISHED_SAVE_TRANSACTIONS_TO_DROPBOX',
+  SET_TRANSACTIONS_CLOUD_STATE = 'SET_TRANSACTIONS_CLOUD_STATE',
 }
 
 // Action creators
@@ -27,19 +26,15 @@ export const updateTransactions = (transactions: ITransaction[]) => ({
   transactions,
 });
 
-const requestSaveTransactionsToDropbox = () => ({
-  type: ActionType.REQUEST_SAVE_TRANSACTIONS_TO_DROPBOX as typeof ActionType.REQUEST_SAVE_TRANSACTIONS_TO_DROPBOX,
-});
-const finishedSaveTransactionsToDropbox = (success: boolean) => ({
-  type: ActionType.FINISHED_SAVE_TRANSACTIONS_TO_DROPBOX as typeof ActionType.FINISHED_SAVE_TRANSACTIONS_TO_DROPBOX,
-  success,
+const setCloudState = (cloudState: CloudState) => ({
+  type: ActionType.SET_TRANSACTIONS_CLOUD_STATE as typeof ActionType.SET_TRANSACTIONS_CLOUD_STATE,
+  cloudState,
 });
 
 export type TransactionsAction =
   | ReturnType<typeof receivedTransactionsFromDropbox>
   | ReturnType<typeof updateTransactions>
-  | ReturnType<typeof requestSaveTransactionsToDropbox>
-  | ReturnType<typeof finishedSaveTransactionsToDropbox>;
+  | ReturnType<typeof setCloudState>;
 
 // Async actions
 export const fetchTransactionsFromDropboxIfNeeded = (): ThunkAction<
@@ -92,7 +87,7 @@ TransactionsAction
 > => {
   return async (dispatch, getState) => {
     const state = getState();
-    dispatch(requestSaveTransactionsToDropbox());
+    dispatch(setCloudState(CloudState.Uploading));
 
     let dbx = new Dropbox.Dropbox({
       accessToken: state.auth.dropboxAccessToken,
@@ -108,10 +103,10 @@ TransactionsAction
     try {
       const metadata = await dbx.filesUpload(filesCommitInfo);
       console.log(metadata);
-      dispatch(finishedSaveTransactionsToDropbox(true));
+      dispatch(setCloudState(CloudState.Done));
     } catch (error) {
       console.info(`settings.json write failed. ${error}`);
-      dispatch(finishedSaveTransactionsToDropbox(false));
+      dispatch(setCloudState(CloudState.Modified));
     }
   };
 };

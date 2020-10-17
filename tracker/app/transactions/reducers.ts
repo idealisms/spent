@@ -34,15 +34,10 @@ TransactionsAction
         transactions: action.transactions,
         cloudState: CloudState.Modified,
       };
-    case ActionType.REQUEST_SAVE_TRANSACTIONS_TO_DROPBOX:
+    case ActionType.SET_TRANSACTIONS_CLOUD_STATE:
       return {
         ...state,
-        cloudState: CloudState.Uploading,
-      };
-    case ActionType.FINISHED_SAVE_TRANSACTIONS_TO_DROPBOX:
-      return {
-        ...state,
-        cloudState: action.success ? CloudState.Done : CloudState.Modified,
+        cloudState: action.cloudState,
       };
 
     default:
