@@ -21,7 +21,7 @@ import {
   TransactionUtils,
 } from '../../transactions';
 import { saveSettingsToDropbox, updateSetting } from '../actions';
-import { CloudState, IAppState, IChartNode, IReportNode } from '../Model';
+import { CloudState, IAppState, IChartNode, IReportNode } from '../model';
 import ReportChart from './ReportChart';
 import { IDateRange, ReportFilterDrawer } from './ReportFilterDrawer';
 import ReportMenuBar from './ReportMenuBar';

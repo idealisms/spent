@@ -1,4 +1,4 @@
-import { CloudState } from '../main/Model';
+import { CloudState } from '../main/model';
 
 // If this were to move into Settings, we would need to also
 // move the mappings to emoji.

@@ -11,7 +11,7 @@ import * as React from 'react';
 import { connect } from 'react-redux';
 import { ThunkDispatch } from 'redux-thunk';
 import * as Transactions from '../../transactions';
-import { CloudState, IAppState } from '../Model';
+import { CloudState, IAppState } from '../model';
 import EditorMenuBar from './EditorMenuBar';
 
 const styles = (_theme: Theme) =>

@@ -1,5 +1,5 @@
 import { ThunkAction } from 'redux-thunk';
-import { IAppState } from '../main/Model';
+import { IAppState } from '../main/model';
 import { AuthStatus } from './Model';
 import {
   fetchTransactionsFromDropboxIfNeeded,

@@ -10,7 +10,7 @@ import {
   GoogleDataTableColumnRoleType,
 } from 'react-google-charts/dist/types';
 import { ITransaction, TransactionUtils } from '../../transactions';
-import { IDailySpendTarget } from '../Model';
+import { IDailySpendTarget } from '../model';
 
 const styles = (_theme: Theme) =>
   createStyles({

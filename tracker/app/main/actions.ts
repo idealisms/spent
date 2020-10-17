@@ -1,6 +1,6 @@
 import * as Dropbox from 'dropbox';
 import { ThunkAction } from 'redux-thunk';
-import { CloudState, IAppState, ISettings } from './Model';
+import { CloudState, IAppState, ISettings } from './model';
 
 // Action types
 export enum ActionType {

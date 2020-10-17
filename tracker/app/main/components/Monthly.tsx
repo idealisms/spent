@@ -17,7 +17,7 @@ import {
   TransactionsTableSumRow,
   TransactionUtils,
 } from '../../transactions';
-import { IAppState, ISpendTarget } from '../Model';
+import { IAppState, ISpendTarget } from '../model';
 import MenuBarWithDrawer from './MenuBarWithDrawer';
 import MonthlyGraph from './MonthlyGraph';
 import * as Pages from './RoutePaths';

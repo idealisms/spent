@@ -19,7 +19,7 @@ import { Location, LocationState } from 'history';
 import * as React from 'react';
 import { connect } from 'react-redux';
 import { Dispatch } from 'redux';
-import { IAppState } from '../Model';
+import { IAppState } from '../model';
 import * as Pages from './RoutePaths';
 
 const styles = (_theme: Theme) =>

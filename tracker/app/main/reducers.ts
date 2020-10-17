@@ -5,7 +5,7 @@ import { transactionsReducer } from '../transactions';
 import { authReducer } from '../auth/reducers';
 import { ActionType, SettingsAction } from './actions';
 import { getDefaultCategories } from './components/Report';
-import { CloudState, ISettingsState } from './Model';
+import { CloudState, ISettingsState } from './model';
 
 const initialSettingsState: ISettingsState = {
   lastUpdated: 0,

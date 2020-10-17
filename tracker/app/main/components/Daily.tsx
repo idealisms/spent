@@ -11,7 +11,7 @@ import {
   TransactionsTable,
   TransactionUtils,
 } from '../../transactions';
-import { IAppState, IDailySpendTarget } from '../Model';
+import { IAppState, IDailySpendTarget } from '../model';
 import DailyGraph from './DailyGraph';
 import MenuBarWithDrawer from './MenuBarWithDrawer';
 

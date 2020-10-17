@@ -4,7 +4,7 @@ import * as React from 'react';
 import { connect } from 'react-redux';
 import { ThunkDispatch } from 'redux-thunk';
 import { RouteComponentProps } from 'react-router-dom';
-import { IAppState } from '../Model';
+import { IAppState } from '../model';
 import { generateAuthUrl } from '../../auth/utils';
 
 const styles = (_theme: Theme) =>

@@ -13,7 +13,7 @@ import EditIcon from '@material-ui/icons/Edit';
 import LabelIcon from '@material-ui/icons/Label';
 import * as React from 'react';
 import * as Transactions from '../../transactions';
-import { CloudState } from '../Model';
+import { CloudState } from '../model';
 import MenuBarWithDrawer from './MenuBarWithDrawer';
 
 const styles = (_theme: Theme) =>

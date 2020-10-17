@@ -1,5 +1,5 @@
 import { Reducer } from 'redux';
-import { CloudState } from '../main/Model';
+import { CloudState } from '../main/model';
 import { ActionType, TransactionsAction } from './actions';
 import { ITransactionsState } from './Model';
 
