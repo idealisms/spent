@@ -2,7 +2,7 @@ import * as Dropbox from 'dropbox';
 import { ThunkAction } from 'redux-thunk';
 import { CloudState, IAppState } from '../main/model';
 import { ITransaction } from './model';
-import { AuthAction, setAuthStatus } from '../auth/actions';
+import { AuthAction, dropboxDownloadCompleted } from '../auth/actions';
 import { AuthStatus } from '../auth/model';
 
 // Action types
@@ -52,20 +52,19 @@ TransactionsAction | AuthAction
       accessToken: state.auth.dropboxAccessToken,
       fetch,
     });
+    const path = '/spent tracker/transactions.json';
     try {
-      const file = await dbx.filesDownload({
-        path: '/spent tracker/transactions.json',
-      });
+      const file = await dbx.filesDownload({path});
       let fr = new FileReader();
       fr.addEventListener('load', _event => {
         let transactions: ITransaction[] = JSON.parse(fr.result as string);
         dispatch(receivedTransactionsFromDropbox(transactions));
-        dispatch(setAuthStatus(AuthStatus.OK));
+        dispatch(dropboxDownloadCompleted(path, AuthStatus.OK));
       });
       fr.addEventListener('error', ev => {
         console.log(ev);
         dispatch(receivedTransactionsFromDropbox());
-        dispatch(setAuthStatus(AuthStatus.NEEDS_LOGIN));
+        dispatch(dropboxDownloadCompleted(path, AuthStatus.NEEDS_LOGIN));
       });
       // NOTE: The Dropbox SDK specification does not include a fileBlob
       // field on the FileLinkMetadataReference type, so it is missing from
@@ -74,7 +73,7 @@ TransactionsAction | AuthAction
     } catch (error) {
       console.info(`transactions.json download failed, ignoring. ${error}`);
       dispatch(receivedTransactionsFromDropbox());
-      dispatch(setAuthStatus(AuthStatus.NEEDS_LOGIN));
+      dispatch(dropboxDownloadCompleted(path, AuthStatus.NEEDS_LOGIN));
     }
   };
 };

@@ -1,6 +1,8 @@
 import * as Dropbox from 'dropbox';
 import { ThunkAction } from 'redux-thunk';
 import { CloudState, IAppState, ISettings } from './model';
+import { AuthAction, dropboxDownloadCompleted } from '../auth/actions';
+import { AuthStatus } from '../auth/model';
 
 // Action types
 export enum ActionType {
@@ -41,7 +43,7 @@ export const fetchSettingsFromDropbox = (): ThunkAction<
 void,
 IAppState,
 null,
-SettingsAction
+SettingsAction | AuthAction
 > => {
   return async (dispatch, getState) => {
     const state = getState();
@@ -49,23 +51,25 @@ SettingsAction
       accessToken: state.auth.dropboxAccessToken,
       fetch,
     });
+    const path = '/spent tracker/settings.json';
     try {
-      const file = await dbx.filesDownload({
-        path: '/spent tracker/settings.json',
-      });
+      const file = await dbx.filesDownload({path});
       let fr = new FileReader();
       fr.addEventListener('load', _event => {
         let settings: ISettings = JSON.parse(fr.result as string);
         dispatch(receivedSettingsFromDropbox(settings));
+        dispatch(dropboxDownloadCompleted(path, AuthStatus.OK));
       });
       fr.addEventListener('error', ev => {
         console.log(ev);
         dispatch(receivedSettingsFromDropbox());
+        dispatch(dropboxDownloadCompleted(path, AuthStatus.NEEDS_LOGIN));
       });
       fr.readAsText((file as any).fileBlob);
     } catch (error) {
       console.info(`settings.json download failed, ignoring. ${error}`);
       dispatch(receivedSettingsFromDropbox());
+      dispatch(dropboxDownloadCompleted(path, AuthStatus.NEEDS_LOGIN));
     }
   };
 };

@@ -14,6 +14,7 @@ import {
 export enum ActionType {
   SET_DROPBOX_ACCESS_TOKEN = 'SET_DROPBOX_ACCESS_TOKEN',
   SET_AUTH_STATUS = 'SET_AUTH_STATUS',
+  DROPBOX_DOWNLOAD_COMPLETED = 'DROPBOX_DOWNLOAD_COMPLETED',
 }
 
 // Action creators
@@ -25,14 +26,21 @@ export const setDropboxAccessToken = (token: string) => {
   };
 };
 
-export const setAuthStatus = (authStatus: AuthStatus) => ({
+const setAuthStatus = (authStatus: AuthStatus) => ({
   type: ActionType.SET_AUTH_STATUS as typeof ActionType.SET_AUTH_STATUS,
+  authStatus,
+});
+
+export const dropboxDownloadCompleted = (path: string, authStatus: AuthStatus) => ({
+  type: ActionType.DROPBOX_DOWNLOAD_COMPLETED as typeof ActionType.DROPBOX_DOWNLOAD_COMPLETED,
+  path,
   authStatus,
 });
 
 export type AuthAction =
   | ReturnType<typeof setDropboxAccessToken>
-  | ReturnType<typeof setAuthStatus>;
+  | ReturnType<typeof setAuthStatus>
+  | ReturnType<typeof dropboxDownloadCompleted>;
 
 // Async actions
 export const tryLogin = (): ThunkAction<
@@ -50,7 +58,6 @@ AuthAction | TransactionsAction | SettingsAction
     if (state.auth.dropboxAccessToken) {
       dispatch(setAuthStatus(AuthStatus.CHECKING));
       dispatch(fetchTransactionsFromDropboxIfNeeded());
-      // TODO: Also set authStatus in fetchSettings.
       dispatch(fetchSettingsFromDropboxIfNeeded());
     } else {
       dispatch(setAuthStatus(AuthStatus.NEEDS_LOGIN));

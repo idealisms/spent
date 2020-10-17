@@ -8,4 +8,5 @@ export enum AuthStatus {
 export interface IAuthState {
   authStatus: AuthStatus;
   dropboxAccessToken: string;
+  downloadStatuses: Record<string, AuthStatus>;
 }

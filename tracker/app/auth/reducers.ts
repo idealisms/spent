@@ -5,6 +5,7 @@ import { Reducer } from 'redux';
 const initialAuthState: IAuthState = {
   authStatus: AuthStatus.INIT,
   dropboxAccessToken: localStorage.getItem('dropboxToken') || '',
+  downloadStatuses: {},
 };
 
 export const authReducer: Reducer<IAuthState, AuthAction> = (
@@ -22,6 +23,26 @@ export const authReducer: Reducer<IAuthState, AuthAction> = (
         ...state,
         authStatus: action.authStatus,
       };
+    case ActionType.DROPBOX_DOWNLOAD_COMPLETED: {
+      const downloadStatuses = {
+        ...state.downloadStatuses,
+        [action.path]: action.authStatus,
+      };
+      let authStatus = state.authStatus;
+      // Compute main auth status once both files have completed.
+      if (Object.keys(downloadStatuses).length === 2) {
+        if (Object.values(downloadStatuses).every(status => status === AuthStatus.OK)) {
+          authStatus = AuthStatus.OK;
+        } else {
+          authStatus = AuthStatus.NEEDS_LOGIN;
+        }
+      }
+      return {
+        ...state,
+        authStatus,
+        downloadStatuses,
+      };
+    }
     default:
       return state;
   }
