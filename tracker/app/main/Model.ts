@@ -82,7 +82,6 @@ export interface ISettings {
 }
 
 export interface ISettingsState {
-  isFetching: boolean;
   /** ms since the epoch */
   lastUpdated: number;
   cloudState: CloudState;

@@ -17,9 +17,6 @@ export enum ActionType {
 }
 
 // Action creators
-const requestTransactionsFromDropbox = () => ({
-  type: ActionType.REQUEST_TRANSACTIONS_FROM_DROPBOX as typeof ActionType.REQUEST_TRANSACTIONS_FROM_DROPBOX,
-});
 const receivedTransactionsFromDropbox = (transactions?: ITransaction[]) => ({
   type: ActionType.RECEIVED_TRANSACTIONS_FROM_DROPBOX as typeof ActionType.RECEIVED_TRANSACTIONS_FROM_DROPBOX,
   transactions,
@@ -39,7 +36,6 @@ const finishedSaveTransactionsToDropbox = (success: boolean) => ({
 });
 
 export type TransactionsAction =
-  | ReturnType<typeof requestTransactionsFromDropbox>
   | ReturnType<typeof receivedTransactionsFromDropbox>
   | ReturnType<typeof updateTransactions>
   | ReturnType<typeof requestSaveTransactionsToDropbox>
@@ -57,7 +53,6 @@ TransactionsAction | AuthAction
     if (state.transactions.lastUpdated != 0) {
       return;
     }
-    dispatch(requestTransactionsFromDropbox());
     let dbx = new Dropbox.Dropbox({
       accessToken: state.auth.dropboxAccessToken,
       fetch,

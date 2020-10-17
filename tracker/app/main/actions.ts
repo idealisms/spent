@@ -14,9 +14,6 @@ export enum ActionType {
 }
 
 // Action creators
-export const requestSettingsFromDropbox = () => ({
-  type: ActionType.REQUEST_SETTINGS_FROM_DROPBOX as typeof ActionType.REQUEST_SETTINGS_FROM_DROPBOX,
-});
 export const receivedSettingsFromDropbox = (settings?: ISettings) => ({
   type: ActionType.RECEIVED_SETTINGS_FROM_DROPBOX as typeof ActionType.RECEIVED_SETTINGS_FROM_DROPBOX,
   settings: settings,
@@ -40,7 +37,6 @@ export const finishedSaveSettingsToDropbox = (success: boolean) => ({
 });
 
 export type SettingsAction =
-  | ReturnType<typeof requestSettingsFromDropbox>
   | ReturnType<typeof receivedSettingsFromDropbox>
   | ReturnType<typeof updateSetting>
   | ReturnType<typeof requestSaveSettingsToDropbox>
@@ -54,8 +50,6 @@ null,
 SettingsAction
 > => {
   return async (dispatch, getState) => {
-    dispatch(requestSettingsFromDropbox());
-
     const state = getState();
     let dbx = new Dropbox.Dropbox({
       accessToken: state.auth.dropboxAccessToken,

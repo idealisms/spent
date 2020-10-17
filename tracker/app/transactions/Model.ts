@@ -97,7 +97,6 @@ export interface ITransaction {
 }
 
 export interface ITransactionsState {
-  isFetching: boolean;
   /** ms since the epoch */
   lastUpdated: number;
   cloudState: CloudState;

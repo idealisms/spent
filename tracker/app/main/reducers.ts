@@ -8,7 +8,6 @@ import { getDefaultCategories } from './components/Report';
 import { CloudState, ISettingsState } from './Model';
 
 const initialSettingsState: ISettingsState = {
-  isFetching: false,
   lastUpdated: 0,
   cloudState: CloudState.Done,
 
@@ -31,23 +30,16 @@ export const settingsReducer: Reducer<ISettingsState, SettingsAction> = (
     action
 ) => {
   switch (action.type) {
-    case ActionType.REQUEST_SETTINGS_FROM_DROPBOX:
-      return {
-        ...state,
-        isFetching: true,
-      };
     case ActionType.RECEIVED_SETTINGS_FROM_DROPBOX:
       if (action.settings) {
         return {
           ...state,
-          isFetching: false,
           lastUpdated: Date.now(),
           settings: action.settings,
         };
       } else {
         return {
           ...state,
-          isFetching: false,
           settings: {
             ...state.settings,
             reportCategories: getDefaultCategories(),
