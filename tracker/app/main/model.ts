@@ -1,6 +1,6 @@
 import { RouterState } from 'connected-react-router';
 import { ITransactionsState } from '../transactions';
-import { IAuthState } from '../auth/Model';
+import { IAuthState } from '../auth/model';
 
 export enum CloudState {
   Done = 1,

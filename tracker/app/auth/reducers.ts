@@ -1,5 +1,5 @@
 import { ActionType, AuthAction } from './actions';
-import { AuthStatus, IAuthState } from './Model';
+import { AuthStatus, IAuthState } from './model';
 import { Reducer } from 'redux';
 
 const initialAuthState: IAuthState = {

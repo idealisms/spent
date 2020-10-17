@@ -3,7 +3,7 @@ import { ThunkAction } from 'redux-thunk';
 import { CloudState, IAppState } from '../main/model';
 import { ITransaction } from './model';
 import { AuthAction, setAuthStatus } from '../auth/actions';
-import { AuthStatus } from '../auth/Model';
+import { AuthStatus } from '../auth/model';
 
 // Action types
 export enum ActionType {

@@ -5,7 +5,7 @@ import * as React from 'react';
 import { Route, Redirect } from 'react-router-dom';
 import { ThunkDispatch } from 'redux-thunk';
 import { connect } from 'react-redux';
-import { AuthStatus } from '../../auth/Model';
+import { AuthStatus } from '../../auth/model';
 import * as RoutePaths from './RoutePaths';
 import { tryLogin } from '../../auth/actions';
 
