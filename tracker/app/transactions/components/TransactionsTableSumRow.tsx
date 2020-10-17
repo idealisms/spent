@@ -4,7 +4,7 @@ import { CSSProperties } from '@material-ui/core/styles/withStyles';
 import CheckBoxIcon from '@material-ui/icons/CheckBox';
 import CheckBoxOutlineBlankIcon from '@material-ui/icons/CheckBoxOutlineBlank';
 import * as React from 'react';
-import { ITransaction } from '../Model';
+import { ITransaction } from '../model';
 import { formatAmountNumber } from '../utils';
 import { styles } from './Transaction';
 

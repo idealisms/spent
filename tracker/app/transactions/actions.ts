@@ -1,7 +1,7 @@
 import * as Dropbox from 'dropbox';
 import { ThunkAction } from 'redux-thunk';
 import { CloudState, IAppState } from '../main/model';
-import { ITransaction } from './Model';
+import { ITransaction } from './model';
 import { AuthAction, setAuthStatus } from '../auth/actions';
 import { AuthStatus } from '../auth/Model';
 

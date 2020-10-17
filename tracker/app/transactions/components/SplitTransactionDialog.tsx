@@ -7,7 +7,7 @@ import DialogTitle from '@material-ui/core/DialogTitle';
 import { Theme, withStyles } from '@material-ui/core/styles';
 import TextField from '@material-ui/core/TextField';
 import * as React from 'react';
-import { ITransaction } from '../Model';
+import { ITransaction } from '../model';
 import { compareTransactions, generateUUID } from '../utils';
 import Transaction from './Transaction';
 import TransactionsTable from './TransactionsTable';

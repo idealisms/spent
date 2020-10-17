@@ -16,7 +16,7 @@ import {
   ITransaction,
   ITransactionsState,
   TAG_TO_CATEGORY,
-} from './Model';
+} from './model';
 import { transactionsReducer } from './reducers';
 import * as TransactionUtils from './utils';
 

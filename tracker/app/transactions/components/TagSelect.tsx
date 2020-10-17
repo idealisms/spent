@@ -9,7 +9,7 @@ import CreatableSelect from 'react-select/lib/Creatable';
 import { Props } from 'react-select/lib/Select';
 import { ValueType } from 'react-select/lib/types';
 import { IAppState } from '../../main';
-import { ITransaction, TAG_TO_CATEGORY } from '../Model';
+import { ITransaction, TAG_TO_CATEGORY } from '../model';
 import { categoryToEmoji } from '../utils';
 
 const styles = (_theme: Theme) =>

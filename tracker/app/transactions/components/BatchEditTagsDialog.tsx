@@ -9,7 +9,7 @@ import Radio from '@material-ui/core/Radio';
 import RadioGroup from '@material-ui/core/RadioGroup';
 import { Theme, withStyles } from '@material-ui/core/styles';
 import * as React from 'react';
-import { ITransaction } from '../Model';
+import { ITransaction } from '../model';
 import * as TransactionUtils from '../utils';
 import TagSelect from './TagSelect';
 import Transaction from './Transaction';

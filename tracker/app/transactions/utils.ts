@@ -1,5 +1,5 @@
 import moment from 'moment';
-import { Category, ITransaction, TAG_TO_CATEGORY } from './Model';
+import { Category, ITransaction, TAG_TO_CATEGORY } from './model';
 
 export function shouldExclude(
     transaction: ITransaction,

@@ -2,7 +2,7 @@ import { createStyles, WithStyles } from '@material-ui/core';
 import { Theme, withStyles } from '@material-ui/core/styles';
 import CheckBoxIcon from '@material-ui/icons/CheckBox';
 import * as React from 'react';
-import { Category, ITransaction } from '../Model';
+import { Category, ITransaction } from '../model';
 import { categoryToEmoji, formatAmount, getCategory } from '../utils';
 
 export const styles = (theme: Theme) =>

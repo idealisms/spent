@@ -2,7 +2,7 @@
 // import {createRenderer, ShallowRenderer} from 'react-test-renderer/shallow';
 import * as fs from 'fs';
 import moment from 'moment';
-import { ITransaction } from '../Model';
+import { ITransaction } from '../model';
 import * as utils from '../utils';
 
 describe('Home', () => {

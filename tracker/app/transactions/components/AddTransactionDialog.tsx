@@ -10,7 +10,7 @@ import { KeyboardDatePicker } from '@material-ui/pickers';
 import { MaterialUiPickersDate } from '@material-ui/pickers/typings/date';
 import moment from 'moment';
 import * as React from 'react';
-import { ITransaction } from '../Model';
+import { ITransaction } from '../model';
 import { generateUUID } from '../utils';
 import TagSelect from './TagSelect';
 
