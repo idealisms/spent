@@ -54,7 +54,7 @@ TransactionsAction | AuthAction
     });
     const path = '/spent tracker/transactions.json';
     try {
-      const file = await dbx.filesDownload({path});
+      const file = await dbx.filesDownload({ path });
       let fr = new FileReader();
       fr.addEventListener('load', _event => {
         let transactions: ITransaction[] = JSON.parse(fr.result as string);

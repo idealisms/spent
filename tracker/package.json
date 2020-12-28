@@ -34,7 +34,9 @@
       "./config/test.shim.js",
       "./config/test.setup.js"
     ],
-    "setupFilesAfterEnv": ["./config/test.setup.ts"],
+    "setupFilesAfterEnv": [
+      "./config/test.setup.ts"
+    ],
     "testRegex": "/*.spec.(ts|tsx|js)$",
     "testURL": "http://www.example.com/"
   },

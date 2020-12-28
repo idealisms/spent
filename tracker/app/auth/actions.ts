@@ -31,7 +31,10 @@ const setAuthStatus = (authStatus: AuthStatus) => ({
   authStatus,
 });
 
-export const dropboxDownloadCompleted = (path: string, authStatus: AuthStatus) => ({
+export const dropboxDownloadCompleted = (
+    path: string,
+    authStatus: AuthStatus
+) => ({
   type: ActionType.DROPBOX_DOWNLOAD_COMPLETED as typeof ActionType.DROPBOX_DOWNLOAD_COMPLETED,
   path,
   authStatus,

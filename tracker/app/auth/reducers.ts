@@ -31,7 +31,11 @@ export const authReducer: Reducer<IAuthState, AuthAction> = (
       let authStatus = state.authStatus;
       // Compute main auth status once both files have completed.
       if (Object.keys(downloadStatuses).length === 2) {
-        if (Object.values(downloadStatuses).every(status => status === AuthStatus.OK)) {
+        if (
+          Object.values(downloadStatuses).every(
+              status => status === AuthStatus.OK
+          )
+        ) {
           authStatus = AuthStatus.OK;
         } else {
           authStatus = AuthStatus.NEEDS_LOGIN;

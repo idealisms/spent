@@ -53,7 +53,7 @@ SettingsAction | AuthAction
     });
     const path = '/spent tracker/settings.json';
     try {
-      const file = await dbx.filesDownload({path});
+      const file = await dbx.filesDownload({ path });
       let fr = new FileReader();
       fr.addEventListener('load', _event => {
         let settings: ISettings = JSON.parse(fr.result as string);
