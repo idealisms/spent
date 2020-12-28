@@ -375,7 +375,7 @@ export const ReportFilterDrawer = withStyles(styles)(
         startDate.dayOfYear() == 1 &&
         endDate.clone().add(1, 'day').dayOfYear() == 1
         ) {
-        // Create entries for year comparisons.
+        // Create entries for full year comparisons.
           for (let year = lastDay.year() - 1; year >= this.START_YEAR; year--) {
             if (year == startDate.year()) {
               continue;
@@ -386,6 +386,23 @@ export const ReportFilterDrawer = withStyles(styles)(
               startDate: lastDay.clone().year(year).month(0).date(1),
               endDate: lastDay.clone().year(year).month(11).date(31),
               description: year.toString(),
+            });
+          }
+        } else if (
+          startDate.year() == endDate.year() &&
+        startDate.dayOfYear() == 1
+        ) {
+        // Comparing against year to date.
+          for (let year = lastDay.year() - 1; year >= this.START_YEAR; year--) {
+            if (year == startDate.year()) {
+              continue;
+            }
+            dateOptions.push({
+              name: year.toString() + '-to-date',
+              chartColumnName: year.toString(),
+              startDate: lastDay.clone().year(year).month(0).date(1),
+              endDate: lastDay.clone().year(year).dayOfYear(endDate.dayOfYear()),
+              description: year.toString() + ' to date',
             });
           }
         } else if (
