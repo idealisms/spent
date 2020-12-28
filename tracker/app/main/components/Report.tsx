@@ -244,7 +244,7 @@ const Report = withStyles(styles)(
                 label={`${columnName} Categories`}
               />,
               <Tab
-                key={`tab-${columnName}-cat`}
+                key={`tab-${columnName}-uncat`}
                 label={`${columnName} Uncategorized`}
               />
           );
