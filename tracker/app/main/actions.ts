@@ -38,6 +38,18 @@ export type SettingsAction =
   | ReturnType<typeof updateSetting>
   | ReturnType<typeof setCloudState>;
 
+function upgradeIfNecessary(settings: ISettings) {
+  if (settings.version === undefined) {
+    // Migrate reportCategories to a map.
+    if (Array.isArray(settings.reportCategories)) {
+      settings.reportCategories = new Map([
+        ['report', settings.reportCategories],
+      ]);
+    }
+    settings.version = 1;
+  }
+}
+
 // Async actions
 export const fetchSettingsFromDropbox = (): ThunkAction<
 void,
@@ -57,6 +69,7 @@ SettingsAction | AuthAction
       let fr = new FileReader();
       fr.addEventListener('load', _event => {
         let settings: ISettings = JSON.parse(fr.result as string);
+        upgradeIfNecessary(settings);
         dispatch(receivedSettingsFromDropbox(settings));
         dispatch(dropboxDownloadCompleted(path, AuthStatus.OK));
       });

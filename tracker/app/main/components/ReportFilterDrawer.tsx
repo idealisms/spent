@@ -70,6 +70,8 @@ interface IReportFilterDrawerProps extends WithStyles<typeof styles> {
   settingsCloudState: CloudState;
   saveSettings: () => void;
   categoriesPretty: string;
+  reportNames: string[];
+  selectedReportName: string;
   updateReportCategories: (categories: IReportNode[]) => void;
   setDate: (dateRange: IDateRange, compareDateRange?: IDateRange) => void;
   setCategoriesPretty: (categoriesPretty: string) => void;

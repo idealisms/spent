@@ -12,6 +12,7 @@ const initialSettingsState: ISettingsState = {
   cloudState: CloudState.Done,
 
   settings: {
+    version: 0,
     reportCategories: [],
     spendTargets: [],
     dailySpendTarget: {

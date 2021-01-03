@@ -74,8 +74,13 @@ export interface ISpendTarget {
   notes?: string;
 }
 
+// Removed in version 1.
+type DeprecatedReportCategories = IReportNode[];
+
 export interface ISettings {
-  reportCategories: IReportNode[];
+  version: number;
+  reportCategories: Map<string, IReportNode[]>
+  | DeprecatedReportCategories;
   dailySpendTarget: IDailySpendTarget;
   /** These are shown on the Monthly page. */
   spendTargets: ISpendTarget[];

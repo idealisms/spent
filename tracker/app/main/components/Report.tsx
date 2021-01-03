@@ -114,12 +114,12 @@ type ReportRenderNode = {
 
 interface IReportOwnProps extends WithStyles<typeof styles> {}
 interface IReportAppStateProps {
-  reportCategories: IReportNode[];
+  reportCategories: Map<string, IReportNode[]>;
   settingsCloudState: CloudState;
   transactions: ITransaction[];
 }
 interface IReportDispatchProps {
-  updateReportCategories: (categories: IReportNode[]) => void;
+  updateReportCategories: (categories: Map<string, IReportNode[]>) => void;
   saveSettings: () => void;
 }
 type IReportProps = IReportOwnProps &
@@ -129,6 +129,7 @@ interface IReportState {
   dateRange: IDateRange;
   compareDateRange?: IDateRange;
   tabIndex: number;
+  selectedReportName: string;
   categoriesPretty: string;
   isFilterDrawerOpen: boolean;
 }
@@ -147,6 +148,9 @@ const Report = withStyles(styles)(
           .date(31)
           .startOf('day');
 
+        let reportName = this.props.reportCategories.keys().next().value || '';
+        let reportCategories = this.props.reportCategories.get(reportName) || [];
+
         this.state = {
           dateRange: {
             name: 'lastyear',
@@ -155,8 +159,9 @@ const Report = withStyles(styles)(
             endDate,
           },
           tabIndex: 0,
-          categoriesPretty: this.props.reportCategories.length
-            ? JSON.stringify(this.props.reportCategories, null, 2)
+          selectedReportName: reportName,
+          categoriesPretty: reportCategories.length
+            ? JSON.stringify(reportCategories, null, 2)
             : LOADING_TEXT,
           isFilterDrawerOpen: false,
         };
@@ -168,9 +173,11 @@ const Report = withStyles(styles)(
           this.state.categoriesPretty == LOADING_TEXT &&
         this.props.reportCategories
         ) {
+          let reportCategories = this.props.reportCategories.get(
+              this.state.selectedReportName) || [];
           this.setState({
             categoriesPretty: JSON.stringify(
-                this.props.reportCategories,
+                reportCategories,
                 null,
                 2
             ),
@@ -277,7 +284,13 @@ const Report = withStyles(styles)(
             settingsCloudState={this.props.settingsCloudState}
             saveSettings={this.props.saveSettings}
             categoriesPretty={this.state.categoriesPretty}
-            updateReportCategories={this.props.updateReportCategories}
+            reportNames={Array.from(this.props.reportCategories.keys())}
+            selectedReportName={this.state.selectedReportName}
+            updateReportCategories={categories => {
+              let reportCategories = new Map(this.props.reportCategories);
+              reportCategories.set(this.state.selectedReportName, categories);
+              this.props.updateReportCategories(reportCategories);
+            }}
             setDate={(dateRange, compareDateRange) => {
               let tabIndex =
               !compareDateRange && this.state.tabIndex >= 2
@@ -359,7 +372,7 @@ const Report = withStyles(styles)(
       private buildTree = (
           transactions: ITransaction[]
       ): [ITransaction[], JSX.Element, IChartNode[]] => {
-        if (!this.props.reportCategories.length) {
+        if (!this.props.reportCategories) {
           return [[], <div key="loading">Loading...</div>, []];
         }
 
@@ -381,7 +394,8 @@ const Report = withStyles(styles)(
           }
           return renderNodes;
         };
-        let reportRenderNodes = buildRenderTree(this.props.reportCategories);
+        let reportRenderNodes = buildRenderTree(
+            this.props.reportCategories.get(this.state.selectedReportName) || []);
 
         let tagToRootReportRenderNode: Map<string, ReportRenderNode> = new Map();
         for (let renderNode of reportRenderNodes) {
@@ -574,7 +588,7 @@ const Report = withStyles(styles)(
 );
 
 const mapStateToProps = (state: IAppState): IReportAppStateProps => ({
-  reportCategories: state.settings.settings.reportCategories,
+  reportCategories: state.settings.settings.reportCategories as Map<string, IReportNode[]>,
   settingsCloudState: state.settings.cloudState,
   transactions: state.transactions.transactions,
 });
