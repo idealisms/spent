@@ -1,11 +1,4 @@
-import {
-  createStyles,
-  Drawer,
-  Hidden,
-  Tab,
-  Tabs,
-  WithStyles,
-} from '@material-ui/core';
+import { createStyles, Drawer, Hidden, WithStyles } from '@material-ui/core';
 import { Theme, withStyles } from '@material-ui/core/styles';
 import classNames from 'classnames';
 import moment from 'moment';
@@ -16,8 +9,6 @@ import {
   Category,
   ITransaction,
   TAG_TO_CATEGORY,
-  Transaction,
-  TransactionsTable,
   TransactionUtils,
 } from '../../transactions';
 import { saveSettingsToDropbox, updateSetting } from '../actions';
@@ -25,6 +16,7 @@ import { CloudState, IAppState, IChartNode, IReportNode } from '../model';
 import ReportChart from './ReportChart';
 import { IDateRange, ReportFilterDrawer } from './ReportFilterDrawer';
 import ReportMenuBar from './ReportMenuBar';
+import ReportTabs from './ReportTabs';
 
 const LOADING_TEXT = 'loading...';
 
@@ -46,13 +38,6 @@ const styles = (_theme: Theme) =>
       flex: '0 1 100%',
       display: 'flex',
       flexDirection: 'column',
-    },
-    tables: {
-      overflow: 'auto',
-      flex: '1 1 0',
-    },
-    tabs: {
-      backgroundColor: '#eee',
     },
     drawer: {
       width: 0,
@@ -77,32 +62,6 @@ const styles = (_theme: Theme) =>
       width: '90%',
       maxWidth: '420px',
       minWidth: '16px',
-    },
-    renderedTree: {
-      margin: '16px',
-      '& > .row': {
-        lineHeight: '24px',
-        borderRadius: '4px',
-        margin: '4px',
-        backgroundColor: 'rgba(0, 0, 0, .08)',
-      },
-      '& > .row .amount': {
-        display: 'inline-block',
-        whiteSpace: 'nowrap',
-        textAlign: 'right',
-        marginRight: '16px',
-        width: '90px',
-      },
-      '& > .total': {
-        color: 'rgba(0, 0, 0, .3)',
-      },
-      '& > .info': {
-        color: 'rgba(0, 0, 0, .3)',
-        fontSize: 'small',
-      },
-    },
-    transactionsTable: {
-      borderTop: '1px solid lightgrey',
     },
   });
 type ReportRenderNode = {
@@ -173,33 +132,39 @@ const Report = withStyles(styles)(
           this.state.categoriesPretty == LOADING_TEXT &&
         this.props.reportCategories
         ) {
-          let reportCategories = this.props.reportCategories.get(
-              this.state.selectedReportName) || [];
+          let reportCategories =
+          this.props.reportCategories.get(this.state.selectedReportName) || [];
           this.setState({
-            categoriesPretty: JSON.stringify(
-                reportCategories,
-                null,
-                2
-            ),
+            categoriesPretty: JSON.stringify(reportCategories, null, 2),
           });
         }
       }
 
       public render(): React.ReactElement<Record<string, unknown>> {
+        let startTime = window.performance.now();
+        console.debug(`${startTime} Report start`);
         let classes = this.props.classes;
         let filteredTransactions = TransactionUtils.filterTransactionsByDate(
             this.props.transactions,
             this.state.dateRange.startDate.toDate(),
             this.state.dateRange.endDate.toDate()
         );
+        console.debug(`${window.performance.now() - startTime}   filtered`);
+
         let [unmatchedTransactions, renderedTree, chartNodes] = this.buildTree(
             filteredTransactions
         );
+        console.debug(
+            `${window.performance.now() - startTime}   tree built ${
+              unmatchedTransactions.length
+            }`
+        );
 
-        let compareUnmatchedTransactions: ITransaction[] = [];
-        let compareRenderTree: JSX.Element = <div />;
+        let compareTabData;
         let compareChartNodes: IChartNode[] = [];
         if (this.state.compareDateRange) {
+          let compareUnmatchedTransactions;
+          let compareRenderTree;
           filteredTransactions = TransactionUtils.filterTransactionsByDate(
               this.props.transactions,
               this.state.compareDateRange.startDate.toDate(),
@@ -210,69 +175,11 @@ const Report = withStyles(styles)(
             compareRenderTree,
             compareChartNodes,
           ] = this.buildTree(filteredTransactions);
-        }
-
-        let columnName = this.state.dateRange.chartColumnName;
-        let tabs = [
-          <Tab
-            key={`tab-${columnName}-cat`}
-            label={`${columnName} Categories`}
-          />,
-          <Tab
-            key={`tab-${columnName}-uncat`}
-            label={`${columnName} Uncategorized`}
-          />,
-        ];
-
-        let tabContents = [
-          <div
-            key={`tree-${columnName}`}
-            className={classes.renderedTree}
-            hidden={this.state.tabIndex != 0}
-          >
-            {renderedTree}
-          </div>,
-          <TransactionsTable
-            key={`table-${columnName}`}
-            classes={{ root: classes.transactionsTable }}
-            hidden={this.state.tabIndex != 1}
-          >
-            {unmatchedTransactions.map(t => (
-              <Transaction transaction={t} key={t.id} />
-            ))}
-          </TransactionsTable>,
-        ];
-
-        if (this.state.compareDateRange) {
-          columnName = this.state.compareDateRange.chartColumnName;
-          tabs.push(
-              <Tab
-                key={`tab-${columnName}-cat`}
-                label={`${columnName} Categories`}
-              />,
-              <Tab
-                key={`tab-${columnName}-uncat`}
-                label={`${columnName} Uncategorized`}
-              />
-          );
-          tabContents.push(
-              <div
-                key={`tree-${columnName}`}
-                className={classes.renderedTree}
-                hidden={this.state.tabIndex != 2}
-              >
-                {compareRenderTree}
-              </div>,
-              <TransactionsTable
-                key={`table-${columnName}`}
-                classes={{ root: classes.transactionsTable }}
-                hidden={this.state.tabIndex != 3}
-              >
-                {compareUnmatchedTransactions.map(t => (
-                  <Transaction transaction={t} key={t.id} />
-                ))}
-              </TransactionsTable>
-          );
+          compareTabData = {
+            columnName: this.state.compareDateRange.chartColumnName,
+            renderedTree: compareRenderTree,
+            unmatchedTransactions: compareUnmatchedTransactions,
+          };
         }
 
         let chartData = this.buildChartDataTable(chartNodes, compareChartNodes);
@@ -307,6 +214,7 @@ const Report = withStyles(styles)(
             }
           />
         );
+        console.debug(`${window.performance.now() - startTime} Report end`);
         return (
           <div className={classes.root}>
             <ReportMenuBar
@@ -321,24 +229,17 @@ const Report = withStyles(styles)(
               <div className={classes.content}>
                 <ReportChart chartData={chartData} />
 
-                <Tabs
-                  className={classes.tabs}
-                  value={this.state.tabIndex}
-                  onChange={(
-                      _event: React.ChangeEvent<unknown>,
-                      tabIndex: number
-                  ) => {
-                    this.setState({ tabIndex });
+                <ReportTabs
+                  key={`${this.state.dateRange.chartColumnName}-${
+                    compareTabData ? compareTabData.columnName : 'none'
+                  }`}
+                  tabData={{
+                    columnName: this.state.dateRange.chartColumnName,
+                    renderedTree: renderedTree,
+                    unmatchedTransactions: unmatchedTransactions,
                   }}
-                  variant="scrollable"
-                  scrollButtons="auto"
-                  indicatorColor="primary"
-                  textColor="primary"
-                >
-                  {tabs}
-                </Tabs>
-
-                <div className={classes.tables}>{tabContents}</div>
+                  compareTabData={compareTabData}
+                />
               </div>
               <Hidden smUp>
                 {/* Use a standard <Drawer> here for mobile. */}
@@ -395,7 +296,8 @@ const Report = withStyles(styles)(
           return renderNodes;
         };
         let reportRenderNodes = buildRenderTree(
-            this.props.reportCategories.get(this.state.selectedReportName) || []);
+            this.props.reportCategories.get(this.state.selectedReportName) || []
+        );
 
         let tagToRootReportRenderNode: Map<string, ReportRenderNode> = new Map();
         for (let renderNode of reportRenderNodes) {
@@ -588,7 +490,10 @@ const Report = withStyles(styles)(
 );
 
 const mapStateToProps = (state: IAppState): IReportAppStateProps => ({
-  reportCategories: state.settings.settings.reportCategories as Map<string, IReportNode[]>,
+  reportCategories: state.settings.settings.reportCategories as Map<
+  string,
+  IReportNode[]
+  >,
   settingsCloudState: state.settings.cloudState,
   transactions: state.transactions.transactions,
 });

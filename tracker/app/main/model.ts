@@ -79,8 +79,7 @@ type DeprecatedReportCategories = IReportNode[];
 
 export interface ISettings {
   version: number;
-  reportCategories: Map<string, IReportNode[]>
-  | DeprecatedReportCategories;
+  reportCategories: Map<string, IReportNode[]> | DeprecatedReportCategories;
   dailySpendTarget: IDailySpendTarget;
   /** These are shown on the Monthly page. */
   spendTargets: ISpendTarget[];

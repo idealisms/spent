@@ -91,6 +91,7 @@ export const ReportFilterDrawer = withStyles(styles)(
       }
 
       public render(): JSX.Element {
+        console.debug(`${window.performance.now()} ReportFilterDrawer start`);
         let classes = this.props.classes;
 
         let dateOptions = this.getDateOptions();
@@ -99,6 +100,7 @@ export const ReportFilterDrawer = withStyles(styles)(
             this.props.dateRange.endDate
         );
 
+        console.debug(`${window.performance.now()} ReportFilterDrawer end`);
         return (
           <div className={classes.drawerContents}>
             <div className={classes.dateRangeContainer}>
