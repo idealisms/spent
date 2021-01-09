@@ -134,6 +134,8 @@ const ReportTabs = withStyles(styles)(
               key={`table-${columnName}`}
               classes={{ root: classes.transactionsTable }}
               hidden={this.state.tabIndex != 1}
+              // TODO: Fix lazyRender for these table contents.
+              // lazyRender
             >
               {tabData.unmatchedTransactions.map(t => (
                 <Transaction transaction={t} key={t.id} />
