@@ -5,6 +5,7 @@ import moment from 'moment';
 import * as React from 'react';
 import { connect } from 'react-redux';
 import { ThunkDispatch } from 'redux-thunk';
+import memoize from 'memoize-one';
 import {
   Category,
   ITransaction,
@@ -70,6 +71,10 @@ type ReportRenderNode = {
   transactions: ITransaction[];
   subcategories: ReportRenderNode[];
 };
+type buildTreeFunction = (
+  transactions: ITransaction[],
+  reportCategories: IReportNode[],
+) => [ITransaction[], JSX.Element, IChartNode[]];
 
 interface IReportOwnProps extends WithStyles<typeof styles> {}
 interface IReportAppStateProps {
@@ -151,8 +156,11 @@ const Report = withStyles(styles)(
         );
         console.debug(`${window.performance.now() - startTime}   filtered`);
 
+        let reportName = this.props.reportCategories.keys().next().value || '';
+        let reportCategories = this.props.reportCategories.get(reportName) || [];
+
         let [unmatchedTransactions, renderedTree, chartNodes] = this.buildTree(
-            filteredTransactions
+            filteredTransactions, reportCategories
         );
         console.debug(
             `${window.performance.now() - startTime}   tree built ${
@@ -174,7 +182,7 @@ const Report = withStyles(styles)(
             compareUnmatchedTransactions,
             compareRenderTree,
             compareChartNodes,
-          ] = this.buildTree(filteredTransactions);
+          ] = this.buildTree(filteredTransactions, reportCategories);
           compareTabData = {
             columnName: this.state.compareDateRange.chartColumnName,
             renderedTree: compareRenderTree,
@@ -194,9 +202,9 @@ const Report = withStyles(styles)(
             reportNames={Array.from(this.props.reportCategories.keys())}
             selectedReportName={this.state.selectedReportName}
             updateReportCategories={categories => {
-              let reportCategories = new Map(this.props.reportCategories);
-              reportCategories.set(this.state.selectedReportName, categories);
-              this.props.updateReportCategories(reportCategories);
+              let reportCategoriesCopy = new Map(this.props.reportCategories);
+              reportCategoriesCopy.set(this.state.selectedReportName, categories);
+              this.props.updateReportCategories(reportCategoriesCopy);
             }}
             setDate={(dateRange, compareDateRange) => {
               let tabIndex =
@@ -270,10 +278,14 @@ const Report = withStyles(styles)(
       }
 
       // Builds the tree to be rendered.
-      private buildTree = (
-          transactions: ITransaction[]
-      ): [ITransaction[], JSX.Element, IChartNode[]] => {
-        if (!this.props.reportCategories) {
+      // TODO: Fix memoization when comparing (since we call this function
+      // twice with different args, the memoization doesn't help.)
+      // eslint-disable-next-line @typescript-eslint/member-ordering
+      private buildTree: buildTreeFunction = memoize<
+      buildTreeFunction
+      >((transactions, reportCategories) => {
+        console.debug('buildTree');
+        if (reportCategories.length == 0) {
           return [[], <div key="loading">Loading...</div>, []];
         }
 
@@ -295,9 +307,7 @@ const Report = withStyles(styles)(
           }
           return renderNodes;
         };
-        let reportRenderNodes = buildRenderTree(
-            this.props.reportCategories.get(this.state.selectedReportName) || []
-        );
+        let reportRenderNodes = buildRenderTree(reportCategories);
 
         let tagToRootReportRenderNode: Map<string, ReportRenderNode> = new Map();
         for (let renderNode of reportRenderNodes) {
@@ -438,7 +448,21 @@ const Report = withStyles(styles)(
           </React.Fragment>,
           outputChartData,
         ];
-      };
+      }, (newArgs, lastArgs) => {
+        let newTransactions = newArgs[0];
+        let lastTransactions = lastArgs[0];
+        if (newTransactions.length != lastTransactions.length ||
+            newArgs[1] != lastArgs[1]) {
+          return false;
+        }
+        for (let i = 0; i < newTransactions.length; ++i) {
+          if (newTransactions[i]  != lastTransactions[i]) {
+            return false;
+          }
+        }
+        console.log('same');
+        return true;
+      });
 
       private buildChartDataTable = (
           chartData: IChartNode[],
