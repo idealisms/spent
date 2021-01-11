@@ -17,7 +17,7 @@ import { CloudState, IAppState, IChartNode, IReportNode } from '../model';
 import ReportChart from './ReportChart';
 import { IDateRange, ReportFilterDrawer } from './ReportFilterDrawer';
 import ReportMenuBar from './ReportMenuBar';
-import ReportTabs from './ReportTabs';
+import { IReportTabData, ReportTabs } from './ReportTabs';
 
 const LOADING_TEXT = 'loading...';
 
@@ -74,7 +74,7 @@ type ReportRenderNode = {
 type buildTreeFunction = (
   transactions: ITransaction[],
   reportCategories: IReportNode[],
-) => [ITransaction[], JSX.Element, IChartNode[]];
+) => [IReportTabData, IChartNode[]];
 
 interface IReportOwnProps extends WithStyles<typeof styles> {}
 interface IReportAppStateProps {
@@ -147,47 +147,34 @@ const Report = withStyles(styles)(
 
       public render(): React.ReactElement<Record<string, unknown>> {
         let startTime = window.performance.now();
-        console.debug(`${startTime} Report start`);
         let classes = this.props.classes;
         let filteredTransactions = TransactionUtils.filterTransactionsByDate(
             this.props.transactions,
             this.state.dateRange.startDate.toDate(),
             this.state.dateRange.endDate.toDate()
         );
-        console.debug(`${window.performance.now() - startTime}   filtered`);
 
         let reportName = this.props.reportCategories.keys().next().value || '';
         let reportCategories = this.props.reportCategories.get(reportName) || [];
 
-        let [unmatchedTransactions, renderedTree, chartNodes] = this.buildTree(
+        let [tabData, chartNodes] = this.buildTree(
             filteredTransactions, reportCategories
         );
-        console.debug(
-            `${window.performance.now() - startTime}   tree built ${
-              unmatchedTransactions.length
-            }`
-        );
+        tabData.columnName = this.state.dateRange.chartColumnName;
 
         let compareTabData;
         let compareChartNodes: IChartNode[] = [];
         if (this.state.compareDateRange) {
-          let compareUnmatchedTransactions;
-          let compareRenderTree;
           filteredTransactions = TransactionUtils.filterTransactionsByDate(
               this.props.transactions,
               this.state.compareDateRange.startDate.toDate(),
               this.state.compareDateRange.endDate.toDate()
           );
           [
-            compareUnmatchedTransactions,
-            compareRenderTree,
+            compareTabData,
             compareChartNodes,
           ] = this.buildTree(filteredTransactions, reportCategories);
-          compareTabData = {
-            columnName: this.state.compareDateRange.chartColumnName,
-            renderedTree: compareRenderTree,
-            unmatchedTransactions: compareUnmatchedTransactions,
-          };
+          compareTabData.columnName = this.state.compareDateRange.chartColumnName;
         }
 
         let chartData = this.buildChartDataTable(chartNodes, compareChartNodes);
@@ -222,7 +209,8 @@ const Report = withStyles(styles)(
             }
           />
         );
-        console.debug(`${window.performance.now() - startTime} Report end`);
+        console.debug(`${window.performance.now() - startTime} Report render()`);
+
         return (
           <div className={classes.root}>
             <ReportMenuBar
@@ -238,14 +226,7 @@ const Report = withStyles(styles)(
                 <ReportChart chartData={chartData} />
 
                 <ReportTabs
-                  key={`${this.state.dateRange.chartColumnName}-${
-                    compareTabData ? compareTabData.columnName : 'none'
-                  }`}
-                  tabData={{
-                    columnName: this.state.dateRange.chartColumnName,
-                    renderedTree: renderedTree,
-                    unmatchedTransactions: unmatchedTransactions,
-                  }}
+                  tabData={tabData}
                   compareTabData={compareTabData}
                 />
               </div>
@@ -284,9 +265,11 @@ const Report = withStyles(styles)(
       private buildTree: buildTreeFunction = memoize<
       buildTreeFunction
       >((transactions, reportCategories) => {
-        console.debug('buildTree');
         if (reportCategories.length == 0) {
-          return [[], <div key="loading">Loading...</div>, []];
+          return [{
+            columnName: '',
+            renderedTree: <div key="loading">Loading...</div>,
+            unmatchedTransactions: []}, []];
         }
 
         let startTime = window.performance.now();
@@ -317,15 +300,14 @@ const Report = withStyles(styles)(
           for (let tag of renderNode.reportNode.tags) {
             const reportRenderNode = tagToRootReportRenderNode.get(tag);
             if (reportRenderNode) {
-              return [
-                [],
-                <div key="msg">
+              return [{
+                columnName: '',
+                renderedTree: <div key="msg">
                 Error, tag appears twice.
                   {tag} in {reportRenderNode.reportNode.title}
                 and {renderNode.reportNode.title}.
                 </div>,
-                [],
-              ];
+                unmatchedTransactions: []}, []];
             }
             tagToRootReportRenderNode.set(tag, renderNode);
           }
@@ -432,9 +414,9 @@ const Report = withStyles(styles)(
         }
 
         let domTime = window.performance.now();
-        return [
-          unmatchedTransactions,
-          <React.Fragment key="msg">
+        return [{
+          columnName: '',
+          renderedTree: <React.Fragment key="msg">
             <div className="total">
             ${TransactionUtils.formatAmountNumber(total)}
             </div>
@@ -446,7 +428,9 @@ const Report = withStyles(styles)(
             DOM time: {(domTime - buildTime).toFixed(2)}ms
             </div>
           </React.Fragment>,
-          outputChartData,
+          unmatchedTransactions,
+        },
+        outputChartData,
         ];
       }, (newArgs, lastArgs) => {
         let newTransactions = newArgs[0];
@@ -460,7 +444,6 @@ const Report = withStyles(styles)(
             return false;
           }
         }
-        console.log('same');
         return true;
       });
 
