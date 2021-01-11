@@ -44,7 +44,7 @@ const styles = (_theme: Theme) =>
     },
   });
 
-interface IReportTabData {
+export interface IReportTabData {
   columnName: string;
   renderedTree: JSX.Element;
   unmatchedTransactions: ITransaction[];
@@ -57,8 +57,8 @@ interface IReportTabsProps extends WithStyles<typeof styles> {
 interface IReportTabsState {
   tabIndex: number;
 }
-const ReportTabs = withStyles(styles)(
-    class Component extends React.Component<IReportTabsProps, IReportTabsState> {
+export const ReportTabs = withStyles(styles)(
+    class Component extends React.PureComponent<IReportTabsProps, IReportTabsState> {
       constructor(props: IReportTabsProps) {
         super(props);
         this.state = {
@@ -122,18 +122,19 @@ const ReportTabs = withStyles(styles)(
             />
         );
 
+        let tabIndex = tabContents.length;
         tabContents.push(
             <div
               key={`tree-${columnName}`}
               className={classes.renderedTree}
-              hidden={this.state.tabIndex != 0}
+              hidden={this.state.tabIndex != tabIndex}
             >
               {tabData.renderedTree}
             </div>,
             <TransactionsTable
               key={`table-${columnName}`}
               classes={{ root: classes.transactionsTable }}
-              hidden={this.state.tabIndex != 1}
+              hidden={this.state.tabIndex != (tabIndex + 1)}
               // TODO: Fix lazyRender for these table contents.
               // lazyRender
             >
