@@ -17,7 +17,7 @@ interface IReportChartProps extends WithStyles<typeof styles> {
 }
 interface IReportChartState {}
 const ReportChart = withStyles(styles)(
-    class Component extends React.Component<
+    class Component extends React.PureComponent<
     IReportChartProps,
     IReportChartState
     > {
@@ -27,6 +27,7 @@ const ReportChart = withStyles(styles)(
       }
 
       public render(): React.ReactElement<Record<string, unknown>> {
+        let startTime = window.performance.now();
         let classes = this.props.classes;
 
         let loadingPlaceholder = (
@@ -40,6 +41,7 @@ const ReportChart = withStyles(styles)(
         // wide enough, the chart will scroll to the right.
         let minWidth = `${80 + 16 + 48 * (this.props.chartData.length - 1)}px`;
 
+        console.debug(`${window.performance.now() - startTime} ReportChart render()`);
         return (
           <div className={classes.chartContainer}>
             <Chart

@@ -20,6 +20,7 @@ import ReportMenuBar from './ReportMenuBar';
 import { IReportTabData, ReportTabs } from './ReportTabs';
 
 const LOADING_TEXT = 'loading...';
+const EMPTY_ARRAY: IChartNode[] = [];
 
 const styles = (_theme: Theme) =>
   createStyles({
@@ -75,6 +76,13 @@ type buildTreeFunction = (
   transactions: ITransaction[],
   reportCategories: IReportNode[],
 ) => [IReportTabData, IChartNode[]];
+
+type DataCell = string | number;
+type DataRow = [DataCell, DataCell, DataCell?];
+type buildChartDataTableFunction = (
+  chartData: IChartNode[],
+  compareChartData: IChartNode[],
+) => DataRow[];
 
 interface IReportOwnProps extends WithStyles<typeof styles> {}
 interface IReportAppStateProps {
@@ -163,7 +171,7 @@ const Report = withStyles(styles)(
         tabData.columnName = this.state.dateRange.chartColumnName;
 
         let compareTabData;
-        let compareChartNodes: IChartNode[] = [];
+        let compareChartNodes;
         if (this.state.compareDateRange) {
           filteredTransactions = TransactionUtils.filterTransactionsByDate(
               this.props.transactions,
@@ -177,7 +185,8 @@ const Report = withStyles(styles)(
           compareTabData.columnName = this.state.compareDateRange.chartColumnName;
         }
 
-        let chartData = this.buildChartDataTable(chartNodes, compareChartNodes);
+        let chartData = this.buildChartDataTable(
+            chartNodes, compareChartNodes || EMPTY_ARRAY);
 
         let drawerContents = (
           <ReportFilterDrawer
@@ -214,11 +223,17 @@ const Report = withStyles(styles)(
         return (
           <div className={classes.root}>
             <ReportMenuBar
-              onFilterClick={() =>
+              onFilterClick={() => {
                 this.setState({
                   isFilterDrawerOpen: !this.state.isFilterDrawerOpen,
-                })
-              }
+                });
+                // Force a re-rendering of <ReportChart> by flushing its
+                // cached data. This is only needed on wide screens where
+                // the filter drawer reduces the width of ReportChart.
+                // TODO: Use https://github.com/rehooks/component-size
+                // or something similar to detect div resizes.
+                this.buildChartDataTable([], []);
+              }}
             />
 
             <div className={classes.contentAndDrawerContainer}>
@@ -447,54 +462,51 @@ const Report = withStyles(styles)(
         return true;
       });
 
-      private buildChartDataTable = (
-          chartData: IChartNode[],
-          compareChartData: IChartNode[]
-      ) => {
-      type DataCell = string | number;
-      type DataRow = [DataCell, DataCell, DataCell?];
-      let data: DataRow[] = [];
-      data.push(['Category', this.state.dateRange.chartColumnName]);
-      for (let chartNode of chartData) {
-        if (chartNode.amount_cents <= 0) {
-          continue;
+      // eslint-disable-next-line @typescript-eslint/member-ordering
+      private buildChartDataTable: buildChartDataTableFunction = memoize<
+      buildChartDataTableFunction>((
+          chartData, compareChartData) => {
+        let data: DataRow[] = [];
+        data.push(['Category', this.state.dateRange.chartColumnName]);
+        for (let chartNode of chartData) {
+          if (chartNode.amount_cents <= 0) {
+            continue;
+          }
+          data.push([chartNode.title, chartNode.amount_cents / 100.0]);
         }
-        data.push([chartNode.title, chartNode.amount_cents / 100.0]);
-      }
 
-      if (this.state.compareDateRange) {
-        let columnTitle = this.state.compareDateRange.chartColumnName;
-        let compareMap: Map<string, number> = new Map();
-        compareChartData.forEach(chartNode => {
-          if (chartNode.amount_cents > 0) {
-            compareMap.set(chartNode.title, chartNode.amount_cents);
-          }
-        });
-        data.forEach((dataRow, index) => {
-          if (index == 0) {
-            dataRow.push(columnTitle);
-          } else {
-            let category = dataRow[0] as string;
-            let amountCents = compareMap.get(category) || 0;
-            dataRow.push(amountCents / 100);
-            compareMap.delete(category);
-          }
-        });
-        // If there are categories in the compare data that wasn't in the base
-        // data, add entries for those at the end.
-        if (compareMap.size > 0) {
-          for (let chartNode of compareChartData) {
-            if (compareMap.has(chartNode.title)) {
-              data.push([chartNode.title, 0, chartNode.amount_cents / 100]);
+        if (this.state.compareDateRange) {
+          let columnTitle = this.state.compareDateRange.chartColumnName;
+          let compareMap: Map<string, number> = new Map();
+          compareChartData.forEach(chartNode => {
+            if (chartNode.amount_cents > 0) {
+              compareMap.set(chartNode.title, chartNode.amount_cents);
+            }
+          });
+          data.forEach((dataRow, index) => {
+            if (index == 0) {
+              dataRow.push(columnTitle);
+            } else {
+              let category = dataRow[0] as string;
+              let amountCents = compareMap.get(category) || 0;
+              dataRow.push(amountCents / 100);
+              compareMap.delete(category);
+            }
+          });
+          // If there are categories in the compare data that wasn't in the base
+          // data, add entries for those at the end.
+          if (compareMap.size > 0) {
+            for (let chartNode of compareChartData) {
+              if (compareMap.has(chartNode.title)) {
+                data.push([chartNode.title, 0, chartNode.amount_cents / 100]);
+              }
             }
           }
         }
-      }
 
-      return data;
-      };
-    }
-);
+        return data;
+      });
+    });
 
 const mapStateToProps = (state: IAppState): IReportAppStateProps => ({
   reportCategories: state.settings.settings.reportCategories as Map<
