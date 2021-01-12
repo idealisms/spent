@@ -41,7 +41,9 @@ const ReportChart = withStyles(styles)(
         // wide enough, the chart will scroll to the right.
         let minWidth = `${80 + 16 + 48 * (this.props.chartData.length - 1)}px`;
 
-        console.debug(`${window.performance.now() - startTime} ReportChart render()`);
+        console.debug(
+            `${window.performance.now() - startTime} ReportChart render()`
+        );
         return (
           <div className={classes.chartContainer}>
             <Chart

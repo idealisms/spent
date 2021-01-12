@@ -74,14 +74,14 @@ type ReportRenderNode = {
 };
 type buildTreeFunction = (
   transactions: ITransaction[],
-  reportCategories: IReportNode[],
+  reportCategories: IReportNode[]
 ) => [IReportTabData, IChartNode[]];
 
 type DataCell = string | number;
 type DataRow = [DataCell, DataCell, DataCell?];
 type buildChartDataTableFunction = (
   chartData: IChartNode[],
-  compareChartData: IChartNode[],
+  compareChartData: IChartNode[]
 ) => DataRow[];
 
 interface IReportOwnProps extends WithStyles<typeof styles> {}
@@ -166,7 +166,8 @@ const Report = withStyles(styles)(
         let reportCategories = this.props.reportCategories.get(reportName) || [];
 
         let [tabData, chartNodes] = this.buildTree(
-            filteredTransactions, reportCategories
+            filteredTransactions,
+            reportCategories
         );
         tabData.columnName = this.state.dateRange.chartColumnName;
 
@@ -178,15 +179,17 @@ const Report = withStyles(styles)(
               this.state.compareDateRange.startDate.toDate(),
               this.state.compareDateRange.endDate.toDate()
           );
-          [
-            compareTabData,
-            compareChartNodes,
-          ] = this.buildTree(filteredTransactions, reportCategories);
+          [compareTabData, compareChartNodes] = this.buildTree(
+              filteredTransactions,
+              reportCategories
+          );
           compareTabData.columnName = this.state.compareDateRange.chartColumnName;
         }
 
         let chartData = this.buildChartDataTable(
-            chartNodes, compareChartNodes || EMPTY_ARRAY);
+            chartNodes,
+            compareChartNodes || EMPTY_ARRAY
+        );
 
         let drawerContents = (
           <ReportFilterDrawer
@@ -240,10 +243,7 @@ const Report = withStyles(styles)(
               <div className={classes.content}>
                 <ReportChart chartData={chartData} />
 
-                <ReportTabs
-                  tabData={tabData}
-                  compareTabData={compareTabData}
-                />
+                <ReportTabs tabData={tabData} compareTabData={compareTabData} />
               </div>
               <Hidden smUp>
                 {/* Use a standard <Drawer> here for mobile. */}
@@ -277,195 +277,214 @@ const Report = withStyles(styles)(
       // TODO: Fix memoization when comparing (since we call this function
       // twice with different args, the memoization doesn't help.)
       // eslint-disable-next-line @typescript-eslint/member-ordering
-      private buildTree: buildTreeFunction = memoize<
-      buildTreeFunction
-      >((transactions, reportCategories) => {
-        if (reportCategories.length == 0) {
-          return [{
-            columnName: '',
-            renderedTree: <div key="loading">Loading...</div>,
-            unmatchedTransactions: []}, []];
-        }
+      private buildTree: buildTreeFunction = memoize<buildTreeFunction>(
+          (transactions, reportCategories) => {
+            if (reportCategories.length == 0) {
+              return [
+                {
+                  columnName: '',
+                  renderedTree: <div key="loading">Loading...</div>,
+                  unmatchedTransactions: [],
+                },
+                [],
+              ];
+            }
 
-        let startTime = window.performance.now();
-        let output: JSX.Element[] = [];
-        const buildRenderTree = (
-            reportNodes: IReportNode[]
-        ): ReportRenderNode[] => {
-          reportNodes = reportNodes || [];
-          let renderNodes: ReportRenderNode[] = [];
-          for (let reportNode of reportNodes) {
-            let reportRenderNode: ReportRenderNode = {
-              reportNode: reportNode,
-              amountCents: 0,
-              transactions: [],
-              subcategories: buildRenderTree(reportNode.subcategories),
+            let startTime = window.performance.now();
+            let output: JSX.Element[] = [];
+            const buildRenderTree = (
+                reportNodes: IReportNode[]
+            ): ReportRenderNode[] => {
+              reportNodes = reportNodes || [];
+              let renderNodes: ReportRenderNode[] = [];
+              for (let reportNode of reportNodes) {
+                let reportRenderNode: ReportRenderNode = {
+                  reportNode: reportNode,
+                  amountCents: 0,
+                  transactions: [],
+                  subcategories: buildRenderTree(reportNode.subcategories),
+                };
+                renderNodes.push(reportRenderNode);
+              }
+              return renderNodes;
             };
-            renderNodes.push(reportRenderNode);
-          }
-          return renderNodes;
-        };
-        let reportRenderNodes = buildRenderTree(reportCategories);
+            let reportRenderNodes = buildRenderTree(reportCategories);
 
-        let tagToRootReportRenderNode: Map<string, ReportRenderNode> = new Map();
-        for (let renderNode of reportRenderNodes) {
-          if (!renderNode.reportNode.tags) {
-            continue;
-          }
-          for (let tag of renderNode.reportNode.tags) {
-            const reportRenderNode = tagToRootReportRenderNode.get(tag);
-            if (reportRenderNode) {
-              return [{
-                columnName: '',
-                renderedTree: <div key="msg">
-                Error, tag appears twice.
-                  {tag} in {reportRenderNode.reportNode.title}
-                and {renderNode.reportNode.title}.
-                </div>,
-                unmatchedTransactions: []}, []];
-            }
-            tagToRootReportRenderNode.set(tag, renderNode);
-          }
-        }
-
-        const addTransactionToRenderNode = (
-            transaction: ITransaction,
-            node: ReportRenderNode
-        ): void => {
-          node.transactions.push(transaction);
-          node.amountCents += transaction.amount_cents;
-          let subnodes = [];
-          for (let subnode of node.subcategories) {
-            if (!subnode.reportNode.tags) {
-              continue;
-            }
-            for (let tag of subnode.reportNode.tags) {
-              if (transaction.tags.indexOf(tag) != -1) {
-                subnodes.push(subnode);
-                break;
+            let tagToRootReportRenderNode: Map<
+            string,
+            ReportRenderNode
+            > = new Map();
+            for (let renderNode of reportRenderNodes) {
+              if (!renderNode.reportNode.tags) {
+                continue;
+              }
+              for (let tag of renderNode.reportNode.tags) {
+                const reportRenderNode = tagToRootReportRenderNode.get(tag);
+                if (reportRenderNode) {
+                  return [
+                    {
+                      columnName: '',
+                      renderedTree: (
+                        <div key="msg">
+                      Error, tag appears twice.
+                          {tag} in {reportRenderNode.reportNode.title}
+                      and {renderNode.reportNode.title}.
+                        </div>
+                      ),
+                      unmatchedTransactions: [],
+                    },
+                    [],
+                  ];
+                }
+                tagToRootReportRenderNode.set(tag, renderNode);
               }
             }
-          }
-          if (subnodes.length > 1) {
-            output.push(
-                <div key={transaction.id}>
-              Multiple subnodes of {node.reportNode.title}:{' '}
-                  {transaction.description} ({transaction.tags.join(', ')})
-                </div>
-            );
-          } else if (subnodes.length == 1) {
-            addTransactionToRenderNode(transaction, subnodes[0]);
-          }
-        };
 
-        let unmatchedTransactions: ITransaction[] = [];
-        let multipleCategoriesTransactions: ITransaction[] = [];
-        for (let transaction of transactions) {
-          let renderNodes = [];
-          for (let tag of transaction.tags) {
-            let node = tagToRootReportRenderNode.get(tag);
-            if (node && renderNodes.indexOf(node) == -1) {
-              renderNodes.push(node);
-            }
-          }
-          if (!renderNodes.length) {
-            unmatchedTransactions.push(transaction);
-          } else if (renderNodes.length > 1) {
-            multipleCategoriesTransactions.push(transaction);
-          } else {
-            addTransactionToRenderNode(transaction, renderNodes[0]);
-          }
-        }
-
-        // console.log(ReportRenderNodes);
-
-        let buildTime = window.performance.now();
-        let outputChartData: IChartNode[] = [];
-        const buildDom = (
-            renderNodes: ReportRenderNode[],
-            depth: number,
-            outputDom: JSX.Element[],
-            chartData: IChartNode[]
-        ): void => {
-          renderNodes.sort((lhs, rhs) => {
-            if (lhs.amountCents == rhs.amountCents) {
-              return 0;
-            }
-            return lhs.amountCents > rhs.amountCents ? -1 : 1;
-          });
-          for (let renderNode of renderNodes) {
-            outputDom.push(
-                <div
-                  key={`${renderNode.reportNode.title}-${renderNode.amountCents}`}
-                  className="row"
-                  style={{ marginLeft: depth * 32 + 'px' }}
-                >
-                  <span className="amount">
-                ${TransactionUtils.formatAmountNumber(renderNode.amountCents)}
-                  </span>
-                  {renderNode.reportNode.title} from{' '}
-                  {renderNode.transactions.length} transaction(s)
-                </div>
-            );
-            let chartDatum = {
-              title: renderNode.reportNode.title,
-              amount_cents: renderNode.amountCents,
-              subcategories: [],
+            const addTransactionToRenderNode = (
+                transaction: ITransaction,
+                node: ReportRenderNode
+            ): void => {
+              node.transactions.push(transaction);
+              node.amountCents += transaction.amount_cents;
+              let subnodes = [];
+              for (let subnode of node.subcategories) {
+                if (!subnode.reportNode.tags) {
+                  continue;
+                }
+                for (let tag of subnode.reportNode.tags) {
+                  if (transaction.tags.indexOf(tag) != -1) {
+                    subnodes.push(subnode);
+                    break;
+                  }
+                }
+              }
+              if (subnodes.length > 1) {
+                output.push(
+                    <div key={transaction.id}>
+                Multiple subnodes of {node.reportNode.title}:{' '}
+                      {transaction.description} ({transaction.tags.join(', ')})
+                    </div>
+                );
+              } else if (subnodes.length == 1) {
+                addTransactionToRenderNode(transaction, subnodes[0]);
+              }
             };
-            chartData.push(chartDatum);
-            buildDom(
-                renderNode.subcategories,
-                depth + 1,
-                outputDom,
-                chartDatum.subcategories
-            );
-          }
-        };
-        buildDom(reportRenderNodes, 0, output, outputChartData);
 
-        let total = 0;
-        for (let chartData of outputChartData) {
-          total += chartData.amount_cents;
-        }
+            let unmatchedTransactions: ITransaction[] = [];
+            let multipleCategoriesTransactions: ITransaction[] = [];
+            for (let transaction of transactions) {
+              let renderNodes = [];
+              for (let tag of transaction.tags) {
+                let node = tagToRootReportRenderNode.get(tag);
+                if (node && renderNodes.indexOf(node) == -1) {
+                  renderNodes.push(node);
+                }
+              }
+              if (!renderNodes.length) {
+                unmatchedTransactions.push(transaction);
+              } else if (renderNodes.length > 1) {
+                multipleCategoriesTransactions.push(transaction);
+              } else {
+                addTransactionToRenderNode(transaction, renderNodes[0]);
+              }
+            }
 
-        let domTime = window.performance.now();
-        return [{
-          columnName: '',
-          renderedTree: <React.Fragment key="msg">
-            <div className="total">
-            ${TransactionUtils.formatAmountNumber(total)}
-            </div>
-            {output}
-            <div className="info">
-            Build time: {(buildTime - startTime).toFixed(2)}ms
-            </div>
-            <div className="info">
-            DOM time: {(domTime - buildTime).toFixed(2)}ms
-            </div>
-          </React.Fragment>,
-          unmatchedTransactions,
-        },
-        outputChartData,
-        ];
-      }, (newArgs, lastArgs) => {
-        let newTransactions = newArgs[0];
-        let lastTransactions = lastArgs[0];
-        if (newTransactions.length != lastTransactions.length ||
-            newArgs[1] != lastArgs[1]) {
-          return false;
-        }
-        for (let i = 0; i < newTransactions.length; ++i) {
-          if (newTransactions[i]  != lastTransactions[i]) {
-            return false;
+            // console.log(ReportRenderNodes);
+
+            let buildTime = window.performance.now();
+            let outputChartData: IChartNode[] = [];
+            const buildDom = (
+                renderNodes: ReportRenderNode[],
+                depth: number,
+                outputDom: JSX.Element[],
+                chartData: IChartNode[]
+            ): void => {
+              renderNodes.sort((lhs, rhs) => {
+                if (lhs.amountCents == rhs.amountCents) {
+                  return 0;
+                }
+                return lhs.amountCents > rhs.amountCents ? -1 : 1;
+              });
+              for (let renderNode of renderNodes) {
+                outputDom.push(
+                    <div
+                      key={`${renderNode.reportNode.title}-${renderNode.amountCents}`}
+                      className="row"
+                      style={{ marginLeft: depth * 32 + 'px' }}
+                    >
+                      <span className="amount">
+                  ${TransactionUtils.formatAmountNumber(renderNode.amountCents)}
+                      </span>
+                      {renderNode.reportNode.title} from{' '}
+                      {renderNode.transactions.length} transaction(s)
+                    </div>
+                );
+                let chartDatum = {
+                  title: renderNode.reportNode.title,
+                  amount_cents: renderNode.amountCents,
+                  subcategories: [],
+                };
+                chartData.push(chartDatum);
+                buildDom(
+                    renderNode.subcategories,
+                    depth + 1,
+                    outputDom,
+                    chartDatum.subcategories
+                );
+              }
+            };
+            buildDom(reportRenderNodes, 0, output, outputChartData);
+
+            let total = 0;
+            for (let chartData of outputChartData) {
+              total += chartData.amount_cents;
+            }
+
+            let domTime = window.performance.now();
+            return [
+              {
+                columnName: '',
+                renderedTree: (
+                  <React.Fragment key="msg">
+                    <div className="total">
+                  ${TransactionUtils.formatAmountNumber(total)}
+                    </div>
+                    {output}
+                    <div className="info">
+                  Build time: {(buildTime - startTime).toFixed(2)}ms
+                    </div>
+                    <div className="info">
+                  DOM time: {(domTime - buildTime).toFixed(2)}ms
+                    </div>
+                  </React.Fragment>
+                ),
+                unmatchedTransactions,
+              },
+              outputChartData,
+            ];
+          },
+          (newArgs, lastArgs) => {
+            let newTransactions = newArgs[0];
+            let lastTransactions = lastArgs[0];
+            if (
+              newTransactions.length != lastTransactions.length ||
+          newArgs[1] != lastArgs[1]
+            ) {
+              return false;
+            }
+            for (let i = 0; i < newTransactions.length; ++i) {
+              if (newTransactions[i] != lastTransactions[i]) {
+                return false;
+              }
+            }
+            return true;
           }
-        }
-        return true;
-      });
+      );
 
       // eslint-disable-next-line @typescript-eslint/member-ordering
       private buildChartDataTable: buildChartDataTableFunction = memoize<
-      buildChartDataTableFunction>((
-          chartData, compareChartData) => {
+      buildChartDataTableFunction
+      >((chartData, compareChartData) => {
         let data: DataRow[] = [];
         data.push(['Category', this.state.dateRange.chartColumnName]);
         for (let chartNode of chartData) {
@@ -506,7 +525,8 @@ const Report = withStyles(styles)(
 
         return data;
       });
-    });
+    }
+);
 
 const mapStateToProps = (state: IAppState): IReportAppStateProps => ({
   reportCategories: state.settings.settings.reportCategories as Map<

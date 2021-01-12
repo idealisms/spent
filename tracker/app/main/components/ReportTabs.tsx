@@ -58,7 +58,10 @@ interface IReportTabsState {
   tabIndex: number;
 }
 export const ReportTabs = withStyles(styles)(
-    class Component extends React.PureComponent<IReportTabsProps, IReportTabsState> {
+    class Component extends React.PureComponent<
+    IReportTabsProps,
+    IReportTabsState
+    > {
       constructor(props: IReportTabsProps) {
         super(props);
         this.state = {
@@ -134,7 +137,7 @@ export const ReportTabs = withStyles(styles)(
             <TransactionsTable
               key={`table-${columnName}`}
               classes={{ root: classes.transactionsTable }}
-              hidden={this.state.tabIndex != (tabIndex + 1)}
+              hidden={this.state.tabIndex != tabIndex + 1}
               // TODO: Fix lazyRender for these table contents.
               // lazyRender
             >
