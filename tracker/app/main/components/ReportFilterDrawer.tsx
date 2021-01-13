@@ -94,6 +94,8 @@ export const ReportFilterDrawer = withStyles(styles)(
         let startTime = window.performance.now();
         let classes = this.props.classes;
 
+        // TODO: Memoize getDateOptions and getCompareDateOptions to improve
+        // performance.
         let dateOptions = this.getDateOptions();
         let compareDateOptions = this.getCompareDateOptions(
             this.props.dateRange.startDate,
