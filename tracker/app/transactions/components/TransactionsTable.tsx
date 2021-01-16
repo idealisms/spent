@@ -32,7 +32,8 @@ const TransactionsTable = withStyles(styles)(
     ITransactionsTableProps,
     ITransactionsTableState
     > {
-      private container: HTMLElement | null = null;
+      private containerRef: React.RefObject<HTMLDivElement>;
+      private resizeObserver: ResizeObserver;
 
       constructor(props: ITransactionsTableProps) {
         super(props);
@@ -40,30 +41,32 @@ const TransactionsTable = withStyles(styles)(
           containerHeight: -1,
           scrollTop: -1,
         };
+        this.containerRef = React.createRef<HTMLDivElement>();
+        this.resizeObserver = new ResizeObserver(this.resizeObserved);
       }
 
       public componentDidMount(): void {
-        if (!this.container) {
+        if (!this.containerRef.current) {
           console.log('container not set (componentDidMount)');
           return;
         }
         this.setState({
-          containerHeight: this.container.offsetHeight,
-          scrollTop: this.container.scrollTop,
+          containerHeight: this.containerRef.current.offsetHeight,
+          scrollTop: this.containerRef.current.scrollTop,
         });
-        window.addEventListener('resize', this.handleWindowResize);
+        this.resizeObserver.observe(this.containerRef.current);
       }
 
       public componentWillUnmount(): void {
-        window.removeEventListener('resize', this.handleWindowResize);
+        this.resizeObserver.disconnect();
       }
 
       public componentDidUpdate(prevProps: ITransactionsTableProps): void {
         if (this.props.scrollToRow !== prevProps.scrollToRow) {
-          if (this.props.scrollToRow !== undefined && this.container) {
+          if (this.props.scrollToRow !== undefined && this.containerRef.current) {
             let scrollTop = this.props.scrollToRow * ROW_HEIGHT;
             // This will trigger the scroll event handler.
-            this.container.scrollTo(0, scrollTop);
+            this.containerRef.current.scrollTo(0, scrollTop);
           }
         }
       }
@@ -77,7 +80,7 @@ const TransactionsTable = withStyles(styles)(
           <div
             className={classes.root}
             hidden={this.props.hidden}
-            ref={elt => (this.container = elt)}
+            ref={this.containerRef}
             onScroll={this.handleScroll}
           >
             {shouldRenderChildren && this.renderChildren()}
@@ -85,24 +88,23 @@ const TransactionsTable = withStyles(styles)(
         );
       }
 
-      private handleWindowResize = () => {
-        if (!this.container) {
-          console.log('container not set (handleWindowResize)');
-          return;
+      private resizeObserved: ResizeObserverCallback = entries => {
+        for (let entry of entries) {
+          console.log(entry);
+          this.setState({
+            containerHeight: entry.contentRect.height,
+            scrollTop: entry.target.scrollTop,
+          });
         }
-        this.setState({
-          containerHeight: this.container.offsetHeight,
-          scrollTop: this.container.scrollTop,
-        });
       };
 
       private handleScroll = (_event: React.UIEvent<HTMLDivElement>) => {
-        if (!this.container) {
+        if (!this.containerRef.current) {
           console.log('container not set (handleScroll)');
           return;
         }
         this.setState({
-          scrollTop: this.container.scrollTop,
+          scrollTop: this.containerRef.current.scrollTop,
         });
       };
 
@@ -110,7 +112,7 @@ const TransactionsTable = withStyles(styles)(
         if (!this.props.lazyRender) {
           return <React.Fragment>{this.props.children}</React.Fragment>;
         }
-        if (!this.container) {
+        if (!this.containerRef.current) {
           console.log('container not set (renderChildren)');
           return <div></div>;
         }
@@ -123,7 +125,7 @@ const TransactionsTable = withStyles(styles)(
             ROW_HEIGHT * numRows - this.state.containerHeight
         );
         if (this.state.scrollTop > maxScrollTop) {
-          this.container.scrollTop = maxScrollTop;
+          this.containerRef.current.scrollTop = maxScrollTop;
         }
 
         let rowsBefore = Math.floor(this.state.scrollTop / ROW_HEIGHT);

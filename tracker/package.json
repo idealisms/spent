@@ -56,6 +56,7 @@
     "@types/redux-devtools": "^3.0.45",
     "@types/redux-logger": "^3.0.7",
     "@types/redux-mock-store": "^0.0.13",
+    "@types/resize-observer-browser": "^0.1.5",
     "@types/sha.js": "^2.4.0",
     "@typescript-eslint/eslint-plugin": "^4.3.0",
     "@typescript-eslint/eslint-plugin-tslint": "^4.3.0",
