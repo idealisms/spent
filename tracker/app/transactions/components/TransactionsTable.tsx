@@ -90,7 +90,6 @@ const TransactionsTable = withStyles(styles)(
 
       private resizeObserved: ResizeObserverCallback = entries => {
         for (let entry of entries) {
-          console.log(entry);
           this.setState({
             containerHeight: entry.contentRect.height,
             scrollTop: entry.target.scrollTop,
