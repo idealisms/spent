@@ -22,7 +22,7 @@ import { IReportTabData, ReportTabs } from './ReportTabs';
 const LOADING_TEXT = 'loading...';
 const EMPTY_ARRAY: IChartNode[] = [];
 
-const styles = (_theme: Theme) =>
+const styles = (theme: Theme) =>
   createStyles({
     root: {
       display: 'flex',
@@ -45,13 +45,10 @@ const styles = (_theme: Theme) =>
       width: 0,
       flexShrink: 0,
       overflow: 'hidden auto',
-      // Disable the transition because it causes the chart to be
-      // incorrectly sized (the chart only resizes once at the first
-      // frame of the animation).
-      // transition: theme.transitions.create('width', {
-      //   easing: theme.transitions.easing.easeOut,
-      //   duration: theme.transitions.duration.enteringScreen,
-      // }),
+      transition: theme.transitions.create('width', {
+        easing: theme.transitions.easing.easeOut,
+        duration: theme.transitions.duration.enteringScreen,
+      }),
       '&.open': {
         width: '420px',
       },
@@ -447,12 +444,6 @@ const Report = withStyles(styles)(
                 this.setState({
                   isFilterDrawerOpen: !this.state.isFilterDrawerOpen,
                 });
-                // Force a re-rendering of <ReportChart> by flushing its
-                // cached data. This is only needed on wide screens where
-                // the filter drawer reduces the width of ReportChart.
-                // TODO: Use https://github.com/rehooks/component-size
-                // or something similar to detect div resizes.
-                this.buildChartDataTable([], []);
               }}
             />
 

@@ -21,9 +21,27 @@ const ReportChart = withStyles(styles)(
     IReportChartProps,
     IReportChartState
     > {
+      private containerRef: React.RefObject<HTMLDivElement>;
+      private resizeObserver: ResizeObserver;
+      private timerId?: NodeJS.Timeout;
+
       constructor(props: IReportChartProps) {
         super(props);
         this.state = {};
+        this.containerRef = React.createRef<HTMLDivElement>();
+        this.resizeObserver = new ResizeObserver(this.resizeObserved);
+      }
+
+      public componentDidMount(): void {
+        if (!this.containerRef.current) {
+          console.log('container not set (componentDidMount)');
+          return;
+        }
+        this.resizeObserver.observe(this.containerRef.current);
+      }
+
+      public componentWillUnmount(): void {
+        this.resizeObserver.disconnect();
       }
 
       public render(): React.ReactElement<Record<string, unknown>> {
@@ -45,7 +63,7 @@ const ReportChart = withStyles(styles)(
             `${window.performance.now() - startTime} ReportChart render()`
         );
         return (
-          <div className={classes.chartContainer}>
+          <div className={classes.chartContainer} ref={this.containerRef}>
             <Chart
               style={{ height: '100%', minWidth: minWidth }}
               chartType="ColumnChart"
@@ -65,6 +83,19 @@ const ReportChart = withStyles(styles)(
           </div>
         );
       }
+
+      private resizeObserved: ResizeObserverCallback = () => {
+        // Force this component to update when the container div changes
+        // size. This is needed because the SVG based chart needs to
+        // recompute sizes. We wrap the call in a timeout so when the
+        // drawer is opened or closed, we only resize after the animation
+        // finishes.
+        if (this.timerId != undefined) {
+          clearInterval(this.timerId);
+        }
+        let transitionTimeMs = 225;
+        this.timerId = setTimeout(() => this.forceUpdate(), transitionTimeMs);
+      };
     }
 );
 
