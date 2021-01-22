@@ -38,10 +38,10 @@ export type TransactionsAction =
 
 // Async actions
 export const fetchTransactionsFromDropboxIfNeeded = (): ThunkAction<
-void,
-IAppState,
-null,
-TransactionsAction | AuthAction
+  void,
+  IAppState,
+  null,
+  TransactionsAction | AuthAction
 > => {
   return async (dispatch, getState) => {
     const state = getState();
@@ -79,10 +79,10 @@ TransactionsAction | AuthAction
 };
 
 export const saveTransactionsToDropbox = (): ThunkAction<
-void,
-IAppState,
-null,
-TransactionsAction
+  void,
+  IAppState,
+  null,
+  TransactionsAction
 > => {
   return async (dispatch, getState) => {
     const state = getState();

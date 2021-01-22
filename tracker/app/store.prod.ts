@@ -7,7 +7,7 @@ import { createRootReducer, IAppState } from './main';
 export function configureStore(history: History): Store<IAppState> {
   const routingMiddleware = routerMiddleware(history);
   const enhancers = compose(
-      applyMiddleware(routingMiddleware, thunkMiddleware)
+    applyMiddleware(routingMiddleware, thunkMiddleware)
   );
 
   return createStore(createRootReducer(history), enhancers);

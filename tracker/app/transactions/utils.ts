@@ -2,8 +2,8 @@ import moment from 'moment';
 import { Category, ITransaction, TAG_TO_CATEGORY } from './model';
 
 export function shouldExclude(
-    transaction: ITransaction,
-    excludeTags: Set<string>
+  transaction: ITransaction,
+  excludeTags: Set<string>
 ): boolean {
   for (let tag of transaction.tags) {
     if (excludeTags.has(tag)) {
@@ -26,7 +26,7 @@ export function formatAmountNumber(amountCentsNumber: number): string {
   let numCommas = parseInt(((dollars.length - 1) / 3).toString(), 10);
   for (let c = numCommas * 3; c > 0; c -= 3) {
     dollars = `${dollars.substr(0, dollars.length - c)},${dollars.substr(
-        dollars.length - c
+      dollars.length - c
     )}`;
   }
   let centsString = amountCents.substr(digits - 2);
@@ -42,8 +42,8 @@ export function formatAmountNumber(amountCentsNumber: number): string {
 
 // This sorts in decending order by date, then ascending order by description.
 export function compareTransactions(
-    lhs: ITransaction,
-    rhs: ITransaction
+  lhs: ITransaction,
+  rhs: ITransaction
 ): number {
   if (lhs.date < rhs.date) {
     return 1;
@@ -76,7 +76,7 @@ export function getCategory(transaction: ITransaction): Category {
     return categories[0];
   } else if (categories.length > 1) {
     throw Error(
-        'multiple categories: ' + categories.map(cat => Category[cat]).join(', ')
+      'multiple categories: ' + categories.map(cat => Category[cat]).join(', ')
     );
   }
   return Category.Other;
@@ -149,9 +149,9 @@ export function generateUUID(crypto: Crypto = window.crypto): string {
 }
 
 function searchByDate(
-    transactions: ITransaction[],
-    date: string,
-    isStart: boolean
+  transactions: ITransaction[],
+  date: string,
+  isStart: boolean
 ): number {
   let hi = 0;
   let lo = transactions.length - 1;
@@ -189,9 +189,9 @@ function searchByDate(
 // Returns transactions between the two provided dates (inclusive). This assumes the
 // transactions are sorted from most recent to oldest.
 export function filterTransactionsByDate(
-    transactions: ITransaction[],
-    startDate: Date,
-    endDate: Date
+  transactions: ITransaction[],
+  startDate: Date,
+  endDate: Date
 ): ITransaction[] {
   // 20-30ms for filter with conversion to Date objects.
   // 3-4ms for filter with string comparisons.
@@ -225,8 +225,8 @@ export interface IFilters {
  * Filter transactions by the parameters provided.
  */
 export function filterTransactions(
-    transactions: ITransaction[],
-    filters: IFilters
+  transactions: ITransaction[],
+  filters: IFilters
 ): ITransaction[] {
   if (!transactions.length) {
     return [];
@@ -234,10 +234,10 @@ export function filterTransactions(
   let filteredTransactions: ITransaction[] = transactions;
   if (filters.startDate || filters.endDate) {
     filteredTransactions = filterTransactionsByDate(
-        filteredTransactions,
-        filters.startDate ||
+      filteredTransactions,
+      filters.startDate ||
         moment(transactions[transactions.length - 1].date).toDate(),
-        filters.endDate || moment(transactions[0].date).toDate()
+      filters.endDate || moment(transactions[0].date).toDate()
     );
   }
 
@@ -296,7 +296,7 @@ export function getTags(transactions: ITransaction[]): Set<string> {
 }
 
 export function getSpreadDurationAsDays(
-    transaction: ITransaction
+  transaction: ITransaction
 ): number | undefined {
   for (let tag of transaction.tags) {
     if (tag.startsWith('spread:')) {

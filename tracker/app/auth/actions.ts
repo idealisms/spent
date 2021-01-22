@@ -32,8 +32,8 @@ const setAuthStatus = (authStatus: AuthStatus) => ({
 });
 
 export const dropboxDownloadCompleted = (
-    path: string,
-    authStatus: AuthStatus
+  path: string,
+  authStatus: AuthStatus
 ) => ({
   type: ActionType.DROPBOX_DOWNLOAD_COMPLETED as typeof ActionType.DROPBOX_DOWNLOAD_COMPLETED,
   path,
@@ -47,10 +47,10 @@ export type AuthAction =
 
 // Async actions
 export const tryLogin = (): ThunkAction<
-void,
-IAppState,
-null,
-AuthAction | TransactionsAction | SettingsAction
+  void,
+  IAppState,
+  null,
+  AuthAction | TransactionsAction | SettingsAction
 > => {
   return async (dispatch, getState) => {
     const state = getState();

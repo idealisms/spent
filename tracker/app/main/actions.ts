@@ -20,8 +20,8 @@ export const receivedSettingsFromDropbox = (settings?: ISettings) => ({
 });
 
 export const updateSetting = (
-    key: keyof ISettings,
-    value: ISettings[keyof ISettings]
+  key: keyof ISettings,
+  value: ISettings[keyof ISettings]
 ) => ({
   type: ActionType.UPDATE_SETTING as typeof ActionType.UPDATE_SETTING,
   key,
@@ -52,10 +52,10 @@ function upgradeIfNecessary(settings: ISettings) {
 
 // Async actions
 export const fetchSettingsFromDropbox = (): ThunkAction<
-void,
-IAppState,
-null,
-SettingsAction | AuthAction
+  void,
+  IAppState,
+  null,
+  SettingsAction | AuthAction
 > => {
   return async (dispatch, getState) => {
     const state = getState();
@@ -88,10 +88,10 @@ SettingsAction | AuthAction
 };
 
 export const fetchSettingsFromDropboxIfNeeded = (): ThunkAction<
-void,
-IAppState,
-null,
-SettingsAction
+  void,
+  IAppState,
+  null,
+  SettingsAction
 > => {
   return async (dispatch, getState) => {
     let state = getState();
@@ -102,10 +102,10 @@ SettingsAction
 };
 
 export const saveSettingsToDropbox = (): ThunkAction<
-void,
-IAppState,
-null,
-SettingsAction
+  void,
+  IAppState,
+  null,
+  SettingsAction
 > => {
   return async (dispatch, getState) => {
     dispatch(setCloudState(CloudState.Uploading));

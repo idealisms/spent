@@ -82,84 +82,84 @@ interface ITransactionProps extends WithStyles<typeof styles> {
   amountFragment?: JSX.Element;
 }
 const Transaction = withStyles(styles)(
-    class Component extends React.Component<
+  class Component extends React.Component<
     ITransactionProps,
     Record<string, unknown>
-    > {
-      public render(): React.ReactElement<Record<string, unknown>> {
-        let classes = this.props.classes;
-        let isCredit = this.props.transaction.amount_cents < 0;
-        let categoryEmoji = '🙅';
-        let categoryName = 'error';
-        try {
-          let category = this.getCategory();
-          categoryEmoji = categoryToEmoji(category);
-          categoryName = Category[category];
-        } catch (e) {
-          console.log(e);
-        }
-        // Use a zero width space (\u200B) so double clicking a tag only
-        // selects the tag and not the words around it.
-        let tags = this.props.transaction.tags.map(tag => [
-          '\u200B',
-          <span key={tag}>{tag}</span>,
-        ]);
-        return (
+  > {
+    public render(): React.ReactElement<Record<string, unknown>> {
+      let classes = this.props.classes;
+      let isCredit = this.props.transaction.amount_cents < 0;
+      let categoryEmoji = '🙅';
+      let categoryName = 'error';
+      try {
+        let category = this.getCategory();
+        categoryEmoji = categoryToEmoji(category);
+        categoryName = Category[category];
+      } catch (e) {
+        console.log(e);
+      }
+      // Use a zero width space (\u200B) so double clicking a tag only
+      // selects the tag and not the words around it.
+      let tags = this.props.transaction.tags.map(tag => [
+        '\u200B',
+        <span key={tag}>{tag}</span>,
+      ]);
+      return (
+        <div
+          className={classes.row + (this.props.isSelected ? ' selected' : '')}
+          key={this.props.key ? this.props.key : ''}
+        >
+          {this.props.hideDate ? (
+            ''
+          ) : (
+            <div className={classes.date}>
+              <span className="y">
+                {this.props.transaction.date.substr(0, 5)}
+              </span>
+              {this.props.transaction.date.substr(5)}
+            </div>
+          )}
+          {this.props.amountFragment ? (
+            this.props.amountFragment
+          ) : (
+            <div className={classes.amount + (isCredit ? ' credit' : '')}>
+              {this.formatAmount()}
+            </div>
+          )}
           <div
-            className={classes.row + (this.props.isSelected ? ' selected' : '')}
-            key={this.props.key ? this.props.key : ''}
-          >
-            {this.props.hideDate ? (
-              ''
-            ) : (
-              <div className={classes.date}>
-                <span className="y">
-                  {this.props.transaction.date.substr(0, 5)}
-                </span>
-                {this.props.transaction.date.substr(5)}
-              </div>
-            )}
-            {this.props.amountFragment ? (
-              this.props.amountFragment
-            ) : (
-              <div className={classes.amount + (isCredit ? ' credit' : '')}>
-                {this.formatAmount()}
-              </div>
-            )}
-            <div
-              className={
-                classes.category + (this.props.onCategoryClick ? ' editable' : '')
+            className={
+              classes.category + (this.props.onCategoryClick ? ' editable' : '')
+            }
+            title={categoryName}
+            onClick={() => {
+              if (this.props.onCategoryClick) {
+                this.props.onCategoryClick(this.props.transaction);
               }
-              title={categoryName}
-              onClick={() => {
-                if (this.props.onCategoryClick) {
-                  this.props.onCategoryClick(this.props.transaction);
-                }
-              }}
-            >
-              {this.props.isSelected ? <CheckBoxIcon /> : categoryEmoji}
-            </div>
-            <div className={classes.description}>
-              {this.props.transaction.description}
-              {this.props.transaction.notes ? (
-                <span className="notes"> - {this.props.transaction.notes}</span>
-              ) : (
-                ''
-              )}
-              {this.props.hideTags ? '' : tags}
-            </div>
+            }}
+          >
+            {this.props.isSelected ? <CheckBoxIcon /> : categoryEmoji}
           </div>
-        );
-      }
-
-      protected formatAmount(): string {
-        return formatAmount(this.props.transaction);
-      }
-
-      protected getCategory(): Category {
-        return getCategory(this.props.transaction);
-      }
+          <div className={classes.description}>
+            {this.props.transaction.description}
+            {this.props.transaction.notes ? (
+              <span className="notes"> - {this.props.transaction.notes}</span>
+            ) : (
+              ''
+            )}
+            {this.props.hideTags ? '' : tags}
+          </div>
+        </div>
+      );
     }
+
+    protected formatAmount(): string {
+      return formatAmount(this.props.transaction);
+    }
+
+    protected getCategory(): Category {
+      return getCategory(this.props.transaction);
+    }
+  }
 );
 
 export default Transaction;

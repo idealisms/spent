@@ -19,16 +19,16 @@ const rowStyles = (theme: Theme) => {
 interface ITransactionsTableSumRowProps extends WithStyles<typeof rowStyles> {}
 interface ITransactionsTableSumRowState {}
 const TransactionsTableHeadingRow = withStyles(rowStyles)(
-    class Component extends React.Component<
+  class Component extends React.Component<
     ITransactionsTableSumRowProps,
     ITransactionsTableSumRowState
-    > {
-      public render(): React.ReactElement<Record<string, unknown>> {
-        let classes = this.props.classes;
+  > {
+    public render(): React.ReactElement<Record<string, unknown>> {
+      let classes = this.props.classes;
 
-        return <div className={classes.row}>{this.props.children}</div>;
-      }
+      return <div className={classes.row}>{this.props.children}</div>;
     }
+  }
 );
 
 export default TransactionsTableHeadingRow;

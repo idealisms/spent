@@ -22,6 +22,9 @@ module.exports = {
     'plugin:@typescript-eslint/eslint-recommended',
     'plugin:@typescript-eslint/recommended',
     'plugin:react/recommended',
+    'prettier',
+    'prettier/@typescript-eslint',
+    'prettier/react',
   ],
   parser: '@typescript-eslint/parser',
   parserOptions: {
@@ -101,23 +104,6 @@ module.exports = {
         },
       },
     ],
-    '@typescript-eslint/indent': [
-      'error',
-      2,
-      {
-        CallExpression: {
-          arguments: 2,
-        },
-        FunctionDeclaration: {
-          parameters: 2,
-        },
-        FunctionExpression: {
-          parameters: 2,
-        },
-        SwitchCase: 1,
-      },
-    ],
-    '@typescript-eslint/member-delimiter-style': ['error'],
     '@typescript-eslint/member-ordering': 'error',
     '@typescript-eslint/no-empty-function': 'error',
     '@typescript-eslint/no-explicit-any': 'off',
@@ -132,33 +118,15 @@ module.exports = {
     ],
     '@typescript-eslint/no-var-requires': 'error',
     '@typescript-eslint/prefer-namespace-keyword': 'error',
-    '@typescript-eslint/quotes': [
-      'error',
-      'single',
-      {
-        avoidEscape: true,
-      },
-    ],
-    '@typescript-eslint/semi': ['error'],
     '@typescript-eslint/no-empty-interface': 'off',
-    '@typescript-eslint/type-annotation-spacing': 'error',
     '@typescript-eslint/explicit-module-boundary-types': 'off',
-    'brace-style': ['error', '1tbs'],
     camelcase: 'off',
-    'comma-dangle': ['error', 'always-multiline'],
     curly: 'error',
     'default-case': 'error',
-    'eol-last': 'error',
     eqeqeq: ['off', 'smart'],
     'guard-for-in': 'error',
     'id-blacklist': 'off',
     'id-match': 'off',
-    'max-len': [
-      'error',
-      {
-        code: 140,
-      },
-    ],
     'no-bitwise': 'error',
     'no-caller': 'error',
     'no-cond-assign': 'error',
@@ -199,7 +167,6 @@ module.exports = {
     'no-redeclare': 'error',
     'no-shadow': 'off', // replaced by ts-eslint rule below
     '@typescript-eslint/no-shadow': 'error',
-    'no-trailing-spaces': 'error',
     'no-underscore-dangle': 'off',
     'no-unused-labels': 'error',
     'no-var': 'error',

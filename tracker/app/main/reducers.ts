@@ -27,8 +27,8 @@ const initialSettingsState: ISettingsState = {
 };
 
 export const settingsReducer: Reducer<ISettingsState, SettingsAction> = (
-    state = initialSettingsState,
-    action
+  state = initialSettingsState,
+  action
 ) => {
   switch (action.type) {
     case ActionType.RECEIVED_SETTINGS_FROM_DROPBOX:

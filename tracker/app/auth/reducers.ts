@@ -9,8 +9,8 @@ const initialAuthState: IAuthState = {
 };
 
 export const authReducer: Reducer<IAuthState, AuthAction> = (
-    state = initialAuthState,
-    action
+  state = initialAuthState,
+  action
 ): IAuthState => {
   switch (action.type) {
     case ActionType.SET_DROPBOX_ACCESS_TOKEN:
@@ -33,7 +33,7 @@ export const authReducer: Reducer<IAuthState, AuthAction> = (
       if (Object.keys(downloadStatuses).length === 2) {
         if (
           Object.values(downloadStatuses).every(
-              status => status === AuthStatus.OK
+            status => status === AuthStatus.OK
           )
         ) {
           authStatus = AuthStatus.OK;

@@ -15,7 +15,8 @@
     "start:deno:prod": "NODE_ENV=production deno run --allow-net --allow-env --allow-read=build server/server.ts",
     "test": "npm run clean && jest",
     "test:watch": "npm test -- --watch",
-    "prettier": "prettier --write . && eslint -c .eslintrc.js --fix --ext .ts,.tsx app"
+    "eslint-prettier-check": "eslint-config-prettier app/**/*.ts",
+    "prettier": "prettier --write ."
   },
   "bugs": {
     "url": "https://github.com/idealisms/spent/issues"
@@ -65,6 +66,7 @@
     "enzyme": "^3.3.0",
     "enzyme-adapter-react-16": "^1.1.1",
     "eslint": "^7.5.0",
+    "eslint-config-prettier": "^7.2.0",
     "eslint-loader": "^4.0.2",
     "eslint-plugin-react": "^7.20.5",
     "express": "^4.15.3",

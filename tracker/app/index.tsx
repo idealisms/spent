@@ -23,14 +23,14 @@ const store: Store<IAppState> =
     : (require('./store.prod') as any).configureStore(history); // eslint-disable-line @typescript-eslint/no-var-requires
 
 ReactDOM.render(
-    <Provider store={store}>
-      <MuiThemeProvider theme={theme}>
-        <ConnectedRouter history={history}>
-          <MuiPickersUtilsProvider utils={MomentUtils}>
-            <App />
-          </MuiPickersUtilsProvider>
-        </ConnectedRouter>
-      </MuiThemeProvider>
-    </Provider>,
-    document.getElementById('app')
+  <Provider store={store}>
+    <MuiThemeProvider theme={theme}>
+      <ConnectedRouter history={history}>
+        <MuiPickersUtilsProvider utils={MomentUtils}>
+          <App />
+        </MuiPickersUtilsProvider>
+      </ConnectedRouter>
+    </MuiThemeProvider>
+  </Provider>,
+  document.getElementById('app')
 );

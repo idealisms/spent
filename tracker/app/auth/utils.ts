@@ -26,48 +26,48 @@ export function generateAuthUrl(origin: string) {
 
 export function getAuthToken(origin: string, returnCode: string | null) {
   const codeVerifier = window.localStorage.getItem(
-      CODE_VERIFIER_LOCAL_STORAGE_KEY
+    CODE_VERIFIER_LOCAL_STORAGE_KEY
   );
 
   return new Promise(
-      (
-          resolve: (accessToken: string) => void,
-          reject: (reason: string) => void
-      ) => {
-        if (!returnCode) {
-          reject('missing return code');
-          return;
-        }
-        if (!codeVerifier) {
-          reject('missing code verifier');
-          return;
-        }
-
-        // https://www.dropbox.com/developers/documentation/http/documentation#oauth2-token
-        const searchParams = new URLSearchParams();
-        searchParams.set('code', returnCode);
-        searchParams.set('grant_type', 'authorization_code');
-        searchParams.set('client_id', CLIENT_ID);
-        searchParams.set('redirect_uri', origin + AuthPage);
-        searchParams.set('code_verifier', codeVerifier);
-
-        window
-          .fetch('https://api.dropbox.com/oauth2/token', {
-            method: 'POST',
-            body: searchParams,
-          })
-          .then(response => {
-            console.log(response);
-            if (response.status == 200) {
-              response.json().then(data => {
-                window.localStorage.removeItem('dropboxCodeVerifier');
-                resolve(data['access_token']);
-              });
-            } else {
-              console.log(response);
-            }
-          });
+    (
+      resolve: (accessToken: string) => void,
+      reject: (reason: string) => void
+    ) => {
+      if (!returnCode) {
+        reject('missing return code');
+        return;
       }
+      if (!codeVerifier) {
+        reject('missing code verifier');
+        return;
+      }
+
+      // https://www.dropbox.com/developers/documentation/http/documentation#oauth2-token
+      const searchParams = new URLSearchParams();
+      searchParams.set('code', returnCode);
+      searchParams.set('grant_type', 'authorization_code');
+      searchParams.set('client_id', CLIENT_ID);
+      searchParams.set('redirect_uri', origin + AuthPage);
+      searchParams.set('code_verifier', codeVerifier);
+
+      window
+        .fetch('https://api.dropbox.com/oauth2/token', {
+          method: 'POST',
+          body: searchParams,
+        })
+        .then(response => {
+          console.log(response);
+          if (response.status == 200) {
+            response.json().then(data => {
+              window.localStorage.removeItem('dropboxCodeVerifier');
+              resolve(data['access_token']);
+            });
+          } else {
+            console.log(response);
+          }
+        });
+    }
   );
 }
 

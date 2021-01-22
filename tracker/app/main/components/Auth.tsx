@@ -16,7 +16,7 @@ const styles = (_theme: Theme) =>
 
 interface IAuthOwnProps
   extends WithStyles<typeof styles>,
-  RouteComponentProps<void> {}
+    RouteComponentProps<void> {}
 interface IAuthAppStateProps {}
 interface IAuthDispatchProps {
   dispatchSetDropboxAuthToken: (token: string) => void;
@@ -24,36 +24,36 @@ interface IAuthDispatchProps {
 type IAuthProps = IAuthOwnProps & IAuthAppStateProps & IAuthDispatchProps;
 
 const Auth = withStyles(styles)(
-    class Component extends React.Component<IAuthProps, any> {
-      public render(): React.ReactElement<Record<string, unknown>> {
-        let classes = this.props.classes;
+  class Component extends React.Component<IAuthProps, any> {
+    public render(): React.ReactElement<Record<string, unknown>> {
+      let classes = this.props.classes;
 
-        // Following the steps outlined here (PKCE):
-        // https://www.dropbox.com/lp/developers/reference/oauth-guide
-        const returnCode = new URLSearchParams(this.props.location.search).get(
-            'code'
-        );
+      // Following the steps outlined here (PKCE):
+      // https://www.dropbox.com/lp/developers/reference/oauth-guide
+      const returnCode = new URLSearchParams(this.props.location.search).get(
+        'code'
+      );
 
-        getAuthToken(window.location.origin, returnCode)
-          .then(accessToken => {
-            this.props.dispatchSetDropboxAuthToken(accessToken);
-            this.props.history.push(DailyPage);
-          })
-          .catch(reason => {
-            console.log(reason);
-            this.props.history.push(HomePage);
-          });
+      getAuthToken(window.location.origin, returnCode)
+        .then(accessToken => {
+          this.props.dispatchSetDropboxAuthToken(accessToken);
+          this.props.history.push(DailyPage);
+        })
+        .catch(reason => {
+          console.log(reason);
+          this.props.history.push(HomePage);
+        });
 
-        return (
-          <div className={classes.root}>Fetching token and redirecting ...</div>
-        );
-      }
+      return (
+        <div className={classes.root}>Fetching token and redirecting ...</div>
+      );
     }
+  }
 );
 
 const mapStateToProps = (_state: IAppState): IAuthAppStateProps => ({});
 const mapDispatchToProps = (
-    dispatch: ThunkDispatch<IAppState, null, any>
+  dispatch: ThunkDispatch<IAppState, null, any>
 ): IAuthDispatchProps => ({
   dispatchSetDropboxAuthToken: token => {
     dispatch(setDropboxAccessToken(token));

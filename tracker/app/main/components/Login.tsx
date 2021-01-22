@@ -14,28 +14,28 @@ const styles = (_theme: Theme) =>
 
 interface ILoginOwnProps
   extends WithStyles<typeof styles>,
-  RouteComponentProps<void> {}
+    RouteComponentProps<void> {}
 interface ILoginAppStateProps {}
 interface ILoginDispatchProps {}
 type ILoginProps = ILoginOwnProps & ILoginAppStateProps & ILoginDispatchProps;
 
 const Login = withStyles(styles)(
-    class Component extends React.Component<ILoginProps, any> {
-      public render(): React.ReactElement<Record<string, unknown>> {
-        let classes = this.props.classes;
+  class Component extends React.Component<ILoginProps, any> {
+    public render(): React.ReactElement<Record<string, unknown>> {
+      let classes = this.props.classes;
 
-        return (
-          <div className={classes.root}>
-            <a href={generateAuthUrl(window.location.origin)}>Login</a>
-          </div>
-        );
-      }
+      return (
+        <div className={classes.root}>
+          <a href={generateAuthUrl(window.location.origin)}>Login</a>
+        </div>
+      );
     }
+  }
 );
 
 const mapStateToProps = (_state: IAppState): ILoginAppStateProps => ({});
 const mapDispatchToProps = (
-    _dispatch: ThunkDispatch<IAppState, null, any>
+  _dispatch: ThunkDispatch<IAppState, null, any>
 ): ILoginDispatchProps => ({});
 
 export default connect(mapStateToProps, mapDispatchToProps)(Login);

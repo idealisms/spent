@@ -11,8 +11,8 @@ const initialState: ITransactionsState = {
 };
 
 export const transactionsReducer: Reducer<
-ITransactionsState,
-TransactionsAction
+  ITransactionsState,
+  TransactionsAction
 > = (state = initialState, action) => {
   switch (action.type) {
     case ActionType.RECEIVED_TRANSACTIONS_FROM_DROPBOX:

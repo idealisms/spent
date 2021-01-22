@@ -19,7 +19,7 @@ export function configureStore(history: History): Store<IAppState> {
   const composeEnhancers =
     (window as any).__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;
   const enhancers = composeEnhancers(
-      applyMiddleware(routingMiddleware, thunkMiddleware, loggerMiddleware)
+    applyMiddleware(routingMiddleware, thunkMiddleware, loggerMiddleware)
   );
 
   const store = createStore(createRootReducer(history), enhancers);
