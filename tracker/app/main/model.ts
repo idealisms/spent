@@ -77,6 +77,8 @@ export interface ISpendTarget {
 // Removed in version 1.
 type DeprecatedReportCategories = IReportNode[];
 
+export const SETTINGS_VERSION = 1;
+
 export interface ISettings {
   version: number;
   reportCategories: Map<string, IReportNode[]> | DeprecatedReportCategories;

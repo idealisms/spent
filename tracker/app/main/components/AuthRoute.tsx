@@ -1,6 +1,6 @@
 import { createStyles, WithStyles } from '@material-ui/core';
 import { Theme, withStyles } from '@material-ui/core/styles';
-import { IAppState } from '../model';
+import { IAppState, SETTINGS_VERSION } from '../model';
 import * as React from 'react';
 import { Route, Redirect } from 'react-router-dom';
 import { ThunkDispatch } from 'redux-thunk';
@@ -19,6 +19,7 @@ interface IAuthRouteOwnProps extends WithStyles<typeof styles> {
 interface IAuthRouteAppStateProps {
   authStatus: AuthStatus;
   dropboxAccessToken: string;
+  settingsVersion: number;
 }
 interface IAuthStateDispatchProps {
   tryLogin: () => void;
@@ -52,6 +53,17 @@ const AuthRoute = withStyles(styles)(
         return <Redirect to={RoutePaths.HomePage} />;
       }
 
+      if (this.props.settingsVersion > SETTINGS_VERSION) {
+        return (
+          <div>
+            A newer version is available.{' '}
+            <a href="#" onClick={() => window.location.reload()}>
+              Please reload the page.
+            </a>
+          </div>
+        );
+      }
+
       return (
         <Route
           exact={this.props.exact}
@@ -66,6 +78,7 @@ const AuthRoute = withStyles(styles)(
 const mapStateToProps = (state: IAppState): IAuthRouteAppStateProps => ({
   dropboxAccessToken: state.auth.dropboxAccessToken,
   authStatus: state.auth.authStatus,
+  settingsVersion: state.settings.settings.version,
 });
 const mapDispatchToProps = (
   dispatch: ThunkDispatch<IAppState, null, any>

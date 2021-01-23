@@ -1,6 +1,6 @@
 import * as Dropbox from 'dropbox';
 import { ThunkAction } from 'redux-thunk';
-import { CloudState, IAppState, ISettings } from './model';
+import { CloudState, IAppState, ISettings, SETTINGS_VERSION } from './model';
 import { AuthAction, dropboxDownloadCompleted } from '../auth/actions';
 import { AuthStatus } from '../auth/model';
 
@@ -46,7 +46,7 @@ function upgradeIfNecessary(settings: ISettings) {
         ['report', settings.reportCategories],
       ]);
     }
-    settings.version = 1;
+    settings.version = SETTINGS_VERSION;
   }
 }
 
