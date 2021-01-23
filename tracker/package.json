@@ -92,9 +92,9 @@
   },
   "dependencies": {
     "@date-io/moment": "^1.0.1",
-    "@material-ui/core": "^4.8.2",
-    "@material-ui/icons": "^4.5.1",
-    "@material-ui/pickers": "^3.2.8",
+    "@material-ui/core": "^4.11.2",
+    "@material-ui/icons": "^4.11.2",
+    "@material-ui/pickers": "^3.2.10",
     "awesome-typescript-loader": "^5.2.1",
     "classnames": "^2.2.6",
     "connected-react-router": "^6.6.1",
