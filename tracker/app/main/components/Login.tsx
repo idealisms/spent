@@ -1,16 +1,15 @@
 import { createStyles, WithStyles } from '@material-ui/core';
+import Button from '@material-ui/core/Button';
 import { Theme, withStyles } from '@material-ui/core/styles';
 import * as React from 'react';
 import { connect } from 'react-redux';
 import { ThunkDispatch } from 'redux-thunk';
 import { RouteComponentProps } from 'react-router-dom';
 import { IAppState } from '../model';
+import BaseNoNav from './BaseNoNav';
 import { generateAuthUrl } from '../../auth/utils';
 
-const styles = (_theme: Theme) =>
-  createStyles({
-    root: {},
-  });
+const styles = (_theme: Theme) => createStyles({});
 
 interface ILoginOwnProps
   extends WithStyles<typeof styles>,
@@ -22,12 +21,23 @@ type ILoginProps = ILoginOwnProps & ILoginAppStateProps & ILoginDispatchProps;
 const Login = withStyles(styles)(
   class Component extends React.Component<ILoginProps, any> {
     public render(): React.ReactElement<Record<string, unknown>> {
-      let classes = this.props.classes;
-
       return (
-        <div className={classes.root}>
-          <a href={generateAuthUrl(window.location.origin)}>Login</a>
-        </div>
+        <BaseNoNav>
+          <div>
+            📈 Spent is a tool for tracking money being spent. It is a method
+            for budgeting based on an annual spending target.
+          </div>
+
+          <div style={{ marginTop: '16px' }}>
+            <Button
+              variant="contained"
+              color="primary"
+              href={generateAuthUrl(window.location.origin)}
+            >
+              Login with Dropbox
+            </Button>
+          </div>
+        </BaseNoNav>
       );
     }
   }
