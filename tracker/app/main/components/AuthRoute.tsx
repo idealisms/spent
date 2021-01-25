@@ -7,6 +7,7 @@ import { ThunkDispatch } from 'redux-thunk';
 import { connect } from 'react-redux';
 import { AuthStatus } from '../../auth/model';
 import * as RoutePaths from './RoutePaths';
+import BaseNoNav from './BaseNoNav';
 import { tryLogin } from '../../auth/actions';
 
 const styles = (_theme: Theme) => createStyles({});
@@ -55,12 +56,14 @@ const AuthRoute = withStyles(styles)(
 
       if (this.props.settingsVersion > SETTINGS_VERSION) {
         return (
-          <div>
-            A newer version is available.{' '}
-            <a href="#" onClick={() => window.location.reload()}>
-              Please reload the page.
-            </a>
-          </div>
+          <BaseNoNav>
+            <div>
+              A newer version is available.{' '}
+              <a href="#" onClick={() => window.location.reload()}>
+                Please reload the page.
+              </a>
+            </div>
+          </BaseNoNav>
         );
       }
 
