@@ -49,7 +49,11 @@ const AuthRoute = withStyles(styles)(
         this.props.authStatus === AuthStatus.INIT ||
         this.props.authStatus === AuthStatus.CHECKING
       ) {
-        return <div>Loading...</div>;
+        return (
+          <BaseNoNav>
+            <div>Loading...</div>
+          </BaseNoNav>
+        );
       } else if (this.props.authStatus === AuthStatus.NEEDS_LOGIN) {
         return <Redirect to={RoutePaths.HomePage} />;
       }

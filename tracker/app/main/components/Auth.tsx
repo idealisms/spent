@@ -7,27 +7,22 @@ import { RouteComponentProps } from 'react-router-dom';
 import { IAppState } from '../model';
 import { setDropboxAccessToken } from '../../auth/actions';
 import { HomePage, DailyPage } from './RoutePaths';
+import BaseNoNav from './BaseNoNav';
 import { getAuthToken } from '../../auth/utils';
 
-const styles = (_theme: Theme) =>
-  createStyles({
-    root: {},
-  });
+const styles = (_theme: Theme) => createStyles({});
 
 interface IAuthOwnProps
   extends WithStyles<typeof styles>,
     RouteComponentProps<void> {}
-interface IAuthAppStateProps {}
 interface IAuthDispatchProps {
   dispatchSetDropboxAuthToken: (token: string) => void;
 }
-type IAuthProps = IAuthOwnProps & IAuthAppStateProps & IAuthDispatchProps;
+type IAuthProps = IAuthOwnProps & IAuthDispatchProps;
 
 const Auth = withStyles(styles)(
   class Component extends React.Component<IAuthProps, any> {
     public render(): React.ReactElement<Record<string, unknown>> {
-      let classes = this.props.classes;
-
       // Following the steps outlined here (PKCE):
       // https://www.dropbox.com/lp/developers/reference/oauth-guide
       const returnCode = new URLSearchParams(this.props.location.search).get(
@@ -45,13 +40,14 @@ const Auth = withStyles(styles)(
         });
 
       return (
-        <div className={classes.root}>Fetching token and redirecting ...</div>
+        <BaseNoNav>
+          <div>Fetching token and redirecting...</div>
+        </BaseNoNav>
       );
     }
   }
 );
 
-const mapStateToProps = (_state: IAppState): IAuthAppStateProps => ({});
 const mapDispatchToProps = (
   dispatch: ThunkDispatch<IAppState, null, any>
 ): IAuthDispatchProps => ({
@@ -60,4 +56,4 @@ const mapDispatchToProps = (
   },
 });
 
-export default connect(mapStateToProps, mapDispatchToProps)(Auth);
+export default connect(null, mapDispatchToProps)(Auth);
