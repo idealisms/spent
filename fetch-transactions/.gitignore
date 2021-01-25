@@ -3,11 +3,13 @@ downloads
 node_modules
 screenshots
 user-data
+debug.log
 *.py[cod]
 
 # python venv
 bin
 lib
+lib64
 share
 pyvenv.cfg
 
