@@ -57,24 +57,29 @@ async function main(authCode) {
   await page.click("a.profileWidget-button--logon");
   // await page.goto('https://www.usaa.com/inet/ent_logon/Logon');
   // await page.waitForSelector('#usaa-my-profile');
-  await page.waitForSelector("#usaaNum");
+  await page.waitForSelector("[name=memberId]");
   await page.screenshot({ path: filenameGenerator.next().value });
 
-  console.log("Typing login info");
+  console.log("Typing user name");
   // await page.click('#usaa-my-profile');
-  await page.type("#j_usaaNum", config.USAA.username, { delay: 90 });
-  await page.type("#j_usaaPass", config.USAA.pin + authCode, { delay: 102 });
+  await page.type("[name=memberId]", config.USAA.username, { delay: 90 });
   await page.screenshot({ path: filenameGenerator.next().value });
-
+  console.log("Clicking Next...");
+  await Promise.all([
+    page.waitForSelector("input[name=pintoken]"),
+    page.click("button.miam-btn-next"),
+  ]);
+  await page.screenshot({ path: filenameGenerator.next().value });
+  console.log("Entering PIN + token...");
+  await page.type("input[name=pintoken]", config.USAA.pin + authCode, {
+    delay: 102,
+  });
+  await page.screenshot({ path: filenameGenerator.next().value });
   console.log("Clicking Log On...");
   let [response] = await Promise.all([
     page.waitForNavigation({ waitUntil: "load", timeout: 60000 }),
-    page.click(".ent-logon-jump-button"),
+    page.click("button.pin-token-submit-btn"),
   ]);
-  if (response) {
-    console.log(response.url());
-  }
-  await page.screenshot({ path: filenameGenerator.next().value });
 
   // try {
   //   console.log('waiting 10s for another nav');
