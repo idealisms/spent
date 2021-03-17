@@ -40,7 +40,11 @@ async function getFrameMatchingUrl(page, urlSubstring) {
 
 async function main(authCode) {
   let filenameGenerator = screenshotFilename();
-  const browser = await puppeteer.launch(config.LAUNCH_OPTIONS);
+  let options = {
+    ...config.LAUNCH_OPTIONS,
+    userDataDir: './user-data/usaa2',
+  };
+  const browser = await puppeteer.launch(options);
   console.log(await browser.version());
 
   console.log('Loading login page...');
@@ -58,8 +62,8 @@ async function main(authCode) {
 
   console.log('Typing login info');
   // await page.click('#usaa-my-profile');
-  await page.type('#j_usaaNum', config.USAA.username);
-  await page.type('#j_usaaPass', config.USAA.pin + authCode);
+  await page.type('#j_usaaNum', config.USAA.username, {delay: 90});
+  await page.type('#j_usaaPass', config.USAA.pin + authCode, {delay: 102});
   await page.screenshot({path: filenameGenerator.next().value});
 
   console.log('Clicking Log On...');
