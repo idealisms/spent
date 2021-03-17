@@ -1,22 +1,22 @@
-const puppeteer = require('puppeteer');
-const readline = require('readline');
+const puppeteer = require("puppeteer");
+const readline = require("readline");
 
-const config = require('./config.js');
+const config = require("./config.js");
 
 // mm/dd/yyyy
 function formatDate(date) {
   function pad(number) {
-    return '' + (number < 10 ? '0' + number : number);
+    return "" + (number < 10 ? "0" + number : number);
   }
-  let fullYear = '' + date.getFullYear();
-  return pad(date.getMonth() + 1) + '/' + pad(date.getDate()) + '/' + fullYear;
+  let fullYear = "" + date.getFullYear();
+  return pad(date.getMonth() + 1) + "/" + pad(date.getDate()) + "/" + fullYear;
 }
 
 function* screenshotFilename() {
   let index = 0;
   while (true) {
     ++index;
-    let fileNumber = index < 10 ? '0' + index : '' + index;
+    let fileNumber = index < 10 ? "0" + index : "" + index;
     yield `screenshots/${fileNumber}.png`;
   }
 }
@@ -42,39 +42,39 @@ async function main(authCode) {
   let filenameGenerator = screenshotFilename();
   let options = {
     ...config.LAUNCH_OPTIONS,
-    userDataDir: './user-data/usaa2',
+    userDataDir: "./user-data/usaa2",
   };
   const browser = await puppeteer.launch(options);
   console.log(await browser.version());
 
-  console.log('Loading login page...');
+  console.log("Loading login page...");
   const page = await browser.newPage();
   await page.setUserAgent(config.LAUNCH_OPTIONS.userAgent);
   // await page.goto('https://www.usaa.com/');
-  await page.goto('https://www.usaa.com/');
-  await page.waitForSelector('a.profileWidget-button--logon');
-  await page.screenshot({path: filenameGenerator.next().value});
-  await page.click('a.profileWidget-button--logon');
+  await page.goto("https://www.usaa.com/");
+  await page.waitForSelector("a.profileWidget-button--logon");
+  await page.screenshot({ path: filenameGenerator.next().value });
+  await page.click("a.profileWidget-button--logon");
   // await page.goto('https://www.usaa.com/inet/ent_logon/Logon');
   // await page.waitForSelector('#usaa-my-profile');
-  await page.waitForSelector('#usaaNum');
-  await page.screenshot({path: filenameGenerator.next().value});
+  await page.waitForSelector("#usaaNum");
+  await page.screenshot({ path: filenameGenerator.next().value });
 
-  console.log('Typing login info');
+  console.log("Typing login info");
   // await page.click('#usaa-my-profile');
-  await page.type('#j_usaaNum', config.USAA.username, {delay: 90});
-  await page.type('#j_usaaPass', config.USAA.pin + authCode, {delay: 102});
-  await page.screenshot({path: filenameGenerator.next().value});
+  await page.type("#j_usaaNum", config.USAA.username, { delay: 90 });
+  await page.type("#j_usaaPass", config.USAA.pin + authCode, { delay: 102 });
+  await page.screenshot({ path: filenameGenerator.next().value });
 
-  console.log('Clicking Log On...');
+  console.log("Clicking Log On...");
   let [response] = await Promise.all([
-    page.waitForNavigation({waitUntil: 'load', timeout: 60000}),
-    page.click('.ent-logon-jump-button'),
+    page.waitForNavigation({ waitUntil: "load", timeout: 60000 }),
+    page.click(".ent-logon-jump-button"),
   ]);
   if (response) {
     console.log(response.url());
   }
-  await page.screenshot({path: filenameGenerator.next().value});
+  await page.screenshot({ path: filenameGenerator.next().value });
 
   // try {
   //   console.log('waiting 10s for another nav');
@@ -84,60 +84,68 @@ async function main(authCode) {
   //   console.log('timeout, no nav');
   // }
 
-  let frame = await getFrameMatchingUrl(page, '/EntManageAccounts?');
+  let frame = await getFrameMatchingUrl(page, "/EntManageAccounts?");
   if (!frame) {
-    console.log('Frame not found.');
+    console.log("Frame not found.");
     await browser.close();
     return;
   }
   [response] = await Promise.all([
     page.waitForNavigation(),
-    frame.click('.acctName > a'),
+    frame.click(".acctName > a"),
   ]);
   console.log(response.url());
-  await page.screenshot({path: filenameGenerator.next().value});
+  await page.screenshot({ path: filenameGenerator.next().value });
 
-  console.log('looking for menu');
-  await page.waitForSelector('#actionMenuTarget button');
-  await page.click('#actionMenuTarget button');
-  await page.click('#actionMenuTarget .yuimenuitem:nth-child(2)');
-  await page.screenshot({path: filenameGenerator.next().value});
+  console.log("looking for menu");
+  await page.waitForSelector("#actionMenuTarget button");
+  await page.click("#actionMenuTarget button");
+  await page.click("#actionMenuTarget .yuimenuitem:nth-child(2)");
+  await page.screenshot({ path: filenameGenerator.next().value });
 
-  console.log('select date range')
-  await page.waitForSelector('#searchcriteria\\.allorselectedtransactions_3', {visible: true});
-  await page.click('#searchcriteria\\.allorselectedtransactions_3');
-  await page.waitForSelector('#exportFromDate', {visible: true});
+  console.log("select date range");
+  await page.waitForSelector("#searchcriteria\\.allorselectedtransactions_3", {
+    visible: true,
+  });
+  await page.click("#searchcriteria\\.allorselectedtransactions_3");
+  await page.waitForSelector("#exportFromDate", { visible: true });
 
   // Get the last 7 days of transactions.
   const ONE_DAY_MS = 24 * 60 * 60 * 1000;
-  let startTime = new Date(Date.now() - (21 * ONE_DAY_MS));
-  startTime = new Date(startTime.getFullYear(), startTime.getMonth(), startTime.getDate());
+  let startTime = new Date(Date.now() - 21 * ONE_DAY_MS);
+  startTime = new Date(
+    startTime.getFullYear(),
+    startTime.getMonth(),
+    startTime.getDate()
+  );
 
-  await page.type('#exportFromDate', formatDate(startTime));
-  await page.type('#exportToDate', formatDate(new Date()));
-  await page.screenshot({path: filenameGenerator.next().value});
+  await page.type("#exportFromDate", formatDate(startTime));
+  await page.type("#exportToDate", formatDate(new Date()));
+  await page.screenshot({ path: filenameGenerator.next().value });
 
-  console.log('Downloading...');
+  console.log("Downloading...");
   try {
-    await page._client.send('Page.setDownloadBehavior', {behavior: 'allow', downloadPath: './downloads/'});
+    await page._client.send("Page.setDownloadBehavior", {
+      behavior: "allow",
+      downloadPath: "./downloads/",
+    });
     await Promise.all([
       // This will timeout, we're just giving time for the download to finish.
       page.waitForNavigation(),
-      page.click('#exportTable'),
+      page.click("#exportTable"),
     ]);
-  } catch (e) {
-  }
-  await page.screenshot({path: filenameGenerator.next().value});
+  } catch (e) {}
+  await page.screenshot({ path: filenameGenerator.next().value });
 
-  console.log('Success!');
+  console.log("Success!");
   await browser.close();
 }
 
 const rl = readline.createInterface({
   input: process.stdin,
-  output: process.stdout
+  output: process.stdout,
 });
-rl.question('Enter auth code: ', (authCode) => {
+rl.question("Enter auth code: ", (authCode) => {
   rl.close();
   main(authCode);
 });
