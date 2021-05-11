@@ -87,7 +87,7 @@
     "webpack": "^4.42.1",
     "webpack-cli": "^3.3.11",
     "webpack-dev-middleware": "^3.7.2",
-    "webpack-dev-server": "^3.11.0",
+    "webpack-dev-server": "^3.11.2",
     "webpack-hot-middleware": "^2.25.0"
   },
   "dependencies": {
@@ -98,7 +98,7 @@
     "awesome-typescript-loader": "^5.2.1",
     "classnames": "^2.2.6",
     "connected-react-router": "^6.6.1",
-    "css-loader": "^3.0.0",
+    "css-loader": "^5.2.4",
     "emotion": "^10.0.9",
     "file-loader": "^1.1.11",
     "html-loader": "^0.5.5",
