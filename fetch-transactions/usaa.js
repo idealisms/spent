@@ -52,9 +52,9 @@ async function main(authCode) {
   await page.setUserAgent(config.LAUNCH_OPTIONS.userAgent);
   // await page.goto('https://www.usaa.com/');
   await page.goto("https://www.usaa.com/");
-  await page.waitForSelector("a.profileWidget-button--logon");
+  await page.waitForSelector("a.usaa-globalHeader-utilityButton--logon");
   await page.screenshot({ path: filenameGenerator.next().value });
-  await page.click("a.profileWidget-button--logon");
+  await page.click("a.usaa-globalHeader-utilityButton--logon");
   // await page.goto('https://www.usaa.com/inet/ent_logon/Logon');
   // await page.waitForSelector('#usaa-my-profile');
   await page.waitForSelector("[name=memberId]");
