@@ -39,11 +39,11 @@ module.exports = require('./webpack.shared.config')({
 
   plugins: plugins,
 
-  devtool: 'cheap-module-eval-source-map',
+  devtool: 'cheap-module-source-map',
 
   devServer: {
     historyApiFallback: true,
-    contentBase: './build',
+    static: './build',
     hot: true,
   }
 

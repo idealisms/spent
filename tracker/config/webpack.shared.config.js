@@ -18,12 +18,12 @@ module.exports = (options) => ({
       }, {
         test: /\.(ts|tsx)?$/,
         include: options.srcs,
-        loader: 'awesome-typescript-loader',
+        loader: 'ts-loader',
       }, {
         test: /\.css$/,
         include: options.srcs,
         exclude: /node_modules/,
-        loaders: ['style-loader', 'css-loader'],
+        use: ['style-loader', 'css-loader'],
       }, {
         test: /\.(eot|svg|ttf|woff|woff2)$/,
         include: options.srcs,
@@ -31,10 +31,7 @@ module.exports = (options) => ({
       }, {
         test: /\.(jpg|png|gif)$/,
         include: options.srcs,
-        loaders: [
-          'file-loader',
-        // 'image-webpack-loader?{progressive:true, optimizationLevel: 7, interlaced: false, pngquant:{quality: "65-90", speed: 4}}',
-        ],
+        loader: 'file-loader',
       }, {
         test: /\.html$/,
         include: options.srcs,
@@ -47,11 +44,13 @@ module.exports = (options) => ({
       }, {
         test: /\.(mp4|webm)$/,
         include: options.srcs,
-        loader: 'url-loader?limit=10000',
+        loader: 'url-loader',
+        options: {
+          limit: 10000,
+        },
       }],
   },
   plugins: options.plugins.concat([
-    new webpack.NamedModulesPlugin(),
     new webpack.LoaderOptionsPlugin({
       debug: false,
       options: {
@@ -86,6 +85,11 @@ module.exports = (options) => ({
     alias: {
       moment$: 'moment/moment.js',
     },
+    fallback: {
+      "util": require.resolve("util/"),
+      "crypto": require.resolve("crypto-browserify/"),
+      "stream": require.resolve("stream-browserify")
+    }
   }, options.resolve),
 
   optimization: options.optimization,
