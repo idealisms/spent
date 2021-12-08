@@ -531,49 +531,48 @@ const Report = withStyles(styles)(
     }
 
     // eslint-disable-next-line @typescript-eslint/member-ordering
-    private buildChartDataTable: buildChartDataTableFunction = memoize<
-      buildChartDataTableFunction
-    >((chartData, compareChartData) => {
-      let data: DataRow[] = [];
-      data.push(['Category', this.state.dateRange.chartColumnName]);
-      for (let chartNode of chartData) {
-        if (chartNode.amount_cents <= 0) {
-          continue;
+    private buildChartDataTable: buildChartDataTableFunction =
+      memoize<buildChartDataTableFunction>((chartData, compareChartData) => {
+        let data: DataRow[] = [];
+        data.push(['Category', this.state.dateRange.chartColumnName]);
+        for (let chartNode of chartData) {
+          if (chartNode.amount_cents <= 0) {
+            continue;
+          }
+          data.push([chartNode.title, chartNode.amount_cents / 100.0]);
         }
-        data.push([chartNode.title, chartNode.amount_cents / 100.0]);
-      }
 
-      if (this.state.compareDateRange) {
-        let columnTitle = this.state.compareDateRange.chartColumnName;
-        let compareMap: Map<string, number> = new Map();
-        compareChartData.forEach(chartNode => {
-          if (chartNode.amount_cents > 0) {
-            compareMap.set(chartNode.title, chartNode.amount_cents);
-          }
-        });
-        data.forEach((dataRow, index) => {
-          if (index == 0) {
-            dataRow.push(columnTitle);
-          } else {
-            let category = dataRow[0] as string;
-            let amountCents = compareMap.get(category) || 0;
-            dataRow.push(amountCents / 100);
-            compareMap.delete(category);
-          }
-        });
-        // If there are categories in the compare data that wasn't in the base
-        // data, add entries for those at the end.
-        if (compareMap.size > 0) {
-          for (let chartNode of compareChartData) {
-            if (compareMap.has(chartNode.title)) {
-              data.push([chartNode.title, 0, chartNode.amount_cents / 100]);
+        if (this.state.compareDateRange) {
+          let columnTitle = this.state.compareDateRange.chartColumnName;
+          let compareMap: Map<string, number> = new Map();
+          compareChartData.forEach(chartNode => {
+            if (chartNode.amount_cents > 0) {
+              compareMap.set(chartNode.title, chartNode.amount_cents);
+            }
+          });
+          data.forEach((dataRow, index) => {
+            if (index == 0) {
+              dataRow.push(columnTitle);
+            } else {
+              let category = dataRow[0] as string;
+              let amountCents = compareMap.get(category) || 0;
+              dataRow.push(amountCents / 100);
+              compareMap.delete(category);
+            }
+          });
+          // If there are categories in the compare data that wasn't in the base
+          // data, add entries for those at the end.
+          if (compareMap.size > 0) {
+            for (let chartNode of compareChartData) {
+              if (compareMap.has(chartNode.title)) {
+                data.push([chartNode.title, 0, chartNode.amount_cents / 100]);
+              }
             }
           }
         }
-      }
 
-      return data;
-    });
+        return data;
+      });
   }
 );
 
