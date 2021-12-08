@@ -48,6 +48,14 @@ function upgradeIfNecessary(settings: ISettings) {
     }
     settings.version = SETTINGS_VERSION;
   }
+  // FIXME: We incorrectly assumed that a map serialized to
+  // json would be read as a map rather than an object. Manually
+  // convert from an object to a map.
+  if ('report' in settings.reportCategories) {
+    const reportCategories = new Map();
+    reportCategories.set('report', settings.reportCategories['report']);
+    settings.reportCategories = reportCategories;
+  }
 }
 
 // Async actions
