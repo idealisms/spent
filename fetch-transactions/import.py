@@ -1,10 +1,13 @@
-import ofxparse
+import csv
 import glob
-import dropbox
+import html
+import json
 import os
 import re
-import json
-import html
+import uuid
+
+import dropbox
+import ofxparse
 
 DOWNLOAD_DIR = 'downloads'
 DROPBOX_PATH = '/spent tracker/transactions.json'
@@ -35,6 +38,32 @@ def read_transactions(filename):
             })
     return transactions
 
+
+def read_csv_transactions(filename):
+    transactions = []
+
+    def format_date(mmddyyyy):
+        mm, dd, yy = mmddyyyy.split('/')
+        return f'{yy}-{mm}-{dd}'
+
+    with open(filename) as csvfile:
+        reader = csv.reader(csvfile)
+        for row in reader:
+            if not row:
+                continue
+            transactions.append({
+                'id': uuid.uuid4().hex,
+                'description': row[4],
+                'original_line': ','.join(row),
+                'date': format_date(row[2]),
+                'tags': [],
+                'amount_cents': int(float(row[6][1:]) * 100),
+                'transactions': [],
+                'source': 'usaa',
+                'notes': '',
+            })
+
+    return transactions
 
 def read_access_token(filename):
     '''Returns the dropbox access token from filename.'''
@@ -106,8 +135,13 @@ def main():
     ofx_filenames = glob.glob(os.path.join(DOWNLOAD_DIR, '*.ofx'))
     for filename in ofx_filenames:
         new_transactions.extend(read_transactions(filename))
-    print('{} transaction(s) in ofx files'.format(len(new_transactions)))
+    ofx_transactions = len(new_transactions)
+    print('{} transaction(s) in ofx files'.format(ofx_transactions))
 
+    csv_filenames = glob.glob(os.path.join(DOWNLOAD_DIR, '*.csv'))
+    for filename in csv_filenames:
+        new_transactions.extend(read_csv_transactions(filename))
+    print('{} transaction(s) in csv files'.format(len(new_transactions) - ofx_transactions))
     access_token = read_access_token('config.js')
 
     dbx = dropbox.Dropbox(access_token)
@@ -135,6 +169,9 @@ def main():
     for filename in ofx_filenames:
         os.remove(filename)
     print('.ofx files deleted')
+    for filename in csv_filenames:
+        os.remove(filename)
+    print('.csv files deleted')
 
 if __name__ == '__main__':
     main()
