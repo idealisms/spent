@@ -90,6 +90,8 @@ export function categoryToEmoji(category: Category): string {
       return '🚗';
     case Category.Cash:
       return '🏧';
+    case Category.Child:
+      return '👨‍👩‍👧';
     case Category.Clothes:
       return '👚';
     case Category.Entertainment:
