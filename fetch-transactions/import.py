@@ -40,26 +40,56 @@ def read_transactions(filename):
 
 
 def read_csv_transactions(filename):
+    if 'Chase' in filename:
+        return read_chase_csv_transactions(filename)
+
+    # USAA csv file reader
     transactions = []
 
-    def format_date(mmddyyyy):
-        mm, dd, yy = mmddyyyy.split('/')
+    def format_date(yyyymmdd):
+        yy, mm, dd = yyyymmdd.split('-')
         return f'{yy}-{mm}-{dd}'
 
     with open(filename) as csvfile:
         reader = csv.reader(csvfile)
         for row in reader:
-            if not row:
+            if not row or row[0] == 'Date':
                 continue
             transactions.append({
                 'id': uuid.uuid4().hex,
-                'description': row[4],
+                'description': row[1],
                 'original_line': ','.join(row),
-                'date': format_date(row[2]),
+                'date': format_date(row[0]),
                 'tags': [],
-                'amount_cents': int(float(row[6][1:]) * 100),
+                'amount_cents': int(float(row[4]) * -100),
                 'transactions': [],
                 'source': 'usaa',
+                'notes': '',
+            })
+
+    return transactions
+
+def read_chase_csv_transactions(filename):
+    transactions = []
+
+    def format_date(mmddyyyy):
+        mm, dd, yyyy = mmddyyyy.split('/')
+        return f'{yyyy}-{mm}-{dd}'
+
+    with open(filename) as csvfile:
+        reader = csv.reader(csvfile)
+        for row in reader:
+            if not row or row[0] == 'Transaction Date':
+                continue
+            transactions.append({
+                'id': uuid.uuid4().hex,
+                'description': row[2],
+                'original_line': ','.join(row),
+                'date': format_date(row[1]),
+                'tags': [],
+                'amount_cents': int(float(row[5]) * -100),
+                'transactions': [],
+                'source': 'chase',
                 'notes': '',
             })
 
@@ -80,6 +110,8 @@ def format_description(transaction):
     date of the transaction.'''
     if 'source' in transaction and transaction['source'].startswith('chase'):
         posted_date = transaction['original_line'].split(',')[2]
+        if len(posted_date.split('/')) == 1:
+            posted_date = transaction['original_line'].split(',')[1]
         m, d, y = posted_date.split('/')
         return '{}-{}-{} {}'.format(
                 y, m, d, html.unescape(transaction['description']))
