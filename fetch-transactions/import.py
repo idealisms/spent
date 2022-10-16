@@ -1,4 +1,6 @@
+import base64
 import csv
+import email
 import glob
 import html
 import json
@@ -95,6 +97,84 @@ def read_chase_csv_transactions(filename):
 
     return transactions
 
+CHASE_PATTERNS = {
+    'source': 'email_chase',
+    # >Merchant</td><td>SP IGLOOPRODUCTSCORP</td>
+    'description': r'>Merchant<[^<]+<td [^>]+>(?P<description>[^<]+)</td>',
+    # >Amount</td><td>$54.30</td>
+    'amount': r'>Amount<[^<]+<td [^>]+>[$](?P<amount>[0-9.]+)</td>',
+}
+
+JPMORGAN_PATTERNS = {
+    'source': 'email_chase',
+    # >Merchant</td><td>SP IGLOOPRODUCTSCORP</td>
+    'description': r'>Merchant: <[^<]+<td [^>]+> (?P<description>[^<]+)</td>',
+    # >Amount</td><td>$54.30</td>
+    'amount': r'>Authorized  amount: <[^<]+<td [^>]+> [$](?P<amount>[0-9.]+)  </td>',
+}
+
+def email_to_transaction(email_id, msg, patterns):
+    body = (msg.get_payload()
+        .replace('=\r\n', '')
+        .replace('=3D', '=')
+        .replace('=C2=A0', ' '))
+
+    # Date: >Oct 14, 2022 at 11:21 AM ET<
+    m = re.search(r'> ?(?P<mmm>\w+) (?P<dd>\d+), (?P<yyyy>\d+) ', body, re.MULTILINE | re.DOTALL)
+    mm = {
+        'Jan': '01',
+        'Feb': '02',
+        'Mar': '03',
+        'Apr': '04',
+        'May': '05',
+        'Jun': '06',
+        'Jul': '07',
+        'Aug': '08',
+        'Sep': '09',
+        'Oct': '10',
+        'Nov': '11',
+        'Dec': '12',
+        }[m.group('mmm')]
+    dd = m.group('dd')
+    if len(dd) == 1:
+        dd = '0' + dd
+    yyyy = m.group('yyyy')
+    date = f'{yyyy}-{mm}-{dd}'
+
+    # Merchant: 
+    m = re.search(patterns['description'], body, re.MULTILINE | re.DOTALL)
+    description = m.group('description')
+
+    # Amount: 
+    m = re.search(patterns['amount'], body, re.MULTILINE | re.DOTALL)
+    amount = int(float(m.group('amount')) * 100.0)
+    return {
+                'id': email_id,
+                'description': description,
+                'original_line': msg.get('Subject'),
+                'date': date,
+                'tags': [],
+                'amount_cents': amount,
+                'transactions': [],
+                'source': patterns['source'],
+                'notes': '',
+            }
+
+
+def read_email_transaction(filename):
+    email_id = filename[:-4].split('_')[-1]
+    raw = open(filename).read()
+    decoded = base64.urlsafe_b64decode(raw).decode('utf8')
+    msg = email.message_from_string(decoded)
+    if '@chase.com' in msg.get('From'):
+        transaction = email_to_transaction(email_id, msg, CHASE_PATTERNS)
+    elif '@jpmorgan.com' in msg.get('From'):
+        transaction = email_to_transaction(email_id, msg, JPMORGAN_PATTERNS)
+    else:
+        raise 'Unknown Email format'
+    return [transaction]
+
+
 def read_access_token(filename):
     '''Returns the dropbox access token from filename.'''
     with open('config.js') as fileobj:
@@ -174,8 +254,13 @@ def main():
     for filename in csv_filenames:
         new_transactions.extend(read_csv_transactions(filename))
     print('{} transaction(s) in csv files'.format(len(new_transactions) - ofx_transactions))
-    access_token = read_access_token('config.js')
 
+    raw_email_filenames = glob.glob(os.path.join(DOWNLOAD_DIR, 'email_raw_*.txt'))
+    for filename in raw_email_filenames:
+        new_transactions.extend(read_email_transaction(filename))
+    print('{} transaction(s) in email files'.format(len(raw_email_filenames)))
+
+    access_token = read_access_token('config.js')
     dbx = dropbox.Dropbox(access_token)
     transactions = []
     meta, response = dbx.files_download(DROPBOX_PATH)
@@ -200,10 +285,14 @@ def main():
 
     for filename in ofx_filenames:
         os.remove(filename)
-    print('.ofx files deleted')
+    print('*.ofx files deleted')
     for filename in csv_filenames:
         os.remove(filename)
-    print('.csv files deleted')
+    print('*.csv files deleted')
+    for filename in raw_email_filenames:
+        os.remove(filename)
+    print('email_raw_*.txt files deleted')
+
 
 if __name__ == '__main__':
     main()

@@ -2,7 +2,7 @@
 const fs = require('fs');
 const cryptoNode = require('crypto');
 
-const fetch = require('node-fetch');
+let fetch = require('node-fetch');
 const Dropbox = require('dropbox').Dropbox;
 
 const config = require('./config.js');
@@ -258,7 +258,7 @@ function compareTransactions(lhs: ITransaction, rhs: ITransaction): number {
 }
 
 function saveToDropbox(transactions) {
-  return new Promise((resolve, reject) => {
+  return new Promise<void>((resolve, reject) => {
     let filesCommitInfo = {
       contents: JSON.stringify(transactions),
       path: '/spent tracker/transactions.json',

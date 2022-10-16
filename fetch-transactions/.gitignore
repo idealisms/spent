@@ -15,3 +15,7 @@ pyvenv.cfg
 
 config.js
 import.js
+# Google API credentials
+credentials.json
+# Google OAuth session token
+token.json

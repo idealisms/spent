@@ -6,5 +6,5 @@ cd `dirname $0`
 # timeout 60 nodejs import.js
 
 source bin/activate
-python fetch.py
+python fetch_from_gmail.py
 python import.py
