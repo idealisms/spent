@@ -105,7 +105,7 @@
     "file-loader": "^1.1.11",
     "html-loader": "^0.5.5",
     "memoize-one": "^5.0.0",
-    "moment": "^2.29.2",
+    "moment": "^2.29.4",
     "prop-types": "^15.6.0",
     "react": "^16.8.1",
     "react-dom": "^16.8.1",
