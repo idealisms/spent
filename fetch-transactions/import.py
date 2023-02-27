@@ -102,7 +102,7 @@ CHASE_PATTERNS = {
     # >Merchant</td><td>SP IGLOOPRODUCTSCORP</td>
     'description': r'>Merchant<[^<]+<td [^>]+>(?P<description>[^<]+)</td>',
     # >Amount</td><td>$54.30</td>
-    'amount': r'>Amount<[^<]+<td [^>]+>[$](?P<amount>[0-9.]+)</td>',
+    'amount': r'>Amount<[^<]+<td [^>]+>[$](?P<amount>[0-9.,]+)</td>',
 }
 
 JPMORGAN_PATTERNS = {
@@ -110,7 +110,7 @@ JPMORGAN_PATTERNS = {
     # >Merchant</td><td>SP IGLOOPRODUCTSCORP</td>
     'description': r'>Merchant: <[^<]+<td [^>]+> (?P<description>[^<]+)</td>',
     # >Amount</td><td>$54.30</td>
-    'amount': r'>Authorized  amount: <[^<]+<td [^>]+> [$](?P<amount>[0-9.]+)  </td>',
+    'amount': r'>Authorized  amount: <[^<]+<td [^>]+> [$](?P<amount>[0-9.,]+)  </td>',
 }
 
 def email_to_transaction(email_id, msg, patterns):
@@ -147,7 +147,7 @@ def email_to_transaction(email_id, msg, patterns):
 
     # Amount: 
     m = re.search(patterns['amount'], body, re.MULTILINE | re.DOTALL)
-    amount = int(float(m.group('amount')) * 100.0)
+    amount = int(float(m.group('amount').replace(',', '')) * 100.0)
     return {
                 'id': email_id,
                 'description': description,
