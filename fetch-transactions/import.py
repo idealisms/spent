@@ -103,6 +103,7 @@ CHASE_PATTERNS = {
     'description': r'>Merchant<[^<]+<td [^>]+>(?P<description>[^<]+)</td>',
     # >Amount</td><td>$54.30</td>
     'amount': r'>Amount<[^<]+<td [^>]+>[$](?P<amount>[0-9.,]+)</td>',
+    'credit amount': r'>Credit Amount<[^<]+<td [^>]+>[$](?P<amount>[0-9.,]+)</td>',
 }
 
 JPMORGAN_PATTERNS = {
@@ -147,7 +148,11 @@ def email_to_transaction(email_id, msg, patterns):
 
     # Amount: 
     m = re.search(patterns['amount'], body, re.MULTILINE | re.DOTALL)
-    amount = int(float(m.group('amount').replace(',', '')) * 100.0)
+    multiplier = 1
+    if not m:
+        m = re.search(patterns['credit amount'], body, re.MULTILINE | re.DOTALL)
+        multiplier = -1
+    amount = int(float(m.group('amount').replace(',', '')) * 100.0 * multiplier)
     return {
                 'id': email_id,
                 'description': description,
