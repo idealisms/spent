@@ -111,7 +111,9 @@ JPMORGAN_PATTERNS = {
     # >Merchant</td><td>SP IGLOOPRODUCTSCORP</td>
     'description': r'>Merchant: <[^<]+<td [^>]+> (?P<description>[^<]+)</td>',
     # >Amount</td><td>$54.30</td>
-    'amount': r'>Authorized  amount: <[^<]+<td [^>]+> [$](?P<amount>[0-9.,]+)  </td>',
+    'amount': (r'>Authorized  (incremental )?amount:'
+               r'(<sup[^<]+<str[^<]+</strong></sup>)?'
+               r' <[^<]+<td [^>]+> [$](?P<amount>[0-9.,]+)  </td>'),
 }
 
 def email_to_transaction(email_id, msg, patterns):
@@ -142,11 +144,11 @@ def email_to_transaction(email_id, msg, patterns):
     yyyy = m.group('yyyy')
     date = f'{yyyy}-{mm}-{dd}'
 
-    # Merchant: 
+    # Merchant:
     m = re.search(patterns['description'], body, re.MULTILINE | re.DOTALL)
     description = m.group('description')
 
-    # Amount: 
+    # Amount:
     m = re.search(patterns['amount'], body, re.MULTILINE | re.DOTALL)
     multiplier = 1
     if not m:
