@@ -8,5 +8,7 @@ tmp/
 dist/
 logs
 *.log
+.yarn/
+.yarnrc.yml
 
 app/config.ts
