@@ -126,7 +126,7 @@ export const saveSettingsToDropbox = (): ThunkAction<
     let filesCommitInfo = {
       contents: JSON.stringify(state.settings.settings, null, 2),
       path: '/spent tracker/settings.json',
-      mode: { '.tag': 'overwrite' } as DropboxTypes.files.WriteModeOverwrite,
+      mode: { '.tag': 'overwrite' } as Dropbox.files.WriteModeOverwrite,
       autorename: false,
       mute: false,
     };

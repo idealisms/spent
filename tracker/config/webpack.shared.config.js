@@ -62,6 +62,9 @@ module.exports = (options) => ({
         },
       },
     }),
+    new webpack.ProvidePlugin({
+      Buffer: ['buffer', 'Buffer'],
+    }),
   ]),
   //
   // node: {
@@ -88,7 +91,8 @@ module.exports = (options) => ({
     fallback: {
       "util": require.resolve("util/"),
       "crypto": require.resolve("crypto-browserify/"),
-      "stream": require.resolve("stream-browserify")
+      "stream": require.resolve("stream-browserify"),
+      "buffer": require.resolve("buffer/"),
     }
   }, options.resolve),
 
