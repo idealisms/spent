@@ -50,11 +50,10 @@ export const fetchTransactionsFromDropboxIfNeeded = (): ThunkAction<
     }
     let dbx = new Dropbox.Dropbox({
       accessToken: state.auth.dropboxAccessToken,
-      fetch,
     });
     const path = '/spent tracker/transactions.json';
     try {
-      const file = await dbx.filesDownload({ path });
+      const response = await dbx.filesDownload({ path });
       let fr = new FileReader();
       fr.addEventListener('load', _event => {
         let transactions: ITransaction[] = JSON.parse(fr.result as string);
@@ -69,7 +68,7 @@ export const fetchTransactionsFromDropboxIfNeeded = (): ThunkAction<
       // NOTE: The Dropbox SDK specification does not include a fileBlob
       // field on the FileLinkMetadataReference type, so it is missing from
       // the TypeScript type. This field is injected by the Dropbox SDK.
-      fr.readAsText((file as any).fileBlob);
+      fr.readAsText((response.result as any).fileBlob);
     } catch (error) {
       console.info(`transactions.json download failed, ignoring. ${error}`);
       dispatch(receivedTransactionsFromDropbox());
@@ -90,7 +89,6 @@ export const saveTransactionsToDropbox = (): ThunkAction<
 
     let dbx = new Dropbox.Dropbox({
       accessToken: state.auth.dropboxAccessToken,
-      fetch: fetch,
     });
     let filesCommitInfo = {
       contents: JSON.stringify(state.transactions.transactions),

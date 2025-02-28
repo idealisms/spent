@@ -69,11 +69,10 @@ export const fetchSettingsFromDropbox = (): ThunkAction<
     const state = getState();
     let dbx = new Dropbox.Dropbox({
       accessToken: state.auth.dropboxAccessToken,
-      fetch,
     });
     const path = '/spent tracker/settings.json';
     try {
-      const file = await dbx.filesDownload({ path });
+      const response = await dbx.filesDownload({ path });
       let fr = new FileReader();
       fr.addEventListener('load', _event => {
         let settings: ISettings = JSON.parse(fr.result as string);
@@ -86,7 +85,7 @@ export const fetchSettingsFromDropbox = (): ThunkAction<
         dispatch(receivedSettingsFromDropbox());
         dispatch(dropboxDownloadCompleted(path, AuthStatus.NEEDS_LOGIN));
       });
-      fr.readAsText((file as any).fileBlob);
+      fr.readAsText((response.result as any).fileBlob);
     } catch (error) {
       console.info(`settings.json download failed, ignoring. ${error}`);
       dispatch(receivedSettingsFromDropbox());
@@ -121,7 +120,6 @@ export const saveSettingsToDropbox = (): ThunkAction<
     const state = getState();
     let dbx = new Dropbox.Dropbox({
       accessToken: state.auth.dropboxAccessToken,
-      fetch,
     });
     let filesCommitInfo = {
       contents: JSON.stringify(state.settings.settings, null, 2),
