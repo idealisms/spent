@@ -99,10 +99,10 @@
     "buffer": "^6.0.3",
     "classnames": "^2.2.6",
     "connected-react-router": "^6.6.1",
-    "css-loader": "^5.2.4",
+    "css-loader": "^7.1.2",
     "emotion": "^10.0.9",
-    "file-loader": "^1.1.11",
-    "html-loader": "^0.5.5",
+    "file-loader": "^6.2.0",
+    "html-loader": "^5.1.0",
     "memoize-one": "^5.0.0",
     "moment": "^2.29.4",
     "prop-types": "^15.6.0",
@@ -115,8 +115,8 @@
     "redux": "^4.0.4",
     "redux-thunk": "^2.3.0",
     "sha.js": "^2.4.11",
-    "style-loader": "^0.21.0",
-    "ts-loader": "^9.2.6"
+    "style-loader": "^4.0.0",
+    "ts-loader": "^9.5.2"
   },
   "resolutions": {
     "dot-prop": "^5.1.1",
