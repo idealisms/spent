@@ -12588,6 +12588,19 @@ __metadata:
   languageName: node
   linkType: hard
 
+"sha.js@npm:^2.4.12":
+  version: 2.4.12
+  resolution: "sha.js@npm:2.4.12"
+  dependencies:
+    inherits: "npm:^2.0.4"
+    safe-buffer: "npm:^5.2.1"
+    to-buffer: "npm:^1.2.0"
+  bin:
+    sha.js: bin.js
+  checksum: 10c0/9d36bdd76202c8116abbe152a00055ccd8a0099cb28fc17c01fa7bb2c8cffb9ca60e2ab0fe5f274ed6c45dc2633d8c39cf7ab050306c231904512ba9da4d8ab1
+  languageName: node
+  linkType: hard
+
 "shallow-clone@npm:^3.0.0":
   version: 3.0.1
   resolution: "shallow-clone@npm:3.0.1"
@@ -13762,7 +13775,7 @@ __metadata:
     redux-mock-store: "npm:^1.2.3"
     redux-thunk: "npm:^2.3.0"
     rimraf: "npm:^2.6.1"
-    sha.js: "npm:^2.4.11"
+    sha.js: "npm:^2.4.12"
     stream-browserify: "npm:^3.0.0"
     style-loader: "npm:^4.0.0"
     ts-jest: "npm:^26.4.1"
