@@ -116,32 +116,57 @@ JPMORGAN_PATTERNS = {
                r' <[^<]+<td [^>]+> [$](?P<amount>[0-9.,]+)  </td>'),
 }
 
+USAA_DEPOSIT_PATTERNS = {
+    'source': 'email_usaa',
+    # From: VANGUARD SELL
+    'description': r'From: (?P<description>[A-Z ]+)',
+    'amount': r'SOMETHING_NOT_IN_THE_EMAIL',
+    # You received a deposit for $444.98 to your account ending in 9552.=0D
+    'credit amount': r'You received a deposit for [$](?P<amount>[0-9.,]+) to your',
+}
+
+USAA_DEBIT_PATTERNS = {
+    'source': 'email_usaa',
+    # To: ROCKY MOUNTAIN P SALE
+    'description': r'To: (?P<description>[A-Z ]+)',
+    'amount': r'[$](?P<amount>[0-9.,]+) came out of your account',
+}
+
 def email_to_transaction(email_id, msg, patterns):
     body = (msg.get_payload()
         .replace('=\r\n', '')
         .replace('=3D', '=')
-        .replace('=C2=A0', ' '))
+        .replace('=C2=A0', ' ')
+        .replace('=0D=09', ' ')
+    )
 
     # Date: >Oct 14, 2022 at 11:21 AM ET<
     m = re.search(r'> ?(?P<mmm>\w+) (?P<dd>\d+), (?P<yyyy>\d+) ', body, re.MULTILINE | re.DOTALL)
-    mm = {
-        'Jan': '01',
-        'Feb': '02',
-        'Mar': '03',
-        'Apr': '04',
-        'May': '05',
-        'Jun': '06',
-        'Jul': '07',
-        'Aug': '08',
-        'Sep': '09',
-        'Oct': '10',
-        'Nov': '11',
-        'Dec': '12',
-        }[m.group('mmm')]
-    dd = m.group('dd')
-    if len(dd) == 1:
-        dd = '0' + dd
-    yyyy = m.group('yyyy')
+    if m:
+        mm = {
+            'Jan': '01',
+            'Feb': '02',
+            'Mar': '03',
+            'Apr': '04',
+            'May': '05',
+            'Jun': '06',
+            'Jul': '07',
+            'Aug': '08',
+            'Sep': '09',
+            'Oct': '10',
+            'Nov': '11',
+            'Dec': '12',
+            }[m.group('mmm')]
+        dd = m.group('dd')
+        if len(dd) == 1:
+            dd = '0' + dd
+        yyyy = m.group('yyyy')
+    else:
+        # Date: 01/02/26
+        m = re.search(r'Date: (?P<mm>\d\d)/(?P<dd>\d\d)/(?P<yy>\d\d)', body, re.MULTILINE | re.DOTALL)
+        mm = m.group('mm')
+        dd = m.group('dd')
+        yyyy = '20' + m.group('yy')
     date = f'{yyyy}-{mm}-{dd}'
 
     # Merchant:
@@ -158,7 +183,7 @@ def email_to_transaction(email_id, msg, patterns):
     return {
                 'id': email_id,
                 'description': description,
-                'original_line': msg.get('Subject'),
+                'original_line': msg.get('Subject') or email_id,
                 'date': date,
                 'tags': [],
                 'amount_cents': amount,
@@ -177,6 +202,10 @@ def read_email_transaction(filename):
         transaction = email_to_transaction(email_id, msg, CHASE_PATTERNS)
     elif '@jpmorgan.com' in msg.get('From'):
         transaction = email_to_transaction(email_id, msg, JPMORGAN_PATTERNS)
+    elif 'USAA: Your Bank Account Received a Deposit' in msg.get('Subject'):
+        transaction = email_to_transaction(email_id, msg.get_payload()[0], USAA_DEPOSIT_PATTERNS)
+    elif 'Debit Alert for Your USAA Bank Account' in msg.get('Subject'):
+        transaction = email_to_transaction(email_id, msg.get_payload()[0], USAA_DEBIT_PATTERNS)
     else:
         raise 'Unknown Email format'
     return [transaction]
