@@ -22,6 +22,7 @@ interface ITransactionsTableProps extends WithStyles<typeof styles> {
   scrollToRow?: number;
   /** If true, hides the component. */
   hidden?: boolean;
+  children?: React.ReactNode;
 }
 interface ITransactionsTableState {
   containerHeight: number;

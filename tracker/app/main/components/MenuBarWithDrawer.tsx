@@ -222,7 +222,7 @@ const mapStateToProps = (state: IAppState): IMenuBarWithDrawerAppStateProps => {
 };
 
 const mapDispatchToProps = (
-  dispatch: Dispatch
+  dispatch: Dispatch<any>
 ): IMenuBarWithDrawerDispatchProps => ({
   navigateTo: (location: string) => {
     dispatch(push(location));

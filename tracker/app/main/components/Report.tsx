@@ -1,4 +1,7 @@
-import { createStyles, Drawer, Hidden, WithStyles } from '@material-ui/core';
+import { createStyles, Drawer, Hidden as MuiHidden, WithStyles } from '@material-ui/core';
+
+// MUI 4 Hidden doesn't have proper children types for React 18
+const Hidden = MuiHidden as React.ComponentType<any>;
 import { Theme, withStyles } from '@material-ui/core/styles';
 import classNames from 'classnames';
 import moment from 'moment';

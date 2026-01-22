@@ -19,7 +19,9 @@ const styles = (_theme: Theme) =>
     },
   });
 
-interface IBaseNoNavOwnProps extends WithStyles<typeof styles> {}
+interface IBaseNoNavOwnProps extends WithStyles<typeof styles> {
+  children?: React.ReactNode;
+}
 
 const BaseNoNav = withStyles(styles)(
   class Component extends React.Component<IBaseNoNavOwnProps, any> {

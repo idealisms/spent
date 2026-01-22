@@ -16,7 +16,9 @@ const rowStyles = (theme: Theme) => {
   return createStyles(mergedStyles);
 };
 
-interface ITransactionsTableSumRowProps extends WithStyles<typeof rowStyles> {}
+interface ITransactionsTableSumRowProps extends WithStyles<typeof rowStyles> {
+  children?: React.ReactNode;
+}
 interface ITransactionsTableSumRowState {}
 const TransactionsTableHeadingRow = withStyles(rowStyles)(
   class Component extends React.Component<

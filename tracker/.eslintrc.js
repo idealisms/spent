@@ -23,8 +23,6 @@ module.exports = {
     'plugin:@typescript-eslint/recommended',
     'plugin:react/recommended',
     'prettier',
-    'prettier/@typescript-eslint',
-    'prettier/react',
   ],
   parser: '@typescript-eslint/parser',
   parserOptions: {
@@ -32,6 +30,7 @@ module.exports = {
   },
   plugins: ['@typescript-eslint'],
   rules: {
+    'react/react-in-jsx-scope': 'off',
     '@typescript-eslint/naming-convention': [
       'error',
       {

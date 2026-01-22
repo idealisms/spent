@@ -1,7 +1,8 @@
 const path = require('path');
 const webpack = require('webpack');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
-const { GenerateSW } = require('workbox-webpack-plugin');
+// TODO: Re-enable service worker after fixing workbox compatibility
+// const { GenerateSW } = require('workbox-webpack-plugin');
 
 module.exports = require('./webpack.shared.config')({
   entry: [
@@ -31,22 +32,21 @@ module.exports = require('./webpack.shared.config')({
       inject: true,
       favicon: './app/favicon.png',
     }),
-    new GenerateSW({
-      // These options encourage safe defaults.
-      // and let you customize the behavior to your liking.
-      clientsClaim: true,
-      skipWaiting: true,
-      // Define runtime caching rules.
-      runtimeCaching: [{
-        urlPattern: /\.(?:png|jpg|jpeg|svg|gif)$/,
-        handler: 'CacheFirst',
-        options: {
-          cacheName: 'images',
-          expiration: {
-            maxEntries: 10,
-          },
-        },
-      }],
-    }),
+    // TODO: Re-enable service worker after fixing workbox compatibility
+    // new GenerateSW({
+    //   clientsClaim: true,
+    //   skipWaiting: true,
+    //   mode: 'production',
+    //   runtimeCaching: [{
+    //     urlPattern: /\.(?:png|jpg|jpeg|svg|gif)$/,
+    //     handler: 'CacheFirst',
+    //     options: {
+    //       cacheName: 'images',
+    //       expiration: {
+    //         maxEntries: 10,
+    //       },
+    //     },
+    //   }],
+    // }),
   ],
 });

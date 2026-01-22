@@ -1,6 +1,6 @@
 import { routerMiddleware } from 'connected-react-router';
 import { History } from 'history';
-import { applyMiddleware, compose, createStore, Store } from 'redux';
+import { applyMiddleware, compose, legacy_createStore as createStore, Store } from 'redux';
 import { createLogger } from 'redux-logger';
 import thunkMiddleware from 'redux-thunk';
 import { createRootReducer, IAppState } from './main';
@@ -19,10 +19,10 @@ export function configureStore(history: History): Store<IAppState> {
   const composeEnhancers =
     (window as any).__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;
   const enhancers = composeEnhancers(
-    applyMiddleware(routingMiddleware, thunkMiddleware, loggerMiddleware)
+    applyMiddleware(routingMiddleware, thunkMiddleware, loggerMiddleware as any)
   );
 
-  const store = createStore(createRootReducer(history), enhancers);
+  const store = createStore(createRootReducer(history), enhancers) as Store<IAppState>;
 
   if (module.hot) {
     module.hot.accept('./main/reducers', () => {

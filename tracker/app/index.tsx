@@ -3,8 +3,7 @@ import { MuiThemeProvider } from '@material-ui/core/styles';
 import { MuiPickersUtilsProvider } from '@material-ui/pickers';
 import { ConnectedRouter } from 'connected-react-router';
 import { createBrowserHistory } from 'history';
-import * as React from 'react';
-import * as ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { Provider } from 'react-redux';
 import { Store } from 'redux';
 import { App, IAppState } from './main';
@@ -22,7 +21,9 @@ const store: Store<IAppState> =
     ? (require('./store.dev') as any).configureStore(history) // eslint-disable-line @typescript-eslint/no-var-requires
     : (require('./store.prod') as any).configureStore(history); // eslint-disable-line @typescript-eslint/no-var-requires
 
-ReactDOM.render(
+const container = document.getElementById('app');
+const root = createRoot(container!);
+root.render(
   <Provider store={store}>
     <MuiThemeProvider theme={theme}>
       <ConnectedRouter history={history}>
@@ -31,6 +32,5 @@ ReactDOM.render(
         </MuiPickersUtilsProvider>
       </ConnectedRouter>
     </MuiThemeProvider>
-  </Provider>,
-  document.getElementById('app')
+  </Provider>
 );

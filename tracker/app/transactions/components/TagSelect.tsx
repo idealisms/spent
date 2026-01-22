@@ -1,16 +1,18 @@
 import { createStyles, WithStyles } from '@material-ui/core';
 import { Theme, withStyles } from '@material-ui/core/styles';
-import { css } from 'emotion';
 import * as React from 'react';
 import { connect } from 'react-redux';
-import Select from 'react-select';
-import { OptionProps } from 'react-select/lib/components/Option';
-import CreatableSelect from 'react-select/lib/Creatable';
-import { Props } from 'react-select/lib/Select';
-import { ValueType } from 'react-select/lib/types';
+import Select, {
+  OptionProps,
+  Props,
+  MultiValueGenericProps,
+} from 'react-select';
+import CreatableSelect from 'react-select/creatable';
 import { IAppState } from '../../main';
 import { ITransaction, TAG_TO_CATEGORY } from '../model';
 import { categoryToEmoji } from '../utils';
+
+type TagOption = { label: string; value: string };
 
 const styles = (_theme: Theme) =>
   createStyles({
@@ -77,11 +79,10 @@ const TagSelect = withStyles(styles)(
       let Option = this.getOptionClass(tagMap);
       let MultiValueLabel = this.getMultiValueLabelClass();
 
-      let componentProps: Props = {
+      let componentProps: Props<TagOption, true> = {
         // Pass through props.
         className: this.props.className,
         isDisabled: this.props.isDisabled,
-        createOptionPosition: this.props.createOptionPosition,
         placeholder: this.props.placeholder,
         autoFocus: this.props.autoFocus,
         menuPortalTarget: document.body,
@@ -102,6 +103,7 @@ const TagSelect = withStyles(styles)(
         return (
           <CreatableSelect
             {...componentProps}
+            createOptionPosition={this.props.createOptionPosition}
             formatCreateLabel={inputValue => <span>New tag: {inputValue}</span>}
           />
         );
@@ -111,14 +113,10 @@ const TagSelect = withStyles(styles)(
     }
 
     private handleChangeTags = (
-      tags: ValueType<{ label: string; value: string }>,
+      tags: readonly TagOption[] | null,
       _action: any
     ): void => {
-      this.setState({
-        tags,
-      });
-
-      if (Array.isArray(tags)) {
+      if (tags && tags.length > 0) {
         this.props.onChange(tags.map(valueType => valueType.value));
       } else {
         this.props.onChange([]);
@@ -127,9 +125,7 @@ const TagSelect = withStyles(styles)(
 
     private getOptionClass = (
       tagMap: Map<string, number>
-    ): React.FunctionComponent<
-      OptionProps<{ label: string; value: string }>
-    > => {
+    ): React.FunctionComponent<OptionProps<TagOption, true>> => {
       let hideCategories = this.props.hideCategories;
       let showCounts = this.props.showCounts;
       let renderChild = (tag: string): JSX.Element => {
@@ -154,11 +150,12 @@ const TagSelect = withStyles(styles)(
       };
 
       let classes = this.props.classes;
-      return props => {
+      const OptionComponent: React.FunctionComponent<
+        OptionProps<TagOption, true>
+      > = props => {
         const {
           className,
           cx,
-          getStyles,
           isDisabled,
           isFocused,
           isSelected,
@@ -171,7 +168,6 @@ const TagSelect = withStyles(styles)(
             className={
               `${classes.option} ` +
               (cx(
-                css(getStyles('option', props)),
                 {
                   option: true,
                   'option--is-disabled': isDisabled,
@@ -187,14 +183,18 @@ const TagSelect = withStyles(styles)(
           </div>
         );
       };
+      OptionComponent.displayName = 'TagSelectOption';
+      return OptionComponent;
     };
 
     private getMultiValueLabelClass = (): React.FunctionComponent<
-      OptionProps<{ label: string; value: string }>
+      MultiValueGenericProps<TagOption, true>
     > => {
       // let classes = this.props.classes;
       let hideCategories = this.props.hideCategories;
-      return props => {
+      const MultiValueLabelComponent: React.FunctionComponent<
+        MultiValueGenericProps<TagOption, true>
+      > = props => {
         let category = TAG_TO_CATEGORY.get(props.data.label);
         let emoji =
           !hideCategories && category ? categoryToEmoji(category) + ' ' : '';
@@ -205,6 +205,8 @@ const TagSelect = withStyles(styles)(
           </div>
         );
       };
+      MultiValueLabelComponent.displayName = 'TagSelectMultiValueLabel';
+      return MultiValueLabelComponent;
     };
   }
 );
