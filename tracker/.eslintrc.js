@@ -38,6 +38,13 @@ module.exports = {
         format: ['camelCase'],
       },
       {
+        selector: 'import',
+        format: [
+          'camelCase',
+          'PascalCase', // React components and namespaces use PascalCase.
+        ],
+      },
+      {
         selector: 'function',
         format: [
           'camelCase',
@@ -60,6 +67,15 @@ module.exports = {
         selector: 'parameter',
         format: ['camelCase'],
         leadingUnderscore: 'allow',
+      },
+      {
+        // Allow CSS selectors, media queries, and numeric keys in object literals
+        selector: 'property',
+        format: null,
+        filter: {
+          regex: '^(&|@|\\.|\\[|>|#|\\d|option--)',
+          match: true,
+        },
       },
       {
         selector: 'property',
@@ -125,6 +141,8 @@ module.exports = {
     '@typescript-eslint/no-var-requires': 'error',
     '@typescript-eslint/prefer-namespace-keyword': 'error',
     '@typescript-eslint/no-empty-interface': 'off',
+    '@typescript-eslint/no-empty-object-type': 'off',
+    'react/prop-types': 'off', // We use TypeScript for type checking
     '@typescript-eslint/explicit-module-boundary-types': 'off',
     camelcase: 'off',
     curly: 'error',

@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
 const path = require('path');
 const webpack = require('webpack');
+const ESLintPlugin = require('eslint-webpack-plugin');
 
 module.exports = (options) => ({
   entry: options.entry,
@@ -10,12 +11,6 @@ module.exports = (options) => ({
   module: {
     rules: [
       {
-        test: /\.(ts|tsx)?$/,
-        enforce: 'pre',
-        include: options.srcs,
-        exclude: /node_modules/,
-        loader: 'eslint-loader',
-      }, {
         test: /\.(ts|tsx)?$/,
         include: options.srcs,
         loader: 'ts-loader',
@@ -27,40 +22,31 @@ module.exports = (options) => ({
       }, {
         test: /\.(eot|svg|ttf|woff|woff2)$/,
         include: options.srcs,
-        loader: 'file-loader',
+        type: 'asset/resource',
       }, {
         test: /\.(jpg|png|gif)$/,
         include: options.srcs,
-        loader: 'file-loader',
+        type: 'asset/resource',
       }, {
         test: /\.html$/,
         include: options.srcs,
         loader: 'html-loader',
       }, {
-        test: /\.json$/,
-        include: options.srcs,
-        exclude: /node_modules/,
-        loader: 'json-loader',
-      }, {
         test: /\.(mp4|webm)$/,
         include: options.srcs,
-        loader: 'url-loader',
-        options: {
-          limit: 10000,
+        type: 'asset',
+        parser: {
+          dataUrlCondition: {
+            maxSize: 10000,
+          },
         },
       }],
   },
   plugins: options.plugins.concat([
-    new webpack.LoaderOptionsPlugin({
-      debug: false,
-      options: {
-        resolve: {
-          extensions: ['.ts', '.tsx', '.js', '.css'],
-          modulesDirectories: [
-            'node_modules',
-          ],
-        },
-      },
+    new ESLintPlugin({
+      extensions: ['ts', 'tsx'],
+      files: options.srcs,
+      configType: 'eslintrc',
     }),
     new webpack.ProvidePlugin({
       Buffer: ['buffer', 'Buffer'],
