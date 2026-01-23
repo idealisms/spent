@@ -1,60 +1,66 @@
-import { createStyles, WithStyles } from '@material-ui/core';
-import IconButton from '@material-ui/core/IconButton';
-import { Theme, withStyles } from '@material-ui/core/styles';
-import FilterListIcon from '@material-ui/icons/FilterList';
+import IconButton from '@mui/material/IconButton';
+import { Theme } from '@mui/material/styles';
+import FilterListIcon from '@mui/icons-material/FilterList';
+import { makeStyles } from 'tss-react/mui';
 import * as React from 'react';
 import MenuBarWithDrawer from './MenuBarWithDrawer';
 
-const styles = (_theme: Theme) =>
-  createStyles({
-    // This is used to ensure that the appbar shadow is above the content.
-    zIndexOne: {
-      zIndex: 1,
+const useStyles = makeStyles()((_theme: Theme) => ({
+  // This is used to ensure that the appbar shadow is above the content.
+  zIndexOne: {
+    zIndex: 1,
+  },
+  whiteIconButton: {
+    '& svg': {
+      fill: '#fff',
+      color: '#fff',
     },
-    whiteIconButton: {
-      '& svg': {
-        fill: '#fff',
-        color: '#fff',
-      },
-    },
-  });
+  },
+}));
 
-interface IReportMenuBarProps extends WithStyles<typeof styles> {
+interface IReportMenuBarProps {
   onFilterClick: () => void;
 }
 
 interface IReportMenuBarState {}
 
-const ReportMenuBar = withStyles(styles)(
-  class Component extends React.Component<
-    IReportMenuBarProps,
-    IReportMenuBarState
-  > {
-    constructor(props: IReportMenuBarProps) {
-      super(props);
-    }
+interface IReportMenuBarInnerProps extends IReportMenuBarProps {
+  classes: ReturnType<typeof useStyles>['classes'];
+}
 
-    public render(): JSX.Element {
-      let classes = this.props.classes;
-
-      let iconElementRight = (
-        <IconButton
-          className={classes.whiteIconButton}
-          onClick={this.props.onFilterClick}
-        >
-          <FilterListIcon />
-        </IconButton>
-      );
-
-      return (
-        <MenuBarWithDrawer
-          title="Report"
-          iconElementRight={iconElementRight}
-          classes={{ root: classes.zIndexOne }}
-        />
-      );
-    }
+class ReportMenuBarInner extends React.Component<
+  IReportMenuBarInnerProps,
+  IReportMenuBarState
+> {
+  constructor(props: IReportMenuBarInnerProps) {
+    super(props);
   }
-);
 
-export default ReportMenuBar;
+  public render(): JSX.Element {
+    let classes = this.props.classes;
+
+    let iconElementRight = (
+      <IconButton
+        className={classes.whiteIconButton}
+        onClick={this.props.onFilterClick}
+      >
+        <FilterListIcon />
+      </IconButton>
+    );
+
+    return (
+      <MenuBarWithDrawer
+        title="Report"
+        iconElementRight={iconElementRight}
+        classes={{ root: classes.zIndexOne }}
+      />
+    );
+  }
+}
+
+function ReportMenuBarWrapper(props: IReportMenuBarProps) {
+  const { classes } = useStyles();
+  return <ReportMenuBarInner {...props} classes={classes} />;
+}
+
+export default ReportMenuBarWrapper;

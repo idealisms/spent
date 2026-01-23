@@ -1,5 +1,3 @@
-import { createStyles, WithStyles } from '@material-ui/core';
-import { Theme, withStyles } from '@material-ui/core/styles';
 import * as React from 'react';
 import { connect } from 'react-redux';
 import { ThunkDispatch } from 'redux-thunk';
@@ -10,43 +8,37 @@ import { HomePage, DailyPage } from './RoutePaths';
 import BaseNoNav from './BaseNoNav';
 import { getAuthToken } from '../../auth/utils';
 
-const styles = (_theme: Theme) => createStyles({});
-
-interface IAuthOwnProps
-  extends WithStyles<typeof styles>,
-    RouteComponentProps<void> {}
+interface IAuthOwnProps extends RouteComponentProps<void> {}
 interface IAuthDispatchProps {
   dispatchSetDropboxAuthToken: (token: string) => void;
 }
 type IAuthProps = IAuthOwnProps & IAuthDispatchProps;
 
-const Auth = withStyles(styles)(
-  class Component extends React.Component<IAuthProps, any> {
-    public render(): React.ReactElement<Record<string, unknown>> {
-      // Following the steps outlined here (PKCE):
-      // https://www.dropbox.com/lp/developers/reference/oauth-guide
-      const returnCode = new URLSearchParams(this.props.location.search).get(
-        'code'
-      );
+class AuthComponent extends React.Component<IAuthProps, any> {
+  public render(): React.ReactElement<Record<string, unknown>> {
+    // Following the steps outlined here (PKCE):
+    // https://www.dropbox.com/lp/developers/reference/oauth-guide
+    const returnCode = new URLSearchParams(this.props.location.search).get(
+      'code'
+    );
 
-      getAuthToken(window.location.origin, returnCode)
-        .then(accessToken => {
-          this.props.dispatchSetDropboxAuthToken(accessToken);
-          this.props.history.push(DailyPage);
-        })
-        .catch(reason => {
-          console.log(reason);
-          this.props.history.push(HomePage);
-        });
+    getAuthToken(window.location.origin, returnCode)
+      .then(accessToken => {
+        this.props.dispatchSetDropboxAuthToken(accessToken);
+        this.props.history.push(DailyPage);
+      })
+      .catch(reason => {
+        console.log(reason);
+        this.props.history.push(HomePage);
+      });
 
-      return (
-        <BaseNoNav>
-          <div>Fetching token and redirecting...</div>
-        </BaseNoNav>
-      );
-    }
+    return (
+      <BaseNoNav>
+        <div>Fetching token and redirecting...</div>
+      </BaseNoNav>
+    );
   }
-);
+}
 
 const mapDispatchToProps = (
   dispatch: ThunkDispatch<IAppState, null, any>
@@ -56,4 +48,4 @@ const mapDispatchToProps = (
   },
 });
 
-export default connect(null, mapDispatchToProps)(Auth);
+export default connect(null, mapDispatchToProps)(AuthComponent);

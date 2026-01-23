@@ -38,6 +38,13 @@ module.exports = {
         format: ['camelCase'],
       },
       {
+        selector: 'function',
+        format: [
+          'camelCase',
+          'PascalCase', // React functional components use PascalCase.
+        ],
+      },
+      {
         selector: 'variable',
         format: [
           'camelCase',

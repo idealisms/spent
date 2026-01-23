@@ -1,6 +1,6 @@
-import MomentUtils from '@date-io/moment';
-import { MuiThemeProvider } from '@material-ui/core/styles';
-import { MuiPickersUtilsProvider } from '@material-ui/pickers';
+import { ThemeProvider } from '@mui/material/styles';
+import { LocalizationProvider } from '@mui/x-date-pickers';
+import { AdapterMoment } from '@mui/x-date-pickers/AdapterMoment';
 import { ConnectedRouter as BaseConnectedRouter } from 'connected-react-router';
 import { createBrowserHistory } from 'history';
 import { createRoot } from 'react-dom/client';
@@ -10,10 +10,10 @@ import { App, IAppState } from './main';
 import { theme } from './muiTheme';
 import * as serviceWorker from './serviceWorker';
 
+declare const require: (name: string) => any;
+
 // connected-react-router doesn't have proper React 18 types for children
 const ConnectedRouter = BaseConnectedRouter as React.ComponentType<any>;
-
-declare const require: (name: string) => any;
 
 serviceWorker.register();
 
@@ -28,12 +28,12 @@ const container = document.getElementById('app');
 const root = createRoot(container!);
 root.render(
   <Provider store={store}>
-    <MuiThemeProvider theme={theme}>
+    <ThemeProvider theme={theme}>
       <ConnectedRouter history={history}>
-        <MuiPickersUtilsProvider utils={MomentUtils}>
+        <LocalizationProvider dateAdapter={AdapterMoment}>
           <App />
-        </MuiPickersUtilsProvider>
+        </LocalizationProvider>
       </ConnectedRouter>
-    </MuiThemeProvider>
+    </ThemeProvider>
   </Provider>
 );
