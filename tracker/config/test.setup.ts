@@ -1,1 +1,2 @@
-/* custom test setup */
+/* Custom test setup for React Testing Library */
+import '@testing-library/jest-dom';

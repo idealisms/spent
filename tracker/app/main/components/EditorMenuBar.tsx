@@ -197,7 +197,7 @@ const EditorMenuBar = withStyles(styles)(
           {this.state.isEditDialogOpen && this.props.selectedTransactions ? (
             <Transactions.EditTransactionDialog
               transaction={
-                this.props.selectedTransactions.values().next().value
+                this.props.selectedTransactions.values().next().value!
               }
               onClose={() => this.setState({ isEditDialogOpen: false })}
               onSaveChanges={this.props.onSelectedEditSaveClick}
@@ -222,7 +222,7 @@ const EditorMenuBar = withStyles(styles)(
           {this.state.isSplitDialogOpen && this.props.selectedTransactions ? (
             <Transactions.SplitTransactionDialog
               transaction={
-                this.props.selectedTransactions.values().next().value
+                this.props.selectedTransactions.values().next().value!
               }
               onClose={() => this.setState({ isSplitDialogOpen: false })}
               onSaveChanges={this.props.onSelectedSplitSaveClick}

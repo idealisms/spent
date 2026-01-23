@@ -1,7 +1,7 @@
 import MomentUtils from '@date-io/moment';
 import { MuiThemeProvider } from '@material-ui/core/styles';
 import { MuiPickersUtilsProvider } from '@material-ui/pickers';
-import { ConnectedRouter } from 'connected-react-router';
+import { ConnectedRouter as BaseConnectedRouter } from 'connected-react-router';
 import { createBrowserHistory } from 'history';
 import { createRoot } from 'react-dom/client';
 import { Provider } from 'react-redux';
@@ -9,6 +9,9 @@ import { Store } from 'redux';
 import { App, IAppState } from './main';
 import { theme } from './muiTheme';
 import * as serviceWorker from './serviceWorker';
+
+// connected-react-router doesn't have proper React 18 types for children
+const ConnectedRouter = BaseConnectedRouter as React.ComponentType<any>;
 
 declare const require: (name: string) => any;
 
