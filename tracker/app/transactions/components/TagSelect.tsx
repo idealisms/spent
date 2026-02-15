@@ -21,8 +21,26 @@ const useStyles = makeStyles()((_theme: Theme) => ({
     alignItems: 'center',
     padding: '8px 12px',
     cursor: 'default',
+    backgroundColor: 'transparent',
+    color: 'inherit',
+    userSelect: 'none' as const,
+    WebkitTapHighlightColor: 'rgba(0, 0, 0, 0)',
     '&:hover': {
       backgroundColor: '#deebff',
+    },
+    '&:active': {
+      backgroundColor: '#b2d4ff',
+    },
+    '&.option--is-focused': {
+      backgroundColor: '#deebff',
+    },
+    '&.option--is-selected': {
+      backgroundColor: '#2684ff',
+      color: '#fff',
+    },
+    '&.option--is-disabled': {
+      color: '#ccc',
+      cursor: 'default',
     },
     '& .cat': {
       width: '24px',
@@ -37,6 +55,16 @@ const useStyles = makeStyles()((_theme: Theme) => ({
       flex: '0 0 auto',
       color: 'rgba(0, 0, 0, .54)',
     },
+  },
+  multiValueLabel: {
+    borderRadius: '2px',
+    color: '#333',
+    fontSize: '85%',
+    overflow: 'hidden',
+    padding: '3px',
+    paddingLeft: '6px',
+    textOverflow: 'ellipsis',
+    whiteSpace: 'nowrap' as const,
   },
 }));
 interface ITagSelectOwnProps {
@@ -198,7 +226,7 @@ class TagSelectInner extends React.Component<ITagSelectInnerProps, ITagSelectSta
   private getMultiValueLabelClass = (): React.FunctionComponent<
     MultiValueGenericProps<TagOption, true>
   > => {
-    // let classes = this.props.classes;
+    let classes = this.props.classes;
     let hideCategories = this.props.hideCategories;
     const MultiValueLabelComponent: React.FunctionComponent<
       MultiValueGenericProps<TagOption, true>
@@ -206,8 +234,10 @@ class TagSelectInner extends React.Component<ITagSelectInnerProps, ITagSelectSta
       let category = TAG_TO_CATEGORY.get(props.data.label);
       let emoji =
         !hideCategories && category ? categoryToEmoji(category) + ' ' : '';
+      // eslint-disable-next-line @typescript-eslint/naming-convention, @typescript-eslint/no-unused-vars
+      let { className, css, ...restInnerProps } = props.innerProps as any;
       return (
-        <div {...props.innerProps}>
+        <div className={classes.multiValueLabel} {...restInnerProps}>
           {emoji}
           {props.children}
         </div>
