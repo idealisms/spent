@@ -124,7 +124,15 @@ class TagSelectInner extends React.Component<ITagSelectInnerProps, ITagSelectSta
       menuPortalTarget: document.body,
       menuPosition: 'absolute',
       // Dialogs are children of document.body with a zIndex of 1300.
-      styles: { menuPortal: base => ({ ...base, zIndex: 2000 }) },
+      styles: {
+        control: (base, state) => ({
+          ...base,
+          padding: '9.5px 0',
+          ...(state.isFocused ? { borderColor: '#2e7d32', boxShadow: '0 0 0 1px #2e7d32' } : {}),
+          '&:hover': { borderColor: '#2e7d32' },
+        }),
+        menuPortal: base => ({ ...base, zIndex: 2000 }),
+      },
 
       components: { Option, MultiValueLabel },
       isMulti: true,
