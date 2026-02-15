@@ -168,8 +168,13 @@ export interface ITransactionPublicProps extends Omit<ITransactionProps, 'classe
 }
 
 function Transaction(props: ITransactionPublicProps) {
-  const { classes: defaultClasses } = useStyles();
-  const classes = { ...defaultClasses, ...props.classes };
+  const { classes: defaultClasses, cx } = useStyles();
+  const classes = Object.fromEntries(
+    Object.keys(defaultClasses).map(key => [
+      key,
+      cx(defaultClasses[key as keyof typeof defaultClasses], props.classes?.[key as keyof typeof defaultClasses]),
+    ]),
+  ) as typeof defaultClasses;
   return <TransactionInner {...props} classes={classes} />;
 }
 

@@ -141,8 +141,13 @@ export interface ITransactionsTableSumRowPublicProps extends Omit<ITransactionsT
 function TransactionsTableSumRow(
   props: ITransactionsTableSumRowPublicProps
 ) {
-  const { classes: defaultClasses } = useHeaderStyles();
-  const classes = { ...defaultClasses, ...props.classes };
+  const { classes: defaultClasses, cx } = useHeaderStyles();
+  const classes = Object.fromEntries(
+    Object.keys(defaultClasses).map(key => [
+      key,
+      cx(defaultClasses[key as keyof typeof defaultClasses], props.classes?.[key as keyof typeof defaultClasses]),
+    ]),
+  ) as typeof defaultClasses;
   return <TransactionsTableSumRowInner {...props} classes={classes} />;
 }
 

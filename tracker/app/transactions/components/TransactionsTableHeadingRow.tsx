@@ -91,8 +91,13 @@ export interface ITransactionsTableHeadingRowPublicProps extends Omit<ITransacti
 function TransactionsTableHeadingRow(
   props: ITransactionsTableHeadingRowPublicProps
 ) {
-  const { classes: defaultClasses } = useRowStyles();
-  const classes = { ...defaultClasses, ...props.classes };
+  const { classes: defaultClasses, cx } = useRowStyles();
+  const classes = Object.fromEntries(
+    Object.keys(defaultClasses).map(key => [
+      key,
+      cx(defaultClasses[key as keyof typeof defaultClasses], props.classes?.[key as keyof typeof defaultClasses]),
+    ]),
+  ) as typeof defaultClasses;
   return <TransactionsTableHeadingRowInner {...props} classes={classes} />;
 }
 
