@@ -232,7 +232,7 @@ class ReportFilterDrawerInner extends React.Component<
     try {
       categories = JSON.parse(categoriesPretty);
       this.props.updateReportCategories(categories);
-    } catch (e) {
+    } catch {
       // If there's a parse error, don't update categories.
     }
     this.props.setCategoriesPretty(categoriesPretty);
