@@ -19,6 +19,11 @@ const useStyles = makeStyles()((_theme: Theme) => ({
     display: 'flex !important',
     flexDirection: 'row',
     alignItems: 'center',
+    padding: '8px 12px',
+    cursor: 'default',
+    '&:hover': {
+      backgroundColor: '#deebff',
+    },
     '& .cat': {
       width: '24px',
       textAlign: 'center',
