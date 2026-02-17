@@ -1,7 +1,6 @@
 import { GlobalStyles } from '@mui/material';
 import * as React from 'react';
-import { Switch } from 'react-router';
-import { Route } from 'react-router-dom';
+import { Routes, Route } from 'react-router-dom';
 import AuthRoute from './AuthRoute';
 import Auth from './Auth';
 import Daily from './Daily';
@@ -30,15 +29,15 @@ const App: React.FC = () => {
   return (
     <>
       <GlobalStyles styles={globalStyles} />
-      <Switch>
-        <Route exact path={RoutePaths.HomePage} component={Login} />
-        <Route exact path={RoutePaths.AuthPage} component={Auth} />
-        <AuthRoute exact path={RoutePaths.DailyPage} component={Daily} />
-        <AuthRoute exact path={RoutePaths.EditorPage} component={Editor} />
-        <AuthRoute exact path={RoutePaths.MonthlyPage} component={Monthly} />
-        <AuthRoute exact path={RoutePaths.ReportPage} component={Report} />
-        <Route component={NoMatch} />
-      </Switch>
+      <Routes>
+        <Route path={RoutePaths.HomePage} element={<Login />} />
+        <Route path={RoutePaths.AuthPage} element={<Auth />} />
+        <Route path={RoutePaths.DailyPage} element={<AuthRoute><Daily /></AuthRoute>} />
+        <Route path={RoutePaths.EditorPage} element={<AuthRoute><Editor /></AuthRoute>} />
+        <Route path={RoutePaths.MonthlyPage} element={<AuthRoute><Monthly /></AuthRoute>} />
+        <Route path={RoutePaths.ReportPage} element={<AuthRoute><Report /></AuthRoute>} />
+        <Route path="*" element={<NoMatch />} />
+      </Routes>
     </>
   );
 };

@@ -1,5 +1,3 @@
-import { connectRouter } from 'connected-react-router';
-import { History } from 'history';
 import { combineReducers, Reducer } from 'redux';
 import { transactionsReducer } from '../transactions';
 import { authReducer } from '../auth/reducers';
@@ -67,10 +65,8 @@ export const settingsReducer: Reducer<ISettingsState, SettingsAction> = (
   }
 };
 
-export const createRootReducer = (history: History) =>
-  combineReducers({
-    router: connectRouter(history),
-    auth: authReducer,
-    settings: settingsReducer,
-    transactions: transactionsReducer,
-  });
+export const rootReducer = combineReducers({
+  auth: authReducer,
+  settings: settingsReducer,
+  transactions: transactionsReducer,
+});

@@ -14,12 +14,8 @@ import EditIcon from '@mui/icons-material/Edit';
 import MenuIcon from '@mui/icons-material/Menu';
 import TimelineIcon from '@mui/icons-material/Timeline';
 import { makeStyles } from 'tss-react/mui';
-import { push } from 'connected-react-router';
-import { Location, LocationState } from 'history';
 import * as React from 'react';
-import { connect } from 'react-redux';
-import { Dispatch } from 'redux';
-import { IAppState } from '../model';
+import { useLocation, useNavigate } from 'react-router-dom';
 import * as Pages from './RoutePaths';
 
 const useStyles = makeStyles()((_theme: Theme) => ({
@@ -62,22 +58,15 @@ interface IMenuBarWithDrawerOwnProps {
   iconElementRight?: JSX.Element;
   classes?: Partial<ReturnType<typeof useStyles>['classes']>;
 }
-interface IMenuBarWithDrawerAppStateProps {
-  location: Location | null;
+
+interface IMenuBarWithDrawerInnerProps extends IMenuBarWithDrawerOwnProps {
+  location: ReturnType<typeof useLocation>;
+  navigateTo: ReturnType<typeof useNavigate>;
+  internalClasses: ReturnType<typeof useStyles>['classes'];
 }
-interface IMenuBarWithDrawerDispatchProps {
-  navigateTo: (location: string, state?: LocationState) => void;
-}
-type IMenuBarWithDrawerProps = IMenuBarWithDrawerOwnProps &
-  IMenuBarWithDrawerAppStateProps &
-  IMenuBarWithDrawerDispatchProps;
 
 interface IMenuBarWithDrawerState {
   isDrawerOpen: boolean;
-}
-
-interface IMenuBarWithDrawerInnerProps extends IMenuBarWithDrawerProps {
-  internalClasses: ReturnType<typeof useStyles>['classes'];
 }
 
 class MenuBarWithDrawerInner extends React.Component<
@@ -213,23 +202,16 @@ class MenuBarWithDrawerInner extends React.Component<
   };
 }
 
-function MenuBarWithDrawerWrapper(props: IMenuBarWithDrawerProps) {
+export default function MenuBarWithDrawer(props: IMenuBarWithDrawerOwnProps) {
   const { classes: internalClasses } = useStyles();
-  return <MenuBarWithDrawerInner {...props} internalClasses={internalClasses} />;
+  const location = useLocation();
+  const navigateTo = useNavigate();
+  return (
+    <MenuBarWithDrawerInner
+      {...props}
+      internalClasses={internalClasses}
+      location={location}
+      navigateTo={navigateTo}
+    />
+  );
 }
-
-const mapStateToProps = (state: IAppState): IMenuBarWithDrawerAppStateProps => {
-  return {
-    location: state.router.location,
-  };
-};
-
-const mapDispatchToProps = (
-  dispatch: Dispatch<any>
-): IMenuBarWithDrawerDispatchProps => ({
-  navigateTo: (location: string) => {
-    dispatch(push(location));
-  },
-});
-
-export default connect(mapStateToProps, mapDispatchToProps)(MenuBarWithDrawerWrapper);

@@ -1,14 +1,11 @@
-import { routerMiddleware } from 'connected-react-router';
-import { History } from 'history';
 import { applyMiddleware, compose, legacy_createStore as createStore, Store } from 'redux';
 import thunkMiddleware from 'redux-thunk';
-import { createRootReducer, IAppState } from './main';
+import { rootReducer, IAppState } from './main';
 
-export function configureStore(history: History): Store<IAppState> {
-  const routingMiddleware = routerMiddleware(history);
+export function configureStore(): Store<IAppState> {
   const enhancers = compose(
-    applyMiddleware(routingMiddleware, thunkMiddleware)
+    applyMiddleware(thunkMiddleware)
   );
 
-  return createStore(createRootReducer(history), enhancers as any) as Store<IAppState>;
+  return createStore(rootReducer, enhancers as any) as Store<IAppState>;
 }

@@ -1,92 +1,58 @@
-import { IAppState, SETTINGS_VERSION } from '../model';
 import * as React from 'react';
-import { Route, Redirect } from 'react-router-dom';
+import { useEffect } from 'react';
+import { useSelector, useDispatch } from 'react-redux';
+import { Navigate } from 'react-router-dom';
 import { ThunkDispatch } from 'redux-thunk';
-import { connect } from 'react-redux';
+import { IAppState, SETTINGS_VERSION } from '../model';
 import { AuthStatus } from '../../auth/model';
 import * as RoutePaths from './RoutePaths';
 import BaseNoNav from './BaseNoNav';
 import { tryLogin } from '../../auth/actions';
 
-interface IAuthRouteOwnProps {
-  exact: boolean;
-  path: string;
-  component: React.ComponentType<any>;
+interface IAuthRouteProps {
+  children: React.ReactNode;
 }
-interface IAuthRouteAppStateProps {
-  authStatus: AuthStatus;
-  dropboxAccessToken: string;
-  settingsVersion: number;
-}
-interface IAuthStateDispatchProps {
-  tryLogin: () => void;
-}
-type IAuthRouteProps = IAuthRouteOwnProps &
-  IAuthRouteAppStateProps &
-  IAuthStateDispatchProps;
 
-interface IAuthRouteState {}
+const AuthRoute: React.FC<IAuthRouteProps> = ({ children }) => {
+  const dispatch: ThunkDispatch<IAppState, null, any> = useDispatch();
+  const authStatus = useSelector((state: IAppState) => state.auth.authStatus);
+  const settingsVersion = useSelector(
+    (state: IAppState) => state.settings.settings.version
+  );
 
-class AuthRouteComponent extends React.Component<IAuthRouteProps, IAuthRouteState> {
-  constructor(props: IAuthRouteProps) {
-    super(props);
-    this.state = {};
-  }
-
-  public componentDidMount() {
-    if (this.props.authStatus === AuthStatus.INIT) {
-      this.props.tryLogin();
+  useEffect(() => {
+    if (authStatus === AuthStatus.INIT) {
+      dispatch(tryLogin());
     }
-  }
+  }, [authStatus, dispatch]);
 
-  public render(): React.ReactElement<Record<string, unknown>> {
-    if (
-      this.props.authStatus === AuthStatus.INIT ||
-      this.props.authStatus === AuthStatus.CHECKING
-    ) {
-      return (
-        <BaseNoNav>
-          <div>Loading...</div>
-        </BaseNoNav>
-      );
-    } else if (this.props.authStatus === AuthStatus.NEEDS_LOGIN) {
-      return <Redirect to={RoutePaths.HomePage} />;
-    }
-
-    if (this.props.settingsVersion > SETTINGS_VERSION) {
-      return (
-        <BaseNoNav>
-          <div>
-            A newer version is available.{' '}
-            <a href="#" onClick={() => window.location.reload()}>
-              Please reload the page.
-            </a>
-          </div>
-        </BaseNoNav>
-      );
-    }
-
+  if (
+    authStatus === AuthStatus.INIT ||
+    authStatus === AuthStatus.CHECKING
+  ) {
     return (
-      <Route
-        exact={this.props.exact}
-        path={this.props.path}
-        component={this.props.component}
-      />
+      <BaseNoNav>
+        <div>Loading...</div>
+      </BaseNoNav>
+    );
+  } else if (authStatus === AuthStatus.NEEDS_LOGIN) {
+    return <Navigate to={RoutePaths.HomePage} replace />;
+  }
+
+  if (settingsVersion > SETTINGS_VERSION) {
+    return (
+      <BaseNoNav>
+        <div>
+          A newer version is available.{' '}
+          <a href="#" onClick={() => window.location.reload()}>
+            Please reload the page.
+          </a>
+        </div>
+      </BaseNoNav>
     );
   }
-}
 
-const mapStateToProps = (state: IAppState): IAuthRouteAppStateProps => ({
-  dropboxAccessToken: state.auth.dropboxAccessToken,
-  authStatus: state.auth.authStatus,
-  settingsVersion: state.settings.settings.version,
-});
-const mapDispatchToProps = (
-  dispatch: ThunkDispatch<IAppState, null, any>
-): IAuthStateDispatchProps => ({
-  tryLogin: () => {
-    dispatch(tryLogin());
-  },
-});
+  return <>{children}</>;
+};
 
-export default connect(mapStateToProps, mapDispatchToProps)(AuthRouteComponent);
+export default AuthRoute;

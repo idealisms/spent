@@ -4,12 +4,10 @@ import OutlinedInput from '@mui/material/OutlinedInput';
 import Select from '@mui/material/Select';
 import { Theme } from '@mui/material/styles';
 import { makeStyles } from 'tss-react/mui';
-import { push } from 'connected-react-router';
-import { Location } from 'history';
 import moment from 'moment';
 import * as React from 'react';
 import { connect } from 'react-redux';
-import { ThunkDispatch } from 'redux-thunk';
+import { useLocation, useNavigate } from 'react-router-dom';
 import {
   ITransaction,
   Transaction,
@@ -55,19 +53,18 @@ interface IMonthlyOwnProps {}
 interface IMonthlyAppStateProps {
   transactions: ITransaction[];
   spendTargets: ISpendTarget[];
-  location: Location;
 }
-interface IMonthlyDispatchProps {
-  navigateTo: (location: string) => void;
-}
+interface IMonthlyDispatchProps {}
 type IMonthlyProps = IMonthlyOwnProps &
   IMonthlyAppStateProps &
   IMonthlyDispatchProps;
-interface IMonthlyState {}
 
 interface IMonthlyInnerProps extends IMonthlyProps {
   classes: ReturnType<typeof useStyles>['classes'];
+  location: ReturnType<typeof useLocation>;
+  navigateTo: ReturnType<typeof useNavigate>;
 }
+interface IMonthlyState {}
 
 class MonthlyInner extends React.Component<IMonthlyInnerProps, IMonthlyState> {
   constructor(props: IMonthlyInnerProps) {
@@ -294,20 +291,14 @@ class MonthlyInner extends React.Component<IMonthlyInnerProps, IMonthlyState> {
 
 function MonthlyWrapper(props: IMonthlyProps) {
   const { classes } = useStyles();
-  return <MonthlyInner {...props} classes={classes} />;
+  const location = useLocation();
+  const navigateTo = useNavigate();
+  return <MonthlyInner {...props} classes={classes} location={location} navigateTo={navigateTo} />;
 }
 
 const mapStateToProps = (state: IAppState): IMonthlyAppStateProps => ({
   transactions: state.transactions.transactions,
   spendTargets: state.settings.settings.spendTargets,
-  location: state.router.location,
-});
-const mapDispatchToProps = (
-  dispatch: ThunkDispatch<IAppState, null, any>
-): IMonthlyDispatchProps => ({
-  navigateTo: (location: string) => {
-    dispatch(push(location));
-  },
 });
 
-export default connect(mapStateToProps, mapDispatchToProps)(MonthlyWrapper);
+export default connect(mapStateToProps)(MonthlyWrapper);

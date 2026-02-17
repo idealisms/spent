@@ -1,5 +1,5 @@
 import App from './components/App';
 import { IAppState, IReportNode } from './model';
-import { createRootReducer } from './reducers';
+import { rootReducer } from './reducers';
 
-export { IAppState, IReportNode, App, createRootReducer };
+export { IAppState, IReportNode, App, rootReducer };

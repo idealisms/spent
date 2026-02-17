@@ -1,9 +1,7 @@
-import { routerMiddleware } from 'connected-react-router';
-import { History } from 'history';
 import { applyMiddleware, compose, legacy_createStore as createStore, Store } from 'redux';
 import { createLogger } from 'redux-logger';
 import thunkMiddleware from 'redux-thunk';
-import { createRootReducer, IAppState } from './main';
+import { rootReducer, IAppState } from './main';
 
 interface IHotModule {
   hot?: { accept: (path: string, callback: () => void) => void };
@@ -14,15 +12,14 @@ declare const module: IHotModule;
 
 const loggerMiddleware = createLogger();
 
-export function configureStore(history: History): Store<IAppState> {
-  const routingMiddleware = routerMiddleware(history);
+export function configureStore(): Store<IAppState> {
   const composeEnhancers =
     (window as any).__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;
   const enhancers = composeEnhancers(
-    applyMiddleware(routingMiddleware, thunkMiddleware, loggerMiddleware as any)
+    applyMiddleware(thunkMiddleware, loggerMiddleware as any)
   );
 
-  const store = createStore(createRootReducer(history), enhancers) as Store<IAppState>;
+  const store = createStore(rootReducer, enhancers) as Store<IAppState>;
 
   if (module.hot) {
     module.hot.accept('./main/reducers', () => {

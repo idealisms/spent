@@ -1,4 +1,3 @@
-import { RouterState } from 'connected-react-router';
 import { ITransactionsState } from '../transactions';
 import { IAuthState } from '../auth/model';
 
@@ -96,7 +95,6 @@ export interface ISettingsState {
 }
 
 export interface IAppState {
-  router: RouterState;
   auth: IAuthState;
   settings: ISettingsState;
   transactions: ITransactionsState;
