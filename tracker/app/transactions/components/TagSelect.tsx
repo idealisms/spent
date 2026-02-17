@@ -34,6 +34,9 @@ const useStyles = makeStyles()((_theme: Theme) => ({
     '&.option--is-focused': {
       backgroundColor: '#deebff',
     },
+    '&.option--is-focused.option--is-selected': {
+      backgroundColor: '#2065c9',
+    },
     '&.option--is-selected': {
       backgroundColor: '#2684ff',
       color: '#fff',
@@ -198,29 +201,20 @@ class TagSelectInner extends React.Component<ITagSelectInnerProps, ITagSelectSta
       OptionProps<TagOption, true>
     > = props => {
       const {
-        className,
-        cx,
         isDisabled,
         isFocused,
         isSelected,
         innerRef,
         innerProps,
       } = props;
+      let classNames = classes.option;
+      if (isFocused) { classNames += ' option--is-focused'; }
+      if (isSelected) { classNames += ' option--is-selected'; }
+      if (isDisabled) { classNames += ' option--is-disabled'; }
       return (
         <div
           ref={innerRef}
-          className={
-            `${classes.option} ` +
-            (cx(
-              {
-                option: true,
-                'option--is-disabled': isDisabled,
-                'option--is-focused': isFocused,
-                'option--is-selected': isSelected,
-              },
-              className
-            ) || '')
-          }
+          className={classNames}
           {...innerProps}
         >
           {renderChild(props.label)}
