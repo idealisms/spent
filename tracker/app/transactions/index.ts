@@ -13,10 +13,9 @@ import TransactionsTableHeadingRow from './components/TransactionsTableHeadingRo
 import TransactionsTableSumRow from './components/TransactionsTableSumRow';
 import {
   Category,
-  ITransaction,
-  ITransactionsState,
   TAG_TO_CATEGORY,
 } from './model';
+import type { ITransaction, ITransactionsState } from './model';
 import { transactionsReducer } from './reducers';
 import * as TransactionUtils from './utils';
 
@@ -26,7 +25,8 @@ export {
   BatchEditTagsAction,
   Category,
 };
-export { EditTransactionDialog, ITransaction, ITransactionsState };
+export { EditTransactionDialog };
+export type { ITransaction, ITransactionsState };
 export {
   MergeTransactionDialog,
   SplitTransactionDialog,

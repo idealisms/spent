@@ -13,7 +13,10 @@ module.exports = (options) => ({
       {
         test: /\.(ts|tsx)?$/,
         include: options.srcs,
-        loader: 'ts-loader',
+        loader: 'esbuild-loader',
+        options: {
+          target: 'es2015',
+        },
       }, {
         test: /\.css$/,
         include: options.srcs,

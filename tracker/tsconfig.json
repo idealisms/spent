@@ -13,7 +13,8 @@
     // "noUnusedParameters": true,
     "outDir": "build",
     "allowSyntheticDefaultImports": true,
-    "esModuleInterop": true
+    "esModuleInterop": true,
+    "skipLibCheck": true
   },
   "exclude": ["build", "config", "node_modules", "dev_server.js", "server"]
 }
