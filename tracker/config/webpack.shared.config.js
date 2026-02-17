@@ -48,19 +48,7 @@ module.exports = (options) => ({
       files: options.srcs,
       configType: 'eslintrc',
     }),
-    new webpack.ProvidePlugin({
-      Buffer: ['buffer', 'Buffer'],
-    }),
   ]),
-  //
-  // node: {
-  //   fs: 'empty',
-  //   path: 'empty',
-  //   net: 'empty',
-  //   fsevents: 'empty',
-  //   tls: 'empty',
-  //   child_process: 'empty'
-  // },
 
   resolve: Object.assign({
     modules: ['app', 'node_modules'],
@@ -75,11 +63,11 @@ module.exports = (options) => ({
       moment$: 'moment/moment.js',
     },
     fallback: {
-      "util": require.resolve("util/"),
-      "crypto": require.resolve("crypto-browserify/"),
-      "stream": require.resolve("stream-browserify"),
-      "buffer": require.resolve("buffer/"),
-      "vm": require.resolve("vm-browserify"),
+      "util": false,
+      "crypto": false,
+      "stream": false,
+      "buffer": false,
+      "vm": false,
     }
   }, options.resolve),
 
