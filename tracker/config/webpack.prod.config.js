@@ -14,6 +14,19 @@ module.exports = require('./webpack.shared.config')({
     chunkFilename: '[name].[chunkhash].chunk.js',
   },
 
+  optimization: {
+    splitChunks: {
+      chunks: 'all',
+      cacheGroups: {
+        vendor: {
+          test: /[\\/]node_modules[\\/]/,
+          name: 'vendor',
+          chunks: 'all',
+        },
+      },
+    },
+  },
+
   plugins: [
     new HtmlWebpackPlugin({
       template: './index.html',
