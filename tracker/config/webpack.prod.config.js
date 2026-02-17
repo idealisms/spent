@@ -1,6 +1,7 @@
 const path = require('path');
 const webpack = require('webpack');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
+const { BundleAnalyzerPlugin } = require('webpack-bundle-analyzer');
 // TODO: Re-enable service worker after fixing workbox compatibility
 // const { GenerateSW } = require('workbox-webpack-plugin');
 
@@ -61,5 +62,9 @@ module.exports = require('./webpack.shared.config')({
     //     },
     //   }],
     // }),
+    new BundleAnalyzerPlugin({
+      analyzerMode: process.env.ANALYZE ? 'server' : 'disabled',
+      generateStatsFile: !!process.env.ANALYZE,
+    }),
   ],
 });
