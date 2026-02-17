@@ -2,8 +2,7 @@ const path = require('path');
 const webpack = require('webpack');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const { BundleAnalyzerPlugin } = require('webpack-bundle-analyzer');
-// TODO: Re-enable service worker after fixing workbox compatibility
-// const { GenerateSW } = require('workbox-webpack-plugin');
+const { GenerateSW } = require('workbox-webpack-plugin');
 
 module.exports = require('./webpack.shared.config')({
   entry: [
@@ -46,22 +45,21 @@ module.exports = require('./webpack.shared.config')({
       inject: true,
       favicon: './app/favicon.png',
     }),
-    // TODO: Re-enable service worker after fixing workbox compatibility
-    // new GenerateSW({
-    //   clientsClaim: true,
-    //   skipWaiting: true,
-    //   mode: 'production',
-    //   runtimeCaching: [{
-    //     urlPattern: /\.(?:png|jpg|jpeg|svg|gif)$/,
-    //     handler: 'CacheFirst',
-    //     options: {
-    //       cacheName: 'images',
-    //       expiration: {
-    //         maxEntries: 10,
-    //       },
-    //     },
-    //   }],
-    // }),
+    new GenerateSW({
+      clientsClaim: true,
+      skipWaiting: true,
+      mode: 'production',
+      runtimeCaching: [{
+        urlPattern: /\.(?:png|jpg|jpeg|svg|gif)$/,
+        handler: 'CacheFirst',
+        options: {
+          cacheName: 'images',
+          expiration: {
+            maxEntries: 10,
+          },
+        },
+      }],
+    }),
     new BundleAnalyzerPlugin({
       analyzerMode: process.env.ANALYZE ? 'server' : 'disabled',
       generateStatsFile: !!process.env.ANALYZE,
