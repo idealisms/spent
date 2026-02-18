@@ -3,15 +3,15 @@ import { DEFAULT_CATEGORIES, transactionsReducer } from '../transactions';
 import { authReducer } from '../auth/reducers';
 import { ActionType, SettingsAction } from './actions';
 import { getDefaultCategories } from './components/Report';
-import { CloudState, ISettingsState } from './model';
+import { CloudState, ISettingsState, SETTINGS_VERSION } from './model';
 
 const initialSettingsState: ISettingsState = {
   lastUpdated: 0,
   cloudState: CloudState.Done,
 
   settings: {
-    version: 0,
-    reportCategories: [],
+    version: SETTINGS_VERSION,
+    reportCategories: new Map(),
     spendTargets: [],
     dailySpendTarget: {
       startBalanceCents: 0,
@@ -43,7 +43,7 @@ export const settingsReducer: Reducer<ISettingsState, SettingsAction> = (
           lastUpdated: Date.now(),
           settings: {
             ...state.settings,
-            reportCategories: getDefaultCategories(),
+            reportCategories: new Map([['report', getDefaultCategories()]]),
           },
         };
       }

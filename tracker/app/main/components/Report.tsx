@@ -588,10 +588,7 @@ function ReportWrapper(props: IReportProps) {
 }
 
 const mapStateToProps = (state: IAppState): IReportAppStateProps => ({
-  reportCategories: state.settings.settings.reportCategories as Map<
-    string,
-    IReportNode[]
-  >,
+  reportCategories: state.settings.settings.reportCategories,
   settingsCloudState: state.settings.cloudState,
   settingsLastUpdated: state.settings.lastUpdated,
   transactions: state.transactions.transactions,

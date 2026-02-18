@@ -1,9 +1,8 @@
 import * as Dropbox from 'dropbox';
 import { ThunkAction } from 'redux-thunk';
-import { CloudState, IAppState, ISettings, SETTINGS_VERSION } from './model';
+import { CloudState, IAppState, IReportNode, ISettings } from './model';
 import { AuthAction, dropboxDownloadCompleted } from '../auth/actions';
 import { AuthStatus } from '../auth/model';
-import { DEFAULT_CATEGORIES } from '../transactions';
 
 // Action types
 export enum ActionType {
@@ -39,30 +38,12 @@ export type SettingsAction =
   | ReturnType<typeof updateSetting>
   | ReturnType<typeof setCloudState>;
 
-function upgradeIfNecessary(settings: ISettings) {
-  if (settings.version === undefined) {
-    // Migrate reportCategories to a map.
-    if (Array.isArray(settings.reportCategories)) {
-      settings.reportCategories = new Map([
-        ['report', settings.reportCategories],
-      ]);
-    }
-    settings.version = 1;
-  }
-  // Maps serialized to JSON round-trip as plain objects, not Maps.
-  // Convert any non-Map value back to a Map, renaming blank keys to 'report'.
-  if (!(settings.reportCategories instanceof Map)) {
-    const reportCategories = new Map<string, unknown>();
-    Object.entries(settings.reportCategories).forEach(([k, v]) => {
-      reportCategories.set(k || 'report', v);
-    });
-    settings.reportCategories = reportCategories as Map<string, never>;
-  }
-  if (settings.version < 2) {
-    // Populate categories from code defaults.
-    settings.categories = DEFAULT_CATEGORIES;
-    settings.version = SETTINGS_VERSION;
-  }
+function hydrateSettings(settings: ISettings) {
+  // reportCategories is a Map but JSON serializes it as a plain object.
+  // Convert it back, renaming any blank key to 'report'.
+  const raw = settings.reportCategories as unknown as Record<string, IReportNode[]>;
+  const entries = Object.entries(raw).map(([k, v]) => [k || 'report', v] as [string, IReportNode[]]);
+  settings.reportCategories = new Map(entries);
 }
 
 // Async actions
@@ -83,7 +64,7 @@ export const fetchSettingsFromDropbox = (): ThunkAction<
       let fr = new FileReader();
       fr.addEventListener('load', _event => {
         let settings: ISettings = JSON.parse(fr.result as string);
-        upgradeIfNecessary(settings);
+        hydrateSettings(settings);
         dispatch(receivedSettingsFromDropbox(settings));
         dispatch(dropboxDownloadCompleted(path, AuthStatus.OK));
       });
