@@ -326,6 +326,7 @@ interface IReportOwnProps {}
 interface IReportAppStateProps {
   reportCategories: Map<string, IReportNode[]>;
   settingsCloudState: CloudState;
+  settingsLastUpdated: number;
   transactions: ITransaction[];
 }
 interface IReportDispatchProps {
@@ -377,20 +378,21 @@ class ReportInner extends React.Component<IReportInnerProps, IReportState> {
       },
       tabIndex: 0,
       selectedReportName: reportName,
-      categoriesPretty: reportCategories.length
-        ? JSON.stringify(reportCategories, null, 2)
-        : LOADING_TEXT,
+      categoriesPretty:
+        this.props.settingsLastUpdated > 0
+          ? JSON.stringify(reportCategories, null, 2)
+          : LOADING_TEXT,
       isFilterDrawerOpen: false,
     };
 
     this.reportDataCache = [];
   }
 
-  public componentDidUpdate(_prevProps: IReportInnerProps): void {
+  public componentDidUpdate(prevProps: IReportInnerProps): void {
     // Update the editable textarea once settings load.
     if (
-      this.state.categoriesPretty == LOADING_TEXT &&
-      this.props.reportCategories
+      prevProps.settingsLastUpdated === 0 &&
+      this.props.settingsLastUpdated > 0
     ) {
       let reportCategories =
         this.props.reportCategories.get(this.state.selectedReportName) || [];
@@ -591,6 +593,7 @@ const mapStateToProps = (state: IAppState): IReportAppStateProps => ({
     IReportNode[]
   >,
   settingsCloudState: state.settings.cloudState,
+  settingsLastUpdated: state.settings.lastUpdated,
   transactions: state.transactions.transactions,
 });
 const mapDispatchToProps = (

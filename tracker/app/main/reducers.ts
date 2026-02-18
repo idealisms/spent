@@ -40,6 +40,7 @@ export const settingsReducer: Reducer<ISettingsState, SettingsAction> = (
       } else {
         return {
           ...state,
+          lastUpdated: Date.now(),
           settings: {
             ...state.settings,
             reportCategories: getDefaultCategories(),

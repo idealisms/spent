@@ -49,12 +49,13 @@ function upgradeIfNecessary(settings: ISettings) {
     }
     settings.version = 1;
   }
-  // FIXME: We incorrectly assumed that a map serialized to
-  // json would be read as a map rather than an object. Manually
-  // convert from an object to a map.
-  if ('report' in settings.reportCategories) {
+  // Maps serialized to JSON round-trip as plain objects, not Maps.
+  // Convert any non-Map value back to a Map.
+  if (!(settings.reportCategories instanceof Map)) {
     const reportCategories = new Map();
-    reportCategories.set('report', settings.reportCategories['report']);
+    if ('report' in settings.reportCategories) {
+      reportCategories.set('report', settings.reportCategories['report']);
+    }
     settings.reportCategories = reportCategories;
   }
   if (settings.version < 2) {
@@ -128,7 +129,11 @@ export const saveSettingsToDropbox = (): ThunkAction<
       accessToken: state.auth.dropboxAccessToken,
     });
     let filesCommitInfo = {
-      contents: JSON.stringify(state.settings.settings, null, 2),
+      contents: JSON.stringify(
+        state.settings.settings,
+        (_key, value) => (value instanceof Map ? Object.fromEntries(value) : value),
+        2
+      ),
       path: '/spent tracker/settings.json',
       mode: { '.tag': 'overwrite' } as Dropbox.files.WriteModeOverwrite,
       autorename: false,
