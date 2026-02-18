@@ -1,3 +1,4 @@
+import Tooltip from '@mui/material/Tooltip';
 import { Theme } from '@mui/material/styles';
 import CheckBoxIcon from '@mui/icons-material/CheckBox';
 import * as React from 'react';
@@ -34,6 +35,7 @@ export const useStyles = makeStyles()((theme: Theme) => ({
       '& .y': {
         display: 'none',
       },
+      cursor: 'pointer',
     },
   },
   description: {
@@ -120,12 +122,18 @@ class TransactionInner extends React.Component<
         {this.props.hideDate ? (
           ''
         ) : (
-          <div className={classes.date}>
-            <span className="y">
-              {this.props.transaction.date.substr(0, 5)}
-            </span>
-            {this.props.transaction.date.substr(5)}
-          </div>
+          <Tooltip
+            title={this.props.transaction.date.substr(0, 4)}
+            enterTouchDelay={0}
+            leaveTouchDelay={2000}
+          >
+            <div className={classes.date}>
+              <span className="y">
+                {this.props.transaction.date.substr(0, 5)}
+              </span>
+              {this.props.transaction.date.substr(5)}
+            </div>
+          </Tooltip>
         )}
         {this.props.amountFragment ? (
           this.props.amountFragment
