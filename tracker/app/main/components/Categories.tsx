@@ -54,6 +54,7 @@ const useStyles = makeStyles()((theme: Theme) => ({
   summaryText: {
     flexGrow: 1,
     minWidth: 0,
+    overflow: 'hidden',
   },
   categoryName: {},
   tagsPreview: {
@@ -145,7 +146,10 @@ class CategoriesInner extends React.Component<
             const tagInput = newTagInputs[name] || '';
             return (
               <Accordion key={name} disableGutters>
-                <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+                <AccordionSummary
+                  expandIcon={<ExpandMoreIcon />}
+                  sx={{ '& .MuiAccordionSummary-content': { minWidth: 0 } }}
+                >
                   <div className={classes.summaryContent}>
                     <span className={classes.emoji}>{def.emoji}</span>
                     <div className={classes.summaryText}>
