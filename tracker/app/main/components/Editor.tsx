@@ -12,6 +12,7 @@ import { connect } from 'react-redux';
 import { ThunkDispatch } from 'redux-thunk';
 import * as Transactions from '../../transactions';
 import { CloudState, IAppState } from '../model';
+import ClassifyDialog from './ClassifyDialog';
 import EditorMenuBar from './EditorMenuBar';
 
 const useStyles = makeStyles()((_theme: Theme) => ({
@@ -93,6 +94,7 @@ interface IEditorState {
   tagFilters: string[];
   searchQuery: string;
   isAddDialogOpen: boolean;
+  isClassifyOpen: boolean;
 }
 
 interface IEditorInnerProps extends IEditorProps {
@@ -115,6 +117,7 @@ class EditorInner extends React.Component<IEditorInnerProps, IEditorState> {
       tagFilters: [],
       searchQuery: '',
       isAddDialogOpen: false,
+      isClassifyOpen: false,
     };
   }
 
@@ -173,6 +176,7 @@ class EditorInner extends React.Component<IEditorInnerProps, IEditorState> {
           onSelectedMergeSaveClick={this.handleMergeSelectedTransactions}
           onSelectedDeleteClick={this.handleDeleteTransactions}
           onSelectedSplitSaveClick={this.handleSplitTransaction}
+          onClassifyClick={() => this.setState({ isClassifyOpen: true })}
         />
 
         <div className={classes.controls}>
@@ -226,6 +230,15 @@ class EditorInner extends React.Component<IEditorInnerProps, IEditorState> {
             <Transactions.AddTransactionDialog
               onClose={() => this.setState({ isAddDialogOpen: false })}
               onSaveChanges={this.handleAddTransaction}
+            />
+          ) : undefined}
+          {this.state.isClassifyOpen ? (
+            <ClassifyDialog
+              open={true}
+              transactions={this.props.transactions.filter(t => t.tags.length === 0)}
+              allTransactions={this.props.transactions}
+              onSave={this.handleEditTransaction}
+              onClose={() => this.setState({ isClassifyOpen: false })}
             />
           ) : undefined}
         </div>

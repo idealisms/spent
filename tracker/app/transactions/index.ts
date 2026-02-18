@@ -1,4 +1,5 @@
 import * as TransactionsActions from './actions';
+import * as classifyUtils from './classifyUtils';
 import AddTransactionDialog from './components/AddTransactionDialog';
 import BatchEditTagsDialog, {
   BatchEditTagsAction,
@@ -20,6 +21,7 @@ export {
   AddTransactionDialog,
   BatchEditTagsDialog,
   BatchEditTagsAction,
+  classifyUtils,
   DEFAULT_CATEGORIES,
 };
 export { EditTransactionDialog };

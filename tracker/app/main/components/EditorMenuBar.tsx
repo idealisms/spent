@@ -3,6 +3,7 @@ import IconButton from '@mui/material/IconButton';
 import { Theme } from '@mui/material/styles';
 import Tooltip from '@mui/material/Tooltip';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import AutoFixHighIcon from '@mui/icons-material/AutoFixHigh';
 import CallMergeIcon from '@mui/icons-material/CallMerge';
 import CallSplitIcon from '@mui/icons-material/CallSplit';
 import CloudDoneIcon from '@mui/icons-material/CloudDone';
@@ -50,6 +51,7 @@ interface IEditorMenuBarProps {
   onSelectedSplitSaveClick: (
     transactions: Map<string, Transactions.ITransaction>
   ) => void;
+  onClassifyClick: () => void;
 }
 
 interface IEditorMenuBarState {
@@ -164,6 +166,14 @@ class EditorMenuBarInner extends React.Component<
       </span>
     ) : (
       <span>
+        <Tooltip title="Classify untagged">
+          <IconButton
+            className={classes.whiteIconButton}
+            onClick={this.props.onClassifyClick}
+          >
+            <AutoFixHighIcon />
+          </IconButton>
+        </Tooltip>
         <IconButton
           className={classes.whiteIconButton}
           disabled={this.props.cloudState != CloudState.Modified}
