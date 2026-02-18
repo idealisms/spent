@@ -51,8 +51,14 @@ const useStyles = makeStyles()((theme: Theme) => ({
     marginRight: theme.spacing(1),
     flexShrink: 0,
   },
-  categoryName: {
+  summaryText: {
     flexGrow: 1,
+    minWidth: 0,
+  },
+  categoryName: {},
+  tagsPreview: {
+    color: theme.palette.text.secondary,
+    fontSize: '0.75rem',
   },
   tagsContainer: {
     display: 'flex',
@@ -142,9 +148,14 @@ class CategoriesInner extends React.Component<
                 <AccordionSummary expandIcon={<ExpandMoreIcon />}>
                   <div className={classes.summaryContent}>
                     <span className={classes.emoji}>{def.emoji}</span>
-                    <Typography className={classes.categoryName}>
-                      {name}
-                    </Typography>
+                    <div className={classes.summaryText}>
+                      <Typography className={classes.categoryName}>
+                        {name}
+                      </Typography>
+                      <Typography className={classes.tagsPreview} noWrap>
+                        {def.tags.join(', ')}
+                      </Typography>
+                    </div>
                   </div>
                   <IconButton
                     size="small"
