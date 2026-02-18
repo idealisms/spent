@@ -4,7 +4,6 @@ import AccordionSummary from '@mui/material/AccordionSummary';
 import Button from '@mui/material/Button';
 import Chip from '@mui/material/Chip';
 import IconButton from '@mui/material/IconButton';
-import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
 import { Theme } from '@mui/material/styles';
 import DeleteIcon from '@mui/icons-material/Delete';
@@ -15,7 +14,7 @@ import { makeStyles } from 'tss-react/mui';
 import * as React from 'react';
 import { connect } from 'react-redux';
 import { ThunkDispatch } from 'redux-thunk';
-import { DEFAULT_CATEGORIES, ICategoryDefinition } from '../../transactions/model';
+import { DEFAULT_CATEGORIES, ICategoryDefinition, ITransaction, TagSelect } from '../../transactions';
 import { saveSettingsToDropbox, updateSetting } from '../actions';
 import { CloudState, IAppState } from '../model';
 import {
@@ -68,9 +67,6 @@ const useStyles = makeStyles()((theme: Theme) => ({
     marginBottom: theme.spacing(1),
   },
   addTagRow: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: theme.spacing(1),
     marginTop: theme.spacing(1),
   },
   addCategoryButton: {
@@ -82,6 +78,7 @@ interface ICategoriesOwnProps {}
 interface ICategoriesAppStateProps {
   categories: Record<string, ICategoryDefinition>;
   cloudState: CloudState;
+  allTransactions: ITransaction[];
 }
 interface ICategoriesDispatchProps {
   updateCategories: (cats: Record<string, ICategoryDefinition>) => void;
@@ -95,7 +92,6 @@ interface ICategoriesState {
   dialogOpen: boolean;
   /** null = adding new, string = editing existing */
   dialogCategory: string | null;
-  newTagInputs: Record<string, string>;
 }
 
 interface ICategoriesInnerProps extends ICategoriesProps {
@@ -111,13 +107,12 @@ class CategoriesInner extends React.Component<
     this.state = {
       dialogOpen: false,
       dialogCategory: null,
-      newTagInputs: {},
     };
   }
 
   public render(): React.ReactElement {
-    const { categories, cloudState, classes } = this.props;
-    const { dialogOpen, dialogCategory, newTagInputs } = this.state;
+    const { categories, cloudState, allTransactions, classes } = this.props;
+    const { dialogOpen, dialogCategory } = this.state;
 
     const sortedNames = Object.keys(categories).sort((a, b) => {
       if (a === 'Other') { return 1; }
@@ -143,7 +138,15 @@ class CategoriesInner extends React.Component<
         <div className={classes.scrollable}>
           {sortedNames.map(name => {
             const def = categories[name];
-            const tagInput = newTagInputs[name] || '';
+            // Build filtered transactions: exclude tags used in other categories
+            const tagsElsewhere = new Set(
+              Object.entries(categories)
+                .filter(([k]) => k !== name)
+                .flatMap(([, d]) => d.tags)
+            );
+            const filteredTransactions = allTransactions
+              .map(t => ({ ...t, tags: t.tags.filter(tag => !tagsElsewhere.has(tag)) }))
+              .filter(t => t.tags.length > 0);
             return (
               <Accordion key={name} disableGutters>
                 <AccordionSummary
@@ -199,32 +202,20 @@ class CategoriesInner extends React.Component<
                     ))}
                   </div>
                   <div className={classes.addTagRow}>
-                    <TextField
-                      size="small"
-                      label="New tag"
-                      value={tagInput}
-                      onChange={e =>
-                        this.setState(prev => ({
-                          newTagInputs: {
-                            ...prev.newTagInputs,
-                            [name]: e.target.value,
-                          },
-                        }))
-                      }
-                      onKeyDown={e => {
-                        if (e.key === 'Enter') {
-                          this.handleAddTag(name, tagInput);
+                    <TagSelect
+                      allowNewTags={true}
+                      hideCategories={true}
+                      transactions={filteredTransactions}
+                      value={[]}
+                      placeholder="Add a tag..."
+                      onChange={tags => {
+                        let updated = this.props.categories;
+                        for (const tag of tags) {
+                          updated = addTag(updated, name, tag);
                         }
+                        this.props.updateCategories(updated);
                       }}
                     />
-                    <Button
-                      variant="outlined"
-                      size="small"
-                      onClick={() => this.handleAddTag(name, tagInput)}
-                      disabled={!tagInput.trim()}
-                    >
-                      Add
-                    </Button>
                   </div>
                 </AccordionDetails>
               </Accordion>
@@ -254,13 +245,6 @@ class CategoriesInner extends React.Component<
     );
   }
 
-  private handleAddTag = (categoryName: string, tag: string) => {
-    this.props.updateCategories(addTag(this.props.categories, categoryName, tag));
-    this.setState(prev => ({
-      newTagInputs: { ...prev.newTagInputs, [categoryName]: '' },
-    }));
-  };
-
   private handleDialogSave = (name: string, emoji: string) => {
     const { categories, dialogCategory } = { ...this.props, ...this.state };
     let updated: Record<string, ICategoryDefinition>;
@@ -282,6 +266,7 @@ function CategoriesWrapper(props: ICategoriesProps) {
 const mapStateToProps = (state: IAppState): ICategoriesAppStateProps => ({
   categories: state.settings.settings.categories ?? DEFAULT_CATEGORIES,
   cloudState: state.settings.cloudState,
+  allTransactions: state.transactions.transactions,
 });
 
 const mapDispatchToProps = (
