@@ -43,7 +43,8 @@ interface IMergeTransactionDialogState {
   transactions: ITransaction[];
 }
 
-interface IMergeTransactionDialogInnerProps extends IMergeTransactionDialogProps {
+interface IMergeTransactionDialogInnerProps
+  extends IMergeTransactionDialogProps {
   classes: ReturnType<typeof useStyles>['classes'];
 }
 

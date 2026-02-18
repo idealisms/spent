@@ -1,5 +1,5 @@
 import { combineReducers, Reducer } from 'redux';
-import { transactionsReducer } from '../transactions';
+import { DEFAULT_CATEGORIES, transactionsReducer } from '../transactions';
 import { authReducer } from '../auth/reducers';
 import { ActionType, SettingsAction } from './actions';
 import { getDefaultCategories } from './components/Report';
@@ -21,6 +21,7 @@ const initialSettingsState: ISettingsState = {
         exclude: [],
       },
     },
+    categories: DEFAULT_CATEGORIES,
   },
 };
 

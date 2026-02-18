@@ -3,6 +3,7 @@ import { ThunkAction } from 'redux-thunk';
 import { CloudState, IAppState, ISettings, SETTINGS_VERSION } from './model';
 import { AuthAction, dropboxDownloadCompleted } from '../auth/actions';
 import { AuthStatus } from '../auth/model';
+import { DEFAULT_CATEGORIES } from '../transactions';
 
 // Action types
 export enum ActionType {
@@ -46,7 +47,7 @@ function upgradeIfNecessary(settings: ISettings) {
         ['report', settings.reportCategories],
       ]);
     }
-    settings.version = SETTINGS_VERSION;
+    settings.version = 1;
   }
   // FIXME: We incorrectly assumed that a map serialized to
   // json would be read as a map rather than an object. Manually
@@ -55,6 +56,11 @@ function upgradeIfNecessary(settings: ISettings) {
     const reportCategories = new Map();
     reportCategories.set('report', settings.reportCategories['report']);
     settings.reportCategories = reportCategories;
+  }
+  if (settings.version < 2) {
+    // Populate categories from code defaults.
+    settings.categories = DEFAULT_CATEGORIES;
+    settings.version = SETTINGS_VERSION;
   }
 }
 

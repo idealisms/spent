@@ -7,8 +7,8 @@ const Login: React.FC = () => {
   return (
     <BaseNoNav>
       <div>
-        📈 Spent is a tool for tracking money being spent. It is a method
-        for budgeting based on an annual spending target.
+        📈 Spent is a tool for tracking money being spent. It is a method for
+        budgeting based on an annual spending target.
       </div>
 
       <div style={{ marginTop: '16px' }}>

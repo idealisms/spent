@@ -1,4 +1,4 @@
-import { ITransactionsState } from '../transactions';
+import { ICategoryDefinition, ITransactionsState } from '../transactions';
 import { IAuthState } from '../auth/model';
 
 export enum CloudState {
@@ -76,7 +76,7 @@ export interface ISpendTarget {
 // Removed in version 1.
 type DeprecatedReportCategories = IReportNode[];
 
-export const SETTINGS_VERSION = 1;
+export const SETTINGS_VERSION = 2;
 
 export interface ISettings {
   version: number;
@@ -84,6 +84,8 @@ export interface ISettings {
   dailySpendTarget: IDailySpendTarget;
   /** These are shown on the Monthly page. */
   spendTargets: ISpendTarget[];
+  /** Category definitions: name → { emoji, tags }. Populated from defaults if absent. */
+  categories?: Record<string, ICategoryDefinition>;
 }
 
 export interface ISettingsState {

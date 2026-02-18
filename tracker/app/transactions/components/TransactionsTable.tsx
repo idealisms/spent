@@ -149,7 +149,8 @@ class TransactionsTableInner extends React.Component<
   };
 }
 
-export interface ITransactionsTablePublicProps extends Omit<ITransactionsTableProps, 'classes'> {
+export interface ITransactionsTablePublicProps
+  extends Omit<ITransactionsTableProps, 'classes'> {
   classes?: Partial<ReturnType<typeof useStyles>['classes']>;
 }
 
@@ -158,8 +159,11 @@ function TransactionsTable(props: ITransactionsTablePublicProps) {
   const classes = Object.fromEntries(
     Object.keys(defaultClasses).map(key => [
       key,
-      cx(defaultClasses[key as keyof typeof defaultClasses], props.classes?.[key as keyof typeof defaultClasses]),
-    ]),
+      cx(
+        defaultClasses[key as keyof typeof defaultClasses],
+        props.classes?.[key as keyof typeof defaultClasses]
+      ),
+    ])
   ) as typeof defaultClasses;
   return <TransactionsTableInner {...props} classes={classes} />;
 }

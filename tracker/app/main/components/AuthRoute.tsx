@@ -26,10 +26,7 @@ const AuthRoute: React.FC<IAuthRouteProps> = ({ children }) => {
     }
   }, [authStatus, dispatch]);
 
-  if (
-    authStatus === AuthStatus.INIT ||
-    authStatus === AuthStatus.CHECKING
-  ) {
+  if (authStatus === AuthStatus.INIT || authStatus === AuthStatus.CHECKING) {
     return (
       <BaseNoNav>
         <div>Loading...</div>

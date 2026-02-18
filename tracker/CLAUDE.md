@@ -19,6 +19,7 @@ yarn prettier     # Format code
 **Stack:** React 18, Redux 5, TypeScript 5, MUI 7, connected-react-router, Dropbox API
 
 **Redux State Shape:**
+
 - `router` - React Router location state
 - `auth` - Dropbox OAuth tokens
 - `settings` - Spend targets, report categories, cloud sync state
@@ -39,6 +40,7 @@ app/
 ```
 
 Each module follows the pattern:
+
 - `model.ts` - TypeScript interfaces and state shape
 - `actions.ts` - Action creators and thunks
 - `reducers.ts` - Redux reducer
@@ -47,14 +49,16 @@ Each module follows the pattern:
 ## Key Patterns
 
 **Component Props Pattern:**
+
 ```typescript
 interface IOwnProps {}
-interface IAppStateProps {}        // mapStateToProps
-interface IDispatchProps {}        // mapDispatchToProps
+interface IAppStateProps {} // mapStateToProps
+interface IDispatchProps {} // mapDispatchToProps
 type IProps = IOwnProps & IAppStateProps & IDispatchProps;
 ```
 
 **Styling:** Uses `tss-react/mui` with `makeStyles()` hook:
+
 ```typescript
 const useStyles = makeStyles()((theme: Theme) => ({
   root: { ... }
@@ -66,6 +70,7 @@ const useStyles = makeStyles()((theme: Theme) => ({
 ## Routes
 
 Defined in `app/main/components/RoutePaths.ts`:
+
 - `/login` - Dropbox login
 - `/auth` - OAuth callback
 - `/` - Daily spending view
@@ -76,6 +81,7 @@ Defined in `app/main/components/RoutePaths.ts`:
 ## Testing
 
 Tests live in `__test__/` directories. Run a single test file:
+
 ```bash
 yarn test -- app/transactions/__test__/utils.spec.ts
 ```

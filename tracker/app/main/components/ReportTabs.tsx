@@ -93,10 +93,7 @@ class ReportTabsInner extends React.PureComponent<
         <Tabs
           className={classes.tabs}
           value={this.state.tabIndex}
-          onChange={(
-            _event: React.SyntheticEvent,
-            tabIndex: number
-          ) => {
+          onChange={(_event: React.SyntheticEvent, tabIndex: number) => {
             this.setState({ tabIndex });
           }}
           variant="scrollable"
@@ -120,10 +117,7 @@ class ReportTabsInner extends React.PureComponent<
     let classes = this.props.classes;
     let columnName = tabData.columnName;
     tabs.push(
-      <Tab
-        key={`tab-${columnName}-cat`}
-        label={`${columnName} Categories`}
-      />,
+      <Tab key={`tab-${columnName}-cat`} label={`${columnName} Categories`} />,
       <Tab
         key={`tab-${columnName}-uncat`}
         label={`${columnName} Uncategorized`}

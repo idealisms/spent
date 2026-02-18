@@ -182,7 +182,9 @@ class EditorInner extends React.Component<IEditorInnerProps, IEditorState> {
             minDate={moment(minDate)}
             maxDate={moment(maxDate)}
             value={moment(this.state.startDate)}
-            onChange={(d: moment.Moment | null) => this.handleChangeStartDate(d)}
+            onChange={(d: moment.Moment | null) =>
+              this.handleChangeStartDate(d)
+            }
             format="YYYY-MM-DD"
           />
           <DatePicker
@@ -450,9 +452,7 @@ class EditorInner extends React.Component<IEditorInnerProps, IEditorState> {
       transactionsToKeep.push(transaction);
       selectedTransactions.set(transaction.id, transaction);
     }
-    transactionsToKeep.sort(
-      Transactions.TransactionUtils.compareTransactions
-    );
+    transactionsToKeep.sort(Transactions.TransactionUtils.compareTransactions);
     this.props.updateTransactions(transactionsToKeep);
     this.setState({
       selectedTransactions,
@@ -466,16 +466,17 @@ class EditorInner extends React.Component<IEditorInnerProps, IEditorState> {
   };
 
   // eslint-disable-next-line @typescript-eslint/member-ordering
-  private filterTransactions: filterTransactionsFunction = memoize<
-    filterTransactionsFunction
-  >((transactions, startDate, endDate, tagFilters, searchQuery) => {
-    return Transactions.TransactionUtils.filterTransactions(transactions, {
-      startDate: startDate || this.state.startDate,
-      endDate: endDate || this.state.endDate,
-      tagsIncludeAll: new Array(...tagFilters),
-      searchQuery,
-    });
-  });
+  private filterTransactions: filterTransactionsFunction =
+    memoize<filterTransactionsFunction>(
+      (transactions, startDate, endDate, tagFilters, searchQuery) => {
+        return Transactions.TransactionUtils.filterTransactions(transactions, {
+          startDate: startDate || this.state.startDate,
+          endDate: endDate || this.state.endDate,
+          tagsIncludeAll: new Array(...tagFilters),
+          searchQuery,
+        });
+      }
+    );
 }
 
 function EditorWrapper(props: IEditorProps) {

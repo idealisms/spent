@@ -9,8 +9,8 @@ import Select, {
 } from 'react-select';
 import CreatableSelect from 'react-select/creatable';
 import { IAppState } from '../../main';
-import { ITransaction, TAG_TO_CATEGORY } from '../model';
-import { categoryToEmoji } from '../utils';
+import { ITransaction } from '../model';
+import { buildCategoryEmojiMap, buildTagToCategoryMap } from '../utils';
 
 type TagOption = { label: string; value: string };
 
@@ -90,6 +90,8 @@ interface ITagSelectPassThroughProps {
 }
 interface ITagSelectAppStateProps {
   allTransactions: ITransaction[];
+  tagToCategory: Map<string, string>;
+  categoryEmoji: Map<string, string>;
 }
 type ITagSelectProps = ITagSelectOwnProps &
   ITagSelectPassThroughProps &
@@ -100,7 +102,10 @@ interface ITagSelectInnerProps extends ITagSelectProps {
   classes: ReturnType<typeof useStyles>['classes'];
 }
 
-class TagSelectInner extends React.Component<ITagSelectInnerProps, ITagSelectState> {
+class TagSelectInner extends React.Component<
+  ITagSelectInnerProps,
+  ITagSelectState
+> {
   public render(): React.ReactElement<Record<string, unknown>> {
     let transactions = this.props.transactions || this.props.allTransactions;
 
@@ -131,7 +136,9 @@ class TagSelectInner extends React.Component<ITagSelectInnerProps, ITagSelectSta
         control: (base, state) => ({
           ...base,
           padding: '9.5px 0',
-          ...(state.isFocused ? { borderColor: '#2e7d32', boxShadow: '0 0 0 1px #2e7d32' } : {}),
+          ...(state.isFocused
+            ? { borderColor: '#2e7d32', boxShadow: '0 0 0 1px #2e7d32' }
+            : {}),
           '&:hover': { borderColor: '#2e7d32' },
         }),
         menuPortal: base => ({ ...base, zIndex: 2000 }),
@@ -175,11 +182,13 @@ class TagSelectInner extends React.Component<ITagSelectInnerProps, ITagSelectSta
   ): React.FunctionComponent<OptionProps<TagOption, true>> => {
     let hideCategories = this.props.hideCategories;
     let showCounts = this.props.showCounts;
+    let tagToCategory = this.props.tagToCategory;
+    let categoryEmoji = this.props.categoryEmoji;
     let renderChild = (tag: string): JSX.Element => {
       let categoryNode: JSX.Element | undefined;
       if (!hideCategories) {
-        let category = TAG_TO_CATEGORY.get(tag);
-        let emoji = category ? categoryToEmoji(category) : '';
+        let categoryName = tagToCategory.get(tag);
+        let emoji = categoryName ? categoryEmoji.get(categoryName) || '' : '';
         categoryNode = <span className="cat">{emoji}</span>;
       }
       let countNode: JSX.Element | undefined;
@@ -200,23 +209,19 @@ class TagSelectInner extends React.Component<ITagSelectInnerProps, ITagSelectSta
     const OptionComponent: React.FunctionComponent<
       OptionProps<TagOption, true>
     > = props => {
-      const {
-        isDisabled,
-        isFocused,
-        isSelected,
-        innerRef,
-        innerProps,
-      } = props;
+      const { isDisabled, isFocused, isSelected, innerRef, innerProps } = props;
       let classNames = classes.option;
-      if (isFocused) { classNames += ' option--is-focused'; }
-      if (isSelected) { classNames += ' option--is-selected'; }
-      if (isDisabled) { classNames += ' option--is-disabled'; }
+      if (isFocused) {
+        classNames += ' option--is-focused';
+      }
+      if (isSelected) {
+        classNames += ' option--is-selected';
+      }
+      if (isDisabled) {
+        classNames += ' option--is-disabled';
+      }
       return (
-        <div
-          ref={innerRef}
-          className={classNames}
-          {...innerProps}
-        >
+        <div ref={innerRef} className={classNames} {...innerProps}>
           {renderChild(props.label)}
         </div>
       );
@@ -230,12 +235,16 @@ class TagSelectInner extends React.Component<ITagSelectInnerProps, ITagSelectSta
   > => {
     let classes = this.props.classes;
     let hideCategories = this.props.hideCategories;
+    let tagToCategory = this.props.tagToCategory;
+    let categoryEmoji = this.props.categoryEmoji;
     const MultiValueLabelComponent: React.FunctionComponent<
       MultiValueGenericProps<TagOption, true>
     > = props => {
-      let category = TAG_TO_CATEGORY.get(props.data.label);
+      let categoryName = tagToCategory.get(props.data.label);
       let emoji =
-        !hideCategories && category ? categoryToEmoji(category) + ' ' : '';
+        !hideCategories && categoryName
+          ? (categoryEmoji.get(categoryName) || '') + ' '
+          : '';
       // eslint-disable-next-line @typescript-eslint/naming-convention, @typescript-eslint/no-unused-vars
       let { className, css, ...restInnerProps } = props.innerProps as any;
       return (
@@ -255,8 +264,13 @@ function TagSelectWrapper(props: ITagSelectProps) {
   return <TagSelectInner {...props} classes={classes} />;
 }
 
-const mapStateToProps = (state: IAppState): ITagSelectAppStateProps => ({
-  allTransactions: state.transactions.transactions,
-});
+const mapStateToProps = (state: IAppState): ITagSelectAppStateProps => {
+  const cats = state.settings.settings.categories!;
+  return {
+    allTransactions: state.transactions.transactions,
+    tagToCategory: buildTagToCategoryMap(cats),
+    categoryEmoji: buildCategoryEmojiMap(cats),
+  };
+};
 
 export default connect(mapStateToProps, {})(TagSelectWrapper);

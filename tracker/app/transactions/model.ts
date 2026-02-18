@@ -1,90 +1,69 @@
 import { CloudState } from '../main/model';
 
-// If this were to move into Settings, we would need to also
-// move the mappings to emoji.
-export enum Category {
-  Bank,
-  Car,
-  Cash,
-  Child,
-  Clothes,
-  Entertainment,
-  Gift,
-  Grocery,
-  Home,
-  HomeImprovement,
-  HomeAndElectronics,
-  Income,
-  Insurance,
-  Medical,
-  PersonalCare,
-  RecurringExpenses,
-  Restaurant,
-  Taxes,
-  Transit,
-  TravelExpenses,
-  Vitamins,
-
-  Other,
+export interface ICategoryDefinition {
+  emoji: string;
+  tags: string[];
 }
 
-// TODO: Move into settings.
-export const TAG_TO_CATEGORY: Map<string, Category> = new Map([
-  ['bank transfer', Category.Bank],
-  ['credit card', Category.Bank],
-  ['car', Category.Car],
-  ['atm', Category.Cash],
-  ['child', Category.Child],
-  ['clothes', Category.Clothes],
-  ['dry cleaner', Category.Clothes],
-  ['shoes', Category.Clothes],
-  ['bike', Category.Entertainment],
-  ['books', Category.Entertainment],
-  ['entertainment', Category.Entertainment],
-  ['netflix', Category.Entertainment],
-  ['fitness', Category.Entertainment],
-  ['gift', Category.Gift],
-  ['donation', Category.Gift],
-  ['grocery', Category.Grocery],
-  ['hoa', Category.Home],
-  ['mortgage', Category.Home],
-  ['home improvement', Category.HomeImprovement],
-  ['art supplies', Category.HomeAndElectronics],
-  ['art', Category.HomeAndElectronics],
-  ['electronics', Category.HomeAndElectronics],
-  ['flowers', Category.HomeAndElectronics],
-  ['furniture', Category.HomeAndElectronics],
-  ['household goods', Category.HomeAndElectronics],
-  ['printing', Category.HomeAndElectronics], // Or maybe RecurringExpenses renamed as ServiceFee?
-  ['plants', Category.HomeAndElectronics],
-  ['shipping', Category.HomeAndElectronics], // Or maybe RecurringExpenses renamed as ServiceFee?
-  ['credit card reward', Category.Income],
-  ['dividend', Category.Income],
-  ['income', Category.Income],
-  ['interest', Category.Income],
-  ['paycheck', Category.Income],
-  ['settlement', Category.Income],
-  ['dental', Category.Insurance],
-  ['health', Category.Insurance],
-  ['homeowners', Category.Insurance],
-  ['jewelry', Category.Insurance],
-  ['umbrella', Category.Insurance],
-  ['vision', Category.Insurance],
-  ['medical', Category.Medical],
-  ['personal care', Category.PersonalCare],
-  ['utility', Category.RecurringExpenses],
-  ['phone service', Category.RecurringExpenses],
-  ['internet', Category.RecurringExpenses],
-  ['restaurant', Category.Restaurant],
-  ['taxes', Category.Taxes],
-  ['transit', Category.Transit],
-  ['taxi', Category.Transit],
-  ['churning', Category.TravelExpenses],
-  ['flight', Category.TravelExpenses],
-  ['lodging', Category.TravelExpenses],
-  ['rail', Category.TravelExpenses],
-  ['vitamins', Category.Vitamins],
-]);
+export const DEFAULT_CATEGORIES: Record<string, ICategoryDefinition> = {
+  Bank: { emoji: '🏦', tags: ['bank transfer', 'credit card'] },
+  Car: { emoji: '🚗', tags: ['car'] },
+  Cash: { emoji: '🏧', tags: ['atm'] },
+  Child: { emoji: '👨‍👩‍👧', tags: ['child'] },
+  Clothes: { emoji: '👚', tags: ['clothes', 'dry cleaner', 'shoes'] },
+  Entertainment: {
+    emoji: '🎟️',
+    tags: ['bike', 'books', 'entertainment', 'netflix', 'fitness'],
+  },
+  Gift: { emoji: '🎁', tags: ['gift', 'donation'] },
+  Grocery: { emoji: '🛒', tags: ['grocery'] },
+  Home: { emoji: '🏠', tags: ['hoa', 'mortgage'] },
+  HomeImprovement: { emoji: '🛠️', tags: ['home improvement'] },
+  HomeAndElectronics: {
+    emoji: '🛍️',
+    tags: [
+      'art supplies',
+      'art',
+      'electronics',
+      'flowers',
+      'furniture',
+      'household goods',
+      'printing',
+      'plants',
+      'shipping',
+    ],
+  },
+  Income: {
+    emoji: '🤑',
+    tags: [
+      'credit card reward',
+      'dividend',
+      'income',
+      'interest',
+      'paycheck',
+      'settlement',
+    ],
+  },
+  Insurance: {
+    emoji: '🛡️',
+    tags: ['dental', 'health', 'homeowners', 'jewelry', 'umbrella', 'vision'],
+  },
+  Medical: { emoji: '👩‍⚕️', tags: ['medical'] },
+  PersonalCare: { emoji: '💆‍', tags: ['personal care'] },
+  RecurringExpenses: {
+    emoji: '🔁',
+    tags: ['utility', 'phone service', 'internet'],
+  },
+  Restaurant: { emoji: '🍽', tags: ['restaurant'] },
+  Taxes: { emoji: '💸', tags: ['taxes'] },
+  Transit: { emoji: '🚇', tags: ['transit', 'taxi'] },
+  TravelExpenses: {
+    emoji: '🛫',
+    tags: ['churning', 'flight', 'lodging', 'rail'],
+  },
+  Vitamins: { emoji: '💊', tags: ['vitamins'] },
+  Other: { emoji: '❓', tags: [] },
+};
 
 export interface ITransaction {
   id: string;

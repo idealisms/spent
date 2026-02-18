@@ -119,9 +119,7 @@ class MonthlyInner extends React.Component<IMonthlyInnerProps, IMonthlyState> {
           <Select
             value={spendTarget ? spendTarget.name : ''}
             onChange={this.handleSelectSpendTarget}
-            input={
-              <OutlinedInput margin="dense" name="Target" />
-            }
+            input={<OutlinedInput margin="dense" name="Target" />}
           >
             {this.props.spendTargets.map(target => (
               <MenuItem value={target.name} key={target.name}>
@@ -293,7 +291,14 @@ function MonthlyWrapper(props: IMonthlyProps) {
   const { classes } = useStyles();
   const location = useLocation();
   const navigateTo = useNavigate();
-  return <MonthlyInner {...props} classes={classes} location={location} navigateTo={navigateTo} />;
+  return (
+    <MonthlyInner
+      {...props}
+      classes={classes}
+      location={location}
+      navigateTo={navigateTo}
+    />
+  );
 }
 
 const mapStateToProps = (state: IAppState): IMonthlyAppStateProps => ({

@@ -162,9 +162,7 @@ class ReportFilterDrawerInner extends React.Component<
         <div className={classes.controls}>
           <TextField
             label="Start date"
-            value={moment(this.props.dateRange.startDate).format(
-              'YYYY-MM-DD'
-            )}
+            value={moment(this.props.dateRange.startDate).format('YYYY-MM-DD')}
             disabled
           />
           <TextField
@@ -307,9 +305,10 @@ class ReportFilterDrawerInner extends React.Component<
     const lastSunday = lastDay.clone().day(-7);
     dateOptions.push({
       name: 'lastweek',
-      chartColumnName: `${lastSunday.format(
-        'MMM D'
-      )} to ${lastDay.clone().add(6, 'day').format('MMM D')}`,
+      chartColumnName: `${lastSunday.format('MMM D')} to ${lastDay
+        .clone()
+        .add(6, 'day')
+        .format('MMM D')}`,
       startDate: lastSunday,
       endDate: lastSunday.clone().add(6, 'day'),
       description: 'Last week (Sun - Sat)',

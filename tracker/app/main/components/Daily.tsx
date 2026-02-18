@@ -105,22 +105,21 @@ class DailyInner extends React.Component<IDailyInnerProps, IDailyState> {
   };
 
   // eslint-disable-next-line @typescript-eslint/member-ordering
-  private filterTransactions: filterTransactionsFunction = memoize<
-    filterTransactionsFunction
-  >((transactions, spendTarget) => {
-    if (!transactions.length || !spendTarget.targets.length) {
-      return [];
-    }
+  private filterTransactions: filterTransactionsFunction =
+    memoize<filterTransactionsFunction>((transactions, spendTarget) => {
+      if (!transactions.length || !spendTarget.targets.length) {
+        return [];
+      }
 
-    let startDate = moment(spendTarget.targets[0].startDate).toDate();
-    let endDate = moment(this.props.transactions[0].date).toDate();
-    return TransactionUtils.filterTransactions(transactions, {
-      startDate,
-      endDate,
-      tagsIncludeAny: spendTarget && spendTarget.tags.include,
-      tagsExcludeAny: spendTarget && spendTarget.tags.exclude,
+      let startDate = moment(spendTarget.targets[0].startDate).toDate();
+      let endDate = moment(this.props.transactions[0].date).toDate();
+      return TransactionUtils.filterTransactions(transactions, {
+        startDate,
+        endDate,
+        tagsIncludeAny: spendTarget && spendTarget.tags.include,
+        tagsExcludeAny: spendTarget && spendTarget.tags.exclude,
+      });
     });
-  });
 }
 
 function DailyWrapper(props: IDailyProps) {

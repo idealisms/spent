@@ -9,9 +9,8 @@ import { connect } from 'react-redux';
 import { ThunkDispatch } from 'redux-thunk';
 import memoize from 'memoize-one';
 import {
-  Category,
+  DEFAULT_CATEGORIES,
   ITransaction,
-  TAG_TO_CATEGORY,
   TransactionUtils,
 } from '../../transactions';
 import { saveSettingsToDropbox, updateSetting } from '../actions';
@@ -606,19 +605,9 @@ const mapDispatchToProps = (
 });
 export default connect(mapStateToProps, mapDispatchToProps)(ReportWrapper);
 
-export const getDefaultCategories = (): IReportNode[] => {
-  let lookup = new Map<string, IReportNode>();
-  TAG_TO_CATEGORY.forEach((category, tag) => {
-    let categoryName = Category[category];
-    let node = lookup.get(categoryName) || {
-      title: categoryName,
-      tags: [],
-      subcategories: [],
-    };
-    node.tags.push(tag);
-    lookup.set(categoryName, node);
-  });
-  let categories: IReportNode[] = [];
-  lookup.forEach(node => categories.push(node));
-  return categories;
-};
+export const getDefaultCategories = (): IReportNode[] =>
+  Object.entries(DEFAULT_CATEGORIES).map(([name, def]) => ({
+    title: name,
+    tags: def.tags,
+    subcategories: [],
+  }));

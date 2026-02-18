@@ -119,9 +119,7 @@ class BatchEditTagsDialogInner extends React.Component<
               }
             />
           </div>
-          <TransactionsTable
-            classes={{ root: classes.transactionsTableRoot }}
-          >
+          <TransactionsTable classes={{ root: classes.transactionsTableRoot }}>
             {rows}
           </TransactionsTable>
         </DialogContent>
@@ -193,9 +191,7 @@ class BatchEditTagsDialogInner extends React.Component<
       return true;
     }
     if (this.state.action != BatchEditTagsAction.SetTags) {
-      let numTags = Array.isArray(this.state.tags)
-        ? this.state.tags.length
-        : 0;
+      let numTags = Array.isArray(this.state.tags) ? this.state.tags.length : 0;
       if (numTags == 0) {
         return true;
       }

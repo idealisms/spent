@@ -84,7 +84,8 @@ class TransactionsTableHeadingRowInner extends React.Component<
   }
 }
 
-export interface ITransactionsTableHeadingRowPublicProps extends Omit<ITransactionsTableHeadingRowProps, 'classes'> {
+export interface ITransactionsTableHeadingRowPublicProps
+  extends Omit<ITransactionsTableHeadingRowProps, 'classes'> {
   classes?: Partial<ReturnType<typeof useRowStyles>['classes']>;
 }
 
@@ -95,8 +96,11 @@ function TransactionsTableHeadingRow(
   const classes = Object.fromEntries(
     Object.keys(defaultClasses).map(key => [
       key,
-      cx(defaultClasses[key as keyof typeof defaultClasses], props.classes?.[key as keyof typeof defaultClasses]),
-    ]),
+      cx(
+        defaultClasses[key as keyof typeof defaultClasses],
+        props.classes?.[key as keyof typeof defaultClasses]
+      ),
+    ])
   ) as typeof defaultClasses;
   return <TransactionsTableHeadingRowInner {...props} classes={classes} />;
 }

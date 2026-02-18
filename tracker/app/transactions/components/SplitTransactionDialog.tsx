@@ -44,7 +44,8 @@ type ISplitTransactionDialogState = {
   isEditing: boolean;
 };
 
-interface ISplitTransactionDialogInnerProps extends ISplitTransactionDialogProps {
+interface ISplitTransactionDialogInnerProps
+  extends ISplitTransactionDialogProps {
   classes: ReturnType<typeof useStyles>['classes'];
 }
 

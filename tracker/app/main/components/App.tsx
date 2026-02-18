@@ -32,10 +32,38 @@ const App: React.FC = () => {
       <Routes>
         <Route path={RoutePaths.HomePage} element={<Login />} />
         <Route path={RoutePaths.AuthPage} element={<Auth />} />
-        <Route path={RoutePaths.DailyPage} element={<AuthRoute><Daily /></AuthRoute>} />
-        <Route path={RoutePaths.EditorPage} element={<AuthRoute><Editor /></AuthRoute>} />
-        <Route path={RoutePaths.MonthlyPage} element={<AuthRoute><Monthly /></AuthRoute>} />
-        <Route path={RoutePaths.ReportPage} element={<AuthRoute><Report /></AuthRoute>} />
+        <Route
+          path={RoutePaths.DailyPage}
+          element={
+            <AuthRoute>
+              <Daily />
+            </AuthRoute>
+          }
+        />
+        <Route
+          path={RoutePaths.EditorPage}
+          element={
+            <AuthRoute>
+              <Editor />
+            </AuthRoute>
+          }
+        />
+        <Route
+          path={RoutePaths.MonthlyPage}
+          element={
+            <AuthRoute>
+              <Monthly />
+            </AuthRoute>
+          }
+        />
+        <Route
+          path={RoutePaths.ReportPage}
+          element={
+            <AuthRoute>
+              <Report />
+            </AuthRoute>
+          }
+        />
         <Route path="*" element={<NoMatch />} />
       </Routes>
     </>

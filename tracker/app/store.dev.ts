@@ -1,4 +1,9 @@
-import { applyMiddleware, compose, legacy_createStore as createStore, Store } from 'redux';
+import {
+  applyMiddleware,
+  compose,
+  legacy_createStore as createStore,
+  Store,
+} from 'redux';
 import { createLogger } from 'redux-logger';
 import thunkMiddleware from 'redux-thunk';
 import { rootReducer, IAppState } from './main';

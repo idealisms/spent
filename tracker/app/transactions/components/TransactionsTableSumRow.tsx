@@ -134,19 +134,21 @@ class TransactionsTableSumRowInner extends React.Component<
   };
 }
 
-export interface ITransactionsTableSumRowPublicProps extends Omit<ITransactionsTableSumRowProps, 'classes'> {
+export interface ITransactionsTableSumRowPublicProps
+  extends Omit<ITransactionsTableSumRowProps, 'classes'> {
   classes?: Partial<ReturnType<typeof useHeaderStyles>['classes']>;
 }
 
-function TransactionsTableSumRow(
-  props: ITransactionsTableSumRowPublicProps
-) {
+function TransactionsTableSumRow(props: ITransactionsTableSumRowPublicProps) {
   const { classes: defaultClasses, cx } = useHeaderStyles();
   const classes = Object.fromEntries(
     Object.keys(defaultClasses).map(key => [
       key,
-      cx(defaultClasses[key as keyof typeof defaultClasses], props.classes?.[key as keyof typeof defaultClasses]),
-    ]),
+      cx(
+        defaultClasses[key as keyof typeof defaultClasses],
+        props.classes?.[key as keyof typeof defaultClasses]
+      ),
+    ])
   ) as typeof defaultClasses;
   return <TransactionsTableSumRowInner {...props} classes={classes} />;
 }

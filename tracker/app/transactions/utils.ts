@@ -1,5 +1,5 @@
 import moment from 'moment';
-import { Category, ITransaction, TAG_TO_CATEGORY } from './model';
+import { ICategoryDefinition, ITransaction } from './model';
 
 export function shouldExclude(
   transaction: ITransaction,
@@ -61,11 +61,36 @@ export function compareTransactions(
   return lhs.id < rhs.id ? -1 : 1;
 }
 
-export function getCategory(transaction: ITransaction): Category {
-  let categories: Category[] = [];
+export function buildTagToCategoryMap(
+  categories: Record<string, ICategoryDefinition>
+): Map<string, string> {
+  const map = new Map<string, string>();
+  for (const [name, def] of Object.entries(categories)) {
+    for (const tag of def.tags) {
+      map.set(tag, name);
+    }
+  }
+  return map;
+}
+
+export function buildCategoryEmojiMap(
+  categories: Record<string, ICategoryDefinition>
+): Map<string, string> {
+  const map = new Map<string, string>();
+  for (const [name, def] of Object.entries(categories)) {
+    map.set(name, def.emoji);
+  }
+  return map;
+}
+
+export function getCategory(
+  transaction: ITransaction,
+  tagToCategory: Map<string, string>
+): string {
+  let categories: string[] = [];
   for (let tag of transaction.tags) {
-    let category = TAG_TO_CATEGORY.get(tag);
-    if (category != undefined) {
+    let category = tagToCategory.get(tag);
+    if (category !== undefined) {
       if (categories.indexOf(category) === -1) {
         categories.push(category);
       }
@@ -75,62 +100,9 @@ export function getCategory(transaction: ITransaction): Category {
   if (categories.length === 1) {
     return categories[0];
   } else if (categories.length > 1) {
-    throw Error(
-      'multiple categories: ' + categories.map(cat => Category[cat]).join(', ')
-    );
+    throw Error('multiple categories: ' + categories.join(', '));
   }
-  return Category.Other;
-}
-
-export function categoryToEmoji(category: Category): string {
-  switch (category) {
-    case Category.Bank:
-      return '🏦';
-    case Category.Car:
-      return '🚗';
-    case Category.Cash:
-      return '🏧';
-    case Category.Child:
-      return '👨‍👩‍👧';
-    case Category.Clothes:
-      return '👚';
-    case Category.Entertainment:
-      return '🎟️';
-    case Category.Gift:
-      return '🎁';
-    case Category.Grocery:
-      return '🛒';
-    case Category.Home:
-      return '🏠';
-    case Category.HomeImprovement:
-      return '🛠️';
-    case Category.HomeAndElectronics:
-      return '🛍️';
-    case Category.Income:
-      return '🤑';
-    case Category.Insurance:
-      return '🛡️';
-    case Category.Medical:
-      return '👩‍⚕️';
-    case Category.PersonalCare:
-      return '💆‍';
-    case Category.RecurringExpenses:
-      return '🔁';
-    case Category.Restaurant:
-      return '🍽';
-    case Category.Taxes:
-      return '💸';
-    case Category.Transit:
-      return '🚇';
-    case Category.TravelExpenses:
-      return '🛫';
-    case Category.Vitamins:
-      return '💊';
-    case Category.Other:
-      return '❓';
-    default:
-      return '💲';
-  }
+  return 'Other';
 }
 
 export function generateUUID(crypto: Crypto = window.crypto): string {

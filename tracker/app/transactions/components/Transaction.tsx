@@ -1,9 +1,16 @@
 import { Theme } from '@mui/material/styles';
 import CheckBoxIcon from '@mui/icons-material/CheckBox';
 import * as React from 'react';
+import { useSelector } from 'react-redux';
 import { makeStyles } from 'tss-react/mui';
-import { Category, ITransaction } from '../model';
-import { categoryToEmoji, formatAmount, getCategory } from '../utils';
+import { IAppState } from '../../main';
+import { ITransaction } from '../model';
+import {
+  buildCategoryEmojiMap,
+  buildTagToCategoryMap,
+  formatAmount,
+  getCategory,
+} from '../utils';
 
 export const useStyles = makeStyles()((theme: Theme) => ({
   row: {
@@ -73,6 +80,8 @@ export const useStyles = makeStyles()((theme: Theme) => ({
 
 interface ITransactionProps {
   classes: ReturnType<typeof useStyles>['classes'];
+  tagToCategory: Map<string, string>;
+  categoryEmoji: Map<string, string>;
   transaction: ITransaction;
   key?: string;
   isSelected?: boolean;
@@ -89,12 +98,11 @@ class TransactionInner extends React.Component<
   public render(): React.ReactElement<Record<string, unknown>> {
     let classes = this.props.classes;
     let isCredit = this.props.transaction.amount_cents < 0;
-    let categoryEmoji = '🙅';
+    let categoryEmojiStr = '🙅';
     let categoryName = 'error';
     try {
-      let category = this.getCategory();
-      categoryEmoji = categoryToEmoji(category);
-      categoryName = Category[category];
+      categoryName = this.getCategory();
+      categoryEmojiStr = this.props.categoryEmoji.get(categoryName) || '❓';
     } catch (e) {
       console.log(e);
     }
@@ -139,7 +147,7 @@ class TransactionInner extends React.Component<
             }
           }}
         >
-          {this.props.isSelected ? <CheckBoxIcon /> : categoryEmoji}
+          {this.props.isSelected ? <CheckBoxIcon /> : categoryEmojiStr}
         </div>
         <div className={classes.description}>
           {this.props.transaction.description}
@@ -158,12 +166,16 @@ class TransactionInner extends React.Component<
     return formatAmount(this.props.transaction);
   }
 
-  protected getCategory(): Category {
-    return getCategory(this.props.transaction);
+  protected getCategory(): string {
+    return getCategory(this.props.transaction, this.props.tagToCategory);
   }
 }
 
-export interface ITransactionPublicProps extends Omit<ITransactionProps, 'classes'> {
+export interface ITransactionPublicProps
+  extends Omit<
+    ITransactionProps,
+    'classes' | 'tagToCategory' | 'categoryEmoji'
+  > {
   classes?: Partial<ReturnType<typeof useStyles>['classes']>;
 }
 
@@ -172,10 +184,31 @@ function Transaction(props: ITransactionPublicProps) {
   const classes = Object.fromEntries(
     Object.keys(defaultClasses).map(key => [
       key,
-      cx(defaultClasses[key as keyof typeof defaultClasses], props.classes?.[key as keyof typeof defaultClasses]),
-    ]),
+      cx(
+        defaultClasses[key as keyof typeof defaultClasses],
+        props.classes?.[key as keyof typeof defaultClasses]
+      ),
+    ])
   ) as typeof defaultClasses;
-  return <TransactionInner {...props} classes={classes} />;
+  const categoriesRecord = useSelector(
+    (s: IAppState) => s.settings.settings.categories!
+  );
+  const tagToCategory = React.useMemo(
+    () => buildTagToCategoryMap(categoriesRecord),
+    [categoriesRecord]
+  );
+  const categoryEmoji = React.useMemo(
+    () => buildCategoryEmojiMap(categoriesRecord),
+    [categoriesRecord]
+  );
+  return (
+    <TransactionInner
+      {...props}
+      classes={classes}
+      tagToCategory={tagToCategory}
+      categoryEmoji={categoryEmoji}
+    />
+  );
 }
 
 export default Transaction;

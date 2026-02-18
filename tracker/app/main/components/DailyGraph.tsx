@@ -75,7 +75,10 @@ interface IDailyGraphInnerProps extends IDailyGraphProps {
   classes: ReturnType<typeof useStyles>['classes'];
 }
 
-class DailyGraphInner extends React.Component<IDailyGraphInnerProps, IDailyGraphState> {
+class DailyGraphInner extends React.Component<
+  IDailyGraphInnerProps,
+  IDailyGraphState
+> {
   private container: HTMLElement | null = null;
 
   constructor(props: IDailyGraphInnerProps) {
@@ -111,10 +114,7 @@ class DailyGraphInner extends React.Component<IDailyGraphInnerProps, IDailyGraph
   }
 
   public componentDidUpdate(prevProps: IDailyGraphInnerProps): void {
-    if (
-      prevProps.transactions !== this.props.transactions &&
-      this.container
-    ) {
+    if (prevProps.transactions !== this.props.transactions && this.container) {
       this.showEndOfGraph();
     }
   }
@@ -125,12 +125,8 @@ class DailyGraphInner extends React.Component<IDailyGraphInnerProps, IDailyGraph
     // console.time('graph');
     let dataMapByDate = this.buildDataMap();
     // console.timeLog('graph', 'built');
-    let dataAsRows: [
-      Date,
-      number | null,
-      number,
-      string
-    ][] = this.formatDataAsRows(dataMapByDate);
+    let dataAsRows: [Date, number | null, number, string][] =
+      this.formatDataAsRows(dataMapByDate);
     // console.timeEnd('graph');
 
     // We place the chart in a div with horizontal overflow so we can scroll
@@ -299,9 +295,8 @@ class DailyGraphInner extends React.Component<IDailyGraphInnerProps, IDailyGraph
     }
 
     for (let transaction of this.props.transactions) {
-      let spreadDuration = TransactionUtils.getSpreadDurationAsDays(
-        transaction
-      );
+      let spreadDuration =
+        TransactionUtils.getSpreadDurationAsDays(transaction);
       if (this.state.useSpread && spreadDuration !== undefined) {
         let spreadStartDate = moment(transaction.date);
         let spreadEndDate = moment.min(
