@@ -11,6 +11,7 @@ import Typography from '@mui/material/Typography';
 import BarChartIcon from '@mui/icons-material/BarChart';
 import CategoryIcon from '@mui/icons-material/Category';
 import EditIcon from '@mui/icons-material/Edit';
+import LabelIcon from '@mui/icons-material/Label';
 import MenuIcon from '@mui/icons-material/Menu';
 import TimelineIcon from '@mui/icons-material/Timeline';
 import { makeStyles } from 'tss-react/mui';
@@ -184,6 +185,23 @@ class MenuBarWithDrawerInner extends React.Component<
               <ListItemText
                 classes={{ primary: classes.drawerItemText }}
                 primary="Report"
+              />
+            </ListItemButton>
+            <ListItemButton
+              key="Categories"
+              onClick={() => this.handleNavigate(Pages.CategoriesPage)}
+              selected={selectedPage === Pages.CategoriesPage}
+            >
+              <ListItemIcon>
+                <LabelIcon
+                  color={
+                    selectedPage === Pages.CategoriesPage ? 'primary' : 'inherit'
+                  }
+                />
+              </ListItemIcon>
+              <ListItemText
+                classes={{ primary: classes.drawerItemText }}
+                primary="Categories"
               />
             </ListItemButton>
           </List>

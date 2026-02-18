@@ -7,6 +7,7 @@ import Daily from './Daily';
 import Editor from './Editor';
 import Login from './Login';
 import Monthly from './Monthly';
+import Categories from './Categories';
 import Report from './Report';
 import * as RoutePaths from './RoutePaths';
 
@@ -61,6 +62,14 @@ const App: React.FC = () => {
           element={
             <AuthRoute>
               <Report />
+            </AuthRoute>
+          }
+        />
+        <Route
+          path={RoutePaths.CategoriesPage}
+          element={
+            <AuthRoute>
+              <Categories />
             </AuthRoute>
           }
         />
