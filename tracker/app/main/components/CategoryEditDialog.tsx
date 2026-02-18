@@ -63,6 +63,9 @@ export class CategoryEditDialog extends React.Component<
             fullWidth
             value={emoji}
             onChange={e => this.setState({ emoji: e.target.value })}
+            onKeyDown={e => {
+              if (e.key === 'Enter' && canSave) { this.handleSave(); }
+            }}
             error={emoji.length > 0 && !emojiValid}
             helperText={emoji.length > 0 && !emojiValid ? 'Must be a single emoji' : undefined}
           />
