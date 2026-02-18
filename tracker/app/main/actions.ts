@@ -50,13 +50,13 @@ function upgradeIfNecessary(settings: ISettings) {
     settings.version = 1;
   }
   // Maps serialized to JSON round-trip as plain objects, not Maps.
-  // Convert any non-Map value back to a Map.
+  // Convert any non-Map value back to a Map, renaming blank keys to 'report'.
   if (!(settings.reportCategories instanceof Map)) {
-    const reportCategories = new Map();
-    if ('report' in settings.reportCategories) {
-      reportCategories.set('report', settings.reportCategories['report']);
-    }
-    settings.reportCategories = reportCategories;
+    const reportCategories = new Map<string, unknown>();
+    Object.entries(settings.reportCategories).forEach(([k, v]) => {
+      reportCategories.set(k || 'report', v);
+    });
+    settings.reportCategories = reportCategories as Map<string, never>;
   }
   if (settings.version < 2) {
     // Populate categories from code defaults.

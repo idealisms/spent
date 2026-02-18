@@ -366,7 +366,7 @@ class ReportInner extends React.Component<IReportInnerProps, IReportState> {
       .date(31)
       .startOf('day');
 
-    let reportName = this.props.reportCategories.keys().next().value || '';
+    let reportName = this.props.reportCategories.keys().next().value || 'report';
     let reportCategories = this.props.reportCategories.get(reportName) || [];
 
     this.state = {
@@ -406,7 +406,7 @@ class ReportInner extends React.Component<IReportInnerProps, IReportState> {
     let startTime = window.performance.now();
     let classes = this.props.classes;
     // TODO: Handle more reports. Currently we just grab the first on in the map.
-    let reportName = this.props.reportCategories.keys().next().value || '';
+    let reportName = this.props.reportCategories.keys().next().value || 'report';
     let reportCategories = this.props.reportCategories.get(reportName) || [];
 
     let reportData = this.reportDataFactory(
