@@ -9,8 +9,7 @@ import * as React from 'react';
 function isValidEmoji(s: string): boolean {
   if (!s) { return false; }
   // Intl.Segmenter correctly handles multi-codepoint emoji (ZWJ sequences, etc.)
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const segments = [...new (Intl as any).Segmenter().segment(s)];
+  const segments = [...new Intl.Segmenter().segment(s)];
   return segments.length === 1 && /\p{Extended_Pictographic}/u.test(s);
 }
 

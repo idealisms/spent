@@ -14,7 +14,8 @@
     "outDir": "build",
     "allowSyntheticDefaultImports": true,
     "esModuleInterop": true,
-    "skipLibCheck": true
+    "skipLibCheck": true,
+    "lib": ["ES6", "DOM", "DOM.Iterable", "ES2022.Intl"]
   },
   "exclude": ["build", "config", "node_modules", "dev_server.js", "server"]
 }
