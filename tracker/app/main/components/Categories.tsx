@@ -162,6 +162,7 @@ class CategoriesInner extends React.Component<
                     </div>
                   </div>
                   <IconButton
+                    component="span"
                     size="small"
                     onClick={e => {
                       e.stopPropagation();
@@ -171,6 +172,7 @@ class CategoriesInner extends React.Component<
                     <EditIcon fontSize="small" />
                   </IconButton>
                   <IconButton
+                    component="span"
                     size="small"
                     onClick={e => {
                       e.stopPropagation();
