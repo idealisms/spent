@@ -6,6 +6,14 @@ import DialogTitle from '@mui/material/DialogTitle';
 import TextField from '@mui/material/TextField';
 import * as React from 'react';
 
+function isValidEmoji(s: string): boolean {
+  if (!s) { return false; }
+  // Intl.Segmenter correctly handles multi-codepoint emoji (ZWJ sequences, etc.)
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const segments = [...new (Intl as any).Segmenter().segment(s)];
+  return segments.length === 1 && /\p{Extended_Pictographic}/u.test(s);
+}
+
 interface ICategoryEditDialogProps {
   open: boolean;
   name: string;
@@ -41,7 +49,8 @@ export class CategoryEditDialog extends React.Component<
   public render(): React.ReactElement {
     const { open, isNew, onClose } = this.props;
     const { name, emoji } = this.state;
-    const canSave = name.trim().length > 0;
+    const emojiValid = isValidEmoji(emoji);
+    const canSave = name.trim().length > 0 && emojiValid;
 
     return (
       <Dialog open={open} onClose={onClose} fullWidth maxWidth="xs">
@@ -54,6 +63,8 @@ export class CategoryEditDialog extends React.Component<
             fullWidth
             value={emoji}
             onChange={e => this.setState({ emoji: e.target.value })}
+            error={emoji.length > 0 && !emojiValid}
+            helperText={emoji.length > 0 && !emojiValid ? 'Must be a single emoji' : undefined}
           />
           <TextField
             margin="dense"
