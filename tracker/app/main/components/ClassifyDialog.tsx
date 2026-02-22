@@ -72,6 +72,17 @@ class ClassifyDialogInner extends React.Component<
         currentIndex: 0,
         currentTags: this.getSuggestion(0),
       });
+      return;
+    }
+    // After confirming, the confirmed transaction is removed from props.transactions.
+    // Re-evaluate at the same index (which now points to the next transaction).
+    if (prevProps.transactions !== this.props.transactions && this.props.open) {
+      const { currentIndex } = this.state;
+      if (currentIndex >= this.props.transactions.length) {
+        this.props.onClose();
+      } else {
+        this.setState({ currentTags: this.getSuggestion(currentIndex) });
+      }
     }
   }
 
@@ -153,7 +164,9 @@ class ClassifyDialogInner extends React.Component<
   private handleConfirm = () => {
     const transaction = this.props.transactions[this.state.currentIndex];
     this.props.onSave({ ...transaction, tags: this.state.currentTags });
-    this.advance();
+    // Don't advance the index here. The saved transaction will be removed from
+    // props.transactions (now tagged), so the same index naturally points to
+    // the next transaction. componentDidUpdate handles the transition.
   };
 
   private handleSkip = () => {
