@@ -134,6 +134,7 @@ class ClassifyDialogInner extends React.Component<
           />
         </DialogContent>
         <DialogActions>
+          <Button onClick={this.handleBack} disabled={currentIndex === 0}>Back</Button>
           <Button onClick={this.handleSkip}>Skip</Button>
           <Button onClick={this.handleConfirm} variant="contained">
             Confirm
@@ -167,6 +168,14 @@ class ClassifyDialogInner extends React.Component<
     // Don't advance the index here. The saved transaction will be removed from
     // props.transactions (now tagged), so the same index naturally points to
     // the next transaction. componentDidUpdate handles the transition.
+  };
+
+  private handleBack = () => {
+    const prevIndex = this.state.currentIndex - 1;
+    this.setState({
+      currentIndex: prevIndex,
+      currentTags: this.getSuggestion(prevIndex),
+    });
   };
 
   private handleSkip = () => {
