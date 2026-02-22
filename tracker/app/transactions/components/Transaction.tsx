@@ -89,6 +89,7 @@ interface ITransactionProps {
   isSelected?: boolean;
   onCategoryClick?: (transaction: ITransaction) => void;
   hideDate?: boolean;
+  hideCategory?: boolean;
   hideTags?: boolean;
   amountFragment?: JSX.Element;
 }
@@ -142,21 +143,23 @@ class TransactionInner extends React.Component<
             {this.formatAmount()}
           </div>
         )}
-        <div
-          className={
-            classes.category +
-            ' category' +
-            (this.props.onCategoryClick ? ' editable' : '')
-          }
-          title={categoryName}
-          onClick={() => {
-            if (this.props.onCategoryClick) {
-              this.props.onCategoryClick(this.props.transaction);
+        {!this.props.hideCategory && (
+          <div
+            className={
+              classes.category +
+              ' category' +
+              (this.props.onCategoryClick ? ' editable' : '')
             }
-          }}
-        >
-          {this.props.isSelected ? <CheckBoxIcon /> : categoryEmojiStr}
-        </div>
+            title={categoryName}
+            onClick={() => {
+              if (this.props.onCategoryClick) {
+                this.props.onCategoryClick(this.props.transaction);
+              }
+            }}
+          >
+            {this.props.isSelected ? <CheckBoxIcon /> : categoryEmojiStr}
+          </div>
+        )}
         <div className={classes.description}>
           {this.props.transaction.description}
           {this.props.transaction.notes ? (

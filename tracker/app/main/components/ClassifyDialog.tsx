@@ -119,6 +119,7 @@ class ClassifyDialogInner extends React.Component<
             <Transaction
               transaction={transaction}
               hideTags
+              hideCategory
               classes={{
                 row: classes.transactionRow,
                 amount: classes.transactionAmount,
