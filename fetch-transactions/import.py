@@ -119,7 +119,7 @@ JPMORGAN_PATTERNS = {
 USAA_DEPOSIT_PATTERNS = {
     'source': 'email_usaa',
     # From: VANGUARD SELL
-    'description': r'From: (?P<description>[A-Z ]+)',
+    'description': r'From: (?P<description>[A-Za-z ]+)',
     'amount': r'SOMETHING_NOT_IN_THE_EMAIL',
     # You received a deposit for $444.98 to your account ending in 9552.=0D
     'credit amount': r'You received a deposit for [$](?P<amount>[0-9.,]+) to your',
@@ -127,7 +127,7 @@ USAA_DEPOSIT_PATTERNS = {
 USAA2_DEPOSIT_PATTERNS = {
     'source': 'email_usaa',
     # From: JPMorgan Chase
-    'description': r'From: (?P<description>[A-Z ]+)',
+    'description': r'From: (?P<description>[A-Za-z ]+)',
     'amount': r'SOMETHING_NOT_IN_THE_EMAIL',
     # You received a deposit of $444.98 to your account ...9552.=0D
     'credit amount': r'You received a deposit of [$](?P<amount>[0-9.,]+) to your',
