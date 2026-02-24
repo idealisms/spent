@@ -124,11 +124,19 @@ USAA_DEPOSIT_PATTERNS = {
     # You received a deposit for $444.98 to your account ending in 9552.=0D
     'credit amount': r'You received a deposit for [$](?P<amount>[0-9.,]+) to your',
 }
+USAA2_DEPOSIT_PATTERNS = {
+    'source': 'email_usaa',
+    # From: JPMorgan Chase
+    'description': r'From: (?P<description>[A-Z ]+)',
+    'amount': r'SOMETHING_NOT_IN_THE_EMAIL',
+    # You received a deposit of $444.98 to your account ...9552.=0D
+    'credit amount': r'You received a deposit of [$](?P<amount>[0-9.,]+) to your',
+}
 
 USAA_DEBIT_PATTERNS = {
     'source': 'email_usaa',
     # To: ROCKY MOUNTAIN P SALE
-    'description': r'To: (?P<description>[A-Z ]+)',
+    'description': r'To: (?P<description>[A-Za-z ]+)',
     'amount': r'[$](?P<amount>[0-9.,]+) came out of your account',
 }
 
@@ -204,6 +212,8 @@ def read_email_transaction(filename):
         transaction = email_to_transaction(email_id, msg, JPMORGAN_PATTERNS)
     elif 'USAA: Your Bank Account Received a Deposit' in msg.get('Subject'):
         transaction = email_to_transaction(email_id, msg.get_payload()[0], USAA_DEPOSIT_PATTERNS)
+    elif 'Deposit to Your Bank Account' in msg.get('Subject'):
+        transaction = email_to_transaction(email_id, msg.get_payload()[0], USAA2_DEPOSIT_PATTERNS)
     elif 'Debit Alert for Your USAA Bank Account' in msg.get('Subject'):
         transaction = email_to_transaction(email_id, msg.get_payload()[0], USAA_DEBIT_PATTERNS)
     else:
