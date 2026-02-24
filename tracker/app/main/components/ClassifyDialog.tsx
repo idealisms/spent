@@ -3,6 +3,7 @@ import Dialog from '@mui/material/Dialog';
 import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
 import DialogTitle from '@mui/material/DialogTitle';
+import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
 import { Theme } from '@mui/material/styles';
 import { makeStyles } from 'tss-react/mui';
@@ -22,6 +23,10 @@ const useStyles = makeStyles()((_theme: Theme) => ({
   transactionAmount: {
     flex: '0 0 auto',
     marginLeft: 0,
+  },
+  descriptionField: {
+    marginTop: '16px',
+    width: '100%',
   },
   tagSelect: {
     marginTop: '16px',
@@ -48,6 +53,7 @@ interface IClassifyDialogProps {
 interface IClassifyDialogState {
   currentIndex: number;
   currentTags: string[];
+  currentDescription: string;
 }
 
 interface IClassifyDialogInnerProps extends IClassifyDialogProps {
@@ -63,6 +69,7 @@ class ClassifyDialogInner extends React.Component<
     this.state = {
       currentIndex: 0,
       currentTags: this.getSuggestion(0),
+      currentDescription: props.transactions[0]?.notes ?? '',
     };
   }
 
@@ -71,6 +78,7 @@ class ClassifyDialogInner extends React.Component<
       this.setState({
         currentIndex: 0,
         currentTags: this.getSuggestion(0),
+        currentDescription: this.props.transactions[0]?.notes ?? '',
       });
       return;
     }
@@ -81,14 +89,17 @@ class ClassifyDialogInner extends React.Component<
       if (currentIndex >= this.props.transactions.length) {
         this.props.onClose();
       } else {
-        this.setState({ currentTags: this.getSuggestion(currentIndex) });
+        this.setState({
+          currentTags: this.getSuggestion(currentIndex),
+          currentDescription: this.props.transactions[currentIndex]?.notes ?? '',
+        });
       }
     }
   }
 
   public render(): React.ReactElement {
     const { open, transactions, onClose, classes } = this.props;
-    const { currentIndex, currentTags } = this.state;
+    const { currentIndex, currentTags, currentDescription } = this.state;
 
     if (transactions.length === 0) {
       return (
@@ -127,6 +138,13 @@ class ClassifyDialogInner extends React.Component<
               }}
             />
           </TransactionsTable>
+          <TextField
+            label="Notes"
+            value={currentDescription}
+            onChange={e => this.setState({ currentDescription: e.target.value })}
+            className={classes.descriptionField}
+            size="small"
+          />
           <TagSelect
             onChange={tags => this.setState({ currentTags: tags })}
             value={currentTags}
@@ -160,13 +178,14 @@ class ClassifyDialogInner extends React.Component<
       this.setState({
         currentIndex: nextIndex,
         currentTags: this.getSuggestion(nextIndex),
+        currentDescription: this.props.transactions[nextIndex]?.notes ?? '',
       });
     }
   };
 
   private handleConfirm = () => {
     const transaction = this.props.transactions[this.state.currentIndex];
-    this.props.onSave({ ...transaction, tags: this.state.currentTags });
+    this.props.onSave({ ...transaction, tags: this.state.currentTags, notes: this.state.currentDescription });
     // Don't advance the index here. The saved transaction will be removed from
     // props.transactions (now tagged), so the same index naturally points to
     // the next transaction. componentDidUpdate handles the transition.
@@ -177,6 +196,7 @@ class ClassifyDialogInner extends React.Component<
     this.setState({
       currentIndex: prevIndex,
       currentTags: this.getSuggestion(prevIndex),
+      currentDescription: this.props.transactions[prevIndex]?.notes ?? '',
     });
   };
 
