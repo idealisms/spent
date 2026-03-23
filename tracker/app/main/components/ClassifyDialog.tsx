@@ -138,19 +138,19 @@ class ClassifyDialogInner extends React.Component<
               }}
             />
           </TransactionsTable>
-          <TextField
-            label="Notes"
-            value={currentDescription}
-            onChange={e => this.setState({ currentDescription: e.target.value })}
-            className={classes.descriptionField}
-            size="small"
-          />
           <TagSelect
             onChange={tags => this.setState({ currentTags: tags })}
             value={currentTags}
             allowNewTags
             className={classes.tagSelect}
             placeholder="e.g. grocery, restaurant"
+          />
+          <TextField
+            label="Notes"
+            value={currentDescription}
+            onChange={e => this.setState({ currentDescription: e.target.value })}
+            className={classes.descriptionField}
+            size="small"
           />
         </DialogContent>
         <DialogActions>
