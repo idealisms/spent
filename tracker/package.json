@@ -130,6 +130,7 @@
   "resolutions": {
     "dot-prop": "^5.1.1",
     "minimatch": "9.0.7",
+    "serialize-javascript": "7.0.3",
     "@types/react": "18.3.27",
     "@types/react-dom": "18.3.7",
     "sha.js": "^2.4.12",
