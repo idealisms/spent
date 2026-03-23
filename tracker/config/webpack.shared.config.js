@@ -49,7 +49,7 @@ module.exports = (options) => ({
     new ESLintPlugin({
       extensions: ['ts', 'tsx'],
       files: options.srcs,
-      configType: 'eslintrc',
+      configType: 'flat',
     }),
   ]),
 

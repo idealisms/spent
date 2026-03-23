@@ -1,0 +1,204 @@
+/* eslint-disable @typescript-eslint/naming-convention */
+const js = require('@eslint/js');
+const tsPlugin = require('@typescript-eslint/eslint-plugin');
+const reactPlugin = require('eslint-plugin-react');
+const prettierConfig = require('eslint-config-prettier');
+const globals = require('globals');
+
+module.exports = [
+  js.configs.recommended,
+  ...tsPlugin.configs['flat/recommended'],
+  reactPlugin.configs.flat.recommended,
+  prettierConfig,
+  {
+    languageOptions: {
+      globals: {
+        ...globals.browser,
+        ...globals.es2021,
+      },
+      parserOptions: {
+        sourceType: 'module',
+      },
+    },
+    settings: {
+      react: {
+        version: 'detect',
+      },
+    },
+    rules: {
+      'react/react-in-jsx-scope': 'off',
+      '@typescript-eslint/naming-convention': [
+        'error',
+        {
+          selector: 'default',
+          format: ['camelCase'],
+        },
+        {
+          selector: 'import',
+          format: [
+            'camelCase',
+            'PascalCase', // React components and namespaces use PascalCase.
+          ],
+        },
+        {
+          selector: 'function',
+          format: [
+            'camelCase',
+            'PascalCase', // React functional components use PascalCase.
+          ],
+        },
+        {
+          selector: 'variable',
+          format: [
+            'camelCase',
+            'PascalCase', // variables that represent a class/component.
+          ],
+        },
+        {
+          selector: 'variable',
+          modifiers: ['const'],
+          format: ['UPPER_CASE', 'camelCase', 'PascalCase'],
+        },
+        {
+          selector: 'parameter',
+          format: ['camelCase'],
+          leadingUnderscore: 'allow',
+        },
+        {
+          // Allow CSS selectors, media queries, and numeric keys in object literals
+          selector: 'property',
+          format: null,
+          filter: {
+            regex: '^(&|@|\\.|\\[|>|#|\\d|option--)',
+            match: true,
+          },
+        },
+        {
+          selector: 'property',
+          format: [
+            'camelCase',
+            'snake_case', // compat with the transactions.json file format.
+            'PascalCase', // Some CSS/HTML properties
+          ],
+        },
+        {
+          selector: 'property',
+          modifiers: ['readonly'],
+          format: [
+            'UPPER_CASE', // Some CSS/HTML properties
+          ],
+        },
+        {
+          selector: 'class',
+          format: ['PascalCase'],
+        },
+        {
+          selector: 'interface',
+          format: ['PascalCase'],
+          custom: {
+            regex: '^I[A-Z]',
+            match: true,
+          },
+        },
+        {
+          selector: 'enum',
+          format: ['PascalCase'],
+        },
+        {
+          selector: 'enumMember',
+          format: ['UPPER_CASE', 'PascalCase'],
+        },
+        {
+          selector: 'typeAlias',
+          format: ['PascalCase', 'camelCase'],
+        },
+      ],
+      '@typescript-eslint/explicit-member-accessibility': [
+        'error',
+        {
+          accessibility: 'explicit',
+          overrides: {
+            constructors: 'no-public',
+          },
+        },
+      ],
+      '@typescript-eslint/member-ordering': 'error',
+      '@typescript-eslint/no-empty-function': 'error',
+      '@typescript-eslint/no-explicit-any': 'off',
+      '@typescript-eslint/no-inferrable-types': 'off',
+      '@typescript-eslint/no-require-imports': 'off',
+      '@typescript-eslint/no-unused-expressions': 'error',
+      '@typescript-eslint/no-unused-vars': [
+        'warn',
+        {
+          argsIgnorePattern: '^_',
+        },
+      ],
+      '@typescript-eslint/no-var-requires': 'error',
+      '@typescript-eslint/prefer-namespace-keyword': 'error',
+      '@typescript-eslint/no-empty-interface': 'off',
+      '@typescript-eslint/no-empty-object-type': 'off',
+      'react/prop-types': 'off', // We use TypeScript for type checking
+      '@typescript-eslint/explicit-module-boundary-types': 'off',
+      camelcase: 'off',
+      curly: 'error',
+      'default-case': 'error',
+      eqeqeq: ['off', 'smart'],
+      'guard-for-in': 'error',
+      'id-denylist': 'off',
+      'id-match': 'off',
+      'no-bitwise': 'error',
+      'no-caller': 'error',
+      'no-cond-assign': 'error',
+      'no-console': [
+        'off',
+        {
+          allow: [
+            'log',
+            'dirxml',
+            'warn',
+            'error',
+            'dir',
+            'timeLog',
+            'assert',
+            'clear',
+            'count',
+            'countReset',
+            'group',
+            'groupCollapsed',
+            'groupEnd',
+            'table',
+            'Console',
+            'markTimeline',
+            'profile',
+            'profileEnd',
+            'timeline',
+            'timelineEnd',
+            'timeStamp',
+            'context',
+          ],
+        },
+      ],
+      'no-debugger': 'error',
+      'no-empty': 'error',
+      'no-eval': 'error',
+      'no-fallthrough': 'error',
+      'no-new-wrappers': 'error',
+      'no-redeclare': 'error',
+      'no-shadow': 'off', // replaced by ts-eslint rule below
+      '@typescript-eslint/no-shadow': 'error',
+      'no-underscore-dangle': 'off',
+      'no-unused-labels': 'error',
+      'no-var': 'error',
+      'prefer-const': 'off',
+      radix: 'error',
+      'spaced-comment': [
+        'error',
+        'always',
+        {
+          markers: ['/'],
+        },
+      ],
+    },
+  },
+];
