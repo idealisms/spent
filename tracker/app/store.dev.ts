@@ -28,7 +28,6 @@ export function configureStore(): Store<IAppState> {
 
   if (module.hot) {
     module.hot.accept('./main/reducers', () => {
-      // eslint-disable-next-line @typescript-eslint/no-var-requires
       const nextRootReducer: any = require('./main/reducers').rootReducer;
       store.replaceReducer(nextRootReducer);
     });

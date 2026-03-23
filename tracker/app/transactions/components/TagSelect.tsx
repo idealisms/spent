@@ -245,7 +245,7 @@ class TagSelectInner extends React.Component<
         !hideCategories && categoryName
           ? (categoryEmoji.get(categoryName) || '') + ' '
           : '';
-      // eslint-disable-next-line @typescript-eslint/naming-convention, @typescript-eslint/no-unused-vars
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       let { className, css, ...restInnerProps } = props.innerProps as any;
       return (
         <div className={classes.multiValueLabel} {...restInnerProps}>

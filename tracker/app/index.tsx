@@ -15,8 +15,8 @@ serviceWorker.register();
 
 const store: Store<IAppState> =
   process.env.NODE_ENV !== 'production'
-    ? (require('./store.dev') as any).configureStore() // eslint-disable-line @typescript-eslint/no-var-requires
-    : (require('./store.prod') as any).configureStore(); // eslint-disable-line @typescript-eslint/no-var-requires
+    ? (require('./store.dev') as any).configureStore()
+    : (require('./store.prod') as any).configureStore();
 
 const container = document.getElementById('app');
 const root = createRoot(container!);
