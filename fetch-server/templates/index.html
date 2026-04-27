@@ -24,6 +24,8 @@
     a:hover { text-decoration: underline; }
     .notice { background: #fff3cd; border: 1px solid #ffc107; border-radius: 4px; padding: 0.5rem 1rem; margin-bottom: 1rem; }
     footer { margin-top: 3rem; color: #999; font-size: 0.8rem; }
+    tr.empty-summary td { color: #999; font-style: italic; cursor: pointer; text-align: center; }
+    tr.empty-summary:hover td { background: #f9f9f9; }
   </style>
 </head>
 <body>
@@ -68,7 +70,7 @@
     </thead>
     <tbody>
       {% for run in runs %}
-      <tr>
+      <tr data-emails="{{ run.emails_downloaded }}">
         <td><a href="/run/{{ run.id }}">{{ run.started_at[:19].replace('T',' ') }}</a></td>
         <td>
           <span class="badge badge-{{ run.status }}">{{ run.status }}</span>
@@ -84,6 +86,38 @@
   {% else %}
   <p>No runs yet.</p>
   {% endif %}
+
+  <script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const tbody = document.querySelector('tbody');
+    if (!tbody) return;
+    const rows = Array.from(tbody.querySelectorAll('tr'));
+
+    let i = 0;
+    while (i < rows.length) {
+      if (rows[i].dataset.emails !== '0') { i++; continue; }
+      let j = i;
+      while (j < rows.length && rows[j].dataset.emails === '0') j++;
+
+      const group = rows.slice(i, j);
+      group.forEach(r => r.hidden = true);
+
+      const summary = document.createElement('tr');
+      summary.className = 'empty-summary';
+      summary.innerHTML = `<td colspan="6">▶ ${group.length} run${group.length > 1 ? 's' : ''} with no new emails</td>`;
+      tbody.insertBefore(summary, rows[i]);
+
+      summary.addEventListener('click', () => {
+        const expanding = rows[i].hidden;
+        group.forEach(r => r.hidden = !expanding);
+        summary.querySelector('td').textContent =
+          (expanding ? '▼' : '▶') + ` ${group.length} run${group.length > 1 ? 's' : ''} with no new emails`;
+      });
+
+      i = j;
+    }
+  });
+  </script>
 
   <footer>
     <code>{{ git.hash }}</code> &middot; {{ git.date }}
