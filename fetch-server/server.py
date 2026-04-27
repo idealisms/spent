@@ -135,21 +135,27 @@ async def reparse():
     return RedirectResponse(f'/?reparsing={count}', status_code=303)
 
 
-_RESTARTING_HTML = """<!doctype html>
+def _restarting_html(git_hash: str, changed: bool) -> str:
+    if changed:
+        subtitle = f'Pulled new code &mdash; <code>{git_hash}</code>'
+    else:
+        subtitle = f'Already up to date &mdash; <code>{git_hash}</code> (restarting anyway)'
+    return f"""<!doctype html>
 <html><head><title>Restarting...</title>
-<style>body{font-family:system-ui,sans-serif;max-width:860px;margin:2rem auto;padding:0 1rem}</style>
+<style>body{{font-family:system-ui,sans-serif;max-width:860px;margin:2rem auto;padding:0 1rem}}</style>
 </head><body>
 <h1>Restarting...</h1>
+<p>{subtitle}</p>
 <p id="msg">Waiting for server to come back up.</p>
 <script>
-async function poll() {
-  try {
+async function poll() {{
+  try {{
     const r = await fetch('/ping');
-    if (r.ok) { window.location = '/'; return; }
-  } catch(e) {}
+    if (r.ok) {{ window.location = '/'; return; }}
+  }} catch(e) {{}}
   document.getElementById('msg').textContent += '.';
   setTimeout(poll, 1000);
-}
+}}
 setTimeout(poll, 2000);
 </script>
 </body></html>"""
@@ -161,6 +167,10 @@ async def update():
         ['git', 'pull'], cwd=REPO_ROOT, capture_output=True, text=True,
     )
     if result.returncode == 0:
+        changed = 'Already up to date' not in result.stdout
+        git_hash = subprocess.check_output(
+            ['git', 'rev-parse', '--short', 'HEAD'], cwd=REPO_ROOT, text=True
+        ).strip()
         subprocess.Popen(['sudo', 'systemctl', 'restart', 'fetch-server'])
-        return HTMLResponse(_RESTARTING_HTML)
-    return RedirectResponse(f'/?update=fail', status_code=303)
+        return HTMLResponse(_restarting_html(git_hash, changed))
+    return RedirectResponse('/?update=fail', status_code=303)
