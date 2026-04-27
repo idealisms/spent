@@ -16,6 +16,7 @@ import json
 import os
 import re
 import sqlite3
+import webbrowser
 from typing import Callable, Optional
 
 import dropbox as dropbox_module
@@ -52,7 +53,10 @@ def gmail_service(token_file: str, credentials_file: str):
             creds.refresh(Request())
         else:
             flow = InstalledAppFlow.from_client_secrets_file(credentials_file, SCOPES)
-            creds = flow.run_local_server(port=0)
+            try:
+                creds = flow.run_local_server(port=0)
+            except webbrowser.Error:
+                creds = flow.run_console()
         with open(token_file, 'w') as f:
             f.write(creds.to_json())
     return build('gmail', 'v1', credentials=creds)
