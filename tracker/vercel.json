@@ -1,0 +1,5 @@
+{
+  "buildCommand": "echo \"export const CLIENT_ID = '$DROPBOX_CLIENT_ID';\" > app/config.ts && yarn build",
+  "outputDirectory": "build",
+  "rewrites": [{ "source": "/(.*)", "destination": "/index.html" }]
+}
