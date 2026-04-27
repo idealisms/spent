@@ -28,6 +28,19 @@ from googleapiclient.discovery import build
 import db
 
 
+def _run_console_flow(flow):
+    """Headless OAuth: print URL, user authorizes in any browser, pastes redirect URL back."""
+    flow.redirect_uri = 'http://localhost'
+    auth_url, _ = flow.authorization_url(prompt='consent')
+    print('\nVisit this URL in any browser:\n')
+    print(f'  {auth_url}\n')
+    print('After authorizing, your browser will show an error page (that\'s fine).')
+    print('Copy the full URL from the address bar and paste it below.\n')
+    redirect_response = input('Paste the redirect URL: ').strip()
+    flow.fetch_token(authorization_response=redirect_response)
+    return flow.credentials
+
+
 SCOPES = [
     'https://www.googleapis.com/auth/gmail.readonly',
     'https://www.googleapis.com/auth/gmail.send',
@@ -56,7 +69,7 @@ def gmail_service(token_file: str, credentials_file: str):
             try:
                 creds = flow.run_local_server(port=0)
             except webbrowser.Error:
-                creds = flow.run_console()
+                creds = _run_console_flow(flow)
         with open(token_file, 'w') as f:
             f.write(creds.to_json())
     return build('gmail', 'v1', credentials=creds)
