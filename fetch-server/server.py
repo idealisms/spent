@@ -123,7 +123,7 @@ async def update():
     """git pull and restart the service."""
     result = subprocess.run(
         ['git', 'pull'],
-        cwd='/home/tc/source/spent',
+        cwd='/home/pi/source/spent',
         capture_output=True, text=True,
     )
     if result.returncode == 0:
