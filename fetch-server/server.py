@@ -47,7 +47,7 @@ _git = _git_info()
 def _reschedule(interval_minutes: int):
     if _scheduler.get_job('fetch'):
         _scheduler.remove_job('fetch')
-    _scheduler.add_job(_do_run, 'interval', minutes=interval_minutes, id='fetch')
+    _scheduler.add_job(_do_run, 'interval', minutes=interval_minutes, jitter=300, id='fetch')
 
 
 @asynccontextmanager
