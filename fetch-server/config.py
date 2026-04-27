@@ -12,6 +12,8 @@ DEFAULTS = {
     'gmail_credentials_file': 'credentials.json',
     'db_path': 'fetch_server.db',
     'fetch_interval_minutes': 60,
+    'summary_to': '',
+    'summary_hour': 6,
 }
 
 

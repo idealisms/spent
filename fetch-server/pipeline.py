@@ -27,7 +27,10 @@ from googleapiclient.discovery import build
 import db
 
 
-SCOPES = ['https://www.googleapis.com/auth/gmail.readonly']
+SCOPES = [
+    'https://www.googleapis.com/auth/gmail.readonly',
+    'https://www.googleapis.com/auth/gmail.send',
+]
 
 Log = Callable[[str], None]
 
@@ -228,22 +231,22 @@ def _walk_transactions(transactions):
     return seen_ids, seen_descs
 
 
-def _merge(existing: list, new_transactions: list, log: Log) -> int:
+def _merge(existing: list, new_transactions: list, log: Log) -> list:
     seen_ids, seen_descs = _walk_transactions(existing)
-    added = 0
+    added = []
     for t in new_transactions:
         if t['id'] in seen_ids or _format_description(t) in seen_descs:
             continue
         existing.append(t)
         seen_ids.add(t['id'])
-        added += 1
+        added.append(t)
         log(f'  + {t["description"]}  {t["date"]}')
     existing.sort(key=lambda t: t['date'], reverse=True)
     return added
 
 
-def sync_to_dropbox(new_transactions: list, access_token: str, dropbox_path: str, log: Log) -> int:
-    """Merge new_transactions into transactions.json on Dropbox. Returns count added."""
+def sync_to_dropbox(new_transactions: list, access_token: str, dropbox_path: str, log: Log) -> list:
+    """Merge new_transactions into transactions.json on Dropbox. Returns list of added transactions."""
     dbx = dropbox_module.Dropbox(access_token)
     _, response = dbx.files_download(dropbox_path)
     existing = json.loads(response.content.decode('utf-8'))
@@ -254,7 +257,7 @@ def sync_to_dropbox(new_transactions: list, access_token: str, dropbox_path: str
             dropbox_path,
             dropbox_module.files.WriteMode.overwrite,
         )
-        log(f'Uploaded {added} new transaction(s) to Dropbox')
+        log(f'Uploaded {len(added)} new transaction(s) to Dropbox')
     else:
         log('No new transactions to upload')
     return added
@@ -291,9 +294,10 @@ def run(conn: sqlite3.Connection, config: dict, log: Log) -> dict:
         db.finish_run(conn, run_id, 'success',
                       emails_downloaded=downloaded,
                       emails_parsed=len(new_transactions),
-                      transactions_added=added)
+                      transactions_added=len(added),
+                      added_transactions=added)
         return {'run_id': run_id, 'status': 'success',
-                'downloaded': downloaded, 'parsed': len(new_transactions), 'added': added}
+                'downloaded': downloaded, 'parsed': len(new_transactions), 'added': len(added)}
 
     except Exception as e:
         _log(f'Fatal error: {e}')
@@ -302,6 +306,18 @@ def run(conn: sqlite3.Connection, config: dict, log: Log) -> dict:
 
 
 # ── One-time Gmail auth setup ─────────────────────────────────────────────────
+
+def send_email(config: dict, to: str, subject: str, body: str) -> None:
+    """Send an email via the Gmail API using the existing OAuth credentials."""
+    import base64
+    from email.mime.text import MIMEText
+    service = gmail_service(config['gmail_token_file'], config['gmail_credentials_file'])
+    msg = MIMEText(body)
+    msg['To'] = to
+    msg['Subject'] = subject
+    raw = base64.urlsafe_b64encode(msg.as_bytes()).decode()
+    service.users().messages().send(userId='me', body={'raw': raw}).execute()
+
 
 if __name__ == '__main__':
     import sys

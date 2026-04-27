@@ -12,7 +12,8 @@ CREATE TABLE IF NOT EXISTS fetch_runs (
     log         TEXT NOT NULL DEFAULT '',
     emails_downloaded   INTEGER NOT NULL DEFAULT 0,
     emails_parsed       INTEGER NOT NULL DEFAULT 0,
-    transactions_added  INTEGER NOT NULL DEFAULT 0
+    transactions_added  INTEGER NOT NULL DEFAULT 0,
+    added_transactions  TEXT     -- JSON array of transaction dicts
 );
 
 CREATE TABLE IF NOT EXISTS emails (
@@ -41,6 +42,12 @@ def get_conn(db_path: str) -> sqlite3.Connection:
 def init_db(db_path: str) -> None:
     with get_conn(db_path) as conn:
         conn.executescript(SCHEMA)
+        # Migrate existing DBs that predate the added_transactions column.
+        try:
+            conn.execute("ALTER TABLE fetch_runs ADD COLUMN added_transactions TEXT")
+            conn.commit()
+        except sqlite3.OperationalError:
+            pass
 
 
 # --- Runs ---
@@ -67,13 +74,17 @@ def finish_run(
     emails_downloaded: int = 0,
     emails_parsed: int = 0,
     transactions_added: int = 0,
+    added_transactions: Optional[list] = None,
 ) -> None:
+    import json
     conn.execute(
         """UPDATE fetch_runs
            SET finished_at = ?, status = ?,
-               emails_downloaded = ?, emails_parsed = ?, transactions_added = ?
+               emails_downloaded = ?, emails_parsed = ?, transactions_added = ?,
+               added_transactions = ?
            WHERE id = ?""",
-        (_now(), status, emails_downloaded, emails_parsed, transactions_added, run_id),
+        (_now(), status, emails_downloaded, emails_parsed, transactions_added,
+         json.dumps(added_transactions) if added_transactions else None, run_id),
     )
     conn.commit()
 
@@ -142,6 +153,16 @@ def get_run_emails(conn: sqlite3.Connection, run_id: int) -> list:
     return conn.execute(
         "SELECT * FROM emails WHERE fetch_run_id = ? ORDER BY downloaded_at",
         (run_id,),
+    ).fetchall()
+
+
+def get_runs_since(conn: sqlite3.Connection, since_iso: str) -> list:
+    """Returns runs that finished successfully since since_iso with at least one transaction."""
+    return conn.execute(
+        """SELECT * FROM fetch_runs
+           WHERE started_at >= ? AND status = 'success' AND transactions_added > 0
+           ORDER BY started_at""",
+        (since_iso,),
     ).fetchall()
 
 

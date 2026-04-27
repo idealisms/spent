@@ -1,8 +1,9 @@
+import json
 import os
 import subprocess
 import threading
 from contextlib import asynccontextmanager
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 
 from apscheduler.schedulers.background import BackgroundScheduler
 from fastapi import FastAPI, Request
@@ -50,9 +51,41 @@ def _reschedule(interval_minutes: int):
     _scheduler.add_job(_do_run, 'interval', minutes=interval_minutes, jitter=300, id='fetch')
 
 
+def _send_daily_summary():
+    cfg = _config
+    if not cfg.get('summary_to') or not cfg.get('smtp_user'):
+        return
+
+    since = (datetime.now(timezone.utc) - timedelta(hours=24)).isoformat()
+    runs = db.get_runs_since(_conn, since)
+    if not runs:
+        return
+
+    transactions = []
+    for run in runs:
+        if run['added_transactions']:
+            transactions.extend(json.loads(run['added_transactions']))
+
+    count = len(transactions)
+    if count == 0:
+        return
+
+    lines = [f'{count} new transaction{"s" if count != 1 else ""} in the past 24 hours:\n']
+    for t in transactions:
+        amount = t['amount_cents'] / 100
+        lines.append(f'  {t["date"]}  {t["description"]:<40}  ${amount:>8.2f}')
+
+    body = '\n'.join(lines)
+    subject = f'Spent: {count} new transaction{"s" if count != 1 else ""}'
+    pipeline.send_email(cfg, cfg['summary_to'], subject, body)
+    print(f'Daily summary sent: {count} transaction(s)')
+
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     _reschedule(_config['fetch_interval_minutes'])
+    _scheduler.add_job(_send_daily_summary, 'cron',
+                       hour=_config['summary_hour'], minute=0, id='summary')
     _scheduler.start()
     yield
     _scheduler.shutdown()
