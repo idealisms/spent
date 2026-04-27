@@ -108,7 +108,7 @@
       tbody.insertBefore(summary, rows[i]);
 
       summary.addEventListener('click', () => {
-        const expanding = rows[i].hidden;
+        const expanding = group[0].hidden;
         group.forEach(r => r.hidden = !expanding);
         summary.querySelector('td').textContent =
           (expanding ? '▼' : '▶') + ` ${group.length} run${group.length > 1 ? 's' : ''} with no new emails`;
