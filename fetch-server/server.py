@@ -1,3 +1,4 @@
+import os
 import subprocess
 import threading
 from contextlib import asynccontextmanager
@@ -14,6 +15,8 @@ import pipeline
 
 # ── State ─────────────────────────────────────────────────────────────────────
 
+REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
 _run_lock = threading.Lock()   # prevent overlapping runs
 _scheduler = BackgroundScheduler()
 _config = cfg.load()
@@ -23,17 +26,28 @@ db.init_db(_config['db_path'])
 templates = Jinja2Templates(directory='templates')
 
 
+def _git_info() -> dict:
+    try:
+        git_hash = subprocess.check_output(
+            ['git', 'rev-parse', '--short', 'HEAD'], cwd=REPO_ROOT, text=True
+        ).strip()
+        git_date = subprocess.check_output(
+            ['git', 'log', '-1', '--format=%ci'], cwd=REPO_ROOT, text=True
+        ).strip()
+        return {'hash': git_hash, 'date': git_date}
+    except Exception:
+        return {'hash': 'unknown', 'date': 'unknown'}
+
+
+_git = _git_info()
+
+
 # ── Scheduler ─────────────────────────────────────────────────────────────────
-
-def _scheduled_run():
-    _do_run()
-
 
 def _reschedule(interval_minutes: int):
     if _scheduler.get_job('fetch'):
         _scheduler.remove_job('fetch')
-    _scheduler.add_job(_scheduled_run, 'interval',
-                       minutes=interval_minutes, id='fetch')
+    _scheduler.add_job(_do_run, 'interval', minutes=interval_minutes, id='fetch')
 
 
 @asynccontextmanager
@@ -89,6 +103,7 @@ async def index(request: Request):
         'runs': runs,
         'next_run': next_run,
         'running': _is_running(),
+        'git': _git,
     })
 
 
@@ -110,7 +125,6 @@ async def fetch_now():
 
 @app.post('/reparse')
 async def reparse():
-    """Reset all parsed emails to pending and trigger a run."""
     count = db.reset_parsed_emails(_conn)
     threading.Thread(target=_do_run, daemon=True).start()
     return RedirectResponse(f'/?reparsing={count}', status_code=303)
@@ -118,11 +132,8 @@ async def reparse():
 
 @app.post('/update')
 async def update():
-    """git pull and restart the service."""
     result = subprocess.run(
-        ['git', 'pull'],
-        cwd='/home/pi/source/spent',
-        capture_output=True, text=True,
+        ['git', 'pull'], cwd=REPO_ROOT, capture_output=True, text=True,
     )
     if result.returncode == 0:
         subprocess.Popen(['sudo', 'systemctl', 'restart', 'fetch-server'])

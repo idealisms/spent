@@ -23,6 +23,7 @@
     a { color: #0066cc; text-decoration: none; }
     a:hover { text-decoration: underline; }
     .notice { background: #fff3cd; border: 1px solid #ffc107; border-radius: 4px; padding: 0.5rem 1rem; margin-bottom: 1rem; }
+    footer { margin-top: 3rem; color: #999; font-size: 0.8rem; }
   </style>
 </head>
 <body>
@@ -83,5 +84,9 @@
   {% else %}
   <p>No runs yet.</p>
   {% endif %}
+
+  <footer>
+    <code>{{ git.hash }}</code> &middot; {{ git.date }}
+  </footer>
 </body>
 </html>
