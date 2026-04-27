@@ -85,8 +85,7 @@ async def index(request: Request):
     runs = [dict(r) | {'duration': _duration(dict(r))} for r in raw_runs]
     job = _scheduler.get_job('fetch')
     next_run = job.next_run_time.strftime('%Y-%m-%d %H:%M UTC') if job and job.next_run_time else '—'
-    return templates.TemplateResponse('index.html', {
-        'request': request,
+    return templates.TemplateResponse(request, 'index.html', {
         'runs': runs,
         'next_run': next_run,
         'running': _is_running(),
@@ -97,8 +96,7 @@ async def index(request: Request):
 async def run_detail(request: Request, run_id: int):
     run = db.get_run(_conn, run_id)
     emails = db.get_run_emails(_conn, run_id)
-    return templates.TemplateResponse('run.html', {
-        'request': request,
+    return templates.TemplateResponse(request, 'run.html', {
         'run': dict(run),
         'emails': [dict(e) for e in emails],
     })
