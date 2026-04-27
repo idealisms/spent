@@ -130,6 +130,26 @@ async def reparse():
     return RedirectResponse(f'/?reparsing={count}', status_code=303)
 
 
+_RESTARTING_HTML = """<!doctype html>
+<html><head><title>Restarting...</title>
+<style>body{font-family:system-ui,sans-serif;max-width:860px;margin:2rem auto;padding:0 1rem}</style>
+</head><body>
+<h1>Restarting...</h1>
+<p id="msg">Waiting for server to come back up.</p>
+<script>
+async function poll() {
+  try {
+    const r = await fetch('/', {method: 'HEAD'});
+    if (r.ok) { window.location = '/'; return; }
+  } catch(e) {}
+  document.getElementById('msg').textContent += '.';
+  setTimeout(poll, 1000);
+}
+setTimeout(poll, 2000);
+</script>
+</body></html>"""
+
+
 @app.post('/update')
 async def update():
     result = subprocess.run(
@@ -137,4 +157,5 @@ async def update():
     )
     if result.returncode == 0:
         subprocess.Popen(['sudo', 'systemctl', 'restart', 'fetch-server'])
-    return RedirectResponse(f'/?update={result.returncode}', status_code=303)
+        return HTMLResponse(_RESTARTING_HTML)
+    return RedirectResponse(f'/?update=fail', status_code=303)
