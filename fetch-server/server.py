@@ -117,6 +117,11 @@ async def run_detail(request: Request, run_id: int):
     })
 
 
+@app.get('/ping')
+async def ping():
+    return 'pong'
+
+
 @app.post('/fetch')
 async def fetch_now():
     threading.Thread(target=_do_run, daemon=True).start()
@@ -139,7 +144,7 @@ _RESTARTING_HTML = """<!doctype html>
 <script>
 async function poll() {
   try {
-    const r = await fetch('/', {method: 'HEAD'});
+    const r = await fetch('/ping');
     if (r.ok) { window.location = '/'; return; }
   } catch(e) {}
   document.getElementById('msg').textContent += '.';
