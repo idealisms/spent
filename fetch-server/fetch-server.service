@@ -1,0 +1,14 @@
+[Unit]
+Description=Fetch Server
+After=network.target
+
+[Service]
+Type=simple
+User=tc
+WorkingDirectory=/home/tc/source/spent/fetch-server
+ExecStart=/home/tc/source/spent/fetch-server/bin/uvicorn server:app --host 0.0.0.0 --port 8001
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
