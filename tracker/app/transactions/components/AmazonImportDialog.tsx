@@ -11,7 +11,6 @@ import * as React from 'react';
 import { ITransaction } from '../model';
 import {
   ICsvRow,
-  daysDiff,
   extractNote,
   matchCsvRow,
   parseCsv,
