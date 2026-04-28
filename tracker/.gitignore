@@ -12,3 +12,4 @@ logs
 .yarnrc.yml
 
 app/config.ts
+package-lock.json
