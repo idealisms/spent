@@ -31,34 +31,46 @@ interface IMatchResult {
 
 // --- Claude API ---
 
+const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+
 async function shortenDescription(items: string, apiKey: string): Promise<string> {
   const first = items.split(';')[0].trim();
-  try {
-    const resp = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: {
-        ['x-api-key']: apiKey,
-        ['anthropic-version']: '2023-06-01',
-        ['anthropic-dangerous-direct-browser-access']: 'true',
-        ['content-type']: 'application/json',
-      },
-      body: JSON.stringify({
-        model: 'claude-haiku-4-5-20251001',
-        max_tokens: 20,
-        messages: [
-          {
-            role: 'user',
-            content: `Shorten this Amazon product title to 4-6 words keeping brand and product type. Reply with only the shortened title.\n\n${first}`,
-          },
-        ],
-      }),
-    });
-    if (!resp.ok) {return extractNote(items);}
-    const data = await resp.json();
-    return data.content?.[0]?.text?.trim() || extractNote(items);
-  } catch {
-    return extractNote(items);
+  let delay = 1000;
+  for (let attempt = 0; attempt < 5; attempt++) {
+    try {
+      const resp = await fetch('https://api.anthropic.com/v1/messages', {
+        method: 'POST',
+        headers: {
+          ['x-api-key']: apiKey,
+          ['anthropic-version']: '2023-06-01',
+          ['anthropic-dangerous-direct-browser-access']: 'true',
+          ['content-type']: 'application/json',
+        },
+        body: JSON.stringify({
+          model: 'claude-haiku-4-5-20251001',
+          max_tokens: 20,
+          messages: [
+            {
+              role: 'user',
+              content: `Shorten this Amazon product title to 4-6 words keeping brand and product type. Reply with only the shortened title.\n\n${first}`,
+            },
+          ],
+        }),
+      });
+      if (resp.status === 429 || resp.status >= 500) {
+        await sleep(delay);
+        delay *= 2;
+        continue;
+      }
+      if (!resp.ok) {return extractNote(items);}
+      const data = await resp.json();
+      return data.content?.[0]?.text?.trim() || extractNote(items);
+    } catch {
+      await sleep(delay);
+      delay *= 2;
+    }
   }
+  return extractNote(items);
 }
 
 // --- Styles ---
@@ -152,6 +164,7 @@ interface IAmazonImportDialogState {
   unmatchedCount: number;
   alreadyNotedCount: number;
   isLoading: boolean;
+  shorteningProgress: { current: number; total: number } | null;
   isEditingApiKey: boolean;
   apiKeyInput: string;
 }
@@ -174,6 +187,7 @@ class AmazonImportDialogInner extends React.Component<
       unmatchedCount: 0,
       alreadyNotedCount: 0,
       isLoading: false,
+      shorteningProgress: null,
       isEditingApiKey: false,
       apiKeyInput: '',
     };
@@ -232,10 +246,14 @@ class AmazonImportDialogInner extends React.Component<
     const { isLoading } = this.state;
 
     if (isLoading) {
+      const { shorteningProgress } = this.state;
+      const message = shorteningProgress
+        ? `Shortening description ${shorteningProgress.current} of ${shorteningProgress.total}…`
+        : 'Analyzing CSV…';
       return (
         <div className={classes.uploadArea}>
           <CircularProgress size={32} />
-          <Typography color="textSecondary">Shortening descriptions with Claude…</Typography>
+          <Typography color="textSecondary">{message}</Typography>
         </div>
       );
     }
@@ -439,13 +457,16 @@ class AmazonImportDialogInner extends React.Component<
     );
 
     if (this.props.anthropicApiKey) {
-      const shortened = await Promise.all(
-        matches.map(m => shortenDescription(m.csvRow.items, this.props.anthropicApiKey!)),
-      );
-      shortened.forEach((note, i) => {matches[i].proposedNote = note;});
+      for (let i = 0; i < matches.length; i++) {
+        this.setState({ shorteningProgress: { current: i + 1, total: matches.length } });
+        matches[i].proposedNote = await shortenDescription(
+          matches[i].csvRow.items,
+          this.props.anthropicApiKey!,
+        );
+      }
     }
 
-    this.setState({ step: 'review', matches, unmatchedCount, alreadyNotedCount, isLoading: false });
+    this.setState({ step: 'review', matches, unmatchedCount, alreadyNotedCount, isLoading: false, shorteningProgress: null });
   }
 
   private handleToggleMatch = (idx: number) => {
