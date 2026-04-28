@@ -1,9 +1,11 @@
 import Button from '@mui/material/Button';
 import Checkbox from '@mui/material/Checkbox';
+import CircularProgress from '@mui/material/CircularProgress';
 import Dialog from '@mui/material/Dialog';
 import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
 import DialogTitle from '@mui/material/DialogTitle';
+import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
 import { Theme } from '@mui/material/styles';
 import { makeStyles } from 'tss-react/mui';
@@ -27,6 +29,50 @@ interface IMatchResult {
   checked: boolean;
 }
 
+// --- Claude API ---
+
+const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+
+async function shortenDescription(items: string, apiKey: string): Promise<string> {
+  const first = items.split(';')[0].trim();
+  let delay = 1000;
+  for (let attempt = 0; attempt < 5; attempt++) {
+    try {
+      const resp = await fetch('https://api.anthropic.com/v1/messages', {
+        method: 'POST',
+        headers: {
+          ['x-api-key']: apiKey,
+          ['anthropic-version']: '2023-06-01',
+          ['anthropic-dangerous-direct-browser-access']: 'true',
+          ['content-type']: 'application/json',
+        },
+        body: JSON.stringify({
+          model: 'claude-haiku-4-5-20251001',
+          max_tokens: 20,
+          messages: [
+            {
+              role: 'user',
+              content: `Shorten this Amazon product title to 4-6 words keeping brand and product type. Reply with only the shortened title.\n\n${first}`,
+            },
+          ],
+        }),
+      });
+      if (resp.status === 429 || resp.status >= 500) {
+        await sleep(delay);
+        delay *= 2;
+        continue;
+      }
+      if (!resp.ok) {return extractNote(items);}
+      const data = await resp.json();
+      return data.content?.[0]?.text?.trim() || extractNote(items);
+    } catch {
+      await sleep(delay);
+      delay *= 2;
+    }
+  }
+  return extractNote(items);
+}
+
 // --- Styles ---
 
 const useStyles = makeStyles()((_theme: Theme) => ({
@@ -38,6 +84,21 @@ const useStyles = makeStyles()((_theme: Theme) => ({
     gap: '16px',
     padding: '32px',
     textAlign: 'center',
+  },
+  apiKeySection: {
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    gap: '8px',
+    width: '100%',
+    maxWidth: '380px',
+    paddingTop: '16px',
+    borderTop: '1px solid #eee',
+  },
+  apiKeyRow: {
+    display: 'flex',
+    gap: '8px',
+    alignItems: 'center',
   },
   matchList: {
     borderTop: '1px solid lightgrey',
@@ -93,6 +154,8 @@ interface IAmazonImportDialogProps {
   allTransactions: ITransaction[];
   onClose: () => void;
   onSaveChanges: (updatedTransactions: ITransaction[]) => void;
+  anthropicApiKey?: string;
+  onSaveApiKey: (key: string | undefined) => void;
 }
 
 interface IAmazonImportDialogState {
@@ -100,6 +163,10 @@ interface IAmazonImportDialogState {
   matches: IMatchResult[];
   unmatchedCount: number;
   alreadyNotedCount: number;
+  isLoading: boolean;
+  shorteningProgress: { current: number; total: number } | null;
+  isEditingApiKey: boolean;
+  apiKeyInput: string;
 }
 
 interface IAmazonImportDialogInnerProps extends IAmazonImportDialogProps {
@@ -119,6 +186,10 @@ class AmazonImportDialogInner extends React.Component<
       matches: [],
       unmatchedCount: 0,
       alreadyNotedCount: 0,
+      isLoading: false,
+      shorteningProgress: null,
+      isEditingApiKey: false,
+      apiKeyInput: '',
     };
   }
 
@@ -172,6 +243,21 @@ class AmazonImportDialogInner extends React.Component<
 
   private renderUpload() {
     const { classes } = this.props;
+    const { isLoading } = this.state;
+
+    if (isLoading) {
+      const { shorteningProgress } = this.state;
+      const message = shorteningProgress
+        ? `Shortening description ${shorteningProgress.current} of ${shorteningProgress.total}…`
+        : 'Analyzing CSV…';
+      return (
+        <div className={classes.uploadArea}>
+          <CircularProgress size={32} />
+          <Typography color="textSecondary">{message}</Typography>
+        </div>
+      );
+    }
+
     return (
       <div className={classes.uploadArea}>
         <Typography>
@@ -191,6 +277,67 @@ class AmazonImportDialogInner extends React.Component<
         >
           Choose CSV file
         </Button>
+        {this.renderApiKeySection()}
+      </div>
+    );
+  }
+
+  private renderApiKeySection() {
+    const { classes, anthropicApiKey } = this.props;
+    const { isEditingApiKey, apiKeyInput } = this.state;
+    const hasKey = !!anthropicApiKey;
+
+    if (isEditingApiKey) {
+      return (
+        <div className={classes.apiKeySection}>
+          <TextField
+            label="Anthropic API key"
+            value={apiKeyInput}
+            onChange={e => this.setState({ apiKeyInput: e.target.value })}
+            size="small"
+            fullWidth
+            type="password"
+            autoFocus
+          />
+          <div className={classes.apiKeyRow}>
+            <Button
+              size="small"
+              onClick={this.handleSaveApiKey}
+              disabled={!apiKeyInput.trim()}
+            >
+              Save
+            </Button>
+            <Button
+              size="small"
+              onClick={() => this.setState({ isEditingApiKey: false, apiKeyInput: '' })}
+            >
+              Cancel
+            </Button>
+          </div>
+        </div>
+      );
+    }
+
+    return (
+      <div className={classes.apiKeySection}>
+        <Typography variant="caption" color="textSecondary">
+          {hasKey
+            ? 'Anthropic API key set — descriptions will be shortened by Claude'
+            : 'No Anthropic API key — descriptions will be truncated'}
+        </Typography>
+        <div className={classes.apiKeyRow}>
+          <Button
+            size="small"
+            onClick={() => this.setState({ isEditingApiKey: true, apiKeyInput: '' })}
+          >
+            {hasKey ? 'Edit key' : 'Set key'}
+          </Button>
+          {hasKey && (
+            <Button size="small" onClick={this.handleClearApiKey}>
+              Clear
+            </Button>
+          )}
+        </div>
       </div>
     );
   }
@@ -246,12 +393,17 @@ class AmazonImportDialogInner extends React.Component<
     const reader = new FileReader();
     reader.onload = event => {
       const text = event.target?.result as string;
-      if (text) {this.parseAndMatch(text);}
+      if (text) {
+        if (this.props.anthropicApiKey) {
+          this.setState({ isLoading: true });
+        }
+        this.parseAndMatch(text);
+      }
     };
     reader.readAsText(file);
   };
 
-  private parseAndMatch(csvText: string) {
+  private async parseAndMatch(csvText: string) {
     const rows = parseCsv(csvText);
     // Amazon transactions only, skip Prime membership fee rows
     const amazonTxns = this.props.allTransactions.filter(
@@ -265,7 +417,7 @@ class AmazonImportDialogInner extends React.Component<
 
     for (const row of rows) {
       const items = row['items']?.trim() ?? '';
-      if (!items) {continue;} // skip rows with no item description
+      if (!items) {continue;}
 
       const payment = parsePayment(
         row['payments'] ?? '',
@@ -304,13 +456,35 @@ class AmazonImportDialogInner extends React.Component<
       a.csvRow.paymentDate.localeCompare(b.csvRow.paymentDate),
     );
 
-    this.setState({ step: 'review', matches, unmatchedCount, alreadyNotedCount });
+    if (this.props.anthropicApiKey) {
+      for (let i = 0; i < matches.length; i++) {
+        this.setState({ shorteningProgress: { current: i + 1, total: matches.length } });
+        matches[i].proposedNote = await shortenDescription(
+          matches[i].csvRow.items,
+          this.props.anthropicApiKey!,
+        );
+      }
+    }
+
+    this.setState({ step: 'review', matches, unmatchedCount, alreadyNotedCount, isLoading: false, shorteningProgress: null });
   }
 
   private handleToggleMatch = (idx: number) => {
     const matches = [...this.state.matches];
     matches[idx] = { ...matches[idx], checked: !matches[idx].checked };
     this.setState({ matches });
+  };
+
+  private handleSaveApiKey = () => {
+    const key = this.state.apiKeyInput.trim();
+    if (key) {
+      this.props.onSaveApiKey(key);
+      this.setState({ isEditingApiKey: false, apiKeyInput: '' });
+    }
+  };
+
+  private handleClearApiKey = () => {
+    this.props.onSaveApiKey(undefined);
   };
 
   private handleApply = () => {
