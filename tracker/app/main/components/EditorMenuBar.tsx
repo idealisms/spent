@@ -4,6 +4,7 @@ import { Theme } from '@mui/material/styles';
 import Tooltip from '@mui/material/Tooltip';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import AutoFixHighIcon from '@mui/icons-material/AutoFixHigh';
+import FileUploadIcon from '@mui/icons-material/FileUpload';
 import CallMergeIcon from '@mui/icons-material/CallMerge';
 import CallSplitIcon from '@mui/icons-material/CallSplit';
 import CloudDoneIcon from '@mui/icons-material/CloudDone';
@@ -52,6 +53,7 @@ interface IEditorMenuBarProps {
     transactions: Map<string, Transactions.ITransaction>
   ) => void;
   onClassifyClick: () => void;
+  onAmazonImportClick: () => void;
 }
 
 interface IEditorMenuBarState {
@@ -172,6 +174,14 @@ class EditorMenuBarInner extends React.Component<
             onClick={this.props.onClassifyClick}
           >
             <AutoFixHighIcon />
+          </IconButton>
+        </Tooltip>
+        <Tooltip title="Import Amazon CSV">
+          <IconButton
+            className={classes.whiteIconButton}
+            onClick={this.props.onAmazonImportClick}
+          >
+            <FileUploadIcon />
           </IconButton>
         </Tooltip>
         <IconButton

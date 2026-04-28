@@ -95,6 +95,7 @@ interface IEditorState {
   searchQuery: string;
   isAddDialogOpen: boolean;
   isClassifyOpen: boolean;
+  isAmazonImportOpen: boolean;
 }
 
 interface IEditorInnerProps extends IEditorProps {
@@ -118,6 +119,7 @@ class EditorInner extends React.Component<IEditorInnerProps, IEditorState> {
       searchQuery: '',
       isAddDialogOpen: false,
       isClassifyOpen: false,
+      isAmazonImportOpen: false,
     };
   }
 
@@ -177,6 +179,7 @@ class EditorInner extends React.Component<IEditorInnerProps, IEditorState> {
           onSelectedDeleteClick={this.handleDeleteTransactions}
           onSelectedSplitSaveClick={this.handleSplitTransaction}
           onClassifyClick={() => this.setState({ isClassifyOpen: true })}
+          onAmazonImportClick={() => this.setState({ isAmazonImportOpen: true })}
         />
 
         <div className={classes.controls}>
@@ -239,6 +242,13 @@ class EditorInner extends React.Component<IEditorInnerProps, IEditorState> {
               allTransactions={this.props.transactions}
               onSave={this.handleEditTransaction}
               onClose={() => this.setState({ isClassifyOpen: false })}
+            />
+          ) : undefined}
+          {this.state.isAmazonImportOpen ? (
+            <Transactions.AmazonImportDialog
+              allTransactions={this.props.transactions}
+              onClose={() => this.setState({ isAmazonImportOpen: false })}
+              onSaveChanges={this.props.updateTransactions}
             />
           ) : undefined}
         </div>

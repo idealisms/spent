@@ -1,6 +1,7 @@
 import * as TransactionsActions from './actions';
 import * as classifyUtils from './classifyUtils';
 import AddTransactionDialog from './components/AddTransactionDialog';
+import AmazonImportDialog from './components/AmazonImportDialog';
 import BatchEditTagsDialog, {
   BatchEditTagsAction,
 } from './components/BatchEditTagsDialog';
@@ -19,6 +20,7 @@ import * as TransactionUtils from './utils';
 
 export {
   AddTransactionDialog,
+  AmazonImportDialog,
   BatchEditTagsDialog,
   BatchEditTagsAction,
   classifyUtils,
