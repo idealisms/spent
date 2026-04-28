@@ -34,7 +34,10 @@ interface IMatchResult {
 const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
 async function shortenDescription(items: string, apiKey: string): Promise<string> {
-  const first = items.split(';')[0].trim();
+  const itemList = items.split(';').map(s => s.trim()).filter(Boolean);
+  const prompt = itemList.length === 1
+    ? `Shorten this Amazon product title to 4-6 words keeping brand and product type. Reply with only the shortened title.\n\n${itemList[0]}`
+    : `Summarize these Amazon order items in 6-8 words, naming the key items. Reply with only the summary.\n\n${itemList.map(s => `- ${s}`).join('\n')}`;
   let delay = 1000;
   for (let attempt = 0; attempt < 5; attempt++) {
     try {
@@ -48,11 +51,11 @@ async function shortenDescription(items: string, apiKey: string): Promise<string
         },
         body: JSON.stringify({
           model: 'claude-haiku-4-5-20251001',
-          max_tokens: 20,
+          max_tokens: 30,
           messages: [
             {
               role: 'user',
-              content: `Shorten this Amazon product title to 4-6 words keeping brand and product type. Reply with only the shortened title.\n\n${first}`,
+              content: prompt,
             },
           ],
         }),
