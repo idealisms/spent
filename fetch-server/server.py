@@ -24,6 +24,9 @@ _config = cfg.load()
 _conn = db.get_conn(_config['db_path'])
 db.init_db(_config['db_path'])
 
+# Last daily summary attempt: {'sent_at', 'subject', 'body'} or {'skipped_at', 'reason'}
+_last_summary: dict | None = None
+
 templates = Jinja2Templates(directory='templates')
 
 
@@ -52,13 +55,22 @@ def _reschedule(interval_minutes: int):
 
 
 def _send_daily_summary():
-    cfg = _config
-    if not cfg.get('summary_to') or not cfg.get('smtp_user'):
+    global _last_summary
+    conf = _config
+
+    def _skip(reason: str):
+        global _last_summary
+        print(f'Daily summary skipped: {reason}')
+        _last_summary = {'skipped_at': datetime.now(timezone.utc).isoformat(), 'reason': reason}
+
+    if not conf.get('summary_to'):
+        _skip('summary_to not configured')
         return
 
     since = (datetime.now(timezone.utc) - timedelta(hours=24)).isoformat()
     runs = db.get_runs_since(_conn, since)
     if not runs:
+        _skip('no successful runs with transactions in the past 24 hours')
         return
 
     transactions = []
@@ -68,6 +80,7 @@ def _send_daily_summary():
 
     count = len(transactions)
     if count == 0:
+        _skip('runs found but added_transactions lists were all empty')
         return
 
     lines = [f'{count} new transaction{"s" if count != 1 else ""} in the past 24 hours:\n']
@@ -77,8 +90,13 @@ def _send_daily_summary():
 
     body = '\n'.join(lines)
     subject = f'Spent: {count} new transaction{"s" if count != 1 else ""}'
-    pipeline.send_email(cfg, cfg['summary_to'], subject, body)
-    print(f'Daily summary sent: {count} transaction(s)')
+    pipeline.send_email(conf, conf['summary_to'], subject, body)
+    print(f'Daily summary sent to {conf["summary_to"]}: {count} transaction(s)')
+    _last_summary = {
+        'sent_at': datetime.now(timezone.utc).isoformat(),
+        'subject': subject,
+        'body': body,
+    }
 
 
 @asynccontextmanager
@@ -137,6 +155,7 @@ async def index(request: Request):
         'next_run': next_run,
         'running': _is_running(),
         'git': _git,
+        'last_summary': _last_summary,
     })
 
 

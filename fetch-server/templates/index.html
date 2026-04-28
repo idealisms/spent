@@ -55,6 +55,18 @@
     </form>
   </div>
 
+  <h2>Last Email Summary</h2>
+  {% if last_summary %}
+    {% if last_summary.get('sent_at') %}
+    <p class="meta">Sent at {{ last_summary.sent_at[:19].replace('T', ' ') }} UTC &mdash; <strong>{{ last_summary.subject }}</strong></p>
+    <pre>{{ last_summary.body }}</pre>
+    {% else %}
+    <p class="meta">Skipped at {{ last_summary.skipped_at[:19].replace('T', ' ') }} UTC &mdash; {{ last_summary.reason }}</p>
+    {% endif %}
+  {% else %}
+  <p style="color:#999;font-style:italic">No summary attempted since server start.</p>
+  {% endif %}
+
   <h2>Recent Runs</h2>
   {% if runs %}
   <table>
