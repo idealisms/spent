@@ -42,7 +42,7 @@ export function parseRow(row: string): string[] {
 export function parseCsv(text: string): Record<string, string>[] {
   // Strip BOM and normalize line endings
   const lines = text
-    .replace(/^﻿/, '')
+    .replace(/^\uFEFF/, '')
     .split('\n')
     .map(l => l.replace(/\r$/, ''))
     .filter(Boolean);
