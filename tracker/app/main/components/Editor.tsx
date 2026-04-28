@@ -11,7 +11,8 @@ import * as React from 'react';
 import { connect } from 'react-redux';
 import { ThunkDispatch } from 'redux-thunk';
 import * as Transactions from '../../transactions';
-import { CloudState, IAppState } from '../model';
+import { CloudState, IAppState, ISettings } from '../model';
+import { saveSettingsToDropbox, updateSetting } from '../actions';
 import ClassifyDialog from './ClassifyDialog';
 import EditorMenuBar from './EditorMenuBar';
 
@@ -79,10 +80,12 @@ interface IEditorOwnProps {}
 interface IEditorAppStateProps {
   transactions: Transactions.ITransaction[];
   cloudState: CloudState;
+  anthropicApiKey?: string;
 }
 interface IEditorDispatchProps {
   updateTransactions: (transactions: Transactions.ITransaction[]) => void;
   saveTransactions: () => void;
+  onSaveApiKey: (key: string | undefined) => void;
 }
 type IEditorProps = IEditorOwnProps &
   IEditorAppStateProps &
@@ -249,6 +252,8 @@ class EditorInner extends React.Component<IEditorInnerProps, IEditorState> {
               allTransactions={this.props.transactions}
               onClose={() => this.setState({ isAmazonImportOpen: false })}
               onSaveChanges={this.props.updateTransactions}
+              anthropicApiKey={this.props.anthropicApiKey}
+              onSaveApiKey={this.props.onSaveApiKey}
             />
           ) : undefined}
         </div>
@@ -510,6 +515,7 @@ function EditorWrapper(props: IEditorProps) {
 const mapStateToProps = (state: IAppState): IEditorAppStateProps => ({
   transactions: state.transactions.transactions,
   cloudState: state.transactions.cloudState,
+  anthropicApiKey: state.settings.settings.anthropicApiKey,
 });
 const mapDispatchToProps = (
   dispatch: ThunkDispatch<IAppState, null, any>
@@ -519,6 +525,10 @@ const mapDispatchToProps = (
   },
   saveTransactions: () => {
     dispatch(Transactions.TransactionsActions.saveTransactionsToDropbox());
+  },
+  onSaveApiKey: (key: string | undefined) => {
+    dispatch(updateSetting('anthropicApiKey', key as ISettings[keyof ISettings]));
+    dispatch(saveSettingsToDropbox());
   },
 });
 

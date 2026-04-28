@@ -83,6 +83,7 @@ export interface ISettings {
   spendTargets: ISpendTarget[];
   /** Category definitions: name → { emoji, tags }. Populated from defaults if absent. */
   categories?: Record<string, ICategoryDefinition>;
+  anthropicApiKey?: string;
 }
 
 export interface ISettingsState {
