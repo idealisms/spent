@@ -9,7 +9,6 @@ dist/
 logs
 *.log
 .yarn/
-.yarnrc.yml
 
 app/config.ts
 package-lock.json
