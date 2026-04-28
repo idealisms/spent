@@ -81,7 +81,7 @@ describe('parseCsv', () => {
   });
 
   it('strips a leading UTF-8 BOM', () => {
-    const result = parseCsv('﻿name,amount\nbar,10');
+    const result = parseCsv('\uFEFFname,amount\nbar,10');
     expect(result).toEqual([{ name: 'bar', amount: '10' }]);
   });
 
