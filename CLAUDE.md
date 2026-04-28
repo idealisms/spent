@@ -2,6 +2,12 @@
 
 This file provides guidance to Claude Code when working with this repository.
 
+## Development Workflow
+
+- Always make changes on a feature branch, never directly on `main`.
+- Push the branch when done, but **do not merge to `main`** — wait for the user to review and approve the PR.
+- If a PR doesn't exist yet for the branch, create one so the user can review it (unless they explicitly say otherwise).
+
 ## Repository Structure
 
 This is a personal finance tracker with two independent parts that share Dropbox as a data layer.
