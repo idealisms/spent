@@ -187,6 +187,13 @@ async def reparse():
     return RedirectResponse(f'/?reparsing={count}', status_code=303)
 
 
+@app.post('/reparse/{run_id}')
+async def reparse_run(run_id: int):
+    count = db.reset_parsed_emails_for_run(_conn, run_id)
+    threading.Thread(target=_do_run, daemon=True).start()
+    return RedirectResponse(f'/run/{run_id}?reparsing={count}', status_code=303)
+
+
 def _restarting_html(git_hash: str, changed: bool) -> str:
     if changed:
         subtitle = f'Pulled new code &mdash; <code>{git_hash}</code>'

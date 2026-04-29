@@ -20,11 +20,25 @@
     .badge-pending { background: #fff3cd; color: #856404; }
     .badge-skipped { background: #e2e3e5; color: #383d41; }
     .error-text { color: #721c24; font-size: 0.8rem; }
+    .actions { display: flex; gap: 0.5rem; margin-bottom: 1.5rem; }
+    button.danger { padding: 0.5rem 1rem; font-size: 1rem; cursor: pointer; border: 1px solid #aa2200; border-radius: 4px; background: #cc3300; color: #fff; }
+    .notice { background: #fff3cd; border: 1px solid #ffc107; border-radius: 4px; padding: 0.5rem 1rem; margin-bottom: 1rem; }
   </style>
 </head>
 <body>
   <a class="back" href="/">← Back</a>
   <h1>Run #{{ run.id }}</h1>
+
+  {% if request.query_params.get('reparsing') %}
+  <div class="notice">Re-parsing {{ request.query_params.get('reparsing') }} emails from this run — run started.</div>
+  {% endif %}
+
+  <div class="actions">
+    <form method="post" action="/reparse/{{ run.id }}">
+      <button class="danger">Re-parse This Run's Emails</button>
+    </form>
+  </div>
+
   <div class="meta">
     {{ run.started_at[:19].replace('T', ' ') }} UTC ·
     <strong>{{ run.status }}</strong> ·
