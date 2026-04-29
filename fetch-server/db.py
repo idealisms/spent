@@ -1,5 +1,5 @@
 import sqlite3
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from typing import Optional
 
 
@@ -89,9 +89,11 @@ def finish_run(
     conn.commit()
 
 
-def get_recent_runs(conn: sqlite3.Connection, limit: int = 20) -> list:
+def get_recent_runs(conn: sqlite3.Connection, days: int = 7) -> list:
+    since = (datetime.now(timezone.utc) - timedelta(days=days)).isoformat()
     return conn.execute(
-        "SELECT * FROM fetch_runs ORDER BY started_at DESC LIMIT ?", (limit,)
+        "SELECT * FROM fetch_runs WHERE started_at >= ? ORDER BY started_at DESC",
+        (since,),
     ).fetchall()
 
 
@@ -172,6 +174,17 @@ def reset_parsed_emails(conn: sqlite3.Connection) -> int:
     cur = conn.execute(
         "UPDATE emails SET parse_status = 'pending', parsed_at = NULL, parse_error = NULL "
         "WHERE parse_status = 'parsed'"
+    )
+    conn.commit()
+    return cur.rowcount
+
+
+def reset_parsed_emails_for_run(conn: sqlite3.Connection, run_id: int) -> int:
+    """Mark emails from a specific run back to pending. Returns the number reset."""
+    cur = conn.execute(
+        "UPDATE emails SET parse_status = 'pending', parsed_at = NULL, parse_error = NULL "
+        "WHERE fetch_run_id = ? AND parse_status IN ('parsed', 'error', 'skipped')",
+        (run_id,),
     )
     conn.commit()
     return cur.rowcount
