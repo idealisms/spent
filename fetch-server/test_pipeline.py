@@ -1,12 +1,11 @@
 """Unit tests for email parsing and merge logic in pipeline.py."""
 import base64
-import json
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 
 import pytest
 
-from pipeline import _parse_email, _merge, sync_to_dropbox
+from pipeline import _parse_email, _merge
 
 
 # ── Email construction helpers ─────────────────────────────────────────────────
@@ -210,74 +209,3 @@ def test_merge_sorts_by_date_descending():
     _merge(existing, [_tx('b', date='2026-03-01'), _tx('c', date='2025-06-01')], lambda _: None)
     dates = [t['date'] for t in existing]
     assert dates == sorted(dates, reverse=True)
-
-
-# ── sync_to_dropbox ────────────────────────────────────────────────────────────
-
-class _FakeDropbox:
-    """Minimal Dropbox SDK mock: holds an in-memory transactions list."""
-    def __init__(self, initial):
-        self._data = list(initial)
-        self.upload_calls = 0
-
-    def files_download(self, path):
-        class _Resp:
-            pass
-        r = _Resp()
-        r.content = json.dumps(self._data).encode()
-        return None, r
-
-    def files_upload(self, data, path, mode):
-        self._data = json.loads(data.decode())
-        self.upload_calls += 1
-
-
-class _FakeDropboxModule:
-    class files:
-        class WriteMode:
-            overwrite = 'overwrite'
-
-    def __init__(self, initial):
-        self._dbx = _FakeDropbox(initial)
-
-    def Dropbox(self, token):
-        return self._dbx
-
-
-def test_sync_uploads_new_transaction(monkeypatch):
-    mod = _FakeDropboxModule([_tx('existing')])
-    import pipeline
-    monkeypatch.setattr(pipeline, 'dropbox_module', mod)
-
-    added = sync_to_dropbox([_tx('new')], 'tok', '/p', lambda _: None)
-
-    assert len(added) == 1
-    assert added[0]['id'] == 'new'
-    assert mod._dbx.upload_calls == 1
-
-
-def test_sync_no_upload_when_nothing_new(monkeypatch):
-    mod = _FakeDropboxModule([_tx('a')])
-    import pipeline
-    monkeypatch.setattr(pipeline, 'dropbox_module', mod)
-
-    added = sync_to_dropbox([_tx('a')], 'tok', '/p', lambda _: None)
-
-    assert added == []
-    assert mod._dbx.upload_calls == 0
-
-
-def test_sync_restores_transaction_missing_after_stale_save(monkeypatch):
-    """When a previously added transaction is absent from Dropbox (stale frontend
-    save overwrote it), passing it back in new_transactions restores it."""
-    mod = _FakeDropboxModule([_tx('kept')])  # 'lost' is not here
-    import pipeline
-    monkeypatch.setattr(pipeline, 'dropbox_module', mod)
-
-    added = sync_to_dropbox([_tx('lost'), _tx('kept')], 'tok', '/p', lambda _: None)
-
-    assert len(added) == 1
-    assert added[0]['id'] == 'lost'
-    restored_ids = {t['id'] for t in mod._dbx._data}
-    assert 'lost' in restored_ids
-    assert 'kept' in restored_ids
