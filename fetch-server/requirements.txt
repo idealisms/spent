@@ -7,3 +7,4 @@ google-auth-httplib2>=0.2
 google-api-python-client>=2.150
 dropbox>=12.0
 ofxparse>=0.21
+pytest>=7
