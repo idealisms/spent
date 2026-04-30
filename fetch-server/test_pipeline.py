@@ -205,6 +205,15 @@ def test_merge_different_dates_not_deduped():
     assert len(added) == 1
 
 
+def test_merge_ofx_same_description_not_deduped_by_description():
+    # OFX transactions skip description-based dedup: identical same-day charges
+    # from a CSV import are legitimate and distinguished only by ID.
+    existing = [_tx('a', description='AMAZON', source='ofx_chase')]
+    new = [_tx('b', description='AMAZON', source='ofx_chase')]
+    added = _merge(existing, new, lambda _: None)
+    assert len(added) == 1
+
+
 def test_merge_sorts_by_date_descending():
     existing = [_tx('a', date='2026-01-01')]
     _merge(existing, [_tx('b', date='2026-03-01'), _tx('c', date='2025-06-01')], lambda _: None)
