@@ -304,8 +304,12 @@ def run(conn: sqlite3.Connection, config: dict, log: Log) -> dict:
 
         new_transactions = _parse_pending_emails(conn, _log)
 
+        # Re-include recently added transactions so any lost due to a stale
+        # frontend save are restored on the next run. _merge deduplicates by
+        # ID, so transactions already in Dropbox are silently skipped.
+        recently_added = db.get_recently_added_transactions(conn)
         added = sync_to_dropbox(
-            new_transactions,
+            recently_added + new_transactions,
             config['dropbox_access_token'],
             config['dropbox_path'],
             _log,

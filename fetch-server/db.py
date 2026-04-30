@@ -89,6 +89,30 @@ def finish_run(
     conn.commit()
 
 
+def get_recently_added_transactions(conn: sqlite3.Connection, days: int = 7) -> list:
+    """Return deduplicated transactions added by successful runs in the last `days` days.
+
+    Used by the pipeline to re-include recent additions so that any lost due to
+    a stale frontend save are restored on the next run.
+    """
+    import json
+    cutoff = (datetime.now(timezone.utc) - timedelta(days=days)).isoformat()
+    rows = conn.execute(
+        """SELECT added_transactions FROM fetch_runs
+           WHERE status = 'success' AND started_at >= ? AND added_transactions IS NOT NULL
+           ORDER BY started_at DESC""",
+        (cutoff,),
+    ).fetchall()
+    seen_ids: set = set()
+    result = []
+    for row in rows:
+        for t in json.loads(row[0]):
+            if t['id'] not in seen_ids:
+                seen_ids.add(t['id'])
+                result.append(t)
+    return result
+
+
 def get_recent_runs(conn: sqlite3.Connection, days: int = 7) -> list:
     since = (datetime.now(timezone.utc) - timedelta(days=days)).isoformat()
     return conn.execute(
