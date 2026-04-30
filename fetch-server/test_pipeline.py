@@ -254,11 +254,11 @@ class _FakeDropboxModule:
 
 
 def test_sync_uploads_new_transaction(monkeypatch):
-    mod = _FakeDropboxModule([_tx('existing')])
+    mod = _FakeDropboxModule([_tx('existing', description='OLD CHARGE')])
     import pipeline
     monkeypatch.setattr(pipeline, 'dropbox_module', mod)
 
-    added = sync_to_dropbox([_tx('new')], 'tok', '/p', lambda _: None)
+    added = sync_to_dropbox([_tx('new', description='NEW CHARGE')], 'tok', '/p', lambda _: None)
 
     assert len(added) == 1
     assert added[0]['id'] == 'new'
@@ -266,11 +266,11 @@ def test_sync_uploads_new_transaction(monkeypatch):
 
 
 def test_sync_no_upload_when_nothing_new(monkeypatch):
-    mod = _FakeDropboxModule([_tx('a')])
+    mod = _FakeDropboxModule([_tx('a', description='CHARGE A')])
     import pipeline
     monkeypatch.setattr(pipeline, 'dropbox_module', mod)
 
-    added = sync_to_dropbox([_tx('a')], 'tok', '/p', lambda _: None)
+    added = sync_to_dropbox([_tx('a', description='CHARGE A')], 'tok', '/p', lambda _: None)
 
     assert added == []
     assert mod._dbx.upload_calls == 0
@@ -279,11 +279,14 @@ def test_sync_no_upload_when_nothing_new(monkeypatch):
 def test_sync_restores_transaction_missing_after_stale_save(monkeypatch):
     """When a previously added transaction is absent from Dropbox (stale frontend
     save overwrote it), passing it back in new_transactions restores it."""
-    mod = _FakeDropboxModule([_tx('kept')])  # 'lost' is not here
+    mod = _FakeDropboxModule([_tx('kept', description='KEPT CHARGE')])
     import pipeline
     monkeypatch.setattr(pipeline, 'dropbox_module', mod)
 
-    added = sync_to_dropbox([_tx('lost'), _tx('kept')], 'tok', '/p', lambda _: None)
+    added = sync_to_dropbox(
+        [_tx('lost', description='LOST CHARGE'), _tx('kept', description='KEPT CHARGE')],
+        'tok', '/p', lambda _: None,
+    )
 
     assert len(added) == 1
     assert added[0]['id'] == 'lost'
