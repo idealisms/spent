@@ -4,3 +4,4 @@ credentials.json
 fetch_server.db
 __pycache__/
 *.pyc
+.venv/
