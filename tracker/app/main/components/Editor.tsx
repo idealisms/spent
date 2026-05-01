@@ -458,7 +458,9 @@ class EditorInner extends React.Component<IEditorInnerProps, IEditorState> {
   ): void => {
     const updated = this.props.transactions.map(
       (t: Transactions.ITransaction) =>
-        transactionsToDelete.has(t.id) ? { ...t, deleted: true as const } : t
+        transactionsToDelete.has(t.id)
+          ? { ...t, tags: [...t.tags, 'deleted'] }
+          : t
     );
     this.props.updateTransactions(updated);
     this.setState({

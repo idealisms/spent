@@ -230,31 +230,8 @@ describe('Home', () => {
     expect(filtered.length).toBe(1);
   });
 
-  it('filterTransactions excludes soft-deleted transactions', () => {
-    const tx = (id: string, deleted?: true): ITransaction => ({
-      id,
-      description: `Merchant ${id}`,
-      original_line: '',
-      date: '2019-01-05',
-      tags: [],
-      amount_cents: 100,
-      transactions: [],
-      ...(deleted ? { deleted } : {}),
-    });
-
-    const transactions = [tx('1'), tx('2', true), tx('3'), tx('4', true), tx('5')];
-
-    const filtered = utils.filterTransactions(transactions, {});
-    expect(filtered.length).toBe(3);
-    expect(filtered.map(t => t.id)).toEqual(['1', '3', '5']);
-  });
-
-  it('filterTransactions applies other filters after excluding deleted', () => {
-    const tx = (
-      id: string,
-      tags: string[],
-      deleted?: true
-    ): ITransaction => ({
+  it('filterTransactions excludes transactions tagged deleted', () => {
+    const tx = (id: string, tags: string[] = []): ITransaction => ({
       id,
       description: `Merchant ${id}`,
       original_line: '',
@@ -262,12 +239,35 @@ describe('Home', () => {
       tags,
       amount_cents: 100,
       transactions: [],
-      ...(deleted ? { deleted } : {}),
+    });
+
+    const transactions = [
+      tx('1'),
+      tx('2', ['deleted']),
+      tx('3'),
+      tx('4', ['deleted']),
+      tx('5'),
+    ];
+
+    const filtered = utils.filterTransactions(transactions, {});
+    expect(filtered.length).toBe(3);
+    expect(filtered.map(t => t.id)).toEqual(['1', '3', '5']);
+  });
+
+  it('filterTransactions excludes deleted even when other tags match filters', () => {
+    const tx = (id: string, tags: string[]): ITransaction => ({
+      id,
+      description: `Merchant ${id}`,
+      original_line: '',
+      date: '2019-01-05',
+      tags,
+      amount_cents: 100,
+      transactions: [],
     });
 
     const transactions = [
       tx('1', ['groceries']),
-      tx('2', ['groceries'], true), // deleted — must not appear even with matching tag
+      tx('2', ['groceries', 'deleted']), // deleted — must not appear even with matching tag
       tx('3', ['gas']),
       tx('4', ['groceries']),
     ];

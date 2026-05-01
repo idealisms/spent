@@ -75,7 +75,6 @@ export interface ITransaction {
   transactions: Array<ITransaction>;
   source?: string;
   notes?: string;
-  deleted?: true;
 }
 
 export interface ITransactionsState {

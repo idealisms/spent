@@ -206,7 +206,7 @@ export function filterTransactions(
     return [];
   }
   let filteredTransactions: ITransaction[] = transactions.filter(
-    t => !t.deleted
+    t => !t.tags.includes('deleted')
   );
   if (filters.startDate || filters.endDate) {
     filteredTransactions = filterTransactionsByDate(
