@@ -27,6 +27,7 @@ const useStyles = makeStyles()((_theme: Theme) => ({
   },
   transactionRow: {
     borderBottom: 'none',
+    marginBottom: '8px',
   },
 }));
 
