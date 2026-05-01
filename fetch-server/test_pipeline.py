@@ -205,6 +205,15 @@ def test_merge_different_dates_not_deduped():
     assert len(added) == 1
 
 
+def test_merge_does_not_readd_soft_deleted_transaction():
+    # A transaction soft-deleted in the frontend (deleted=True) stays in
+    # existing, so its ID remains in seen_ids and _merge won't re-add it.
+    existing = [{**_tx('a'), 'deleted': True}]
+    added = _merge(existing, [_tx('a')], lambda _: None)
+    assert added == []
+    assert len(existing) == 1
+
+
 def test_merge_ofx_same_description_not_deduped_by_description():
     # OFX transactions skip description-based dedup: identical same-day charges
     # from a CSV import are legitimate and distinguished only by ID.

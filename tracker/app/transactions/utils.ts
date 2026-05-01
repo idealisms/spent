@@ -205,7 +205,9 @@ export function filterTransactions(
   if (!transactions.length) {
     return [];
   }
-  let filteredTransactions: ITransaction[] = transactions;
+  let filteredTransactions: ITransaction[] = transactions.filter(
+    t => !t.deleted
+  );
   if (filters.startDate || filters.endDate) {
     filteredTransactions = filterTransactionsByDate(
       filteredTransactions,

@@ -456,12 +456,11 @@ class EditorInner extends React.Component<IEditorInnerProps, IEditorState> {
   private handleDeleteTransactions = (
     transactionsToDelete: Map<string, Transactions.ITransaction>
   ): void => {
-    let transactionsToKeep = this.props.transactions.filter(
-      (t: Transactions.ITransaction) => {
-        return !transactionsToDelete.has(t.id);
-      }
+    const updated = this.props.transactions.map(
+      (t: Transactions.ITransaction) =>
+        transactionsToDelete.has(t.id) ? { ...t, deleted: true as const } : t
     );
-    this.props.updateTransactions(transactionsToKeep);
+    this.props.updateTransactions(updated);
     this.setState({
       selectedTransactions: new Map(),
     });
