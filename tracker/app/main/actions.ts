@@ -3,6 +3,7 @@ import { ThunkAction } from 'redux-thunk';
 import { CloudState, IAppState, IReportNode, ISettings } from './model';
 import { AuthAction, dropboxDownloadCompleted } from '../auth/actions';
 import { AuthStatus } from '../auth/model';
+import { DROPBOX_SETTINGS_PATH } from '../dropboxPaths';
 
 // Action types
 export enum ActionType {
@@ -58,7 +59,7 @@ export const fetchSettingsFromDropbox = (): ThunkAction<
     let dbx = new Dropbox.Dropbox({
       accessToken: state.auth.dropboxAccessToken,
     });
-    const path = '/spent tracker/settings.json';
+    const path = DROPBOX_SETTINGS_PATH;
     try {
       const response = await dbx.filesDownload({ path });
       let fr = new FileReader();
@@ -115,7 +116,7 @@ export const saveSettingsToDropbox = (): ThunkAction<
         (_key, value) => (value instanceof Map ? Object.fromEntries(value) : value),
         2
       ),
-      path: '/spent tracker/settings.json',
+      path: DROPBOX_SETTINGS_PATH,
       mode: { '.tag': 'overwrite' } as Dropbox.files.WriteModeOverwrite,
       autorename: false,
       mute: false,
