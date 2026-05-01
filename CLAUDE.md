@@ -5,8 +5,8 @@ This file provides guidance to Claude Code when working with this repository.
 ## Development Workflow
 
 - Always make changes on a feature branch, never directly on `main`.
-- Push the branch when done, but **do not merge to `main`** — wait for the user to review and approve the PR.
-- If a PR doesn't exist yet for the branch, create one so the user can review it (unless they explicitly say otherwise).
+- When work is complete, push the branch and create a PR if one doesn't exist.
+- **Do not merge to `main` manually** — after creating the PR, wait for CI checks to pass, then merge via the PR.
 
 ## Repository Structure
 
