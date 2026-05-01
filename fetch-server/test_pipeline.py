@@ -162,14 +162,14 @@ def test_unknown_email_raises():
 
 # ── Merge / dedup ──────────────────────────────────────────────────────────────
 
-def _tx(id, date='2026-04-27', description='STORE', source='email_usaa', amount_cents=1000):
+def _tx(id, date='2026-04-27', description='STORE', source='email_usaa', amount_cents=1000, tags=None):
     return {
         'id': id,
         'date': date,
         'description': description,
         'source': source,
         'amount_cents': amount_cents,
-        'tags': [],
+        'tags': tags if tags is not None else [],
         'transactions': [],
         'notes': '',
         'original_line': 'subject',
@@ -203,6 +203,15 @@ def test_merge_different_dates_not_deduped():
     new = [_tx('b', date='2026-04-28', description='STORE')]
     added = _merge(existing, new, lambda _: None)
     assert len(added) == 1
+
+
+def test_merge_does_not_readd_soft_deleted_transaction():
+    # A transaction deleted in the frontend (tagged 'deleted') stays in existing,
+    # so its ID remains in seen_ids and _merge won't re-add it.
+    existing = [_tx('a', tags=['deleted'])]
+    added = _merge(existing, [_tx('a')], lambda _: None)
+    assert added == []
+    assert len(existing) == 1
 
 
 def test_merge_ofx_same_description_not_deduped_by_description():
