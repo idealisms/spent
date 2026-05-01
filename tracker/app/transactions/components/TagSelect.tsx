@@ -117,6 +117,7 @@ class TagSelectInner extends React.Component<
     }
 
     let suggestions = new Array(...tagMap.keys())
+      .filter(tag => tag !== 'deleted')
       .sort()
       .map(tag => ({ label: tag, value: tag }));
 
@@ -159,6 +160,14 @@ class TagSelectInner extends React.Component<
           {...componentProps}
           createOptionPosition={this.props.createOptionPosition}
           formatCreateLabel={inputValue => <span>New tag: {inputValue}</span>}
+          isValidNewOption={inputValue =>
+            inputValue.trim().toLowerCase() !== 'deleted'
+          }
+          noOptionsMessage={({ inputValue }) =>
+            inputValue.trim().toLowerCase() === 'deleted'
+              ? '"deleted" is a reserved tag'
+              : 'No options'
+          }
         />
       );
     } else {
