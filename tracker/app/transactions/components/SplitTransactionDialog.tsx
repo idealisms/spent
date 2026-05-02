@@ -15,10 +15,10 @@ import TransactionsTable from './TransactionsTable';
 const useStyles = makeStyles()((_theme: Theme) => ({
   amount: {
     flex: '0 0 80px',
-    // This fixes the vertical alignment of the input.
-    paddingTop: '8px',
     '& input': {
       textAlign: 'right',
+      paddingTop: '8.5px',
+      paddingBottom: '8.5px',
     },
   },
   dialogContent: {
@@ -27,7 +27,6 @@ const useStyles = makeStyles()((_theme: Theme) => ({
   },
   transactionRow: {
     borderBottom: 'none',
-    marginBottom: '8px',
   },
 }));
 
