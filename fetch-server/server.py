@@ -87,6 +87,7 @@ def _send_daily_summary():
     for t in transactions:
         amount = t['amount_cents'] / 100
         lines.append(f'  {t["date"]}  {t["description"]:<40}  ${amount:>8.2f}')
+    lines.append('\nhttps://spent-xi.vercel.app')
 
     body = '\n'.join(lines)
     subject = f'Spent: {count} new transaction{"s" if count != 1 else ""}'
