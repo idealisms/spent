@@ -53,7 +53,7 @@ function applyBrackets(amountCents: number, brackets: IBracket[]): number {
   let tax = 0;
   let remaining = Math.max(0, amountCents);
   for (const b of brackets) {
-    if (remaining <= 0) break;
+    if (remaining <= 0) {break;}
     const room = Math.min(remaining, b.max - b.min);
     tax += room * b.rate;
     remaining -= room;
@@ -71,7 +71,7 @@ function applyLtcgBrackets(
   let tax = 0;
   let remaining = Math.max(0, ltcgCents);
   for (const b of brackets) {
-    if (remaining <= 0) break;
+    if (remaining <= 0) {break;}
     // Room in this bracket after ordinary income has already filled it.
     const roomStart = Math.max(b.min, stackedOrdinaryCents);
     const room = Math.max(0, b.max - roomStart);
@@ -107,6 +107,8 @@ export function calculateTax(
         break;
       case 'stcg':
         stcgCents += t.amountCents;
+        break;
+      default:
         break;
     }
   }
