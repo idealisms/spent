@@ -137,14 +137,16 @@ function categoryLabel(cat: IBrokerageTransaction['category']): string {
     case 'interest': return 'Interest';
     case 'ltcg':     return 'LT Gain';
     case 'stcg':     return 'ST Gain';
+    default:         return cat;
   }
 }
 
 function sourceLabel(src: IBrokerageTransaction['source']): string {
   switch (src) {
-    case 'vanguard':     return 'Vanguard';
-    case 'schwab':       return 'Schwab';
+    case 'vanguard':      return 'Vanguard';
+    case 'schwab':        return 'Schwab';
     case 'schwab_equity': return 'Schwab RSU';
+    default:              return src;
   }
 }
 
@@ -162,7 +164,7 @@ function UploadButton({ label, count, onFile }: IUploadButtonProps) {
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (!file) return;
+    if (!file) {return;}
     const reader = new FileReader();
     reader.onload = ev => onFile(ev.target?.result as string ?? '');
     reader.readAsText(file);
@@ -247,13 +249,13 @@ export default function BrokeragePage() {
   const dividendSymbols = React.useMemo(() => {
     const syms = new Set<string>();
     for (const t of transactions) {
-      if (t.category === 'dividend' && t.symbol) syms.add(t.symbol);
+      if (t.category === 'dividend' && t.symbol) {syms.add(t.symbol);}
     }
     return Array.from(syms).sort();
   }, [transactions]);
 
   const taxSummary: ITaxSummary | null = React.useMemo(() => {
-    if (transactions.length === 0) return null;
+    if (transactions.length === 0) {return null;}
     return calculateTax(transactions, qualifiedConfig);
   }, [transactions, qualifiedConfig]);
 
@@ -270,7 +272,7 @@ export default function BrokeragePage() {
 
   const handleQualifiedChange = (symbol: string, value: string) => {
     const pct = parseFloat(value);
-    if (isNaN(pct)) return;
+    if (isNaN(pct)) {return;}
     setQualifiedConfig(prev => ({ ...prev, [symbol]: Math.min(1, Math.max(0, pct / 100)) }));
   };
 
