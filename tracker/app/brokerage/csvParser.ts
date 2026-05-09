@@ -88,6 +88,8 @@ export function parseVanguardCsv(text: string): IBrokerageTransaction[] {
 
 // Schwab simple brokerage CSV.
 // Sells are skipped — no cost basis in this export format.
+// Action names for dividends vary ("Qual Div Reinvest", "Cash Div", etc.) so
+// we match any action containing "div" (case-insensitive).
 export function parseSchwebCsv(text: string): IBrokerageTransaction[] {
   const rows = parseCsv(text.replace(/^\uFEFF/, ''));
   const result: IBrokerageTransaction[] = [];
@@ -106,16 +108,12 @@ export function parseSchwebCsv(text: string): IBrokerageTransaction[] {
     if (amountCents === 0) {continue;}
 
     let category: IncomeCategory;
-    if (
-      action === 'div' ||
-      action === 'cash div' ||
-      action.includes('dividend')
-    ) {
+    if (action.includes('div')) {
       category = 'dividend';
     } else if (action.includes('interest')) {
       category = 'interest';
     } else {
-      // Buy, Sell (no basis), Wire, Journal, etc.
+      // Buy, Sell (no basis), Wire, Journal, Reinvest Shares, etc.
       continue;
     }
 
@@ -125,31 +123,48 @@ export function parseSchwebCsv(text: string): IBrokerageTransaction[] {
   return result;
 }
 
-// Schwab equity awards CSV (RSU sales).
-// Each row with a non-empty RealizedGainLoss is a capital gain/loss event.
-// The vest-day ordinary income is already handled via W-2 — only the
-// subsequent capital gain/loss is recorded here.
+// Schwab equity awards CSV (RSU sales + dividends on held shares).
+//
+// The export uses a parent/child row structure for sales:
+//   Parent: Action="Sale", has Date/Symbol, but RealizedGainLoss is empty.
+//   Child:  Type="RS",     has RealizedGainLoss/HoldingPeriod, but Date/Symbol are empty.
+// We track the parent sale row's date and symbol, then apply them to each RS child.
+// Dividend rows (on held RSU shares) are also parsed.
+// The vest-day ordinary income is already on the W-2 — only subsequent cap gains are recorded.
 export function parseSchwebEquityCsv(text: string): IBrokerageTransaction[] {
   const rows = parseCsv(text.replace(/^\uFEFF/, ''));
   const result: IBrokerageTransaction[] = [];
 
+  let saleDate = '';
+  let saleSymbol = '';
+  let saleDescription = '';
+
   for (const row of rows) {
-    const gainStr = (row['RealizedGainLoss'] || '').trim();
-    if (!gainStr || gainStr === 'N/A' || gainStr === '--') {continue;}
+    const action = (row['Action'] || '').trim();
+    const type = (row['Type'] || '').trim();
 
-    const dateStr = (row['Date'] || '').trim();
-    const date = toYMD(dateStr);
-    if (!isValidDate(date)) {continue;}
-
-    const symbol = (row['Symbol'] || '').trim();
-    const description = (row['Description'] || '').trim();
-    const gainCents = parseDollars(gainStr);
-    if (gainCents === 0) {continue;}
-
-    const holdingPeriod = (row['HoldingPeriod'] || '').trim().toLowerCase();
-    const category: IncomeCategory = holdingPeriod.includes('long') ? 'ltcg' : 'stcg';
-
-    result.push(makeTransaction(date, 'schwab_equity', symbol, description, category, gainCents));
+    if (action === 'Sale') {
+      saleDate = toYMD((row['Date'] || '').trim());
+      saleSymbol = (row['Symbol'] || '').trim();
+      saleDescription = (row['Description'] || '').trim();
+    } else if (type === 'RS') {
+      const gainStr = (row['RealizedGainLoss'] || '').trim();
+      if (!gainStr || gainStr === 'N/A' || gainStr === '--') {continue;}
+      if (!isValidDate(saleDate)) {continue;}
+      const gainCents = parseDollars(gainStr);
+      if (gainCents === 0) {continue;}
+      const holdingPeriod = (row['HoldingPeriod'] || '').trim().toLowerCase();
+      const category: IncomeCategory = holdingPeriod.includes('long') ? 'ltcg' : 'stcg';
+      result.push(makeTransaction(saleDate, 'schwab_equity', saleSymbol, saleDescription, category, gainCents));
+    } else if (action === 'Dividend') {
+      const date = toYMD((row['Date'] || '').trim());
+      if (!isValidDate(date)) {continue;}
+      const amountCents = parseDollars(row['Amount'] || '');
+      if (amountCents === 0) {continue;}
+      const symbol = (row['Symbol'] || '').trim();
+      const description = (row['Description'] || '').trim();
+      result.push(makeTransaction(date, 'schwab_equity', symbol, description, 'dividend', amountCents));
+    }
   }
 
   return result;
