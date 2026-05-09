@@ -5,3 +5,4 @@ export const MonthlyPage = '/monthly';
 export const EditorPage = '/editor';
 export const ReportPage = '/report';
 export const CategoriesPage = '/categories';
+export const BrokeragePage = '/brokerage';
