@@ -9,6 +9,7 @@ import { Theme } from '@mui/material/styles';
 import Toolbar from '@mui/material/Toolbar';
 import Typography from '@mui/material/Typography';
 import BarChartIcon from '@mui/icons-material/BarChart';
+import CalculateIcon from '@mui/icons-material/Calculate';
 import CategoryIcon from '@mui/icons-material/Category';
 import EditIcon from '@mui/icons-material/Edit';
 import LabelIcon from '@mui/icons-material/Label';
@@ -202,6 +203,23 @@ class MenuBarWithDrawerInner extends React.Component<
               <ListItemText
                 classes={{ primary: classes.drawerItemText }}
                 primary="Categories"
+              />
+            </ListItemButton>
+            <ListItemButton
+              key="Brokerage"
+              onClick={() => this.handleNavigate(Pages.BrokeragePage)}
+              selected={selectedPage === Pages.BrokeragePage}
+            >
+              <ListItemIcon>
+                <CalculateIcon
+                  color={
+                    selectedPage === Pages.BrokeragePage ? 'primary' : 'inherit'
+                  }
+                />
+              </ListItemIcon>
+              <ListItemText
+                classes={{ primary: classes.drawerItemText }}
+                primary="Tax Estimates"
               />
             </ListItemButton>
           </List>
