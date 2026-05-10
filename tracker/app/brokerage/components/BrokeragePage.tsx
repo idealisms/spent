@@ -1,4 +1,3 @@
-import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import Chip from '@mui/material/Chip';
 import Divider from '@mui/material/Divider';
@@ -21,11 +20,7 @@ import {
   IQualifiedConfig,
   ITaxSummary,
 } from '../model';
-import {
-  parseVanguardCsv,
-  parseSchwebCsv,
-  parseSchwebEquityCsv,
-} from '../csvParser';
+import { detectAndParseCsv } from '../csvParser';
 import { calculateTax } from '../taxCalculator';
 import qualifiedDividendLookup from '../qualifiedDividendLookup';
 
@@ -53,17 +48,32 @@ const useStyles = makeStyles()((_theme: Theme) => ({
     marginBottom: '12px',
     fontWeight: 600,
   },
+  dropZone: {
+    border: '2px dashed #ccc',
+    borderRadius: '8px',
+    padding: '24px',
+    textAlign: 'center' as const,
+    cursor: 'pointer',
+    display: 'flex',
+    flexDirection: 'column' as const,
+    alignItems: 'center',
+    gap: '6px',
+    transition: 'border-color 0.15s, background-color 0.15s',
+    '&:hover': {
+      borderColor: '#1976d2',
+      backgroundColor: 'rgba(25, 118, 210, 0.04)',
+    },
+  },
+  dropZoneActive: {
+    borderColor: '#1976d2',
+    backgroundColor: 'rgba(25, 118, 210, 0.08)',
+  },
   uploadRow: {
     display: 'flex',
-    gap: '12px',
+    gap: '8px',
     flexWrap: 'wrap',
     alignItems: 'center',
-  },
-  uploadButton: {
-    textTransform: 'none',
-  },
-  chip: {
-    marginLeft: '8px',
+    marginTop: '8px',
   },
   warningText: {
     color: '#856404',
@@ -151,59 +161,18 @@ function sourceLabel(src: IBrokerageTransaction['source']): string {
   }
 }
 
-// ── Upload button ─────────────────────────────────────────────────────────────
-
-interface IUploadButtonProps {
-  label: string;
-  count: number;
-  onFile: (text: string) => void;
+// Deduplicate by date + category + symbol + amount. Preserves first occurrence.
+function dedupe(txs: IBrokerageTransaction[]): IBrokerageTransaction[] {
+  const seen = new Set<string>();
+  return txs.filter(t => {
+    const key = `${t.date}|${t.category}|${t.symbol}|${t.amountCents}`;
+    if (seen.has(key)) { return false; }
+    seen.add(key);
+    return true;
+  });
 }
 
-function UploadButton({ label, count, onFile }: IUploadButtonProps) {
-  const { classes } = useStyles();
-  const inputRef = React.useRef<HTMLInputElement>(null);
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) {return;}
-    const reader = new FileReader();
-    reader.onload = ev => onFile(ev.target?.result as string ?? '');
-    reader.readAsText(file);
-    // Reset so the same file can be re-uploaded
-    e.target.value = '';
-  };
-
-  return (
-    <Box display="flex" alignItems="center">
-      <input
-        ref={inputRef}
-        type="file"
-        accept=".csv"
-        style={{ display: 'none' }}
-        onChange={handleChange}
-      />
-      <Button
-        className={classes.uploadButton}
-        variant="outlined"
-        startIcon={<UploadFileIcon />}
-        onClick={() => inputRef.current?.click()}
-      >
-        {label}
-      </Button>
-      {count > 0 && (
-        <Chip
-          className={classes.chip}
-          label={`${count} transaction${count !== 1 ? 's' : ''}`}
-          size="small"
-          color="success"
-          variant="outlined"
-        />
-      )}
-    </Box>
-  );
-}
-
-// ── Summary row helper ────────────────────────────────────────────────────────
+// ── Summary row helpers ───────────────────────────────────────────────────────
 
 function SummaryRow({ label, cents, indent }: { label: string; cents: number; indent?: boolean }) {
   const { classes } = useStyles();
@@ -233,6 +202,8 @@ export default function BrokeragePage() {
   const { classes } = useStyles();
   const [transactions, setTransactions] = React.useState<IBrokerageTransaction[]>([]);
   const [qualifiedConfig, setQualifiedConfig] = React.useState<IQualifiedConfig>(loadQualifiedConfig);
+  const [isDragging, setIsDragging] = React.useState(false);
+  const inputRef = React.useRef<HTMLInputElement>(null);
 
   // Persist qualified config to localStorage on change
   React.useEffect(() => {
@@ -260,30 +231,31 @@ export default function BrokeragePage() {
     return calculateTax(transactions, qualifiedConfig);
   }, [transactions, qualifiedConfig]);
 
-  const addTransactions = (
-    parser: (text: string) => IBrokerageTransaction[],
-    source: IBrokerageTransaction['source'],
-  ) => (text: string) => {
-    const parsed = parser(text);
-    setTransactions(prev => [
-      ...prev.filter(t => t.source !== source),
-      ...parsed,
-    ]);
-    // Auto-populate qualified % from lookup for dividend symbols not yet configured.
-    const newDividendSymbols = [...new Set(parsed
-      .filter(t => t.category === 'dividend' && t.symbol)
-      .map(t => t.symbol),
-    )];
-    setQualifiedConfig(prev => {
-      const updates: IQualifiedConfig = {};
-      for (const sym of newDividendSymbols) {
-        if (!(sym in prev) && sym in qualifiedDividendLookup) {
-          updates[sym] = qualifiedDividendLookup[sym];
+  const handleFiles = React.useCallback((files: FileList) => {
+    const promises = Array.from(files).map(
+      file => new Promise<IBrokerageTransaction[]>(resolve => {
+        const reader = new FileReader();
+        reader.onload = ev => resolve(detectAndParseCsv(ev.target?.result as string ?? ''));
+        reader.readAsText(file);
+      }),
+    );
+    Promise.all(promises).then(results => {
+      const newTxs = results.flat();
+      setTransactions(prev => dedupe([...prev, ...newTxs]));
+      const newDivSymbols = [...new Set(
+        newTxs.filter(t => t.category === 'dividend' && t.symbol).map(t => t.symbol),
+      )];
+      setQualifiedConfig(prev => {
+        const updates: IQualifiedConfig = {};
+        for (const sym of newDivSymbols) {
+          if (!(sym in prev) && sym in qualifiedDividendLookup) {
+            updates[sym] = qualifiedDividendLookup[sym];
+          }
         }
-      }
-      return Object.keys(updates).length > 0 ? { ...prev, ...updates } : prev;
+        return Object.keys(updates).length > 0 ? { ...prev, ...updates } : prev;
+      });
     });
-  };
+  }, []);
 
   const handleQualifiedChange = (symbol: string, value: string) => {
     const pct = parseFloat(value);
@@ -308,28 +280,66 @@ export default function BrokeragePage() {
         {/* ── Import ── */}
         <div className={classes.section}>
           <Typography variant="h6" className={classes.sectionTitle}>Import CSVs</Typography>
+          <input
+            ref={inputRef}
+            type="file"
+            accept=".csv"
+            multiple
+            style={{ display: 'none' }}
+            onChange={e => {
+              if (e.target.files?.length) {handleFiles(e.target.files);}
+              e.target.value = '';
+            }}
+          />
+          <div
+            className={`${classes.dropZone}${isDragging ? ` ${classes.dropZoneActive}` : ''}`}
+            onClick={() => inputRef.current?.click()}
+            onDrop={e => {
+              e.preventDefault();
+              setIsDragging(false);
+              if (e.dataTransfer.files.length > 0) {handleFiles(e.dataTransfer.files);}
+            }}
+            onDragOver={e => e.preventDefault()}
+            onDragEnter={() => setIsDragging(true)}
+            onDragLeave={e => {
+              if (!e.currentTarget.contains(e.relatedTarget as Node)) {setIsDragging(false);}
+            }}
+          >
+            <UploadFileIcon sx={{ fontSize: 32, color: 'text.secondary' }} />
+            <Typography variant="body2" color="text.secondary">
+              Drop CSV files here or click to select
+            </Typography>
+            <Typography variant="caption" color="text.secondary">
+              Vanguard, Schwab, and Schwab RSU formats auto-detected · multiple files OK
+            </Typography>
+          </div>
           <div className={classes.uploadRow}>
-            <UploadButton
-              label="Vanguard"
-              count={countBySource['vanguard'] ?? 0}
-              onFile={addTransactions(parseVanguardCsv, 'vanguard')}
-            />
-            <UploadButton
-              label="Schwab"
-              count={countBySource['schwab'] ?? 0}
-              onFile={addTransactions(parseSchwebCsv, 'schwab')}
-            />
-            <UploadButton
-              label="Schwab RSU"
-              count={countBySource['schwab_equity'] ?? 0}
-              onFile={addTransactions(parseSchwebEquityCsv, 'schwab_equity')}
-            />
-            {transactions.length > 0 && (
-              <Button
+            {countBySource['vanguard'] > 0 && (
+              <Chip
                 size="small"
-                color="error"
-                onClick={() => setTransactions([])}
-              >
+                color="success"
+                variant="outlined"
+                label={`${countBySource['vanguard']} Vanguard`}
+              />
+            )}
+            {countBySource['schwab'] > 0 && (
+              <Chip
+                size="small"
+                color="success"
+                variant="outlined"
+                label={`${countBySource['schwab']} Schwab`}
+              />
+            )}
+            {countBySource['schwab_equity'] > 0 && (
+              <Chip
+                size="small"
+                color="success"
+                variant="outlined"
+                label={`${countBySource['schwab_equity']} Schwab RSU`}
+              />
+            )}
+            {transactions.length > 0 && (
+              <Button size="small" color="error" onClick={() => setTransactions([])}>
                 Clear all
               </Button>
             )}
@@ -391,7 +401,7 @@ export default function BrokeragePage() {
 
               <Typography variant="subtitle2" gutterBottom>Federal</Typography>
               <SummaryRow
-                label={`Standard deduction`}
+                label="Standard deduction"
                 cents={-taxSummary.federalStandardDeductionCents}
               />
               <SummaryRow
