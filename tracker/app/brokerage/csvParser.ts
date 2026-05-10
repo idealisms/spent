@@ -1,6 +1,19 @@
 import { parseCsv } from '../transactions/amazonImportUtils';
 import { BrokerageSource, IBrokerageTransaction, IncomeCategory } from './model';
 
+// Sniff the CSV format from its content and dispatch to the right parser.
+// BOM stripping is left to each sub-parser; includes() works fine on raw text.
+export function detectAndParseCsv(text: string): IBrokerageTransaction[] {
+  if (text.includes('Account Number,Trade Date')) {
+    return parseVanguardCsv(text);
+  }
+  const firstLine = text.split('\n')[0];
+  if (firstLine.includes('RealizedGainLoss') || firstLine.includes('FeesAndCommissions')) {
+    return parseSchwebEquityCsv(text);
+  }
+  return parseSchwebCsv(text);
+}
+
 function toYMD(s: string): string {
   s = s.trim();
   // M/D/YYYY or MM/DD/YYYY → YYYY-MM-DD
