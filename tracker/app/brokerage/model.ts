@@ -19,6 +19,12 @@ export interface IBrokerageTransaction {
 // Sourced from prior-year 1099-DIV. Persisted in localStorage.
 export type IQualifiedConfig = Record<string, number>;
 
+export interface IBracketInfo {
+  currentRate: number;
+  nextRate: number | null;   // null if already in the top bracket
+  roomCents: number | null;  // how much more income before hitting the next bracket
+}
+
 export interface ITaxSummary {
   // Income buckets (before deductions)
   qualifiedDividendsCents: number;
@@ -37,6 +43,9 @@ export interface ITaxSummary {
   caStandardDeductionCents: number;
   caTaxableIncomeCents: number;
   caTaxCents: number;
+  // Bracket headroom (federal only — used for planning)
+  federalOrdinaryBracket: IBracketInfo;
+  federalLtcgBracket: IBracketInfo;
   // Grand total
   totalTaxCents: number;
 }

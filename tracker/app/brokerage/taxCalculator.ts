@@ -1,4 +1,4 @@
-import { IBrokerageTransaction, IQualifiedConfig, ITaxSummary } from './model';
+import { IBracketInfo, IBrokerageTransaction, IQualifiedConfig, ITaxSummary } from './model';
 
 // ── 2026 Tax Year Constants (Married Filing Jointly) ──────────────────────────
 
@@ -49,6 +49,23 @@ const CA_STANDARD_DEDUCTION = c(11_412);
 // ── Bracket helpers ───────────────────────────────────────────────────────────
 
 interface IBracket { min: number; max: number; rate: number; }
+
+// Returns the current bracket rate and how much room is left before the next bracket.
+// For LTCG with stacking, pass the combined (ordinary + LTCG) position as `position`.
+function getBracketInfo(position: number, brackets: IBracket[]): IBracketInfo {
+  for (let i = 0; i < brackets.length; i++) {
+    if (position < brackets[i].max || i === brackets.length - 1) {
+      const next = i < brackets.length - 1 ? brackets[i + 1] : null;
+      return {
+        currentRate: brackets[i].rate,
+        nextRate: next ? next.rate : null,
+        roomCents: next ? Math.max(0, next.min - position) : null,
+      };
+    }
+  }
+  const last = brackets[brackets.length - 1];
+  return { currentRate: last.rate, nextRate: null, roomCents: null };
+}
 
 // Progressive ordinary income tax.
 function applyBrackets(amountCents: number, brackets: IBracket[]): number {
@@ -144,6 +161,13 @@ export function calculateTax(
 
   const federalTotalCents = federalOrdinaryTaxCents + federalLtcgTaxCents + federalNiitCents;
 
+  const federalOrdinaryBracket = getBracketInfo(federalTaxableOrdinaryCents, FED_ORDINARY_BRACKETS);
+  // LTCG stacks on top of ordinary taxable income when finding the applicable bracket.
+  const federalLtcgBracket = getBracketInfo(
+    federalTaxableOrdinaryCents + fedPreferentialCents,
+    FED_LTCG_BRACKETS,
+  );
+
   // ── California ────────────────────────────────────────────────────────────
   // CA taxes all investment income at ordinary rates — no preferential LTCG rate.
 
@@ -164,6 +188,8 @@ export function calculateTax(
     federalLtcgTaxCents,
     federalNiitCents,
     federalTotalCents,
+    federalOrdinaryBracket,
+    federalLtcgBracket,
     caStandardDeductionCents: CA_STANDARD_DEDUCTION,
     caTaxableIncomeCents,
     caTaxCents,
