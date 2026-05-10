@@ -1,48 +1,50 @@
 import { IBrokerageTransaction, IQualifiedConfig, ITaxSummary } from './model';
 
-// ── 2025 Tax Year Constants (Married Filing Jointly) ──────────────────────────
+// ── 2026 Tax Year Constants (Married Filing Jointly) ──────────────────────────
 
 const c = (dollars: number) => Math.round(dollars * 100); // dollars → cents
 
-// Federal ordinary income brackets (MFJ 2025)
+// Federal ordinary income brackets (MFJ 2026) — IRS Rev. Proc. 2025-xx
 const FED_ORDINARY_BRACKETS = [
-  { min: c(0),       max: c(23_850),   rate: 0.10 },
-  { min: c(23_850),  max: c(96_950),   rate: 0.12 },
-  { min: c(96_950),  max: c(206_700),  rate: 0.22 },
-  { min: c(206_700), max: c(394_600),  rate: 0.24 },
-  { min: c(394_600), max: c(501_050),  rate: 0.32 },
-  { min: c(501_050), max: c(751_600),  rate: 0.35 },
-  { min: c(751_600), max: Infinity,    rate: 0.37 },
+  { min: c(0),        max: c(24_800),   rate: 0.10 },
+  { min: c(24_800),   max: c(100_800),  rate: 0.12 },
+  { min: c(100_800),  max: c(211_400),  rate: 0.22 },
+  { min: c(211_400),  max: c(403_550),  rate: 0.24 },
+  { min: c(403_550),  max: c(512_450),  rate: 0.32 },
+  { min: c(512_450),  max: c(768_700),  rate: 0.35 },
+  { min: c(768_700),  max: Infinity,    rate: 0.37 },
 ];
 
-// Federal LTCG / qualified-dividend brackets (MFJ 2025)
+// Federal LTCG / qualified-dividend brackets (MFJ 2026)
 const FED_LTCG_BRACKETS = [
-  { min: c(0),        max: c(96_700),   rate: 0.00 },
-  { min: c(96_700),   max: c(583_750),  rate: 0.15 },
-  { min: c(583_750),  max: Infinity,    rate: 0.20 },
+  { min: c(0),        max: c(98_900),   rate: 0.00 },
+  { min: c(98_900),   max: c(613_700),  rate: 0.15 },
+  { min: c(613_700),  max: Infinity,    rate: 0.20 },
 ];
 
-const FED_STANDARD_DEDUCTION = c(30_000);
+const FED_STANDARD_DEDUCTION = c(32_200);
 
 // Net Investment Income Tax: 3.8% on NII above $250k (MFJ, not inflation-adjusted)
 const NIIT_THRESHOLD = c(250_000);
 const NIIT_RATE = 0.038;
 
-// California ordinary income brackets (MFJ 2025, approximate — CA adjusts annually)
-// Top bracket includes the 1% Mental Health Services Tax surtax above $1M.
+// California ordinary income brackets (MFJ 2025 — 2026 brackets not yet published by FTB)
+// Above $1M the 1% Mental Health Services Tax surcharge applies, so the effective rates
+// for the top two segments are 12.3% ($1M–$1,485,906) and 13.3% (above $1,485,906).
 const CA_BRACKETS = [
-  { min: c(0),          max: c(20_824),    rate: 0.010 },
-  { min: c(20_824),     max: c(49_368),    rate: 0.020 },
-  { min: c(49_368),     max: c(77_918),    rate: 0.040 },
-  { min: c(77_918),     max: c(108_162),   rate: 0.060 },
-  { min: c(108_162),    max: c(136_700),   rate: 0.080 },
-  { min: c(136_700),    max: c(698_274),   rate: 0.093 },
-  { min: c(698_274),    max: c(837_922),   rate: 0.103 },
-  { min: c(837_922),    max: c(1_000_000), rate: 0.113 },
-  { min: c(1_000_000),  max: Infinity,     rate: 0.133 },
+  { min: c(0),           max: c(22_158),    rate: 0.010 },
+  { min: c(22_158),      max: c(52_528),    rate: 0.020 },
+  { min: c(52_528),      max: c(82_904),    rate: 0.040 },
+  { min: c(82_904),      max: c(115_084),   rate: 0.060 },
+  { min: c(115_084),     max: c(145_448),   rate: 0.080 },
+  { min: c(145_448),     max: c(742_958),   rate: 0.093 },
+  { min: c(742_958),     max: c(891_542),   rate: 0.103 },
+  { min: c(891_542),     max: c(1_000_000), rate: 0.113 },
+  { min: c(1_000_000),   max: c(1_485_906), rate: 0.123 },
+  { min: c(1_485_906),   max: Infinity,     rate: 0.133 },
 ];
 
-const CA_STANDARD_DEDUCTION = c(10_726);
+const CA_STANDARD_DEDUCTION = c(11_412);
 
 // ── Bracket helpers ───────────────────────────────────────────────────────────
 

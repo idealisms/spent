@@ -274,7 +274,7 @@ export default function BrokeragePage() {
       <MenuBarWithDrawer title="Tax Estimates" />
       <div className={classes.content}>
         <Typography variant="body2" color="text.secondary" gutterBottom>
-          2025 Federal + California estimate · Married Filing Jointly · All figures approximate
+          2026 Federal + California estimate · Married Filing Jointly · All figures approximate
         </Typography>
 
         {/* ── Import ── */}
