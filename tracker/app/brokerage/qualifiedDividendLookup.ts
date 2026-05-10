@@ -6,7 +6,7 @@
 // Domestic equity ETFs/funds → near 100% (all US corp dividends).
 // International equity → partial, depending on tax treaties (~60-65%).
 // Individual US stocks → 100% (assuming >60 day holding period met).
-const QUALIFIED_DIVIDEND_LOOKUP: Record<string, number> = {
+const qualifiedDividendLookup: Record<string, number> = {
   // Individual US stocks
   AAPL:  1.00,
   GOOG:  1.00,
@@ -30,4 +30,4 @@ const QUALIFIED_DIVIDEND_LOOKUP: Record<string, number> = {
   VXUS:  0.63, // Vanguard Total International Stock ETF
 };
 
-export default QUALIFIED_DIVIDEND_LOOKUP;
+export default qualifiedDividendLookup;
