@@ -27,6 +27,7 @@ import {
   parseSchwebEquityCsv,
 } from '../csvParser';
 import { calculateTax } from '../taxCalculator';
+import QUALIFIED_DIVIDEND_LOOKUP from '../qualifiedDividendLookup';
 
 // ── Styles ────────────────────────────────────────────────────────────────────
 
@@ -268,6 +269,20 @@ export default function BrokeragePage() {
       ...prev.filter(t => t.source !== source),
       ...parsed,
     ]);
+    // Auto-populate qualified % from lookup for dividend symbols not yet configured.
+    const newDividendSymbols = [...new Set(parsed
+      .filter(t => t.category === 'dividend' && t.symbol)
+      .map(t => t.symbol),
+    )];
+    setQualifiedConfig(prev => {
+      const updates: IQualifiedConfig = {};
+      for (const sym of newDividendSymbols) {
+        if (!(sym in prev) && sym in QUALIFIED_DIVIDEND_LOOKUP) {
+          updates[sym] = QUALIFIED_DIVIDEND_LOOKUP[sym];
+        }
+      }
+      return Object.keys(updates).length > 0 ? { ...prev, ...updates } : prev;
+    });
   };
 
   const handleQualifiedChange = (symbol: string, value: string) => {
@@ -338,8 +353,8 @@ export default function BrokeragePage() {
               Qualified Dividend % by Fund
             </Typography>
             <Typography variant="body2" color="text.secondary" gutterBottom>
-              Enter the qualified percentage from your prior-year 1099-DIV.
-              Bond funds = 0%. Stock ETFs are typically 80–100%. Saved in browser.
+              Known funds are pre-filled from prior-year estimates. Override any value or
+              enter a percentage from your 1099-DIV for unlisted symbols. Saved in browser.
             </Typography>
             {dividendSymbols.map(symbol => (
               <div key={symbol} className={classes.qualifiedRow}>
