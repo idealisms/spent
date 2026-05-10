@@ -16,6 +16,7 @@ import { Theme } from '@mui/material/styles';
 import * as React from 'react';
 import MenuBarWithDrawer from '../../main/components/MenuBarWithDrawer';
 import {
+  IBracketInfo,
   IBrokerageTransaction,
   IQualifiedConfig,
   ITaxSummary,
@@ -116,6 +117,14 @@ const useStyles = makeStyles()((_theme: Theme) => ({
   qualifiedField: {
     width: '120px',
   },
+  bracketRoom: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    padding: '2px 0 4px 16px',
+    color: '#666',
+    fontSize: '0.8rem',
+    fontStyle: 'italic',
+  },
   emptyState: {
     color: '#999',
     fontStyle: 'italic',
@@ -192,6 +201,24 @@ function SummaryTotal({ label, cents }: { label: string; cents: number }) {
     <div className={classes.summaryTotal}>
       <Typography variant="body1">{label}</Typography>
       <Typography variant="body1">{fmt(cents)}</Typography>
+    </div>
+  );
+}
+
+function BracketRoom({ info, label }: { info: IBracketInfo; label: string }) {
+  const { classes } = useStyles();
+  const pct = (r: number) => `${(r * 100).toFixed(0)}%`;
+  if (info.roomCents === null || info.nextRate === null) {
+    return (
+      <div className={classes.bracketRoom}>
+        <span>{label}: top bracket ({pct(info.currentRate)})</span>
+      </div>
+    );
+  }
+  return (
+    <div className={classes.bracketRoom}>
+      <span>{label}: {pct(info.currentRate)} bracket</span>
+      <span>{fmt(info.roomCents)} until {pct(info.nextRate)}</span>
     </div>
   );
 }
@@ -409,11 +436,13 @@ export default function BrokeragePage() {
                 cents={taxSummary.federalOrdinaryTaxCents}
                 indent
               />
+              <BracketRoom info={taxSummary.federalOrdinaryBracket} label="Ordinary" />
               <SummaryRow
                 label="LTCG / qualified dividend tax"
                 cents={taxSummary.federalLtcgTaxCents}
                 indent
               />
+              <BracketRoom info={taxSummary.federalLtcgBracket} label="LTCG" />
               {taxSummary.federalNiitCents > 0 && (
                 <SummaryRow
                   label="NIIT (3.8%)"
