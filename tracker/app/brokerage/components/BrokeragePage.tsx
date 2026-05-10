@@ -27,7 +27,7 @@ import {
   parseSchwebEquityCsv,
 } from '../csvParser';
 import { calculateTax } from '../taxCalculator';
-import QUALIFIED_DIVIDEND_LOOKUP from '../qualifiedDividendLookup';
+import qualifiedDividendLookup from '../qualifiedDividendLookup';
 
 // ── Styles ────────────────────────────────────────────────────────────────────
 
@@ -277,8 +277,8 @@ export default function BrokeragePage() {
     setQualifiedConfig(prev => {
       const updates: IQualifiedConfig = {};
       for (const sym of newDividendSymbols) {
-        if (!(sym in prev) && sym in QUALIFIED_DIVIDEND_LOOKUP) {
-          updates[sym] = QUALIFIED_DIVIDEND_LOOKUP[sym];
+        if (!(sym in prev) && sym in qualifiedDividendLookup) {
+          updates[sym] = qualifiedDividendLookup[sym];
         }
       }
       return Object.keys(updates).length > 0 ? { ...prev, ...updates } : prev;
