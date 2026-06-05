@@ -235,8 +235,8 @@ def _format_description(t: dict) -> str:
         parts = t['original_line'].split(',')
         posted_date = parts[2] if len(parts[2].split('/')) > 1 else parts[1]
         mo, day, yr = posted_date.split('/')
-        return f'{yr}-{mo}-{day} {html.unescape(t["description"])}'
-    return f'{t["date"]} {t["description"]}'
+        return f'{yr}-{mo}-{day} {html.unescape(t["description"])} {t["amount_cents"]}'
+    return f'{t["date"]} {t["description"]} {t["amount_cents"]}'
 
 
 def _walk_transactions(transactions):
