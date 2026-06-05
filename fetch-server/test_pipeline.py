@@ -190,12 +190,14 @@ def test_merge_dedup_by_id():
     assert len(existing) == 1
 
 
-def test_merge_dedup_by_date_and_description():
-    existing = [_tx('a', date='2026-04-27', description='STORE')]
-    new = [_tx('b', date='2026-04-27', description='STORE')]
+def test_merge_same_day_same_merchant_different_id():
+    # Two charges to the same merchant on the same day (e.g. two emails from Chase)
+    # are both accepted because dedup is ID-only.
+    existing = [_tx('a', date='2026-04-27', description='STORE', amount_cents=1000)]
+    new = [_tx('b', date='2026-04-27', description='STORE', amount_cents=2000)]
     added = _merge(existing, new, lambda _: None)
-    assert added == []
-    assert len(existing) == 1
+    assert len(added) == 1
+    assert len(existing) == 2
 
 
 def test_merge_different_dates_not_deduped():
@@ -212,15 +214,6 @@ def test_merge_does_not_readd_soft_deleted_transaction():
     added = _merge(existing, [_tx('a')], lambda _: None)
     assert added == []
     assert len(existing) == 1
-
-
-def test_merge_ofx_same_description_not_deduped_by_description():
-    # OFX transactions skip description-based dedup: identical same-day charges
-    # from a CSV import are legitimate and distinguished only by ID.
-    existing = [_tx('a', description='AMAZON', source='ofx_chase')]
-    new = [_tx('b', description='AMAZON', source='ofx_chase')]
-    added = _merge(existing, new, lambda _: None)
-    assert len(added) == 1
 
 
 def test_merge_sorts_by_date_descending():

@@ -11,7 +11,6 @@ all stored emails from scratch (useful after fixing a regex).
 """
 import base64
 import email as email_lib
-import html
 import json
 import os
 import re
@@ -229,33 +228,19 @@ def _parse_pending_emails(conn, log: Log) -> list:
 
 # ── Dropbox ───────────────────────────────────────────────────────────────────
 
-def _format_description(t: dict) -> str:
-    """Canonical string used for dedup across sources."""
-    if t.get('source', '').startswith('chase'):
-        parts = t['original_line'].split(',')
-        posted_date = parts[2] if len(parts[2].split('/')) > 1 else parts[1]
-        mo, day, yr = posted_date.split('/')
-        return f'{yr}-{mo}-{day} {html.unescape(t["description"])}'
-    return f'{t["date"]} {t["description"]}'
-
-
-def _walk_transactions(transactions):
-    seen_ids, seen_descs = set(), set()
+def _collect_ids(transactions) -> set:
+    seen = set()
     for t in transactions:
-        seen_ids.add(t['id'])
-        if not t.get('source', '').startswith('ofx'):
-            seen_descs.add(_format_description(t))
-        sub_ids, sub_descs = _walk_transactions(t.get('transactions', []))
-        seen_ids |= sub_ids
-        seen_descs |= sub_descs
-    return seen_ids, seen_descs
+        seen.add(t['id'])
+        seen |= _collect_ids(t.get('transactions', []))
+    return seen
 
 
 def _merge(existing: list, new_transactions: list, log: Log) -> list:
-    seen_ids, seen_descs = _walk_transactions(existing)
+    seen_ids = _collect_ids(existing)
     added = []
     for t in new_transactions:
-        if t['id'] in seen_ids or _format_description(t) in seen_descs:
+        if t['id'] in seen_ids:
             continue
         existing.append(t)
         seen_ids.add(t['id'])
