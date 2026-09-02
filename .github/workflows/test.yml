@@ -41,9 +41,15 @@ jobs:
 
   test-tracker-e2e:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     defaults:
       run:
         working-directory: tracker
+    env:
+      # Puppeteer's own Chromium download (from storage.googleapis.com) is
+      # a known source of CI hangs/flakiness. Skip it and point Puppeteer
+      # at the Chrome installed by browser-actions/setup-chrome below.
+      PUPPETEER_SKIP_DOWNLOAD: 'true'
 
     steps:
       - uses: actions/checkout@v4
@@ -65,7 +71,12 @@ jobs:
 
       - run: yarn install --immutable
 
+      - uses: browser-actions/setup-chrome@v1
+        id: setup-chrome
+
       - run: yarn test:e2e
+        env:
+          PUPPETEER_EXECUTABLE_PATH: ${{ steps.setup-chrome.outputs.chrome-path }}
 
   test-fetch-server:
     runs-on: ubuntu-latest
