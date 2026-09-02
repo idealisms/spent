@@ -91,7 +91,7 @@ class TransactionsTableSumRowInner extends React.Component<
 
     let totalAmount = this.props.transactions.reduce(
       (total, transaction) => total + transaction.amount_cents,
-      0
+      0,
     );
     let isCredit = totalAmount < 0;
     let description =
@@ -134,8 +134,10 @@ class TransactionsTableSumRowInner extends React.Component<
   };
 }
 
-export interface ITransactionsTableSumRowPublicProps
-  extends Omit<ITransactionsTableSumRowProps, 'classes'> {
+export interface ITransactionsTableSumRowPublicProps extends Omit<
+  ITransactionsTableSumRowProps,
+  'classes'
+> {
   classes?: Partial<ReturnType<typeof useHeaderStyles>['classes']>;
 }
 
@@ -146,9 +148,9 @@ function TransactionsTableSumRow(props: ITransactionsTableSumRowPublicProps) {
       key,
       cx(
         defaultClasses[key as keyof typeof defaultClasses],
-        props.classes?.[key as keyof typeof defaultClasses]
+        props.classes?.[key as keyof typeof defaultClasses],
       ),
-    ])
+    ]),
   ) as typeof defaultClasses;
   return <TransactionsTableSumRowInner {...props} classes={classes} />;
 }

@@ -196,7 +196,9 @@ class MenuBarWithDrawerInner extends React.Component<
               <ListItemIcon>
                 <LabelIcon
                   color={
-                    selectedPage === Pages.CategoriesPage ? 'primary' : 'inherit'
+                    selectedPage === Pages.CategoriesPage
+                      ? 'primary'
+                      : 'inherit'
                   }
                 />
               </ListItemIcon>

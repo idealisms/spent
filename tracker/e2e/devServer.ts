@@ -22,7 +22,7 @@ function ensureConfigTsExists(): void {
   }
   fs.writeFileSync(
     CONFIG_TS_PATH,
-    "export const CLIENT_ID = 'e2e-placeholder-client-id';\n"
+    "export const CLIENT_ID = 'e2e-placeholder-client-id';\n",
   );
 }
 
@@ -68,7 +68,7 @@ export async function startDevServer(): Promise<ChildProcess> {
     {
       cwd: TRACKER_ROOT,
       stdio: 'pipe',
-    }
+    },
   );
 
   let stderr = '';
@@ -81,7 +81,7 @@ export async function startDevServer(): Promise<ChildProcess> {
   } catch (err) {
     child.kill();
     throw new Error(
-      `${(err as Error).message}\nwebpack-dev-server stderr:\n${stderr}`
+      `${(err as Error).message}\nwebpack-dev-server stderr:\n${stderr}`,
     );
   }
 

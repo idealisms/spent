@@ -43,14 +43,14 @@ interface IEditorMenuBarProps {
   onSelectedBackClick: () => void;
   onSelectedEditSaveClick: (transaction: Transactions.ITransaction) => void;
   onSelectedBatchEditTagsSaveClick: (
-    updatedTransactions: Transactions.ITransaction[]
+    updatedTransactions: Transactions.ITransaction[],
   ) => void;
   onSelectedMergeSaveClick: (transaction: Transactions.ITransaction) => void;
   onSelectedDeleteClick: (
-    transactions: Map<string, Transactions.ITransaction>
+    transactions: Map<string, Transactions.ITransaction>,
   ) => void;
   onSelectedSplitSaveClick: (
-    transactions: Map<string, Transactions.ITransaction>
+    transactions: Map<string, Transactions.ITransaction>,
   ) => void;
   onClassifyClick: () => void;
   onAmazonImportClick: () => void;
@@ -157,7 +157,7 @@ class EditorMenuBarInner extends React.Component<
                 this.props.selectedTransactions
               ) {
                 this.props.onSelectedDeleteClick(
-                  this.props.selectedTransactions
+                  this.props.selectedTransactions,
                 );
               }
             }}

@@ -7,7 +7,9 @@ import TextField from '@mui/material/TextField';
 import * as React from 'react';
 
 function isValidEmoji(s: string): boolean {
-  if (!s) { return false; }
+  if (!s) {
+    return false;
+  }
   // Intl.Segmenter correctly handles multi-codepoint emoji (ZWJ sequences, etc.)
   const segments = [...new Intl.Segmenter().segment(s)];
   return segments.length === 1 && /\p{Extended_Pictographic}/u.test(s);
@@ -63,10 +65,16 @@ export class CategoryEditDialog extends React.Component<
             value={emoji}
             onChange={e => this.setState({ emoji: e.target.value })}
             onKeyDown={e => {
-              if (e.key === 'Enter' && canSave) { this.handleSave(); }
+              if (e.key === 'Enter' && canSave) {
+                this.handleSave();
+              }
             }}
             error={emoji.length > 0 && !emojiValid}
-            helperText={emoji.length > 0 && !emojiValid ? 'Must be a single emoji' : undefined}
+            helperText={
+              emoji.length > 0 && !emojiValid
+                ? 'Must be a single emoji'
+                : undefined
+            }
           />
           <TextField
             margin="dense"

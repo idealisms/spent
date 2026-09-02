@@ -23,7 +23,9 @@ export function parseField(row: string, start: number): [string, number] {
     return [field, i];
   }
   const end = row.indexOf(',', start);
-  if (end === -1) {return [row.slice(start), row.length + 1];}
+  if (end === -1) {
+    return [row.slice(start), row.length + 1];
+  }
   return [row.slice(start, end), end + 1];
 }
 
@@ -33,7 +35,9 @@ export function parseRow(row: string): string[] {
   while (pos <= row.length) {
     const [field, next] = parseField(row, pos);
     fields.push(field);
-    if (next > row.length) {break;}
+    if (next > row.length) {
+      break;
+    }
     pos = next;
   }
   return fields;
@@ -46,7 +50,9 @@ export function parseCsv(text: string): Record<string, string>[] {
     .split('\n')
     .map(l => l.replace(/\r$/, ''))
     .filter(Boolean);
-  if (lines.length < 2) {return [];}
+  if (lines.length < 2) {
+    return [];
+  }
   const headers = parseRow(lines[0]).map(h => h.trim());
   return lines.slice(1).map(line => {
     const values = parseRow(line);
@@ -91,9 +97,7 @@ export function extractNote(items: string): string {
 }
 
 export function daysDiff(fromDate: string, toDate: string): number {
-  return (
-    (new Date(toDate).getTime() - new Date(fromDate).getTime()) / 86400000
-  );
+  return (new Date(toDate).getTime() - new Date(fromDate).getTime()) / 86400000;
 }
 
 // Charge date is 0-7 days after CSV payment/order date (items ship after order).
@@ -110,7 +114,9 @@ export function matchCsvRow(
   const single = near.find(
     t => Math.abs(t.amount_cents - csvRow.amountCents) <= TOL,
   );
-  if (single) {return [single];}
+  if (single) {
+    return [single];
+  }
 
   const wide = txns.filter(t => {
     const d = daysDiff(csvRow.paymentDate, t.date);

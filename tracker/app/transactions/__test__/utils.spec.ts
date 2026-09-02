@@ -58,7 +58,7 @@ describe('Home', () => {
             arr[i] = Math.pow(i + 1, 4);
           }
         },
-      } as Crypto)
+      } as Crypto),
     ).toBe('0001001000510100027105100961100019a12710');
   });
 
@@ -66,15 +66,15 @@ describe('Home', () => {
     let transactions = JSON.parse(
       fs
         .readFileSync(
-          './app/transactions/__test__/transactions-dates-only.json'
+          './app/transactions/__test__/transactions-dates-only.json',
         )
-        .toString()
+        .toString(),
     );
     // March 1 to Apr 30.
     let filtered = utils.filterTransactionsByDate(
       transactions,
       new Date(2018, 2, 1),
-      new Date(2018, 3, 30)
+      new Date(2018, 3, 30),
     );
     expect(filtered.length).toBe(156 + 140);
 
@@ -82,7 +82,7 @@ describe('Home', () => {
     filtered = utils.filterTransactionsByDate(
       transactions,
       new Date(2018, 9, 1),
-      new Date(2050, 0, 1)
+      new Date(2050, 0, 1),
     );
     expect(filtered.length).toBe(71);
 
@@ -90,7 +90,7 @@ describe('Home', () => {
     filtered = utils.filterTransactionsByDate(
       transactions,
       new Date(2010, 0, 1),
-      new Date(2050, 0, 1)
+      new Date(2050, 0, 1),
     );
     expect(filtered.length).toBe(7991);
 
@@ -98,7 +98,7 @@ describe('Home', () => {
     filtered = utils.filterTransactionsByDate(
       transactions,
       new Date(2018, 7, 5),
-      new Date(2018, 7, 5)
+      new Date(2018, 7, 5),
     );
     expect(filtered.length).toBe(1);
 
@@ -106,7 +106,7 @@ describe('Home', () => {
     filtered = utils.filterTransactionsByDate(
       transactions,
       new Date(2018, 6, 11),
-      new Date(2018, 6, 12)
+      new Date(2018, 6, 12),
     );
     expect(filtered.length).toBe(6);
 
@@ -114,7 +114,7 @@ describe('Home', () => {
     filtered = utils.filterTransactionsByDate(
       transactions,
       new Date(2018, 6, 10),
-      new Date(2018, 6, 11)
+      new Date(2018, 6, 11),
     );
     expect(filtered.length).toBe(4);
 
@@ -122,7 +122,7 @@ describe('Home', () => {
     filtered = utils.filterTransactionsByDate(
       transactions,
       new Date(2018, 6, 11),
-      new Date(2018, 6, 22)
+      new Date(2018, 6, 22),
     );
     expect(filtered.length).toBe(39);
 
@@ -130,7 +130,7 @@ describe('Home', () => {
     filtered = utils.filterTransactionsByDate(
       transactions,
       new Date(2018, 6, 22),
-      new Date(2018, 6, 22)
+      new Date(2018, 6, 22),
     );
     expect(filtered.length).toBe(0);
 
@@ -138,7 +138,7 @@ describe('Home', () => {
     filtered = utils.filterTransactionsByDate(
       transactions,
       new Date(2050, 0, 1),
-      new Date(2010, 0, 1)
+      new Date(2010, 0, 1),
     );
     expect(filtered.length).toBe(0);
   });
@@ -147,7 +147,7 @@ describe('Home', () => {
     let transactions = JSON.parse(
       fs
         .readFileSync('./app/transactions/__test__/transactions.json')
-        .toString()
+        .toString(),
     );
 
     // No filters.

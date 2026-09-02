@@ -82,7 +82,7 @@ class MonthlyInner extends React.Component<IMonthlyInnerProps, IMonthlyState> {
       // Construct a fake URL so we can parse the search param even if
       // we are using a hash history.
       let url = new URL(
-        'https://www.example.com/' + this.props.location.search
+        'https://www.example.com/' + this.props.location.search,
       );
       let spendTargetName = url.searchParams.get('t');
       for (let i = 0; i < this.props.spendTargets.length; ++i) {
@@ -105,7 +105,7 @@ class MonthlyInner extends React.Component<IMonthlyInnerProps, IMonthlyState> {
         endDate,
         tagsIncludeAny: spendTarget && spendTarget.tags.include,
         tagsExcludeAny: spendTarget && spendTarget.tags.exclude,
-      }
+      },
     );
     let [rows, data] = this.groupByMonths(filteredTransactions, spendTarget);
 
@@ -141,13 +141,13 @@ class MonthlyInner extends React.Component<IMonthlyInnerProps, IMonthlyState> {
   public handleSelectSpendTarget = (event: any): void => {
     let spendTargetName = event.target.value;
     this.props.navigateTo(
-      Pages.MonthlyPage + `?t=${encodeURIComponent(spendTargetName)}`
+      Pages.MonthlyPage + `?t=${encodeURIComponent(spendTargetName)}`,
     );
   };
 
   private groupByMonths = (
     transactions: ITransaction[],
-    spendTarget?: ISpendTarget
+    spendTarget?: ISpendTarget,
   ): [JSX.Element[], [Date, number, number][]] => {
     let classes = this.props.classes;
     let rows: JSX.Element[] = [];
@@ -185,7 +185,7 @@ class MonthlyInner extends React.Component<IMonthlyInnerProps, IMonthlyState> {
       }
       monthlySpendingMap.set(
         month,
-        (monthlySpendingMap.get(month) || 0) - t.amount_cents
+        (monthlySpendingMap.get(month) || 0) - t.amount_cents,
       );
     });
 
@@ -202,7 +202,7 @@ class MonthlyInner extends React.Component<IMonthlyInnerProps, IMonthlyState> {
         ]);
         return total;
       },
-      spendTarget ? -spendTarget.startBalanceCents : 0
+      spendTarget ? -spendTarget.startBalanceCents : 0,
     );
 
     let lastMonth = '';
@@ -216,14 +216,14 @@ class MonthlyInner extends React.Component<IMonthlyInnerProps, IMonthlyState> {
             ...this.monthlySumRows(
               lastMonth,
               lastMonthTransactions,
-              monthlySpendingMap
-            )
+              monthlySpendingMap,
+            ),
           );
           rows.push(
             <TransactionsTableHeadingRow
               key={`spacer-${lastMonth}`}
               classes={{ row: classes.transactionsTableSpacer }}
-            />
+            />,
           );
         }
         let headerText = moment(t.date).format('MMMM YYYY');
@@ -235,7 +235,7 @@ class MonthlyInner extends React.Component<IMonthlyInnerProps, IMonthlyState> {
             >
               {headerText}
             </Typography>
-          </TransactionsTableHeadingRow>
+          </TransactionsTableHeadingRow>,
         );
         lastMonth = month;
       }
@@ -247,8 +247,8 @@ class MonthlyInner extends React.Component<IMonthlyInnerProps, IMonthlyState> {
         ...this.monthlySumRows(
           lastMonth,
           lastMonthTransactions,
-          monthlySpendingMap
-        )
+          monthlySpendingMap,
+        ),
       );
     }
 
@@ -258,7 +258,7 @@ class MonthlyInner extends React.Component<IMonthlyInnerProps, IMonthlyState> {
   private monthlySumRows = (
     month: string,
     transactions: ITransaction[],
-    monthlySpendingMap: Map<string, number>
+    monthlySpendingMap: Map<string, number>,
   ): JSX.Element[] => {
     let classes = this.props.classes;
     return [

@@ -4,7 +4,7 @@ import { ICategoryDefinition } from '../transactions/model';
 export function deleteTag(
   cats: Record<string, ICategoryDefinition>,
   categoryName: string,
-  tag: string
+  tag: string,
 ): Record<string, ICategoryDefinition> {
   const def = cats[categoryName];
   if (!def) {
@@ -23,7 +23,7 @@ export function deleteTag(
 export function addTag(
   cats: Record<string, ICategoryDefinition>,
   categoryName: string,
-  tag: string
+  tag: string,
 ): Record<string, ICategoryDefinition> {
   const trimmed = tag.trim();
   const def = cats[categoryName];
@@ -42,7 +42,7 @@ export function addTag(
 /** Returns new Record without the named category. */
 export function deleteCategory(
   cats: Record<string, ICategoryDefinition>,
-  categoryName: string
+  categoryName: string,
 ): Record<string, ICategoryDefinition> {
   if (!(categoryName in cats)) {
     return cats;
@@ -56,7 +56,7 @@ export function deleteCategory(
 export function addCategory(
   cats: Record<string, ICategoryDefinition>,
   name: string,
-  emoji: string
+  emoji: string,
 ): Record<string, ICategoryDefinition> {
   if (name in cats) {
     return cats;
@@ -72,7 +72,7 @@ export function editCategory(
   cats: Record<string, ICategoryDefinition>,
   oldName: string,
   newName: string,
-  newEmoji: string
+  newEmoji: string,
 ): Record<string, ICategoryDefinition> {
   const def = cats[oldName];
   if (!def) {

@@ -123,7 +123,7 @@ class TransactionsTableInner extends React.Component<
     // Make sure we haven't scrolled past the bottom of the table.
     let maxScrollTop = Math.max(
       0,
-      ROW_HEIGHT * numRows - this.state.containerHeight
+      ROW_HEIGHT * numRows - this.state.containerHeight,
     );
     if (this.state.scrollTop > maxScrollTop) {
       this.containerRef.current.scrollTop = maxScrollTop;
@@ -132,7 +132,7 @@ class TransactionsTableInner extends React.Component<
     let rowsBefore = Math.floor(this.state.scrollTop / ROW_HEIGHT);
     let rowsToShow = Math.min(
       numRows,
-      Math.ceil(this.state.containerHeight / ROW_HEIGHT) + 2
+      Math.ceil(this.state.containerHeight / ROW_HEIGHT) + 2,
     );
     let rowsAfter = Math.max(0, numRows - rowsBefore - rowsToShow);
 
@@ -141,7 +141,7 @@ class TransactionsTableInner extends React.Component<
         <div style={{ height: `${rowsBefore * ROW_HEIGHT}px` }}></div>
         {React.Children.toArray(this.props.children).slice(
           rowsBefore,
-          rowsBefore + rowsToShow
+          rowsBefore + rowsToShow,
         )}
         <div style={{ height: `${rowsAfter * ROW_HEIGHT}px` }}></div>
       </React.Fragment>
@@ -149,8 +149,10 @@ class TransactionsTableInner extends React.Component<
   };
 }
 
-export interface ITransactionsTablePublicProps
-  extends Omit<ITransactionsTableProps, 'classes'> {
+export interface ITransactionsTablePublicProps extends Omit<
+  ITransactionsTableProps,
+  'classes'
+> {
   classes?: Partial<ReturnType<typeof useStyles>['classes']>;
 }
 
@@ -161,9 +163,9 @@ function TransactionsTable(props: ITransactionsTablePublicProps) {
       key,
       cx(
         defaultClasses[key as keyof typeof defaultClasses],
-        props.classes?.[key as keyof typeof defaultClasses]
+        props.classes?.[key as keyof typeof defaultClasses],
       ),
-    ])
+    ]),
   ) as typeof defaultClasses;
   return <TransactionsTableInner {...props} classes={classes} />;
 }

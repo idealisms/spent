@@ -35,7 +35,7 @@ export interface IMockDropboxFile {
  */
 export async function mockDropboxApi(
   page: Page,
-  files: IMockDropboxFile[]
+  files: IMockDropboxFile[],
 ): Promise<{ uploads: Map<string, string> }> {
   const uploads = new Map<string, string>();
   const filesByPath = new Map(files.map(f => [f.path, f.contents]));

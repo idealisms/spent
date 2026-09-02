@@ -99,7 +99,7 @@ class DailyGraphInner extends React.Component<
 
   public shouldComponentUpdate(
     nextProps: IDailyGraphInnerProps,
-    nextState: IDailyGraphState
+    nextState: IDailyGraphState,
   ): boolean {
     // Prevent a re-render when props haven't changed. This was happening when
     // the onClickDate callback was called, which triggered a re-render of
@@ -273,7 +273,7 @@ class DailyGraphInner extends React.Component<
 
     const targets = this.props.spendTarget.targets;
     const startDates = targets.map(spendTarget =>
-      moment(spendTarget.startDate)
+      moment(spendTarget.startDate),
     );
     const endDate = moment(this.props.transactions[0].date);
 
@@ -304,7 +304,7 @@ class DailyGraphInner extends React.Component<
         let spreadStartDate = moment(transaction.date);
         let spreadEndDate = moment.min(
           spreadStartDate.clone().add(spreadDuration - 1, 'days'),
-          endDate
+          endDate,
         );
         for (
           let m = spreadStartDate.clone();
@@ -319,8 +319,8 @@ class DailyGraphInner extends React.Component<
             daysLeft: !daysLeft
               ? 'last day!'
               : daysLeft == 1
-              ? '1 day left'
-              : `${daysLeft} days left`,
+                ? '1 day left'
+                : `${daysLeft} days left`,
           });
         }
       } else {
@@ -356,7 +356,7 @@ class DailyGraphInner extends React.Component<
       for (let transaction of dataMapByDate[currentDate]) {
         currentTotal -= transaction.amountCents;
         let amount = TransactionUtils.formatAmountNumber(
-          transaction.amountCents
+          transaction.amountCents,
         );
         let notes = transaction.notes
           ? ` - <span class='notes'>${transaction.notes}</span>`
@@ -369,9 +369,9 @@ class DailyGraphInner extends React.Component<
       toolTipHtml += '</table>';
 
       toolTipHtml = `<div><strong>${TransactionUtils.formatAmountNumber(
-        currentTotal
+        currentTotal,
       )}</strong> on <strong>${m.format(
-        'MMM D, YYYY'
+        'MMM D, YYYY',
       )}</strong></div>${toolTipHtml}`;
 
       dataAsRows.push([

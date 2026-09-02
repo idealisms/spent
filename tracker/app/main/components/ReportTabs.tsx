@@ -86,7 +86,7 @@ class ReportTabsInner extends React.PureComponent<
     }
 
     console.debug(
-      `${window.performance.now() - startTime} ReportTabs render()`
+      `${window.performance.now() - startTime} ReportTabs render()`,
     );
     return (
       <React.Fragment>
@@ -112,7 +112,7 @@ class ReportTabsInner extends React.PureComponent<
   private buildContent(
     tabData: IReportTabData,
     tabs: JSX.Element[],
-    tabContents: JSX.Element[]
+    tabContents: JSX.Element[],
   ) {
     let classes = this.props.classes;
     let columnName = tabData.columnName;
@@ -121,7 +121,7 @@ class ReportTabsInner extends React.PureComponent<
       <Tab
         key={`tab-${columnName}-uncat`}
         label={`${columnName} Uncategorized`}
-      />
+      />,
     );
 
     let tabIndex = tabContents.length;
@@ -143,7 +143,7 @@ class ReportTabsInner extends React.PureComponent<
         {tabData.unmatchedTransactions.map(t => (
           <Transaction transaction={t} key={t.id} />
         ))}
-      </TransactionsTable>
+      </TransactionsTable>,
     );
   }
 }

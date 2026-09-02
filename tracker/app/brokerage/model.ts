@@ -1,18 +1,18 @@
 export type BrokerageSource = 'vanguard' | 'schwab' | 'schwab_equity';
 
 export type IncomeCategory =
-  | 'dividend'  // qualified fraction determined by qualifiedConfig
-  | 'interest'  // always ordinary income
-  | 'ltcg'      // long-term capital gain (or loss)
-  | 'stcg';     // short-term capital gain (or loss)
+  | 'dividend' // qualified fraction determined by qualifiedConfig
+  | 'interest' // always ordinary income
+  | 'ltcg' // long-term capital gain (or loss)
+  | 'stcg'; // short-term capital gain (or loss)
 
 export interface IBrokerageTransaction {
-  date: string;         // YYYY-MM-DD
+  date: string; // YYYY-MM-DD
   source: BrokerageSource;
   symbol: string;
   description: string;
   category: IncomeCategory;
-  amountCents: number;  // positive = income/gain, negative = loss
+  amountCents: number; // positive = income/gain, negative = loss
 }
 
 // symbol → fraction of dividends that are qualified (0.0 – 1.0)
@@ -21,8 +21,8 @@ export type IQualifiedConfig = Record<string, number>;
 
 export interface IBracketInfo {
   currentRate: number;
-  nextRate: number | null;   // null if already in the top bracket
-  roomCents: number | null;  // how much more income before hitting the next bracket
+  nextRate: number | null; // null if already in the top bracket
+  roomCents: number | null; // how much more income before hitting the next bracket
 }
 
 export interface ITaxSummary {

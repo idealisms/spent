@@ -30,7 +30,7 @@ const useStyles = makeStyles()((_theme: Theme) => ({
 
 type filterTransactionsFunction = (
   transactions: ITransaction[],
-  spendTarget: IDailySpendTarget
+  spendTarget: IDailySpendTarget,
 ) => ITransaction[];
 
 interface IDailyOwnProps {}
@@ -59,7 +59,7 @@ class DailyInner extends React.Component<IDailyInnerProps, IDailyState> {
     let classes = this.props.classes;
     let filteredTransactions = this.filterTransactions(
       this.props.transactions,
-      this.props.dailySpendTarget
+      this.props.dailySpendTarget,
     );
     let rows = filteredTransactions.map(t => {
       return <Transaction transaction={t} key={t.id} />;
@@ -90,7 +90,7 @@ class DailyInner extends React.Component<IDailyInnerProps, IDailyState> {
   public scrollDateIntoView = (date: Date): void => {
     let filteredTransactions = this.filterTransactions(
       this.props.transactions,
-      this.props.dailySpendTarget
+      this.props.dailySpendTarget,
     );
 
     for (let rowNum = 0; rowNum < filteredTransactions.length; ++rowNum) {
@@ -132,7 +132,7 @@ const mapStateToProps = (state: IAppState): IDailyAppStateProps => ({
   dailySpendTarget: state.settings.settings.dailySpendTarget,
 });
 const mapDispatchToProps = (
-  _dispatch: ThunkDispatch<IAppState, null, any>
+  _dispatch: ThunkDispatch<IAppState, null, any>,
 ): IDailyDispatchProps => ({});
 
 export default connect(mapStateToProps, mapDispatchToProps)(DailyWrapper);

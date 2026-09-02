@@ -1,5 +1,9 @@
 import { parseCsv } from '../transactions/amazonImportUtils';
-import { BrokerageSource, IBrokerageTransaction, IncomeCategory } from './model';
+import {
+  BrokerageSource,
+  IBrokerageTransaction,
+  IncomeCategory,
+} from './model';
 
 // Sniff the CSV format from its content and dispatch to the right parser.
 // BOM stripping is left to each sub-parser; includes() works fine on raw text.
@@ -8,7 +12,10 @@ export function detectAndParseCsv(text: string): IBrokerageTransaction[] {
     return parseVanguardCsv(text);
   }
   const firstLine = text.split('\n')[0];
-  if (firstLine.includes('RealizedGainLoss') || firstLine.includes('FeesAndCommissions')) {
+  if (
+    firstLine.includes('RealizedGainLoss') ||
+    firstLine.includes('FeesAndCommissions')
+  ) {
     return parseSchwebEquityCsv(text);
   }
   return parseSchwebCsv(text);
@@ -18,8 +25,12 @@ function toYMD(s: string): string {
   s = s.trim();
   // M/D/YYYY or MM/DD/YYYY → YYYY-MM-DD
   const m = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
-  if (m) {return `${m[3]}-${m[1].padStart(2, '0')}-${m[2].padStart(2, '0')}`;}
-  if (/^\d{4}-\d{2}-\d{2}$/.test(s)) {return s;}
+  if (m) {
+    return `${m[3]}-${m[1].padStart(2, '0')}-${m[2].padStart(2, '0')}`;
+  }
+  if (/^\d{4}-\d{2}-\d{2}$/.test(s)) {
+    return s;
+  }
   return s;
 }
 
@@ -28,11 +39,15 @@ function isValidDate(s: string): boolean {
 }
 
 function parseDollars(s: string): number {
-  if (!s) {return 0;}
+  if (!s) {
+    return 0;
+  }
   const trimmed = s.trim();
   const neg = trimmed.startsWith('(') || trimmed.startsWith('-');
   const val = parseFloat(trimmed.replace(/[$,()]/g, '').replace(/^-/, ''));
-  if (isNaN(val)) {return 0;}
+  if (isNaN(val)) {
+    return 0;
+  }
   return neg ? -Math.round(val * 100) : Math.round(val * 100);
 }
 
@@ -64,7 +79,9 @@ export function parseVanguardCsv(text: string): IBrokerageTransaction[] {
   const txHeaderIdx = lines.findIndex(l =>
     l.startsWith('Account Number,Trade Date'),
   );
-  if (txHeaderIdx === -1) {return [];}
+  if (txHeaderIdx === -1) {
+    return [];
+  }
 
   const txSection = lines.slice(txHeaderIdx).filter(Boolean).join('\n');
   const rows = parseCsv(txSection);
@@ -77,7 +94,9 @@ export function parseVanguardCsv(text: string): IBrokerageTransaction[] {
     const date = toYMD(row['Trade Date'] || '');
     const amountCents = parseDollars(row['Net Amount'] || '');
 
-    if (!isValidDate(date) || amountCents === 0) {continue;}
+    if (!isValidDate(date) || amountCents === 0) {
+      continue;
+    }
 
     let category: IncomeCategory;
     if (type === 'Dividend') {
@@ -93,7 +112,16 @@ export function parseVanguardCsv(text: string): IBrokerageTransaction[] {
       continue;
     }
 
-    result.push(makeTransaction(date, 'vanguard', symbol, description, category, amountCents));
+    result.push(
+      makeTransaction(
+        date,
+        'vanguard',
+        symbol,
+        description,
+        category,
+        amountCents,
+      ),
+    );
   }
 
   return result;
@@ -109,16 +137,22 @@ export function parseSchwebCsv(text: string): IBrokerageTransaction[] {
 
   for (const row of rows) {
     const dateStr = (row['Date'] || '').trim();
-    if (!dateStr) {continue;}
+    if (!dateStr) {
+      continue;
+    }
     const date = toYMD(dateStr);
-    if (!isValidDate(date)) {continue;} // skip totals/summary rows
+    if (!isValidDate(date)) {
+      continue;
+    } // skip totals/summary rows
 
     const action = (row['Action'] || '').trim().toLowerCase();
     const symbol = (row['Symbol'] || '').trim();
     const description = (row['Description'] || '').trim();
     const amountCents = parseDollars(row['Amount'] || '');
 
-    if (amountCents === 0) {continue;}
+    if (amountCents === 0) {
+      continue;
+    }
 
     let category: IncomeCategory;
     if (action.includes('div')) {
@@ -130,7 +164,16 @@ export function parseSchwebCsv(text: string): IBrokerageTransaction[] {
       continue;
     }
 
-    result.push(makeTransaction(date, 'schwab', symbol, description, category, amountCents));
+    result.push(
+      makeTransaction(
+        date,
+        'schwab',
+        symbol,
+        description,
+        category,
+        amountCents,
+      ),
+    );
   }
 
   return result;
@@ -162,21 +205,51 @@ export function parseSchwebEquityCsv(text: string): IBrokerageTransaction[] {
       saleDescription = (row['Description'] || '').trim();
     } else if (type === 'RS') {
       const gainStr = (row['RealizedGainLoss'] || '').trim();
-      if (!gainStr || gainStr === 'N/A' || gainStr === '--') {continue;}
-      if (!isValidDate(saleDate)) {continue;}
+      if (!gainStr || gainStr === 'N/A' || gainStr === '--') {
+        continue;
+      }
+      if (!isValidDate(saleDate)) {
+        continue;
+      }
       const gainCents = parseDollars(gainStr);
-      if (gainCents === 0) {continue;}
+      if (gainCents === 0) {
+        continue;
+      }
       const holdingPeriod = (row['HoldingPeriod'] || '').trim().toLowerCase();
-      const category: IncomeCategory = holdingPeriod.includes('long') ? 'ltcg' : 'stcg';
-      result.push(makeTransaction(saleDate, 'schwab_equity', saleSymbol, saleDescription, category, gainCents));
+      const category: IncomeCategory = holdingPeriod.includes('long')
+        ? 'ltcg'
+        : 'stcg';
+      result.push(
+        makeTransaction(
+          saleDate,
+          'schwab_equity',
+          saleSymbol,
+          saleDescription,
+          category,
+          gainCents,
+        ),
+      );
     } else if (action === 'Dividend') {
       const date = toYMD((row['Date'] || '').trim());
-      if (!isValidDate(date)) {continue;}
+      if (!isValidDate(date)) {
+        continue;
+      }
       const amountCents = parseDollars(row['Amount'] || '');
-      if (amountCents === 0) {continue;}
+      if (amountCents === 0) {
+        continue;
+      }
       const symbol = (row['Symbol'] || '').trim();
       const description = (row['Description'] || '').trim();
-      result.push(makeTransaction(date, 'schwab_equity', symbol, description, 'dividend', amountCents));
+      result.push(
+        makeTransaction(
+          date,
+          'schwab_equity',
+          symbol,
+          description,
+          'dividend',
+          amountCents,
+        ),
+      );
     }
   }
 

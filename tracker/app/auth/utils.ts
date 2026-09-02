@@ -26,13 +26,13 @@ export function generateAuthUrl(origin: string) {
 
 export function getAuthToken(origin: string, returnCode: string | null) {
   const codeVerifier = window.localStorage.getItem(
-    CODE_VERIFIER_LOCAL_STORAGE_KEY
+    CODE_VERIFIER_LOCAL_STORAGE_KEY,
   );
 
   return new Promise(
     (
       resolve: (accessToken: string) => void,
-      reject: (reason: string) => void
+      reject: (reason: string) => void,
     ) => {
       if (!returnCode) {
         reject('missing return code');
@@ -67,7 +67,7 @@ export function getAuthToken(origin: string, returnCode: string | null) {
             console.log(response);
           }
         });
-    }
+    },
   );
 }
 
