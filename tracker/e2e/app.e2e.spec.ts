@@ -12,6 +12,10 @@ beforeAll(async () => {
   browser = await puppeteer.launch({
     headless: true,
     args: process.env.CI ? ['--no-sandbox'] : [],
+    // In CI we point this at a Chrome already on the runner (see
+    // test.yml) instead of letting Puppeteer download its own Chromium —
+    // that download is a common source of CI hangs/flakiness.
+    executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || undefined,
   });
 }, 130000);
 

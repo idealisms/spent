@@ -4,7 +4,7 @@ import {
   legacy_createStore as createStore,
   Store,
 } from 'redux';
-import thunkMiddleware from 'redux-thunk';
+import { thunk as thunkMiddleware } from 'redux-thunk';
 import { rootReducer, IAppState } from './main';
 
 export function configureStore(): Store<IAppState> {
