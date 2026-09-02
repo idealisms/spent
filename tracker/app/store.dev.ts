@@ -21,7 +21,7 @@ export function configureStore(): Store<IAppState> {
   const composeEnhancers =
     (window as any).__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;
   const enhancers = composeEnhancers(
-    applyMiddleware(thunkMiddleware, loggerMiddleware as any)
+    applyMiddleware(thunkMiddleware, loggerMiddleware as any),
   );
 
   const store = createStore(rootReducer, enhancers) as Store<IAppState>;

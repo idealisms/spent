@@ -43,8 +43,7 @@ interface IMergeTransactionDialogState {
   transactions: ITransaction[];
 }
 
-interface IMergeTransactionDialogInnerProps
-  extends IMergeTransactionDialogProps {
+interface IMergeTransactionDialogInnerProps extends IMergeTransactionDialogProps {
   classes: ReturnType<typeof useStyles>['classes'];
 }
 
@@ -86,7 +85,7 @@ class MergeTransactionDialogInner extends React.Component<
           label={label}
           control={<Radio color="primary" />}
           className={classes.mergeRadioButton}
-        />
+        />,
       );
     }
 

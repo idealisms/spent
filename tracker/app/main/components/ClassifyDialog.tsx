@@ -91,7 +91,8 @@ class ClassifyDialogInner extends React.Component<
       } else {
         this.setState({
           currentTags: this.getSuggestion(currentIndex),
-          currentDescription: this.props.transactions[currentIndex]?.notes ?? '',
+          currentDescription:
+            this.props.transactions[currentIndex]?.notes ?? '',
         });
       }
     }
@@ -103,13 +104,19 @@ class ClassifyDialogInner extends React.Component<
 
     if (transactions.length === 0) {
       return (
-        <Dialog open={open} onClose={onClose} classes={{ paper: classes.dialogPaper }}>
+        <Dialog
+          open={open}
+          onClose={onClose}
+          classes={{ paper: classes.dialogPaper }}
+        >
           <DialogTitle>Classify</DialogTitle>
           <DialogContent>
             <Typography>All transactions are tagged.</Typography>
           </DialogContent>
           <DialogActions>
-            <Button onClick={onClose} variant="contained">Close</Button>
+            <Button onClick={onClose} variant="contained">
+              Close
+            </Button>
           </DialogActions>
         </Dialog>
       );
@@ -118,7 +125,11 @@ class ClassifyDialogInner extends React.Component<
     const transaction = transactions[currentIndex];
 
     return (
-      <Dialog open={open} onClose={onClose} classes={{ paper: classes.dialogPaper }}>
+      <Dialog
+        open={open}
+        onClose={onClose}
+        classes={{ paper: classes.dialogPaper }}
+      >
         <DialogTitle>
           Classify
           <span className={classes.progress}>
@@ -148,13 +159,17 @@ class ClassifyDialogInner extends React.Component<
           <TextField
             label="Notes"
             value={currentDescription}
-            onChange={e => this.setState({ currentDescription: e.target.value })}
+            onChange={e =>
+              this.setState({ currentDescription: e.target.value })
+            }
             className={classes.descriptionField}
             size="small"
           />
         </DialogContent>
         <DialogActions>
-          <Button onClick={this.handleBack} disabled={currentIndex === 0}>Back</Button>
+          <Button onClick={this.handleBack} disabled={currentIndex === 0}>
+            Back
+          </Button>
           <Button onClick={this.handleSkip}>Skip</Button>
           <Button onClick={this.handleConfirm} variant="contained">
             Confirm
@@ -166,7 +181,9 @@ class ClassifyDialogInner extends React.Component<
 
   private getSuggestion(index: number): string[] {
     const { transactions, allTransactions } = this.props;
-    if (index >= transactions.length) { return []; }
+    if (index >= transactions.length) {
+      return [];
+    }
     return classifyUtils.suggestTags(allTransactions, transactions[index]);
   }
 
@@ -185,7 +202,11 @@ class ClassifyDialogInner extends React.Component<
 
   private handleConfirm = () => {
     const transaction = this.props.transactions[this.state.currentIndex];
-    this.props.onSave({ ...transaction, tags: this.state.currentTags, notes: this.state.currentDescription });
+    this.props.onSave({
+      ...transaction,
+      tags: this.state.currentTags,
+      notes: this.state.currentDescription,
+    });
     // Don't advance the index here. The saved transaction will be removed from
     // props.transactions (now tagged), so the same index naturally points to
     // the next transaction. componentDidUpdate handles the transition.

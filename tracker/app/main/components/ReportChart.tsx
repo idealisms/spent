@@ -63,7 +63,7 @@ class ReportChartInner extends React.PureComponent<
     let minWidth = `${80 + 16 + 48 * (this.props.chartData.length - 1)}px`;
 
     console.debug(
-      `${window.performance.now() - startTime} ReportChart render()`
+      `${window.performance.now() - startTime} ReportChart render()`,
     );
     return (
       <div className={classes.chartContainer} ref={this.containerRef}>

@@ -182,11 +182,10 @@ class TransactionInner extends React.Component<
   }
 }
 
-export interface ITransactionPublicProps
-  extends Omit<
-    ITransactionProps,
-    'classes' | 'tagToCategory' | 'categoryEmoji'
-  > {
+export interface ITransactionPublicProps extends Omit<
+  ITransactionProps,
+  'classes' | 'tagToCategory' | 'categoryEmoji'
+> {
   classes?: Partial<ReturnType<typeof useStyles>['classes']>;
 }
 
@@ -197,20 +196,20 @@ function Transaction(props: ITransactionPublicProps) {
       key,
       cx(
         defaultClasses[key as keyof typeof defaultClasses],
-        props.classes?.[key as keyof typeof defaultClasses]
+        props.classes?.[key as keyof typeof defaultClasses],
       ),
-    ])
+    ]),
   ) as typeof defaultClasses;
   const categoriesRecord = useSelector(
-    (s: IAppState) => s.settings.settings.categories!
+    (s: IAppState) => s.settings.settings.categories!,
   );
   const tagToCategory = React.useMemo(
     () => buildTagToCategoryMap(categoriesRecord),
-    [categoriesRecord]
+    [categoriesRecord],
   );
   const categoryEmoji = React.useMemo(
     () => buildCategoryEmojiMap(categoriesRecord),
-    [categoriesRecord]
+    [categoriesRecord],
   );
   return (
     <TransactionInner

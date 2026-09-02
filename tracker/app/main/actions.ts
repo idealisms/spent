@@ -22,7 +22,7 @@ export const receivedSettingsFromDropbox = (settings?: ISettings) => ({
 
 export const updateSetting = (
   key: keyof ISettings,
-  value: ISettings[keyof ISettings]
+  value: ISettings[keyof ISettings],
 ) => ({
   type: ActionType.UPDATE_SETTING as typeof ActionType.UPDATE_SETTING,
   key,
@@ -42,8 +42,13 @@ export type SettingsAction =
 function hydrateSettings(settings: ISettings) {
   // reportCategories is a Map but JSON serializes it as a plain object.
   // Convert it back, renaming any blank key to 'report'.
-  const raw = settings.reportCategories as unknown as Record<string, IReportNode[]>;
-  const entries = Object.entries(raw).map(([k, v]) => [k || 'report', v] as [string, IReportNode[]]);
+  const raw = settings.reportCategories as unknown as Record<
+    string,
+    IReportNode[]
+  >;
+  const entries = Object.entries(raw).map(
+    ([k, v]) => [k || 'report', v] as [string, IReportNode[]],
+  );
   settings.reportCategories = new Map(entries);
 }
 
@@ -113,8 +118,9 @@ export const saveSettingsToDropbox = (): ThunkAction<
     let filesCommitInfo = {
       contents: JSON.stringify(
         state.settings.settings,
-        (_key, value) => (value instanceof Map ? Object.fromEntries(value) : value),
-        2
+        (_key, value) =>
+          value instanceof Map ? Object.fromEntries(value) : value,
+        2,
       ),
       path: DROPBOX_SETTINGS_PATH,
       mode: { '.tag': 'overwrite' } as Dropbox.files.WriteModeOverwrite,

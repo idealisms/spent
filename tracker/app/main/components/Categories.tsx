@@ -14,7 +14,12 @@ import { makeStyles } from 'tss-react/mui';
 import * as React from 'react';
 import { connect } from 'react-redux';
 import { ThunkDispatch } from 'redux-thunk';
-import { DEFAULT_CATEGORIES, ICategoryDefinition, ITransaction, TagSelect } from '../../transactions';
+import {
+  DEFAULT_CATEGORIES,
+  ICategoryDefinition,
+  ITransaction,
+  TagSelect,
+} from '../../transactions';
 import { saveSettingsToDropbox, updateSetting } from '../actions';
 import { CloudState, IAppState } from '../model';
 import {
@@ -115,12 +120,17 @@ class CategoriesInner extends React.Component<
     const { dialogOpen, dialogCategory } = this.state;
 
     const sortedNames = Object.keys(categories).sort((a, b) => {
-      if (a === 'Other') { return 1; }
-      if (b === 'Other') { return -1; }
+      if (a === 'Other') {
+        return 1;
+      }
+      if (b === 'Other') {
+        return -1;
+      }
       return a.localeCompare(b);
     });
 
-    const editingDef = dialogCategory != null ? categories[dialogCategory] : null;
+    const editingDef =
+      dialogCategory != null ? categories[dialogCategory] : null;
 
     const saveButton = (
       <IconButton
@@ -142,10 +152,13 @@ class CategoriesInner extends React.Component<
             const tagsElsewhere = new Set(
               Object.entries(categories)
                 .filter(([k]) => k !== name)
-                .flatMap(([, d]) => d.tags)
+                .flatMap(([, d]) => d.tags),
             );
             const filteredTransactions = allTransactions
-              .map(t => ({ ...t, tags: t.tags.filter(tag => !tagsElsewhere.has(tag)) }))
+              .map(t => ({
+                ...t,
+                tags: t.tags.filter(tag => !tagsElsewhere.has(tag)),
+              }))
               .filter(t => t.tags.length > 0);
             return (
               <Accordion key={name} disableGutters>
@@ -180,7 +193,7 @@ class CategoriesInner extends React.Component<
                     onClick={e => {
                       e.stopPropagation();
                       this.props.updateCategories(
-                        deleteCategory(categories, name)
+                        deleteCategory(categories, name),
                       );
                     }}
                   >
@@ -195,7 +208,7 @@ class CategoriesInner extends React.Component<
                         label={tag}
                         onDelete={() =>
                           this.props.updateCategories(
-                            deleteTag(categories, name, tag)
+                            deleteTag(categories, name, tag),
                           )
                         }
                       />
@@ -270,7 +283,7 @@ const mapStateToProps = (state: IAppState): ICategoriesAppStateProps => ({
 });
 
 const mapDispatchToProps = (
-  dispatch: ThunkDispatch<IAppState, null, any>
+  dispatch: ThunkDispatch<IAppState, null, any>,
 ): ICategoriesDispatchProps => ({
   updateCategories: cats => {
     dispatch(updateSetting('categories', cats));

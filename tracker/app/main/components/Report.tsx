@@ -74,7 +74,7 @@ type DataCell = string | number;
 type DataRow = [DataCell, DataCell, DataCell?];
 type buildChartDataTableFunction = (
   chartData: IChartNode[],
-  compareChartData: IChartNode[]
+  compareChartData: IChartNode[],
 ) => DataRow[];
 
 class ReportData {
@@ -87,12 +87,12 @@ class ReportData {
   constructor(
     private allTransactions: ITransaction[],
     private dateRange: IDateRange,
-    private reportCategories: IReportNode[]
+    private reportCategories: IReportNode[],
   ) {
     this.transactions = TransactionUtils.filterTransactionsByDate(
       allTransactions,
       dateRange.startDate.toDate(),
-      dateRange.endDate.toDate()
+      dateRange.endDate.toDate(),
     );
     this.columnName = dateRange.chartColumnName;
   }
@@ -101,7 +101,7 @@ class ReportData {
     if (this.tabData == undefined) {
       [this.tabData, this.chartNodes] = this.buildTree(
         this.transactions,
-        this.reportCategories
+        this.reportCategories,
       );
       this.tabData.columnName = this.columnName;
     }
@@ -112,7 +112,7 @@ class ReportData {
     if (this.chartNodes == undefined) {
       [this.tabData, this.chartNodes] = this.buildTree(
         this.transactions,
-        this.reportCategories
+        this.reportCategories,
       );
       this.tabData.columnName = this.columnName;
     }
@@ -122,7 +122,7 @@ class ReportData {
   public cacheKeyEquals(
     allTransactions: ITransaction[],
     dateRange: IDateRange,
-    reportCategories: IReportNode[]
+    reportCategories: IReportNode[],
   ) {
     // console.log('cacheKeyEquals',
     //     allTransactions == this.allTransactions,
@@ -137,7 +137,7 @@ class ReportData {
 
   private buildTree(
     transactions: ITransaction[],
-    reportCategories: IReportNode[]
+    reportCategories: IReportNode[],
   ): [IReportTabData, IChartNode[]] {
     if (reportCategories.length == 0) {
       return [
@@ -153,7 +153,7 @@ class ReportData {
     let startTime = window.performance.now();
     let output: JSX.Element[] = [];
     const buildRenderTree = (
-      reportNodes: IReportNode[]
+      reportNodes: IReportNode[],
     ): ReportRenderNode[] => {
       reportNodes = reportNodes || [];
       let renderNodes: ReportRenderNode[] = [];
@@ -199,7 +199,7 @@ class ReportData {
 
     const addTransactionToRenderNode = (
       transaction: ITransaction,
-      node: ReportRenderNode
+      node: ReportRenderNode,
     ): void => {
       node.transactions.push(transaction);
       node.amountCents += transaction.amount_cents;
@@ -220,7 +220,7 @@ class ReportData {
           <div key={transaction.id}>
             Multiple subnodes of {node.reportNode.title}:{' '}
             {transaction.description} ({transaction.tags.join(', ')})
-          </div>
+          </div>,
         );
       } else if (subnodes.length == 1) {
         addTransactionToRenderNode(transaction, subnodes[0]);
@@ -254,7 +254,7 @@ class ReportData {
       renderNodes: ReportRenderNode[],
       depth: number,
       outputDom: JSX.Element[],
-      chartData: IChartNode[]
+      chartData: IChartNode[],
     ): void => {
       renderNodes.sort((lhs, rhs) => {
         if (lhs.amountCents == rhs.amountCents) {
@@ -274,7 +274,7 @@ class ReportData {
             </span>
             {renderNode.reportNode.title} from {renderNode.transactions.length}{' '}
             transaction(s)
-          </div>
+          </div>,
         );
         let chartDatum = {
           title: renderNode.reportNode.title,
@@ -286,7 +286,7 @@ class ReportData {
           renderNode.subcategories,
           depth + 1,
           outputDom,
-          chartDatum.subcategories
+          chartDatum.subcategories,
         );
       }
     };
@@ -366,7 +366,8 @@ class ReportInner extends React.Component<IReportInnerProps, IReportState> {
       .date(31)
       .startOf('day');
 
-    let reportName = this.props.reportCategories.keys().next().value || 'report';
+    let reportName =
+      this.props.reportCategories.keys().next().value || 'report';
     let reportCategories = this.props.reportCategories.get(reportName) || [];
 
     this.state = {
@@ -406,12 +407,13 @@ class ReportInner extends React.Component<IReportInnerProps, IReportState> {
     let startTime = window.performance.now();
     let classes = this.props.classes;
     // TODO: Handle more reports. Currently we just grab the first on in the map.
-    let reportName = this.props.reportCategories.keys().next().value || 'report';
+    let reportName =
+      this.props.reportCategories.keys().next().value || 'report';
     let reportCategories = this.props.reportCategories.get(reportName) || [];
 
     let reportData = this.reportDataFactory(
       this.state.dateRange,
-      reportCategories
+      reportCategories,
     );
     let compareReportData =
       this.state.compareDateRange &&
@@ -419,7 +421,7 @@ class ReportInner extends React.Component<IReportInnerProps, IReportState> {
 
     let chartData = this.buildChartDataTable(
       reportData.getChartNodes(),
-      compareReportData ? compareReportData.getChartNodes() : EMPTY_ARRAY
+      compareReportData ? compareReportData.getChartNodes() : EMPTY_ARRAY,
     );
 
     let drawerContents = (
@@ -491,7 +493,7 @@ class ReportInner extends React.Component<IReportInnerProps, IReportState> {
             <div
               className={classNames(
                 classes.drawer,
-                this.state.isFilterDrawerOpen && 'open'
+                this.state.isFilterDrawerOpen && 'open',
               )}
             >
               <div className={classes.drawerContentsContainer}>
@@ -506,7 +508,7 @@ class ReportInner extends React.Component<IReportInnerProps, IReportState> {
 
   private reportDataFactory(
     dateRange: IDateRange,
-    reportCategories: IReportNode[]
+    reportCategories: IReportNode[],
   ): ReportData {
     const CACHE_SIZE = 2;
     for (let i = this.reportDataCache.length - 1; i >= 0; --i) {
@@ -515,7 +517,7 @@ class ReportInner extends React.Component<IReportInnerProps, IReportState> {
         reportData.cacheKeyEquals(
           this.props.transactions,
           dateRange,
-          reportCategories
+          reportCategories,
         )
       ) {
         // We have a match! Make sure to move the most recent item to the back of the Array.
@@ -528,7 +530,7 @@ class ReportInner extends React.Component<IReportInnerProps, IReportState> {
     let reportData = new ReportData(
       this.props.transactions,
       dateRange,
-      reportCategories
+      reportCategories,
     );
     this.reportDataCache.push(reportData);
     while (this.reportDataCache.length > CACHE_SIZE) {
@@ -594,7 +596,7 @@ const mapStateToProps = (state: IAppState): IReportAppStateProps => ({
   transactions: state.transactions.transactions,
 });
 const mapDispatchToProps = (
-  dispatch: ThunkDispatch<IAppState, null, any>
+  dispatch: ThunkDispatch<IAppState, null, any>,
 ): IReportDispatchProps => ({
   updateReportCategories: categories => {
     dispatch(updateSetting('reportCategories', categories));

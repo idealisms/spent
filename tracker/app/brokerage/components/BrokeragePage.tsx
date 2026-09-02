@@ -147,26 +147,38 @@ function loadQualifiedConfig(): IQualifiedConfig {
 
 function fmt(cents: number): string {
   const abs = Math.abs(cents) / 100;
-  const str = abs.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+  const str = abs.toLocaleString('en-US', {
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0,
+  });
   return cents < 0 ? `($${str})` : `$${str}`;
 }
 
 function categoryLabel(cat: IBrokerageTransaction['category']): string {
   switch (cat) {
-    case 'dividend': return 'Dividend';
-    case 'interest': return 'Interest';
-    case 'ltcg':     return 'LT Gain';
-    case 'stcg':     return 'ST Gain';
-    default:         return cat;
+    case 'dividend':
+      return 'Dividend';
+    case 'interest':
+      return 'Interest';
+    case 'ltcg':
+      return 'LT Gain';
+    case 'stcg':
+      return 'ST Gain';
+    default:
+      return cat;
   }
 }
 
 function sourceLabel(src: IBrokerageTransaction['source']): string {
   switch (src) {
-    case 'vanguard':      return 'Vanguard';
-    case 'schwab':        return 'Schwab';
-    case 'schwab_equity': return 'Schwab RSU';
-    default:              return src;
+    case 'vanguard':
+      return 'Vanguard';
+    case 'schwab':
+      return 'Schwab';
+    case 'schwab_equity':
+      return 'Schwab RSU';
+    default:
+      return src;
   }
 }
 
@@ -175,7 +187,9 @@ function dedupe(txs: IBrokerageTransaction[]): IBrokerageTransaction[] {
   const seen = new Set<string>();
   return txs.filter(t => {
     const key = `${t.date}|${t.category}|${t.symbol}|${t.amountCents}`;
-    if (seen.has(key)) { return false; }
+    if (seen.has(key)) {
+      return false;
+    }
     seen.add(key);
     return true;
   });
@@ -183,12 +197,26 @@ function dedupe(txs: IBrokerageTransaction[]): IBrokerageTransaction[] {
 
 // ── Summary row helpers ───────────────────────────────────────────────────────
 
-function SummaryRow({ label, cents, indent }: { label: string; cents: number; indent?: boolean }) {
+function SummaryRow({
+  label,
+  cents,
+  indent,
+}: {
+  label: string;
+  cents: number;
+  indent?: boolean;
+}) {
   const { classes } = useStyles();
   return (
-    <div className={classes.summaryRow} style={indent ? { paddingLeft: '16px' } : undefined}>
+    <div
+      className={classes.summaryRow}
+      style={indent ? { paddingLeft: '16px' } : undefined}
+    >
       <Typography variant="body2">{label}</Typography>
-      <Typography variant="body2" className={cents < 0 ? classes.negative : undefined}>
+      <Typography
+        variant="body2"
+        className={cents < 0 ? classes.negative : undefined}
+      >
         {fmt(cents)}
       </Typography>
     </div>
@@ -211,14 +239,20 @@ function BracketRoom({ info, label }: { info: IBracketInfo; label: string }) {
   if (info.roomCents === null || info.nextRate === null) {
     return (
       <div className={classes.bracketRoom}>
-        <span>{label}: top bracket ({pct(info.currentRate)})</span>
+        <span>
+          {label}: top bracket ({pct(info.currentRate)})
+        </span>
       </div>
     );
   }
   return (
     <div className={classes.bracketRoom}>
-      <span>{label}: {pct(info.currentRate)} bracket</span>
-      <span>{fmt(info.roomCents)} until {pct(info.nextRate)}</span>
+      <span>
+        {label}: {pct(info.currentRate)} bracket
+      </span>
+      <span>
+        {fmt(info.roomCents)} until {pct(info.nextRate)}
+      </span>
     </div>
   );
 }
@@ -227,8 +261,11 @@ function BracketRoom({ info, label }: { info: IBracketInfo; label: string }) {
 
 export default function BrokeragePage() {
   const { classes } = useStyles();
-  const [transactions, setTransactions] = React.useState<IBrokerageTransaction[]>([]);
-  const [qualifiedConfig, setQualifiedConfig] = React.useState<IQualifiedConfig>(loadQualifiedConfig);
+  const [transactions, setTransactions] = React.useState<
+    IBrokerageTransaction[]
+  >([]);
+  const [qualifiedConfig, setQualifiedConfig] =
+    React.useState<IQualifiedConfig>(loadQualifiedConfig);
   const [isDragging, setIsDragging] = React.useState(false);
   const inputRef = React.useRef<HTMLInputElement>(null);
 
@@ -248,30 +285,40 @@ export default function BrokeragePage() {
   const dividendSymbols = React.useMemo(() => {
     const syms = new Set<string>();
     for (const t of transactions) {
-      if (t.category === 'dividend' && t.symbol) {syms.add(t.symbol);}
+      if (t.category === 'dividend' && t.symbol) {
+        syms.add(t.symbol);
+      }
     }
     return Array.from(syms).sort();
   }, [transactions]);
 
   const taxSummary: ITaxSummary | null = React.useMemo(() => {
-    if (transactions.length === 0) {return null;}
+    if (transactions.length === 0) {
+      return null;
+    }
     return calculateTax(transactions, qualifiedConfig);
   }, [transactions, qualifiedConfig]);
 
   const handleFiles = React.useCallback((files: FileList) => {
     const promises = Array.from(files).map(
-      file => new Promise<IBrokerageTransaction[]>(resolve => {
-        const reader = new FileReader();
-        reader.onload = ev => resolve(detectAndParseCsv(ev.target?.result as string ?? ''));
-        reader.readAsText(file);
-      }),
+      file =>
+        new Promise<IBrokerageTransaction[]>(resolve => {
+          const reader = new FileReader();
+          reader.onload = ev =>
+            resolve(detectAndParseCsv((ev.target?.result as string) ?? ''));
+          reader.readAsText(file);
+        }),
     );
     Promise.all(promises).then(results => {
       const newTxs = results.flat();
       setTransactions(prev => dedupe([...prev, ...newTxs]));
-      const newDivSymbols = [...new Set(
-        newTxs.filter(t => t.category === 'dividend' && t.symbol).map(t => t.symbol),
-      )];
+      const newDivSymbols = [
+        ...new Set(
+          newTxs
+            .filter(t => t.category === 'dividend' && t.symbol)
+            .map(t => t.symbol),
+        ),
+      ];
       setQualifiedConfig(prev => {
         const updates: IQualifiedConfig = {};
         for (const sym of newDivSymbols) {
@@ -286,8 +333,13 @@ export default function BrokeragePage() {
 
   const handleQualifiedChange = (symbol: string, value: string) => {
     const pct = parseFloat(value);
-    if (isNaN(pct)) {return;}
-    setQualifiedConfig(prev => ({ ...prev, [symbol]: Math.min(1, Math.max(0, pct / 100)) }));
+    if (isNaN(pct)) {
+      return;
+    }
+    setQualifiedConfig(prev => ({
+      ...prev,
+      [symbol]: Math.min(1, Math.max(0, pct / 100)),
+    }));
   };
 
   // Sort transactions newest first for display
@@ -301,12 +353,15 @@ export default function BrokeragePage() {
       <MenuBarWithDrawer title="Tax Estimates" />
       <div className={classes.content}>
         <Typography variant="body2" color="text.secondary" gutterBottom>
-          2026 Federal + California estimate · Married Filing Jointly · All figures approximate
+          2026 Federal + California estimate · Married Filing Jointly · All
+          figures approximate
         </Typography>
 
         {/* ── Import ── */}
         <div className={classes.section}>
-          <Typography variant="h6" className={classes.sectionTitle}>Import CSVs</Typography>
+          <Typography variant="h6" className={classes.sectionTitle}>
+            Import CSVs
+          </Typography>
           <input
             ref={inputRef}
             type="file"
@@ -314,7 +369,9 @@ export default function BrokeragePage() {
             multiple
             style={{ display: 'none' }}
             onChange={e => {
-              if (e.target.files?.length) {handleFiles(e.target.files);}
+              if (e.target.files?.length) {
+                handleFiles(e.target.files);
+              }
               e.target.value = '';
             }}
           />
@@ -324,12 +381,16 @@ export default function BrokeragePage() {
             onDrop={e => {
               e.preventDefault();
               setIsDragging(false);
-              if (e.dataTransfer.files.length > 0) {handleFiles(e.dataTransfer.files);}
+              if (e.dataTransfer.files.length > 0) {
+                handleFiles(e.dataTransfer.files);
+              }
             }}
             onDragOver={e => e.preventDefault()}
             onDragEnter={() => setIsDragging(true)}
             onDragLeave={e => {
-              if (!e.currentTarget.contains(e.relatedTarget as Node)) {setIsDragging(false);}
+              if (!e.currentTarget.contains(e.relatedTarget as Node)) {
+                setIsDragging(false);
+              }
             }}
           >
             <UploadFileIcon sx={{ fontSize: 32, color: 'text.secondary' }} />
@@ -337,7 +398,8 @@ export default function BrokeragePage() {
               Drop CSV files here or click to select
             </Typography>
             <Typography variant="caption" color="text.secondary">
-              Vanguard, Schwab, and Schwab RSU formats auto-detected · multiple files OK
+              Vanguard, Schwab, and Schwab RSU formats auto-detected · multiple
+              files OK
             </Typography>
           </div>
           <div className={classes.uploadRow}>
@@ -366,14 +428,18 @@ export default function BrokeragePage() {
               />
             )}
             {transactions.length > 0 && (
-              <Button size="small" color="error" onClick={() => setTransactions([])}>
+              <Button
+                size="small"
+                color="error"
+                onClick={() => setTransactions([])}
+              >
                 Clear all
               </Button>
             )}
           </div>
           <Typography className={classes.warningText}>
-            Note: Vanguard and Schwab fund sells are not included (cost basis not in CSV export).
-            Enter those gains manually or use the 1099-B.
+            Note: Vanguard and Schwab fund sells are not included (cost basis
+            not in CSV export). Enter those gains manually or use the 1099-B.
           </Typography>
         </div>
 
@@ -390,19 +456,24 @@ export default function BrokeragePage() {
               Qualified Dividend % by Fund
             </Typography>
             <Typography variant="body2" color="text.secondary" gutterBottom>
-              Known funds are pre-filled from prior-year estimates. Override any value or
-              enter a percentage from your 1099-DIV for unlisted symbols. Saved in browser.
+              Known funds are pre-filled from prior-year estimates. Override any
+              value or enter a percentage from your 1099-DIV for unlisted
+              symbols. Saved in browser.
             </Typography>
             {dividendSymbols.map(symbol => (
               <div key={symbol} className={classes.qualifiedRow}>
-                <Typography className={classes.qualifiedSymbol}>{symbol}</Typography>
+                <Typography className={classes.qualifiedSymbol}>
+                  {symbol}
+                </Typography>
                 <TextField
                   className={classes.qualifiedField}
                   size="small"
                   type="number"
                   inputProps={{ min: 0, max: 100, step: 1 }}
                   InputProps={{
-                    endAdornment: <InputAdornment position="end">%</InputAdornment>,
+                    endAdornment: (
+                      <InputAdornment position="end">%</InputAdornment>
+                    ),
                   }}
                   value={Math.round((qualifiedConfig[symbol] ?? 0) * 100)}
                   onChange={e => handleQualifiedChange(symbol, e.target.value)}
@@ -415,18 +486,36 @@ export default function BrokeragePage() {
         {/* ── Tax summary ── */}
         {taxSummary && (
           <div className={classes.section}>
-            <Typography variant="h6" className={classes.sectionTitle}>Tax Summary</Typography>
+            <Typography variant="h6" className={classes.sectionTitle}>
+              Tax Summary
+            </Typography>
             <Paper className={classes.summaryPaper} variant="outlined">
-              <Typography variant="subtitle2" gutterBottom>Income</Typography>
-              <SummaryRow label="Ordinary dividends" cents={taxSummary.ordinaryDividendsCents} />
-              <SummaryRow label="Qualified dividends" cents={taxSummary.qualifiedDividendsCents} />
+              <Typography variant="subtitle2" gutterBottom>
+                Income
+              </Typography>
+              <SummaryRow
+                label="Ordinary dividends"
+                cents={taxSummary.ordinaryDividendsCents}
+              />
+              <SummaryRow
+                label="Qualified dividends"
+                cents={taxSummary.qualifiedDividendsCents}
+              />
               <SummaryRow label="Interest" cents={taxSummary.interestCents} />
-              <SummaryRow label="Short-term gains" cents={taxSummary.stcgCents} />
-              <SummaryRow label="Long-term gains" cents={taxSummary.ltcgCents} />
+              <SummaryRow
+                label="Short-term gains"
+                cents={taxSummary.stcgCents}
+              />
+              <SummaryRow
+                label="Long-term gains"
+                cents={taxSummary.ltcgCents}
+              />
 
               <Divider sx={{ my: 1.5 }} />
 
-              <Typography variant="subtitle2" gutterBottom>Federal</Typography>
+              <Typography variant="subtitle2" gutterBottom>
+                Federal
+              </Typography>
               <SummaryRow
                 label="Standard deduction"
                 cents={-taxSummary.federalStandardDeductionCents}
@@ -436,7 +525,10 @@ export default function BrokeragePage() {
                 cents={taxSummary.federalOrdinaryTaxCents}
                 indent
               />
-              <BracketRoom info={taxSummary.federalOrdinaryBracket} label="Ordinary" />
+              <BracketRoom
+                info={taxSummary.federalOrdinaryBracket}
+                label="Ordinary"
+              />
               <SummaryRow
                 label="LTCG / qualified dividend tax"
                 cents={taxSummary.federalLtcgTaxCents}
@@ -450,11 +542,16 @@ export default function BrokeragePage() {
                   indent
                 />
               )}
-              <SummaryTotal label="Federal total" cents={taxSummary.federalTotalCents} />
+              <SummaryTotal
+                label="Federal total"
+                cents={taxSummary.federalTotalCents}
+              />
 
               <Divider sx={{ my: 1.5 }} />
 
-              <Typography variant="subtitle2" gutterBottom>California</Typography>
+              <Typography variant="subtitle2" gutterBottom>
+                California
+              </Typography>
               <SummaryRow
                 label="Standard deduction"
                 cents={-taxSummary.caStandardDeductionCents}
@@ -467,7 +564,10 @@ export default function BrokeragePage() {
               <SummaryTotal label="CA total" cents={taxSummary.caTaxCents} />
 
               <Divider sx={{ my: 1.5 }} />
-              <SummaryTotal label="Total estimated tax" cents={taxSummary.totalTaxCents} />
+              <SummaryTotal
+                label="Total estimated tax"
+                cents={taxSummary.totalTaxCents}
+              />
             </Paper>
           </div>
         )}
@@ -494,7 +594,9 @@ export default function BrokeragePage() {
                   <TableRow key={i}>
                     <TableCell>{t.date}</TableCell>
                     <TableCell>{sourceLabel(t.source)}</TableCell>
-                    <TableCell sx={{ fontFamily: 'monospace' }}>{t.symbol}</TableCell>
+                    <TableCell sx={{ fontFamily: 'monospace' }}>
+                      {t.symbol}
+                    </TableCell>
                     <TableCell>{t.description}</TableCell>
                     <TableCell>{categoryLabel(t.category)}</TableCell>
                     <TableCell

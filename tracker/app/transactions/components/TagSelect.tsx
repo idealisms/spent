@@ -177,7 +177,7 @@ class TagSelectInner extends React.Component<
 
   private handleChangeTags = (
     tags: readonly TagOption[] | null,
-    _action: any
+    _action: any,
   ): void => {
     if (tags && tags.length > 0) {
       this.props.onChange(tags.map(valueType => valueType.value));
@@ -187,7 +187,7 @@ class TagSelectInner extends React.Component<
   };
 
   private getOptionClass = (
-    tagMap: Map<string, number>
+    tagMap: Map<string, number>,
   ): React.FunctionComponent<OptionProps<TagOption, true>> => {
     let hideCategories = this.props.hideCategories;
     let showCounts = this.props.showCounts;

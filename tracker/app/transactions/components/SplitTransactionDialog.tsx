@@ -44,8 +44,7 @@ type ISplitTransactionDialogState = {
   isEditing: boolean;
 };
 
-interface ISplitTransactionDialogInnerProps
-  extends ISplitTransactionDialogProps {
+interface ISplitTransactionDialogInnerProps extends ISplitTransactionDialogProps {
   classes: ReturnType<typeof useStyles>['classes'];
 }
 
@@ -90,7 +89,7 @@ class SplitTransactionDialogInner extends React.Component<
       ];
     }
     transactions.map(
-      t => (t.amountString = this.formatAmountNumeric(t.amount_cents))
+      t => (t.amountString = this.formatAmountNumeric(t.amount_cents)),
     );
 
     this.state = {
@@ -131,7 +130,7 @@ class SplitTransactionDialogInner extends React.Component<
               />
             </React.Fragment>
           }
-        />
+        />,
       );
     }
 
@@ -196,11 +195,11 @@ class SplitTransactionDialogInner extends React.Component<
       otherTransaction.amount_cents =
         this.props.transaction.amount_cents - value;
       otherTransaction.amountString = this.formatAmountNumeric(
-        otherTransaction.amount_cents
+        otherTransaction.amount_cents,
       );
     }
     modifiedTransaction.amountString = this.formatAmountNumeric(
-      modifiedTransaction.amount_cents
+      modifiedTransaction.amount_cents,
     );
 
     this.setState({

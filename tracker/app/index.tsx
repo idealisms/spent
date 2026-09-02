@@ -29,5 +29,5 @@ root.render(
         </LocalizationProvider>
       </BrowserRouter>
     </ThemeProvider>
-  </Provider>
+  </Provider>,
 );

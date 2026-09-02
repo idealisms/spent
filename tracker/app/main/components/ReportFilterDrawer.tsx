@@ -98,11 +98,11 @@ class ReportFilterDrawerInner extends React.Component<
     let dateOptions = this.getDateOptions();
     let compareDateOptions = this.getCompareDateOptions(
       this.props.dateRange.startDate,
-      this.props.dateRange.endDate
+      this.props.dateRange.endDate,
     );
 
     console.debug(
-      `${window.performance.now() - startTime} ReportFilterDrawer render()`
+      `${window.performance.now() - startTime} ReportFilterDrawer render()`,
     );
     return (
       <div className={classes.drawerContents}>
@@ -115,7 +115,7 @@ class ReportFilterDrawerInner extends React.Component<
                 this.handleDateChange(
                   event.target.value,
                   this.props.compareDateRange &&
-                    this.props.compareDateRange.name
+                    this.props.compareDateRange.name,
                 )
               }
               inputProps={{
@@ -140,7 +140,7 @@ class ReportFilterDrawerInner extends React.Component<
               onChange={(event: any) =>
                 this.handleDateChange(
                   this.props.dateRange.name,
-                  event.target.value.trim()
+                  event.target.value.trim(),
                 )
               }
               inputProps={{
@@ -206,7 +206,7 @@ class ReportFilterDrawerInner extends React.Component<
         if (compareName) {
           let compareDateOptions = this.getCompareDateOptions(
             dateOption.startDate,
-            dateOption.endDate
+            dateOption.endDate,
           );
           for (let cDateOption of compareDateOptions) {
             if (cDateOption.name == compareName) {
@@ -223,7 +223,7 @@ class ReportFilterDrawerInner extends React.Component<
   };
 
   public handleChangeReportJson = (
-    event: React.ChangeEvent<HTMLTextAreaElement>
+    event: React.ChangeEvent<HTMLTextAreaElement>,
   ): void => {
     let categoriesPretty = event.target.value;
     let categories;
@@ -371,7 +371,7 @@ class ReportFilterDrawerInner extends React.Component<
    */
   private getCompareDateOptions = (
     startDate: moment.Moment,
-    endDate: moment.Moment
+    endDate: moment.Moment,
   ) => {
     let dateOptions: IDateOption[] = [];
     const lastDay = moment().subtract(1, 'day').startOf('day');
@@ -416,7 +416,7 @@ class ReportFilterDrawerInner extends React.Component<
       startDate.date() == 1 &&
       endDate.isSame(
         startDate.clone().add(3, 'month').subtract(1, 'day'),
-        'day'
+        'day',
       )
     ) {
       // Create entries for quarter comparisons

@@ -33,11 +33,18 @@ interface IMatchResult {
 
 const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
-async function shortenDescription(items: string, apiKey: string): Promise<string> {
-  const itemList = items.split(';').map(s => s.trim()).filter(Boolean);
-  const prompt = itemList.length === 1
-    ? `Shorten this Amazon product title to 4-6 words keeping brand and product type. Reply with only the shortened title.\n\n${itemList[0]}`
-    : `Summarize these Amazon order items in 6-8 words, naming the key items. Reply with only the summary.\n\n${itemList.map(s => `- ${s}`).join('\n')}`;
+async function shortenDescription(
+  items: string,
+  apiKey: string,
+): Promise<string> {
+  const itemList = items
+    .split(';')
+    .map(s => s.trim())
+    .filter(Boolean);
+  const prompt =
+    itemList.length === 1
+      ? `Shorten this Amazon product title to 4-6 words keeping brand and product type. Reply with only the shortened title.\n\n${itemList[0]}`
+      : `Summarize these Amazon order items in 6-8 words, naming the key items. Reply with only the summary.\n\n${itemList.map(s => `- ${s}`).join('\n')}`;
   let delay = 1000;
   for (let attempt = 0; attempt < 5; attempt++) {
     try {
@@ -65,7 +72,9 @@ async function shortenDescription(items: string, apiKey: string): Promise<string
         delay *= 2;
         continue;
       }
-      if (!resp.ok) {return extractNote(items);}
+      if (!resp.ok) {
+        return extractNote(items);
+      }
       const data = await resp.json();
       return data.content?.[0]?.text?.trim() || extractNote(items);
     } catch {
@@ -312,7 +321,9 @@ class AmazonImportDialogInner extends React.Component<
             </Button>
             <Button
               size="small"
-              onClick={() => this.setState({ isEditingApiKey: false, apiKeyInput: '' })}
+              onClick={() =>
+                this.setState({ isEditingApiKey: false, apiKeyInput: '' })
+              }
             >
               Cancel
             </Button>
@@ -331,7 +342,9 @@ class AmazonImportDialogInner extends React.Component<
         <div className={classes.apiKeyRow}>
           <Button
             size="small"
-            onClick={() => this.setState({ isEditingApiKey: true, apiKeyInput: '' })}
+            onClick={() =>
+              this.setState({ isEditingApiKey: true, apiKeyInput: '' })
+            }
           >
             {hasKey ? 'Edit key' : 'Set key'}
           </Button>
@@ -392,7 +405,9 @@ class AmazonImportDialogInner extends React.Component<
 
   private handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (!file) {return;}
+    if (!file) {
+      return;
+    }
     const reader = new FileReader();
     reader.onload = event => {
       const text = event.target?.result as string;
@@ -410,7 +425,9 @@ class AmazonImportDialogInner extends React.Component<
     const rows = parseCsv(csvText);
     // Amazon transactions only, skip Prime membership fee rows
     const amazonTxns = this.props.allTransactions.filter(
-      t => /amazon|amzn/i.test(t.description) && !/prime pmts/i.test(t.description),
+      t =>
+        /amazon|amzn/i.test(t.description) &&
+        !/prime pmts/i.test(t.description),
     );
 
     const matches: IMatchResult[] = [];
@@ -420,14 +437,18 @@ class AmazonImportDialogInner extends React.Component<
 
     for (const row of rows) {
       const items = row['items']?.trim() ?? '';
-      if (!items) {continue;}
+      if (!items) {
+        continue;
+      }
 
       const payment = parsePayment(
         row['payments'] ?? '',
         row['date'] ?? '',
         row['total'] ?? '',
       );
-      if (!payment) {continue;}
+      if (!payment) {
+        continue;
+      }
 
       const csvRow: ICsvRow = {
         items,
@@ -444,7 +465,9 @@ class AmazonImportDialogInner extends React.Component<
       matched.forEach(t => usedIds.add(t.id));
 
       const alreadyNoted = matched.some(t => !!t.notes?.trim());
-      if (alreadyNoted) {alreadyNotedCount++;}
+      if (alreadyNoted) {
+        alreadyNotedCount++;
+      }
 
       matches.push({
         csvRow,
@@ -461,7 +484,9 @@ class AmazonImportDialogInner extends React.Component<
 
     if (this.props.anthropicApiKey) {
       for (let i = 0; i < matches.length; i++) {
-        this.setState({ shorteningProgress: { current: i + 1, total: matches.length } });
+        this.setState({
+          shorteningProgress: { current: i + 1, total: matches.length },
+        });
         matches[i].proposedNote = await shortenDescription(
           matches[i].csvRow.items,
           this.props.anthropicApiKey!,
@@ -469,7 +494,14 @@ class AmazonImportDialogInner extends React.Component<
       }
     }
 
-    this.setState({ step: 'review', matches, unmatchedCount, alreadyNotedCount, isLoading: false, shorteningProgress: null });
+    this.setState({
+      step: 'review',
+      matches,
+      unmatchedCount,
+      alreadyNotedCount,
+      isLoading: false,
+      shorteningProgress: null,
+    });
   }
 
   private handleToggleMatch = (idx: number) => {

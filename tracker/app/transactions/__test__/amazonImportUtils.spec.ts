@@ -130,7 +130,11 @@ describe('parsePayment', () => {
   });
 
   it('falls back to order date + total for gift-card-only payments', () => {
-    const result = parsePayment('Gift Card: 2024-02-01: $0.00', '2024-02-01', '29.99');
+    const result = parsePayment(
+      'Gift Card: 2024-02-01: $0.00',
+      '2024-02-01',
+      '29.99',
+    );
     expect(result).toEqual({ date: '2024-02-01', amountCents: 2999 });
   });
 
@@ -139,7 +143,11 @@ describe('parsePayment', () => {
   });
 
   it('skips entries with zero amount', () => {
-    const result = parsePayment('Visa: 2024-01-01: $0.00', '2024-01-01', '9.99');
+    const result = parsePayment(
+      'Visa: 2024-01-01: $0.00',
+      '2024-01-01',
+      '9.99',
+    );
     expect(result).toEqual({ date: '2024-01-01', amountCents: 999 });
   });
 
@@ -205,7 +213,11 @@ describe('daysDiff', () => {
 // --- matchCsvRow ---
 
 describe('matchCsvRow', () => {
-  const csvRow = { items: 'Widget', paymentDate: '2024-01-01', amountCents: 5000 };
+  const csvRow = {
+    items: 'Widget',
+    paymentDate: '2024-01-01',
+    amountCents: 5000,
+  };
 
   it('matches a single transaction on the same day', () => {
     const txn = makeTxn({ id: 't1', date: '2024-01-01', amount_cents: 5000 });
@@ -250,7 +262,11 @@ describe('matchCsvRow', () => {
   });
 
   it('prefers single match over split when both would work', () => {
-    const exact = makeTxn({ id: 'exact', date: '2024-01-02', amount_cents: 5000 });
+    const exact = makeTxn({
+      id: 'exact',
+      date: '2024-01-02',
+      amount_cents: 5000,
+    });
     const t1 = makeTxn({ id: 't1', date: '2024-01-05', amount_cents: 3000 });
     const t2 = makeTxn({ id: 't2', date: '2024-01-10', amount_cents: 2000 });
     const result = matchCsvRow(csvRow, [exact, t1, t2]);

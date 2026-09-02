@@ -2,7 +2,7 @@ import { ITransaction } from '../model';
 import { editDistance, suggestTags } from '../classifyUtils';
 
 function makeTransaction(
-  overrides: Partial<ITransaction> & { id: string }
+  overrides: Partial<ITransaction> & { id: string },
 ): ITransaction {
   return {
     description: '',
@@ -46,7 +46,11 @@ describe('editDistance', () => {
 describe('suggestTags', () => {
   it('returns tag from a single exact-matching transaction (threshold=0)', () => {
     const history = [
-      makeTransaction({ id: 'a', description: 'WHOLE FOODS', tags: ['grocery'] }),
+      makeTransaction({
+        id: 'a',
+        description: 'WHOLE FOODS',
+        tags: ['grocery'],
+      }),
     ];
     expect(suggestTags(history, TARGET, 0)).toEqual(['grocery']);
   });
@@ -54,7 +58,11 @@ describe('suggestTags', () => {
   it('matches a near-match within threshold (threshold=1)', () => {
     // 'WHOLE FOOD' is 1 edit away from 'WHOLE FOODS'
     const history = [
-      makeTransaction({ id: 'a', description: 'WHOLE FOOD', tags: ['grocery'] }),
+      makeTransaction({
+        id: 'a',
+        description: 'WHOLE FOOD',
+        tags: ['grocery'],
+      }),
     ];
     expect(suggestTags(history, TARGET, 1)).toEqual(['grocery']);
   });
@@ -69,15 +77,27 @@ describe('suggestTags', () => {
 
   it('majority vote: tag in 2 of 2 matches is returned', () => {
     const history = [
-      makeTransaction({ id: 'a', description: 'WHOLE FOODS', tags: ['grocery'] }),
-      makeTransaction({ id: 'b', description: 'WHOLE FOODS', tags: ['grocery'] }),
+      makeTransaction({
+        id: 'a',
+        description: 'WHOLE FOODS',
+        tags: ['grocery'],
+      }),
+      makeTransaction({
+        id: 'b',
+        description: 'WHOLE FOODS',
+        tags: ['grocery'],
+      }),
     ];
     expect(suggestTags(history, TARGET, 0)).toEqual(['grocery']);
   });
 
   it('majority vote: tag in 1 of 2 matches is not returned (< 51%)', () => {
     const history = [
-      makeTransaction({ id: 'a', description: 'WHOLE FOODS', tags: ['grocery'] }),
+      makeTransaction({
+        id: 'a',
+        description: 'WHOLE FOODS',
+        tags: ['grocery'],
+      }),
       makeTransaction({ id: 'b', description: 'WHOLE FOODS', tags: ['food'] }),
     ];
     expect(suggestTags(history, TARGET, 0)).toEqual([]);
@@ -85,8 +105,16 @@ describe('suggestTags', () => {
 
   it('majority vote: tag in 2 of 3 matches is returned (67% >= 51%)', () => {
     const history = [
-      makeTransaction({ id: 'a', description: 'WHOLE FOODS', tags: ['grocery'] }),
-      makeTransaction({ id: 'b', description: 'WHOLE FOODS', tags: ['grocery'] }),
+      makeTransaction({
+        id: 'a',
+        description: 'WHOLE FOODS',
+        tags: ['grocery'],
+      }),
+      makeTransaction({
+        id: 'b',
+        description: 'WHOLE FOODS',
+        tags: ['grocery'],
+      }),
       makeTransaction({ id: 'c', description: 'WHOLE FOODS', tags: ['food'] }),
     ];
     expect(suggestTags(history, TARGET, 0)).toEqual(['grocery']);
@@ -94,7 +122,11 @@ describe('suggestTags', () => {
 
   it('majority vote: tag in 1 of 3 matches is not returned', () => {
     const history = [
-      makeTransaction({ id: 'a', description: 'WHOLE FOODS', tags: ['grocery'] }),
+      makeTransaction({
+        id: 'a',
+        description: 'WHOLE FOODS',
+        tags: ['grocery'],
+      }),
       makeTransaction({ id: 'b', description: 'WHOLE FOODS', tags: ['food'] }),
       makeTransaction({ id: 'c', description: 'WHOLE FOODS', tags: ['food'] }),
     ];
@@ -103,14 +135,22 @@ describe('suggestTags', () => {
 
   it('matches case-insensitively', () => {
     const history = [
-      makeTransaction({ id: 'a', description: 'whole foods', tags: ['grocery'] }),
+      makeTransaction({
+        id: 'a',
+        description: 'whole foods',
+        tags: ['grocery'],
+      }),
     ];
     expect(suggestTags(history, TARGET, 0)).toEqual(['grocery']);
   });
 
   it('ignores leading/trailing whitespace in descriptions', () => {
     const history = [
-      makeTransaction({ id: 'a', description: '  WHOLE FOODS  ', tags: ['grocery'] }),
+      makeTransaction({
+        id: 'a',
+        description: '  WHOLE FOODS  ',
+        tags: ['grocery'],
+      }),
     ];
     expect(suggestTags(history, TARGET, 0)).toEqual(['grocery']);
   });
@@ -129,7 +169,11 @@ describe('suggestTags', () => {
 
   it('returns empty array when no match within threshold', () => {
     const history = [
-      makeTransaction({ id: 'a', description: 'AMAZON', tags: ['household goods'] }),
+      makeTransaction({
+        id: 'a',
+        description: 'AMAZON',
+        tags: ['household goods'],
+      }),
     ];
     expect(suggestTags(history, TARGET, 0)).toEqual([]);
   });
@@ -141,7 +185,11 @@ describe('suggestTags', () => {
   it('does not mutate the source tags array', () => {
     const sourceTags = ['grocery'];
     const history = [
-      makeTransaction({ id: 'a', description: 'WHOLE FOODS', tags: sourceTags }),
+      makeTransaction({
+        id: 'a',
+        description: 'WHOLE FOODS',
+        tags: sourceTags,
+      }),
     ];
     const result = suggestTags(history, TARGET, 0);
     result.push('mutated');
@@ -150,8 +198,16 @@ describe('suggestTags', () => {
 
   it('returns results sorted alphabetically', () => {
     const history = [
-      makeTransaction({ id: 'a', description: 'WHOLE FOODS', tags: ['zebra', 'apple'] }),
-      makeTransaction({ id: 'b', description: 'WHOLE FOODS', tags: ['zebra', 'apple'] }),
+      makeTransaction({
+        id: 'a',
+        description: 'WHOLE FOODS',
+        tags: ['zebra', 'apple'],
+      }),
+      makeTransaction({
+        id: 'b',
+        description: 'WHOLE FOODS',
+        tags: ['zebra', 'apple'],
+      }),
     ];
     expect(suggestTags(history, TARGET, 0)).toEqual(['apple', 'zebra']);
   });

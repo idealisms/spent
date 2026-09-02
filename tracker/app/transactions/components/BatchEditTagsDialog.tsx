@@ -173,7 +173,7 @@ class BatchEditTagsDialogInner extends React.Component<
       updatedTransactions = this.props.transactions.map(t => {
         let newTransaction = { ...t };
         newTransaction.tags = newTransaction.tags.filter(
-          tag => !tagsSet.has(tag)
+          tag => !tagsSet.has(tag),
         );
         return newTransaction;
       });

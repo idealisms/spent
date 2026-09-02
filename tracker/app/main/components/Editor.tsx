@@ -73,7 +73,7 @@ type filterTransactionsFunction = (
   startDate: Date,
   endDate: Date,
   tagFilters: string[],
-  searchQuery: string
+  searchQuery: string,
 ) => Transactions.ITransaction[];
 
 interface IEditorOwnProps {}
@@ -132,7 +132,7 @@ class EditorInner extends React.Component<IEditorInnerProps, IEditorState> {
         const transactions = this.props.transactions;
         this.setState({
           startDate: moment(
-            transactions[transactions.length - 1].date
+            transactions[transactions.length - 1].date,
           ).toDate(),
           endDate: moment(transactions[0].date).toDate(),
         });
@@ -147,7 +147,7 @@ class EditorInner extends React.Component<IEditorInnerProps, IEditorState> {
       this.state.startDate,
       this.state.endDate,
       this.state.tagFilters,
-      this.state.searchQuery
+      this.state.searchQuery,
     );
 
     let rows = visibleTransactions.map(t => {
@@ -182,7 +182,9 @@ class EditorInner extends React.Component<IEditorInnerProps, IEditorState> {
           onSelectedDeleteClick={this.handleDeleteTransactions}
           onSelectedSplitSaveClick={this.handleSplitTransaction}
           onClassifyClick={() => this.setState({ isClassifyOpen: true })}
-          onAmazonImportClick={() => this.setState({ isAmazonImportOpen: true })}
+          onAmazonImportClick={() =>
+            this.setState({ isAmazonImportOpen: true })
+          }
         />
 
         <div className={classes.controls}>
@@ -241,7 +243,9 @@ class EditorInner extends React.Component<IEditorInnerProps, IEditorState> {
           {this.state.isClassifyOpen ? (
             <ClassifyDialog
               open={true}
-              transactions={this.props.transactions.filter(t => t.tags.length === 0)}
+              transactions={this.props.transactions.filter(
+                t => t.tags.length === 0,
+              )}
               allTransactions={this.props.transactions}
               onSave={this.handleEditTransaction}
               onClose={() => this.setState({ isClassifyOpen: false })}
@@ -311,7 +315,7 @@ class EditorInner extends React.Component<IEditorInnerProps, IEditorState> {
   };
 
   private handleChangeSearch = (
-    event: React.ChangeEvent<HTMLInputElement>
+    event: React.ChangeEvent<HTMLInputElement>,
   ): void => {
     let searchQuery = event.target.value;
     this.setState({
@@ -328,7 +332,7 @@ class EditorInner extends React.Component<IEditorInnerProps, IEditorState> {
         this.state.startDate,
         this.state.endDate,
         this.state.tagFilters,
-        this.state.searchQuery
+        this.state.searchQuery,
       );
       visibleTransactions.forEach(t => {
         selectedTransactions.set(t.id, t);
@@ -345,7 +349,7 @@ class EditorInner extends React.Component<IEditorInnerProps, IEditorState> {
 
   private handleTransactionClick = (t: Transactions.ITransaction): void => {
     let selectedTransactions = new Map(
-      this.state.selectedTransactions.entries()
+      this.state.selectedTransactions.entries(),
     );
     if (selectedTransactions.has(t.id)) {
       selectedTransactions.delete(t.id);
@@ -358,7 +362,7 @@ class EditorInner extends React.Component<IEditorInnerProps, IEditorState> {
   };
 
   private handleAddTransaction = (
-    transaction: Transactions.ITransaction
+    transaction: Transactions.ITransaction,
   ): void => {
     let transactions = [transaction, ...this.props.transactions];
     transactions.sort(Transactions.TransactionUtils.compareTransactions);
@@ -380,12 +384,12 @@ class EditorInner extends React.Component<IEditorInnerProps, IEditorState> {
   };
 
   private handleEditTransaction = (
-    updatedTransaction: Transactions.ITransaction
+    updatedTransaction: Transactions.ITransaction,
   ): void => {
     this.props.updateTransactions(
       this.props.transactions.map(t =>
-        t.id == updatedTransaction.id ? updatedTransaction : t
-      )
+        t.id == updatedTransaction.id ? updatedTransaction : t,
+      ),
     );
     this.setState({
       selectedTransactions: new Map(),
@@ -393,16 +397,16 @@ class EditorInner extends React.Component<IEditorInnerProps, IEditorState> {
   };
 
   private handleBatchEditTags = (
-    updatedTransactions: Transactions.ITransaction[]
+    updatedTransactions: Transactions.ITransaction[],
   ) => {
     let updatedTransactionsMap = new Map(
       updatedTransactions.map((t): [string, Transactions.ITransaction] => [
         t.id,
         t,
-      ])
+      ]),
     );
     this.props.updateTransactions(
-      this.props.transactions.map(t => updatedTransactionsMap.get(t.id) || t)
+      this.props.transactions.map(t => updatedTransactionsMap.get(t.id) || t),
     );
 
     // Since clearning/removing tags can change the tagFilter results,
@@ -414,7 +418,7 @@ class EditorInner extends React.Component<IEditorInnerProps, IEditorState> {
   };
 
   private handleMergeSelectedTransactions = (
-    transaction: Transactions.ITransaction
+    transaction: Transactions.ITransaction,
   ): void => {
     let fromTransactions = this.state.selectedTransactions;
     fromTransactions.delete(transaction.id);
@@ -454,13 +458,13 @@ class EditorInner extends React.Component<IEditorInnerProps, IEditorState> {
   };
 
   private handleDeleteTransactions = (
-    transactionsToDelete: Map<string, Transactions.ITransaction>
+    transactionsToDelete: Map<string, Transactions.ITransaction>,
   ): void => {
     const updated = this.props.transactions.map(
       (t: Transactions.ITransaction) =>
         transactionsToDelete.has(t.id)
           ? { ...t, tags: [...t.tags, 'deleted'] }
-          : t
+          : t,
     );
     this.props.updateTransactions(updated);
     this.setState({
@@ -469,12 +473,12 @@ class EditorInner extends React.Component<IEditorInnerProps, IEditorState> {
   };
 
   private handleSplitTransaction = (
-    newTransactions: Map<string, Transactions.ITransaction>
+    newTransactions: Map<string, Transactions.ITransaction>,
   ): void => {
     let transactionsToKeep = this.props.transactions.filter(
       (t: Transactions.ITransaction) => {
         return !this.state.selectedTransactions.has(t.id);
-      }
+      },
     );
     let selectedTransactions = new Map();
     for (let transaction of newTransactions.values()) {
@@ -504,7 +508,7 @@ class EditorInner extends React.Component<IEditorInnerProps, IEditorState> {
           tagsIncludeAll: new Array(...tagFilters),
           searchQuery,
         });
-      }
+      },
     );
 }
 
@@ -519,7 +523,7 @@ const mapStateToProps = (state: IAppState): IEditorAppStateProps => ({
   anthropicApiKey: state.settings.settings.anthropicApiKey,
 });
 const mapDispatchToProps = (
-  dispatch: ThunkDispatch<IAppState, null, any>
+  dispatch: ThunkDispatch<IAppState, null, any>,
 ): IEditorDispatchProps => ({
   updateTransactions: transactions => {
     dispatch(Transactions.TransactionsActions.updateTransactions(transactions));
@@ -528,7 +532,9 @@ const mapDispatchToProps = (
     dispatch(Transactions.TransactionsActions.saveTransactionsToDropbox());
   },
   onSaveApiKey: (key: string | undefined) => {
-    dispatch(updateSetting('anthropicApiKey', key as ISettings[keyof ISettings]));
+    dispatch(
+      updateSetting('anthropicApiKey', key as ISettings[keyof ISettings]),
+    );
     dispatch(saveSettingsToDropbox());
   },
 });

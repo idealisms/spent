@@ -17,7 +17,7 @@ const AuthRoute: React.FC<IAuthRouteProps> = ({ children }) => {
   const dispatch: ThunkDispatch<IAppState, null, any> = useDispatch();
   const authStatus = useSelector((state: IAppState) => state.auth.authStatus);
   const settingsVersion = useSelector(
-    (state: IAppState) => state.settings.settings.version
+    (state: IAppState) => state.settings.settings.version,
   );
 
   useEffect(() => {

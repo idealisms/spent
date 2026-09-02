@@ -41,14 +41,14 @@ describe('Editor page', () => {
 
     // Should never fall through to the "Login with Dropbox" screen.
     await expect(
-      page.$('a[href*="dropbox.com/oauth2/authorize"]')
+      page.$('a[href*="dropbox.com/oauth2/authorize"]'),
     ).resolves.toBeNull();
 
     for (const transaction of MOCK_TRANSACTIONS) {
       await page.waitForFunction(
         description => document.body.innerText.includes(description),
         {},
-        transaction.description
+        transaction.description,
       );
     }
 
