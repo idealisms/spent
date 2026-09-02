@@ -10,9 +10,19 @@ on:
       - 'tracker/**'
       - 'fetch-server/**'
 
+env:
+  # puppeteer is a tracker devDependency, so every `yarn install` in this
+  # workspace triggers its postinstall Chromium download from
+  # storage.googleapis.com — a known source of CI hangs/flakiness, and
+  # most jobs (this one included) never even launch a browser. Only
+  # test-tracker-e2e actually needs Chrome; it gets one from
+  # browser-actions/setup-chrome instead.
+  PUPPETEER_SKIP_DOWNLOAD: 'true'
+
 jobs:
   test-tracker:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     defaults:
       run:
         working-directory: tracker
@@ -45,11 +55,6 @@ jobs:
     defaults:
       run:
         working-directory: tracker
-    env:
-      # Puppeteer's own Chromium download (from storage.googleapis.com) is
-      # a known source of CI hangs/flakiness. Skip it and point Puppeteer
-      # at the Chrome installed by browser-actions/setup-chrome below.
-      PUPPETEER_SKIP_DOWNLOAD: 'true'
 
     steps:
       - uses: actions/checkout@v4
