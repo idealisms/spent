@@ -5,7 +5,7 @@ import {
   Store,
 } from 'redux';
 import { createLogger } from 'redux-logger';
-import thunkMiddleware from 'redux-thunk';
+import { thunk as thunkMiddleware } from 'redux-thunk';
 import { rootReducer, IAppState } from './main';
 
 interface IHotModule {

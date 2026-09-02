@@ -241,6 +241,9 @@ class DailyGraphInner extends React.Component<
                 {
                   eventName: 'select',
                   callback: ({ chartWrapper }) => {
+                    if (!chartWrapper) {
+                      return;
+                    }
                     let selected = chartWrapper.getChart().getSelection();
                     // This event also fires when de-selecting a point,
                     // in which case, selected is an empty array.
