@@ -3729,10 +3729,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/google.visualization@npm:^0.0.46":
-  version: 0.0.46
-  resolution: "@types/google.visualization@npm:0.0.46"
-  checksum: 10c0/b24f8781534624dc25ca50749a1380e88dc48b656a2efdb2695e8a990f2cec23b5f4eac6730582d2e5da3a4b9db27a286bac680b2a3cbf852221c784245cd0b5
+"@types/google.visualization@npm:^0.0.75":
+  version: 0.0.75
+  resolution: "@types/google.visualization@npm:0.0.75"
+  checksum: 10c0/a2fc81158afde9c1f19f30a93220540cb8681a212a65a3266eb77b987a7cc0f6a734b03c99f76c471018276da7c9a83813419e5d9a38b811346b87441aa5cdce
   languageName: node
   linkType: hard
 
@@ -12356,7 +12356,7 @@ __metadata:
     "@testing-library/jest-dom": "npm:^7.0.1"
     "@testing-library/react": "npm:^16.3.2"
     "@types/classnames": "npm:^2.2.7"
-    "@types/google.visualization": "npm:^0.0.46"
+    "@types/google.visualization": "npm:^0.0.75"
     "@types/jest": "npm:^30.0.0"
     "@types/memoize-one": "npm:^4.1.0"
     "@types/prop-types": "npm:^15.5.8"
