@@ -36,7 +36,7 @@ class ReportMenuBarInner extends React.Component<
     super(props);
   }
 
-  public render(): JSX.Element {
+  public render(): React.JSX.Element {
     let classes = this.props.classes;
 
     let iconElementRight = (

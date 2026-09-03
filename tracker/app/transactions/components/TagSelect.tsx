@@ -193,14 +193,14 @@ class TagSelectInner extends React.Component<
     let showCounts = this.props.showCounts;
     let tagToCategory = this.props.tagToCategory;
     let categoryEmoji = this.props.categoryEmoji;
-    let renderChild = (tag: string): JSX.Element => {
-      let categoryNode: JSX.Element | undefined;
+    let renderChild = (tag: string): React.JSX.Element => {
+      let categoryNode: React.JSX.Element | undefined;
       if (!hideCategories) {
         let categoryName = tagToCategory.get(tag);
         let emoji = categoryName ? categoryEmoji.get(categoryName) || '' : '';
         categoryNode = <span className="cat">{emoji}</span>;
       }
-      let countNode: JSX.Element | undefined;
+      let countNode: React.JSX.Element | undefined;
       if (showCounts) {
         let count = tagMap.get(tag) || 0;
         countNode = <span className="cnt">{count}</span>;

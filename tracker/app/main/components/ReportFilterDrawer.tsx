@@ -89,7 +89,7 @@ class ReportFilterDrawerInner extends React.Component<
     super(props);
   }
 
-  public render(): JSX.Element {
+  public render(): React.JSX.Element {
     let startTime = window.performance.now();
     let classes = this.props.classes;
 

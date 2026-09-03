@@ -24,7 +24,7 @@ class ReportChartInner extends React.PureComponent<
   IReportChartInnerProps,
   IReportChartState
 > {
-  private containerRef: React.RefObject<HTMLDivElement>;
+  private containerRef: React.RefObject<HTMLDivElement | null>;
   private resizeObserver: ResizeObserver;
   private timerId?: NodeJS.Timeout;
 

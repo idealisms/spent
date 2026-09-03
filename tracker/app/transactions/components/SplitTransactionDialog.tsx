@@ -104,7 +104,7 @@ class SplitTransactionDialogInner extends React.Component<
     let totalAmountCents = 0;
     this.state.transactions.map(t => (totalAmountCents += t.amount_cents));
 
-    let rows: JSX.Element[] = [];
+    let rows: React.JSX.Element[] = [];
     for (let transaction of this.state.transactions) {
       rows.push(
         <Transaction

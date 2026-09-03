@@ -91,7 +91,7 @@ interface ITransactionProps {
   hideDate?: boolean;
   hideCategory?: boolean;
   hideTags?: boolean;
-  amountFragment?: JSX.Element;
+  amountFragment?: React.JSX.Element;
 }
 
 class TransactionInner extends React.Component<

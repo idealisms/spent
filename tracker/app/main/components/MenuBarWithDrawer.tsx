@@ -56,8 +56,8 @@ const useStyles = makeStyles()((_theme: Theme) => ({
 interface IMenuBarWithDrawerOwnProps {
   title: string;
   /** If not provided, this is the hamburger menu. */
-  iconElementLeft?: JSX.Element;
-  iconElementRight?: JSX.Element;
+  iconElementLeft?: React.JSX.Element;
+  iconElementRight?: React.JSX.Element;
   classes?: Partial<ReturnType<typeof useStyles>['classes']>;
 }
 
@@ -82,7 +82,7 @@ class MenuBarWithDrawerInner extends React.Component<
     };
   }
 
-  public render(): JSX.Element {
+  public render(): React.JSX.Element {
     let classes = { ...this.props.internalClasses, ...this.props.classes };
     let selectedPage = this.props.location && this.props.location.pathname;
     return (

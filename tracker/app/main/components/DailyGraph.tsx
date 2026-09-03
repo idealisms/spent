@@ -167,7 +167,9 @@ class DailyGraphInner extends React.Component<
         </div>
         <div
           className={classes.chartContainer}
-          ref={elt => (this.container = elt)}
+          ref={elt => {
+            this.container = elt;
+          }}
         >
           <div style={{ width: chartWidth, height: '100%' }}>
             <Chart
