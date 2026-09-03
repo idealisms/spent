@@ -174,9 +174,11 @@ class ReportFilterDrawerInner extends React.Component<
         </div>
         <TextField
           className={classes.jsonCategoriesTextField}
-          InputProps={{
-            classes: {
-              input: classes.jsonCategoriesInput,
+          slotProps={{
+            input: {
+              classes: {
+                input: classes.jsonCategoriesInput,
+              },
             },
           }}
           label="categories"

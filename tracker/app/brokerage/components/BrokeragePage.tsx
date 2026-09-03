@@ -469,11 +469,13 @@ export default function BrokeragePage() {
                   className={classes.qualifiedField}
                   size="small"
                   type="number"
-                  inputProps={{ min: 0, max: 100, step: 1 }}
-                  InputProps={{
-                    endAdornment: (
-                      <InputAdornment position="end">%</InputAdornment>
-                    ),
+                  slotProps={{
+                    htmlInput: { min: 0, max: 100, step: 1 },
+                    input: {
+                      endAdornment: (
+                        <InputAdornment position="end">%</InputAdornment>
+                      ),
+                    },
                   }}
                   value={Math.round((qualifiedConfig[symbol] ?? 0) * 100)}
                   onChange={e => handleQualifiedChange(symbol, e.target.value)}
