@@ -148,9 +148,9 @@ class MonthlyInner extends React.Component<IMonthlyInnerProps, IMonthlyState> {
   private groupByMonths = (
     transactions: ITransaction[],
     spendTarget?: ISpendTarget,
-  ): [JSX.Element[], [Date, number, number][]] => {
+  ): [React.JSX.Element[], [Date, number, number][]] => {
     let classes = this.props.classes;
-    let rows: JSX.Element[] = [];
+    let rows: React.JSX.Element[] = [];
     let data: [Date, number, number][] = [];
 
     // Pre-allocate each month with the monthly balance.
@@ -259,7 +259,7 @@ class MonthlyInner extends React.Component<IMonthlyInnerProps, IMonthlyState> {
     month: string,
     transactions: ITransaction[],
     monthlySpendingMap: Map<string, number>,
-  ): JSX.Element[] => {
+  ): React.JSX.Element[] => {
     let classes = this.props.classes;
     return [
       <TransactionsTableSumRow

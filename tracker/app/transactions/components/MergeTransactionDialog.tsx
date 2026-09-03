@@ -62,7 +62,7 @@ class MergeTransactionDialogInner extends React.Component<
 
   public render(): React.ReactElement<Record<string, unknown>> {
     let classes = this.props.classes;
-    let rows: JSX.Element[] = [];
+    let rows: React.JSX.Element[] = [];
     for (let transaction of this.state.transactions) {
       let label = (
         <TransactionsTable>

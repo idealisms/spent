@@ -34,7 +34,7 @@ class TransactionsTableInner extends React.Component<
   ITransactionsTableProps,
   ITransactionsTableState
 > {
-  private containerRef: React.RefObject<HTMLDivElement>;
+  private containerRef: React.RefObject<HTMLDivElement | null>;
   private resizeObserver: ResizeObserver;
 
   constructor(props: ITransactionsTableProps) {

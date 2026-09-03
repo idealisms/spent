@@ -47,7 +47,7 @@ const useStyles = makeStyles()((_theme: Theme) => ({
 
 export interface IReportTabData {
   columnName: string;
-  renderedTree: JSX.Element;
+  renderedTree: React.JSX.Element;
   unmatchedTransactions: ITransaction[];
 }
 
@@ -77,8 +77,8 @@ class ReportTabsInner extends React.PureComponent<
   public render(): React.ReactElement<Record<string, unknown>> {
     let startTime = window.performance.now();
     let classes = this.props.classes;
-    let tabs: JSX.Element[] = [];
-    let tabContents: JSX.Element[] = [];
+    let tabs: React.JSX.Element[] = [];
+    let tabContents: React.JSX.Element[] = [];
     this.buildContent(this.props.tabData, tabs, tabContents);
 
     if (this.props.compareTabData) {
@@ -111,8 +111,8 @@ class ReportTabsInner extends React.PureComponent<
 
   private buildContent(
     tabData: IReportTabData,
-    tabs: JSX.Element[],
-    tabContents: JSX.Element[],
+    tabs: React.JSX.Element[],
+    tabContents: React.JSX.Element[],
   ) {
     let classes = this.props.classes;
     let columnName = tabData.columnName;

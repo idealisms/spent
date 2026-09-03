@@ -81,7 +81,7 @@ class EditorMenuBarInner extends React.Component<
     };
   }
 
-  public render(): JSX.Element {
+  public render(): React.JSX.Element {
     let classes = this.props.classes;
     let selectedTransactionsArray = this.props.selectedTransactions
       ? [...this.props.selectedTransactions.values()]

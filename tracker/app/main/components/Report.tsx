@@ -151,7 +151,7 @@ class ReportData {
     }
 
     let startTime = window.performance.now();
-    let output: JSX.Element[] = [];
+    let output: React.JSX.Element[] = [];
     const buildRenderTree = (
       reportNodes: IReportNode[],
     ): ReportRenderNode[] => {
@@ -253,7 +253,7 @@ class ReportData {
     const buildDom = (
       renderNodes: ReportRenderNode[],
       depth: number,
-      outputDom: JSX.Element[],
+      outputDom: React.JSX.Element[],
       chartData: IChartNode[],
     ): void => {
       renderNodes.sort((lhs, rhs) => {
