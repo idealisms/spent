@@ -117,7 +117,7 @@
     "react-dom": "^19.2.8",
     "react-google-charts": "^5.2.1",
     "react-redux": "9",
-    "react-router-dom": "^6",
+    "react-router-dom": "^7.18.3",
     "react-select": "5",
     "redux": "5",
     "redux-thunk": "^3.1.0",
