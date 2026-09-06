@@ -9,7 +9,6 @@ import Login from './Login';
 import Monthly from './Monthly';
 import Categories from './Categories';
 import Report from './Report';
-import BrokeragePage from '../../brokerage/components/BrokeragePage';
 import * as RoutePaths from './RoutePaths';
 
 const globalStyles = {
@@ -71,14 +70,6 @@ const App: React.FC = () => {
           element={
             <AuthRoute>
               <Categories />
-            </AuthRoute>
-          }
-        />
-        <Route
-          path={RoutePaths.BrokeragePage}
-          element={
-            <AuthRoute>
-              <BrokeragePage />
             </AuthRoute>
           }
         />
