@@ -1,7 +1,6 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
 const path = require('path');
 const webpack = require('webpack');
-const ESLintPlugin = require('eslint-webpack-plugin');
 
 module.exports = (options) => ({
   entry: options.entry,
@@ -45,13 +44,7 @@ module.exports = (options) => ({
         },
       }],
   },
-  plugins: options.plugins.concat([
-    new ESLintPlugin({
-      extensions: ['ts', 'tsx'],
-      files: options.srcs,
-      configType: 'flat',
-    }),
-  ]),
+  plugins: options.plugins,
 
   resolve: Object.assign({
     modules: ['app', 'node_modules'],
