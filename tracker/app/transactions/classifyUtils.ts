@@ -20,10 +20,18 @@ export function editDistance(a: string, b: string): number {
   return row[n];
 }
 
+/** Weight of a match at a given edit distance: halves per step (1, .5, .25, ...). */
+export function distanceWeight(distance: number): number {
+  return Math.pow(2, -distance);
+}
+
 /**
- * Returns tag suggestions for `target` using fuzzy matching + majority vote.
+ * Returns tag suggestions for `target` using fuzzy matching + weighted majority vote.
  * - Collects all tagged historical transactions within `threshold` edit distance.
- * - Returns tags that appear in ≥51% of those matches, sorted alphabetically.
+ * - Each match is weighted by `distanceWeight(distance)`, so closer matches (an
+ *   exact match has distance 0) count far more than loose ones near the threshold.
+ * - Returns tags whose total weight is ≥51% of the summed match weight, sorted
+ *   alphabetically.
  * - `allTransactions` order does not matter (no longer first-match).
  */
 export function suggestTags(
@@ -32,7 +40,7 @@ export function suggestTags(
   threshold = EDIT_DISTANCE_THRESHOLD,
 ): string[] {
   const normalizedTarget = target.description.trim().toLowerCase();
-  const matches: ITransaction[] = [];
+  const matches: Array<{ transaction: ITransaction; weight: number }> = [];
   for (const t of allTransactions) {
     if (t.id === target.id) {
       continue;
@@ -40,25 +48,28 @@ export function suggestTags(
     if (t.tags.length === 0) {
       continue;
     }
-    if (
-      editDistance(normalizedTarget, t.description.trim().toLowerCase()) <=
-      threshold
-    ) {
-      matches.push(t);
+    const distance = editDistance(
+      normalizedTarget,
+      t.description.trim().toLowerCase(),
+    );
+    if (distance <= threshold) {
+      matches.push({ transaction: t, weight: distanceWeight(distance) });
     }
   }
   if (matches.length === 0) {
     return [];
   }
-  const tagFreq = new Map<string, number>();
-  for (const t of matches) {
-    for (const tag of t.tags) {
-      tagFreq.set(tag, (tagFreq.get(tag) ?? 0) + 1);
+  const tagWeight = new Map<string, number>();
+  let totalWeight = 0;
+  for (const { transaction, weight } of matches) {
+    totalWeight += weight;
+    for (const tag of transaction.tags) {
+      tagWeight.set(tag, (tagWeight.get(tag) ?? 0) + weight);
     }
   }
-  const minCount = matches.length * 0.51;
-  return [...tagFreq.entries()]
-    .filter(([, count]) => count >= minCount)
+  const minWeight = totalWeight * 0.51;
+  return [...tagWeight.entries()]
+    .filter(([, weight]) => weight >= minWeight)
     .map(([tag]) => tag)
     .sort();
 }
