@@ -1,5 +1,5 @@
 import { ITransaction } from '../model';
-import { editDistance, suggestTags } from '../classifyUtils';
+import { distanceWeight, editDistance, suggestTags } from '../classifyUtils';
 
 function makeTransaction(
   overrides: Partial<ITransaction> & { id: string },
@@ -210,5 +210,41 @@ describe('suggestTags', () => {
       }),
     ];
     expect(suggestTags(history, TARGET, 0)).toEqual(['apple', 'zebra']);
+  });
+
+  it('weights an exact match above many loose matches, even outnumbered', () => {
+    // A single distance-0 match for 'grocery' should outweigh a pile of
+    // distance-6 matches for an unrelated tag, since 2^-6 is tiny relative
+    // to the exact match's weight of 1.
+    const history: ITransaction[] = [
+      makeTransaction({
+        id: 'exact',
+        description: 'WHOLE FOODS',
+        tags: ['grocery'],
+      }),
+    ];
+    for (let i = 0; i < 20; i++) {
+      history.push(
+        makeTransaction({
+          id: `loose-${i}`,
+          // 6 edits away from 'WHOLE FOODS'
+          description: 'XXXXXX FOODS',
+          tags: ['unrelated'],
+        }),
+      );
+    }
+    expect(suggestTags(history, TARGET, 6)).toEqual(['grocery']);
+  });
+});
+
+describe('distanceWeight', () => {
+  it('gives an exact match (distance 0) a weight of 1', () => {
+    expect(distanceWeight(0)).toBe(1);
+  });
+
+  it('halves with each additional edit', () => {
+    expect(distanceWeight(1)).toBe(0.5);
+    expect(distanceWeight(2)).toBe(0.25);
+    expect(distanceWeight(3)).toBe(0.125);
   });
 });
