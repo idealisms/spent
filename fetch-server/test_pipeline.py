@@ -7,6 +7,8 @@ from email.mime.text import MIMEText
 import dropbox
 import pytest
 
+import db
+
 from pipeline import MAX_SYNC_ATTEMPTS, _parse_email, _merge, sync_to_dropbox
 
 
@@ -339,9 +341,9 @@ def test_sync_no_upload_when_nothing_new(monkeypatch):
     assert mod._dbx.upload_calls == 0
 
 
-def test_sync_restores_transaction_missing_after_stale_save(monkeypatch):
-    """When a previously added transaction is absent from Dropbox (stale frontend
-    save overwrote it), passing it back in new_transactions restores it."""
+def test_sync_adds_only_transactions_missing_from_dropbox(monkeypatch):
+    """Re-sending transactions (e.g. retrying after a failed sync) only adds
+    the ones not already in Dropbox."""
     mod = _FakeDropboxModule([_tx('kept', description='KEPT CHARGE')])
     import pipeline
     monkeypatch.setattr(pipeline, 'dropbox_module', mod)
@@ -383,3 +385,77 @@ def test_sync_gives_up_after_repeated_conflicts(monkeypatch):
         sync_to_dropbox([_tx('new')], 'tok', '/p', lambda _: None)
     assert mod._dbx.upload_calls == MAX_SYNC_ATTEMPTS
 
+
+
+# ── run ────────────────────────────────────────────────────────────────────────
+
+_DEBIT_BODY = (
+    "Date: 10/27/26\n"
+    "To: VENMO PAYMENT\n"
+    "$35.00 came out of your account\n"
+)
+
+
+@pytest.fixture
+def run_env(tmp_path, monkeypatch):
+    """A DB with one stored USAA debit email, Gmail stubbed out, and a fake Dropbox."""
+    import pipeline
+    conn = db.get_conn(str(tmp_path / 'test.db'))
+    conn.executescript(db.SCHEMA)
+    db.save_email(conn, 'g1', _multipart(
+        'notify@usaa.com', 'Debit Alert for Your USAA Bank Account', _DEBIT_BODY,
+    ), 'Debit Alert for Your USAA Bank Account', 'notify@usaa.com', None)
+    monkeypatch.setattr(pipeline, 'gmail_service', lambda *a: None)
+    monkeypatch.setattr(pipeline, '_download_new_emails', lambda *a: 0)
+    mod = _FakeDropboxModule([])
+    monkeypatch.setattr(pipeline, 'dropbox_module', mod)
+    config = {
+        'gmail_token_file': '', 'gmail_credentials_file': '', 'gmail_label_id': '',
+        'dropbox_access_token': 'tok', 'dropbox_path': '/p',
+    }
+    yield conn, mod._dbx, config
+    conn.close()
+
+
+def _status(conn, gmail_id):
+    return conn.execute(
+        'SELECT parse_status FROM emails WHERE gmail_id = ?', (gmail_id,),
+    ).fetchone()[0]
+
+
+def test_run_marks_email_parsed_after_sync(run_env):
+    import pipeline
+    conn, dbx, config = run_env
+
+    result = pipeline.run(conn, config, lambda _: None)
+
+    assert result['added'] == 1
+    assert [t['id'] for t in dbx._data] == ['g1']
+    assert _status(conn, 'g1') == 'parsed'
+
+
+def test_run_does_not_resend_transactions_deleted_in_tracker(run_env):
+    import pipeline
+    conn, dbx, config = run_env
+    pipeline.run(conn, config, lambda _: None)
+
+    dbx._data = []  # Deleted in the tracker.
+    result = pipeline.run(conn, config, lambda _: None)
+
+    assert result['added'] == 0
+    assert dbx._data == []
+
+
+def test_run_leaves_email_pending_when_sync_fails(run_env):
+    import pipeline
+    conn, dbx, config = run_env
+    dbx.concurrent_writes = [[] for _ in range(MAX_SYNC_ATTEMPTS)]
+
+    with pytest.raises(dropbox.exceptions.ApiError):
+        pipeline.run(conn, config, lambda _: None)
+    assert _status(conn, 'g1') == 'pending'
+
+    # The next run retries it.
+    result = pipeline.run(conn, config, lambda _: None)
+    assert result['added'] == 1
+    assert _status(conn, 'g1') == 'parsed'
