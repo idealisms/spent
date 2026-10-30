@@ -152,6 +152,47 @@ def test_usaa_debit():
     assert t['source'] == 'email_usaa'
 
 
+def test_usaa_debit_blank_line_format():
+    # Since Sept 2026, USAA puts labels and values on separate lines.
+    body = (
+        "$2,408.02=C2=A0came out of your account ending in 9552.\n"
+        "\n"
+        "To:\n"
+        "\n"
+        "CHASE CREDIT CRD AUTOPAY\n"
+        "\n"
+        "Date:\n"
+        "\n"
+        "09/16/26\n"
+    )
+    t = _parse_email('id10', _multipart(
+        'notify@usaa.com', 'Debit Alert for Your USAA Bank Account', body,
+    ))
+    assert t['description'] == 'CHASE CREDIT CRD AUTOPAY'
+    assert t['date'] == '2026-09-16'
+    assert t['amount_cents'] == 240802
+
+
+def test_usaa_deposit_blank_line_format():
+    body = (
+        "You received a deposit of $13.35=C2=A0to your account ...9552.\n"
+        "\n"
+        "From:\n"
+        "\n"
+        "eBay Com0DMSHITV\n"
+        "\n"
+        "Date:\n"
+        "\n"
+        "09/08/26\n"
+    )
+    t = _parse_email('id11', _multipart(
+        'notify@usaa.com', 'Deposit to Your Bank Account', body,
+    ))
+    assert t['description'] == 'eBay Com0DMSHITV'
+    assert t['date'] == '2026-09-08'
+    assert t['amount_cents'] == -1335
+
+
 # ── Routing ────────────────────────────────────────────────────────────────────
 
 def test_unknown_email_raises():

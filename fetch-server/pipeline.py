@@ -125,21 +125,21 @@ JPMORGAN_PATTERNS = {
 
 USAA_DEPOSIT_PATTERNS = {
     'source': 'email_usaa',
-    'description': r'From: (?P<description>[A-Za-z ]+)',
+    'description': r'From:\s*(?P<description>[^\r\n]*\S)',
     'amount': r'NOTHING_NOT_IN_EMAIL',
     'credit amount': r'You received a deposit for [$](?P<amount>[0-9.,]+) to your',
 }
 
 USAA2_DEPOSIT_PATTERNS = {
     'source': 'email_usaa',
-    'description': r'From: (?P<description>[A-Za-z ]+)',
+    'description': r'From:\s*(?P<description>[^\r\n]*\S)',
     'amount': r'NOTHING_NOT_IN_EMAIL',
     'credit amount': r'You received a deposit of [$](?P<amount>[0-9.,]+) to your',
 }
 
 USAA_DEBIT_PATTERNS = {
     'source': 'email_usaa',
-    'description': r'To: (?P<description>[A-Za-z ]+)',
+    'description': r'To:\s*(?P<description>[^\r\n]*\S)',
     'amount': r'[$](?P<amount>[0-9.,]+) came out of your account',
 }
 
@@ -162,7 +162,7 @@ def _email_to_transaction(gmail_id: str, msg, patterns: dict) -> dict:
         dd = m.group('dd').zfill(2)
         yyyy = m.group('yyyy')
     else:
-        m = re.search(r'Date: (?P<mm>\d\d)/(?P<dd>\d\d)/(?P<yy>\d\d)', body, re.MULTILINE | re.DOTALL)
+        m = re.search(r'Date:\s*(?P<mm>\d\d)/(?P<dd>\d\d)/(?P<yy>\d\d)', body, re.MULTILINE | re.DOTALL)
         mm, dd, yyyy = m.group('mm'), m.group('dd'), '20' + m.group('yy')
     date = f'{yyyy}-{mm}-{dd}'
 
