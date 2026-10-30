@@ -210,13 +210,14 @@ def _parse_email(gmail_id: str, raw_content: str) -> dict:
 
 
 def _parse_pending_emails(conn, log: Log) -> list:
+    """Parse all pending/errored emails. Parse failures are marked as errors;
+    successes are left pending until run() has synced them to Dropbox."""
     pending = db.get_emails_pending_parse(conn)
     transactions = []
     for row in pending:
         gmail_id = row['gmail_id']
         try:
             t = _parse_email(gmail_id, row['raw_content'])
-            db.mark_email_parsed(conn, gmail_id)
             transactions.append(t)
             log(f'Parsed: {t["description"]}  {t["date"]}')
         except Exception as e:
@@ -310,16 +311,16 @@ def run(conn: sqlite3.Connection, config: dict, log: Log) -> dict:
 
         new_transactions = _parse_pending_emails(conn, _log)
 
-        # Re-include recently added transactions so any lost due to a stale
-        # frontend save are restored on the next run. _merge deduplicates by
-        # ID, so transactions already in Dropbox are silently skipped.
-        recently_added = db.get_recently_added_transactions(conn)
         added = sync_to_dropbox(
-            recently_added + new_transactions,
+            new_transactions,
             config['dropbox_access_token'],
             config['dropbox_path'],
             _log,
         )
+        # Only mark emails parsed once their transactions are in Dropbox, so a
+        # failed sync is retried on the next run. Transaction ids are Gmail ids.
+        for t in new_transactions:
+            db.mark_email_parsed(conn, t['id'])
 
         db.finish_run(conn, run_id, 'success',
                       emails_downloaded=downloaded,
