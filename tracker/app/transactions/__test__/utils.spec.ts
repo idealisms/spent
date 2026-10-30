@@ -279,3 +279,57 @@ describe('Home', () => {
     expect(filtered.map(t => t.id)).toEqual(['1', '4']);
   });
 });
+
+describe('mergeRemoteAdditions', () => {
+  const txn = (id: string, date: string, sub: ITransaction[] = []) =>
+    ({
+      id,
+      description: id,
+      original_line: '',
+      date,
+      tags: [],
+      amount_cents: 100,
+      transactions: sub,
+    }) as ITransaction;
+
+  it('adds remote transactions not in the base', () => {
+    const local = [txn('a', '2026-10-01')];
+    const remote = [txn('b', '2026-10-02'), txn('a', '2026-10-01')];
+    const merged = utils.mergeRemoteAdditions(local, remote, ['a']);
+    expect(merged.map(t => t.id)).toEqual(['b', 'a']);
+  });
+
+  it('does not resurrect locally deleted transactions', () => {
+    const remote = [txn('a', '2026-10-01'), txn('b', '2026-10-02')];
+    const merged = utils.mergeRemoteAdditions([], remote, ['a', 'b']);
+    expect(merged).toEqual([]);
+  });
+
+  it('keeps local edits over the remote copy', () => {
+    const local = [{ ...txn('a', '2026-10-01'), tags: ['grocery'] }];
+    const merged = utils.mergeRemoteAdditions(
+      local,
+      [txn('a', '2026-10-01')],
+      ['a'],
+    );
+    expect(merged).toBe(local);
+  });
+
+  it('treats split sub-transaction ids as known', () => {
+    // Locally, 'a' was split into a parent holding 'a1' and 'a2'.
+    const local = [txn('p', '2026-10-01', [txn('a1', '2026-10-01')])];
+    const remote = [txn('a1', '2026-10-01')];
+    const merged = utils.mergeRemoteAdditions(local, remote, ['a']);
+    expect(merged).toBe(local);
+  });
+});
+
+describe('collectIds', () => {
+  it('includes nested split ids', () => {
+    const t = {
+      id: 'p',
+      transactions: [{ id: 'c', transactions: [] }],
+    } as unknown as ITransaction;
+    expect(utils.collectIds([t])).toEqual(['p', 'c']);
+  });
+});
