@@ -250,22 +250,43 @@ def _merge(existing: list, new_transactions: list, log: Log) -> list:
     return added
 
 
+# Times to re-download, re-merge and retry an upload that conflicts with a
+# concurrent write (e.g. a tracker save) before giving up.
+MAX_SYNC_ATTEMPTS = 3
+
+
+def _is_upload_conflict(e: Exception) -> bool:
+    return (isinstance(e, dropbox_module.exceptions.ApiError)
+            and e.error.is_path()
+            and e.error.get_path().reason.is_conflict())
+
+
 def sync_to_dropbox(new_transactions: list, access_token: str, dropbox_path: str, log: Log) -> list:
-    """Merge new_transactions into transactions.json on Dropbox. Returns list of added transactions."""
+    """Merge new_transactions into transactions.json on Dropbox. Returns list of added transactions.
+
+    Uploads only if the file is unchanged since it was downloaded (by rev), so a
+    concurrent tracker save is never clobbered; on conflict, re-merges and retries."""
     dbx = dropbox_module.Dropbox(access_token)
-    _, response = dbx.files_download(dropbox_path)
-    existing = json.loads(response.content.decode('utf-8'))
-    added = _merge(existing, new_transactions, log)
-    if added:
-        dbx.files_upload(
-            json.dumps(existing).encode('utf-8'),
-            dropbox_path,
-            dropbox_module.files.WriteMode.overwrite,
-        )
+    for attempt in range(1, MAX_SYNC_ATTEMPTS + 1):
+        metadata, response = dbx.files_download(dropbox_path)
+        existing = json.loads(response.content.decode('utf-8'))
+        added = _merge(existing, new_transactions, log)
+        if not added:
+            log('No new transactions to upload')
+            return added
+        try:
+            dbx.files_upload(
+                json.dumps(existing).encode('utf-8'),
+                dropbox_path,
+                dropbox_module.files.WriteMode.update(metadata.rev),
+            )
+        except Exception as e:
+            if attempt < MAX_SYNC_ATTEMPTS and _is_upload_conflict(e):
+                log('transactions.json changed during sync; retrying')
+                continue
+            raise
         log(f'Uploaded {len(added)} new transaction(s) to Dropbox')
-    else:
-        log('No new transactions to upload')
-    return added
+        return added
 
 
 # ── Entry point ───────────────────────────────────────────────────────────────

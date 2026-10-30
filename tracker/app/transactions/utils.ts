@@ -61,6 +61,37 @@ export function compareTransactions(
   return lhs.id < rhs.id ? -1 : 1;
 }
 
+// Ids of the given transactions and all of their (nested) split
+// sub-transactions.
+export function collectIds(transactions: ITransaction[]): string[] {
+  const ids: string[] = [];
+  const visit = (ts: ITransaction[]) => {
+    for (const t of ts) {
+      ids.push(t.id);
+      visit(t.transactions || []);
+    }
+  };
+  visit(transactions);
+  return ids;
+}
+
+// Merges transactions that were added to the remote copy since it was last
+// loaded/saved (i.e. whose ids aren't in baseIds) into the local copy.
+// Local edits and deletions of transactions that existed at baseIds win;
+// only new remote transactions (e.g. from fetch-server) are added.
+export function mergeRemoteAdditions(
+  local: ITransaction[],
+  remote: ITransaction[],
+  baseIds: string[],
+): ITransaction[] {
+  const known = new Set([...baseIds, ...collectIds(local)]);
+  const added = remote.filter(t => !known.has(t.id));
+  if (added.length === 0) {
+    return local;
+  }
+  return [...local, ...added].sort(compareTransactions);
+}
+
 export function buildTagToCategoryMap(
   categories: Record<string, ICategoryDefinition>,
 ): Map<string, string> {

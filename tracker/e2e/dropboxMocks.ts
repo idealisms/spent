@@ -39,6 +39,9 @@ export async function mockDropboxApi(
 ): Promise<{ uploads: Map<string, string> }> {
   const uploads = new Map<string, string>();
   const filesByPath = new Map(files.map(f => [f.path, f.contents]));
+  // Dropbox file revisions; the app sends these back on upload.
+  let revCounter = 1;
+  const revsByPath = new Map(files.map(f => [f.path, `e2e-rev-${revCounter}`]));
 
   // The real Dropbox API responds with CORS headers allowing
   // localhost/browser access; our mocked responses need to too, or the
@@ -87,6 +90,7 @@ export async function mockDropboxApi(
             name: apiArg.path.split('/').pop(),
             path_lower: apiArg.path,
             id: 'id:e2e-mock',
+            rev: revsByPath.get(apiArg.path),
             size: contents.length,
           }),
         },
@@ -98,6 +102,7 @@ export async function mockDropboxApi(
     if (url.startsWith('https://content.dropboxapi.com/2/files/upload')) {
       const apiArg = JSON.parse(request.headers()['dropbox-api-arg'] || '{}');
       uploads.set(apiArg.path, request.postData() || '');
+      revsByPath.set(apiArg.path, `e2e-rev-${++revCounter}`);
       request.respond({
         status: 200,
         contentType: 'application/json',
@@ -106,6 +111,7 @@ export async function mockDropboxApi(
           name: apiArg.path.split('/').pop(),
           path_lower: apiArg.path,
           id: 'id:e2e-mock',
+          rev: revsByPath.get(apiArg.path),
         }),
       });
       return;

@@ -83,4 +83,13 @@ export interface ITransactionsState {
   cloudState: CloudState;
 
   transactions: ITransaction[];
+
+  /** Dropbox rev of transactions.json as last downloaded or uploaded. */
+  rev?: string;
+  /**
+   * Ids (including split sub-transactions) in transactions.json at `rev`.
+   * Used on a save conflict to tell transactions added remotely since then
+   * from ones deleted locally.
+   */
+  baseIds: string[];
 }

@@ -4,9 +4,10 @@ import json
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 
+import dropbox
 import pytest
 
-from pipeline import _parse_email, _merge, sync_to_dropbox
+from pipeline import MAX_SYNC_ATTEMPTS, _parse_email, _merge, sync_to_dropbox
 
 
 # ── Email construction helpers ─────────────────────────────────────────────────
@@ -267,27 +268,46 @@ def test_merge_sorts_by_date_descending():
 # ── sync_to_dropbox ────────────────────────────────────────────────────────────
 
 class _FakeDropbox:
-    """Minimal Dropbox SDK mock: holds an in-memory transactions list."""
+    """Minimal Dropbox SDK mock: holds an in-memory transactions list and rev.
+
+    concurrent_writes simulates another client (the tracker) saving between
+    our download and upload: each entry replaces the data just after a download."""
     def __init__(self, initial):
         self._data = list(initial)
+        self._rev = 1
         self.upload_calls = 0
+        self.concurrent_writes = []
+
+    def _rev_str(self):
+        return f'{self._rev:09d}'
 
     def files_download(self, path):
-        class _Resp:
+        class _Obj:
             pass
-        r = _Resp()
+        r = _Obj()
         r.content = json.dumps(self._data).encode()
-        return None, r
+        md = _Obj()
+        md.rev = self._rev_str()
+        if self.concurrent_writes:
+            self._data = self.concurrent_writes.pop(0)
+            self._rev += 1
+        return md, r
 
     def files_upload(self, data, path, mode):
-        self._data = json.loads(data.decode())
         self.upload_calls += 1
+        if mode.is_update() and mode.get_update() != self._rev_str():
+            files = dropbox.files
+            raise dropbox.exceptions.ApiError('req', files.UploadError.path(files.UploadWriteFailed(
+                reason=files.WriteError.conflict(files.WriteConflictError.file),
+                upload_session_id='s',
+            )), None, None)
+        self._data = json.loads(data.decode())
+        self._rev += 1
 
 
 class _FakeDropboxModule:
-    class files:
-        class WriteMode:
-            overwrite = 'overwrite'
+    files = dropbox.files
+    exceptions = dropbox.exceptions
 
     def __init__(self, initial):
         self._dbx = _FakeDropbox(initial)
@@ -336,3 +356,30 @@ def test_sync_restores_transaction_missing_after_stale_save(monkeypatch):
     restored_ids = {t['id'] for t in mod._dbx._data}
     assert 'lost' in restored_ids
     assert 'kept' in restored_ids
+
+
+def test_sync_retries_on_conflict_without_clobbering(monkeypatch):
+    """A tracker save landing between download and upload must not be lost."""
+    mod = _FakeDropboxModule([_tx('a', description='CHARGE A')])
+    # The tracker deletes 'a' and adds 'manual' while we're syncing.
+    mod._dbx.concurrent_writes = [[_tx('manual', description='MANUAL')]]
+    import pipeline
+    monkeypatch.setattr(pipeline, 'dropbox_module', mod)
+
+    added = sync_to_dropbox([_tx('new', description='NEW CHARGE')], 'tok', '/p', lambda _: None)
+
+    assert [t['id'] for t in added] == ['new']
+    assert mod._dbx.upload_calls == 2
+    assert {t['id'] for t in mod._dbx._data} == {'manual', 'new'}
+
+
+def test_sync_gives_up_after_repeated_conflicts(monkeypatch):
+    mod = _FakeDropboxModule([])
+    mod._dbx.concurrent_writes = [[] for _ in range(MAX_SYNC_ATTEMPTS)]
+    import pipeline
+    monkeypatch.setattr(pipeline, 'dropbox_module', mod)
+
+    with pytest.raises(dropbox.exceptions.ApiError):
+        sync_to_dropbox([_tx('new')], 'tok', '/p', lambda _: None)
+    assert mod._dbx.upload_calls == MAX_SYNC_ATTEMPTS
+
