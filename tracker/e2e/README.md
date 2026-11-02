@@ -16,9 +16,8 @@ This is a separate Vitest config (`config/vitest.e2e.config.mts`) from the main
 doesn't run as part of the normal unit test suite. It has its own CI job
 (`test-tracker-e2e`).
 
-`puppeteer` is still pinned to `21.11.0` (last version with a CommonJS
-build). That pin dates from the Jest/`ts-jest` setup, which couldn't load
-ESM-only `^22`+; Vitest handles ESM natively, so it can now be bumped.
+Puppeteer 22+ is ESM-only; that's fine because Vitest loads ESM natively
+(it was pinned at 21 while the tests ran on Jest/`ts-jest`).
 
 ## How the mocking works
 
