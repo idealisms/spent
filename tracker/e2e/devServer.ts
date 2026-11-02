@@ -58,7 +58,12 @@ export async function startDevServer(): Promise<ChildProcess> {
   const child = spawn(
     'node',
     [
-      require.resolve('webpack-dev-server/bin/webpack-dev-server.js'),
+      // webpack-dev-server 6's package "exports" doesn't expose bin/, so
+      // require.resolve() can't reach it; point at the installed file.
+      path.join(
+        TRACKER_ROOT,
+        'node_modules/webpack-dev-server/bin/webpack-dev-server.js',
+      ),
       '--mode=development',
       '--config',
       'config/webpack.dev.config.js',
