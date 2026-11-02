@@ -4,11 +4,11 @@ import { Theme } from '@mui/material/styles';
 import { makeStyles } from 'tss-react/mui';
 import moment from 'moment';
 import * as React from 'react';
-import { Chart } from 'react-google-charts';
 import {
+  Chart,
   GoogleDataTableCell,
   GoogleDataTableColumnRoleType,
-} from 'react-google-charts/dist/types';
+} from 'react-google-charts';
 import { ITransaction, TransactionUtils } from '../../transactions';
 import { IDailySpendTarget } from '../model';
 
