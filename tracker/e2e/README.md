@@ -11,6 +11,16 @@ data, so these run offline and don't need any real credentials.
 yarn test:e2e
 ```
 
+Puppeteer needs its matching Chrome build in `~/.cache/puppeteer`. Install
+scripts are disabled (Yarn's default), so it isn't downloaded automatically
+on `yarn install` — after a fresh setup or a puppeteer upgrade, run:
+
+```bash
+yarn puppeteer browsers install chrome
+```
+
+CI doesn't need this; it supplies Chrome via `browser-actions/setup-chrome`.
+
 This is a separate Vitest config (`config/vitest.e2e.config.mts`) from the main
 `yarn test` — it's slower (spins up a dev server + headless Chromium) so it
 doesn't run as part of the normal unit test suite. It has its own CI job
