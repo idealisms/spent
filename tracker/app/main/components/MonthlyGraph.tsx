@@ -1,8 +1,7 @@
 import { Theme } from '@mui/material/styles';
 import { makeStyles } from 'tss-react/mui';
 import * as React from 'react';
-import { Chart } from 'react-google-charts';
-import { GoogleDataTableCell } from 'react-google-charts/dist/types';
+import { Chart, GoogleDataTableCell } from 'react-google-charts';
 
 const useStyles = makeStyles()((_theme: Theme) => ({
   root: {

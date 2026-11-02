@@ -46,7 +46,7 @@ uvicorn server:app --host 0.0.0.0 --port 8001
 
 React SPA deployed on Vercel. All data access is browser-to-Dropbox directly — no server involved.
 
-**Stack:** React 18, Redux 5, TypeScript 5, MUI 7, Dropbox API, Webpack
+**Stack:** React 19, Redux 5, TypeScript 7, MUI 9, Dropbox API, Webpack, Vitest
 
 **Commands** (run from `tracker/`):
 ```bash

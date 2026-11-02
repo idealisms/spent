@@ -10,6 +10,7 @@ yarn build        # Production build
 yarn test         # Run unit tests (Vitest)
 yarn test:e2e     # Run Puppeteer e2e tests
 yarn test:watch   # Watch mode for tests
+yarn typecheck    # tsc --noEmit (TypeScript 7)
 yarn prettier     # Format code
 ```
 
@@ -17,11 +18,10 @@ yarn prettier     # Format code
 
 **Spent Tracker** is a React expense tracking app that syncs data to Dropbox.
 
-**Stack:** React 18, Redux 5, TypeScript 5, MUI 7, connected-react-router, Dropbox API
+**Stack:** React 19, Redux 5, TypeScript 7, MUI 9, React Router 7, Dropbox API. Built with webpack 5 + esbuild-loader (no type-checking in the build; run `yarn typecheck`). Tests: Vitest (unit) and Puppeteer (e2e). Dependency upgrade history/status: `PACKAGES.md`.
 
 **Redux State Shape:**
 
-- `router` - React Router location state
 - `auth` - Dropbox OAuth tokens
 - `settings` - Spend targets, report categories, cloud sync state
 - `transactions` - Transaction data with tags and categories
@@ -35,7 +35,7 @@ app/
 ├── auth/          # Authentication (Dropbox OAuth)
 ├── main/          # Core app: Daily/Monthly views, Reports, Editor
 ├── transactions/  # Transaction components and data model
-├── index.tsx      # Entry point with React 18 createRoot
+├── index.tsx      # Entry point (React createRoot)
 ├── muiTheme.ts    # MUI theme configuration
 └── store.*.ts     # Redux store (dev/prod variants)
 ```
