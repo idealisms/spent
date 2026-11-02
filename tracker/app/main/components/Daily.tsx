@@ -104,7 +104,6 @@ class DailyInner extends React.Component<IDailyInnerProps, IDailyState> {
     }
   };
 
-  // eslint-disable-next-line @typescript-eslint/member-ordering
   private filterTransactions: filterTransactionsFunction =
     memoize<filterTransactionsFunction>((transactions, spendTarget) => {
       if (!transactions.length || !spendTarget.targets.length) {

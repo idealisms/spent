@@ -539,7 +539,6 @@ class ReportInner extends React.Component<IReportInnerProps, IReportState> {
     return reportData;
   }
 
-  // eslint-disable-next-line @typescript-eslint/member-ordering
   private buildChartDataTable: buildChartDataTableFunction =
     memoize<buildChartDataTableFunction>((chartData, compareChartData) => {
       let data: DataRow[] = [];
