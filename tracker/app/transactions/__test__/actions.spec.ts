@@ -1,12 +1,13 @@
+import type { Mock } from 'vitest';
 import * as Dropbox from 'dropbox';
 import { CloudState } from '../../main/model';
 import { saveTransactionsToDropbox } from '../actions';
 import { ITransaction } from '../model';
 import { transactionsReducer } from '../reducers';
 
-jest.mock('dropbox', () => {
-  const actual = jest.requireActual('dropbox');
-  return { ...actual, Dropbox: jest.fn() };
+vi.mock('dropbox', async importOriginal => {
+  const actual = await importOriginal<typeof import('dropbox')>();
+  return { ...actual, Dropbox: vi.fn() };
 });
 
 function txn(id: string, date: string): ITransaction {
@@ -48,8 +49,11 @@ function makeStore(transactions: ITransaction[], rev: string) {
   return { getState, dispatch };
 }
 
-function mockDropbox(dbx: Partial<Record<string, jest.Mock>>) {
-  (Dropbox.Dropbox as unknown as jest.Mock).mockImplementation(() => dbx);
+function mockDropbox(dbx: Partial<Record<string, Mock>>) {
+  // `new Dropbox(...)` needs a constructible implementation (not an arrow fn).
+  vi.mocked(Dropbox.Dropbox).mockImplementation(function () {
+    return dbx as unknown as Dropbox.Dropbox;
+  });
 }
 
 function downloadResult(transactions: ITransaction[], rev: string) {
@@ -64,7 +68,7 @@ function downloadResult(transactions: ITransaction[], rev: string) {
 
 describe('saveTransactionsToDropbox', () => {
   it('uploads in update mode with the last-seen rev', async () => {
-    const filesUpload = jest.fn().mockResolvedValue({ result: { rev: 'r2' } });
+    const filesUpload = vi.fn().mockResolvedValue({ result: { rev: 'r2' } });
     mockDropbox({ filesUpload });
     const store = makeStore([txn('a', '2026-10-01')], 'r1');
 
@@ -90,11 +94,11 @@ describe('saveTransactionsToDropbox', () => {
       transactions: [txn('a', '2026-10-01')],
     });
 
-    const filesUpload = jest
+    const filesUpload = vi
       .fn()
       .mockRejectedValueOnce(conflictError())
       .mockResolvedValueOnce({ result: { rev: 'r3' } });
-    const filesDownload = jest
+    const filesDownload = vi
       .fn()
       .mockResolvedValue(
         downloadResult(
@@ -134,8 +138,8 @@ describe('saveTransactionsToDropbox', () => {
       type: 'UPDATE_TRANSACTIONS',
       transactions: [txn('a', '2026-10-01')],
     });
-    const filesUpload = jest.fn().mockRejectedValue(conflictError());
-    const filesDownload = jest
+    const filesUpload = vi.fn().mockRejectedValue(conflictError());
+    const filesDownload = vi
       .fn()
       .mockResolvedValue(downloadResult([txn('a', '2026-10-01')], 'r2'));
     mockDropbox({ filesUpload, filesDownload });
@@ -148,10 +152,10 @@ describe('saveTransactionsToDropbox', () => {
 
   it('does not retry on non-conflict errors', async () => {
     const store = makeStore([txn('a', '2026-10-01')], 'r1');
-    const filesUpload = jest
+    const filesUpload = vi
       .fn()
       .mockRejectedValue(new Dropbox.DropboxResponseError(401, {}, {}));
-    const filesDownload = jest.fn();
+    const filesDownload = vi.fn();
     mockDropbox({ filesUpload, filesDownload });
 
     await saveTransactionsToDropbox()(store.dispatch, store.getState, null);

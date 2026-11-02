@@ -11,14 +11,14 @@ data, so these run offline and don't need any real credentials.
 yarn test:e2e
 ```
 
-This is a separate Jest config (`config/jest.e2e.config.js`) from the main
+This is a separate Vitest config (`config/vitest.e2e.config.mts`) from the main
 `yarn test` — it's slower (spins up a dev server + headless Chromium) so it
 doesn't run as part of the normal unit test suite. It has its own CI job
 (`test-tracker-e2e`).
 
-`puppeteer` is pinned to `21.11.0` (last version with a CommonJS build) —
-`^22` and later ship ESM-only, which `ts-jest`'s CommonJS output can't
-`require()`. Bump only alongside a wider ESM migration of the test setup.
+`puppeteer` is still pinned to `21.11.0` (last version with a CommonJS
+build). That pin dates from the Jest/`ts-jest` setup, which couldn't load
+ESM-only `^22`+; Vitest handles ESM natively, so it can now be bumped.
 
 ## How the mocking works
 

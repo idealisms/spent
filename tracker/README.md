@@ -17,8 +17,9 @@ After setting up the project, type `yarn start` to start the Express dev server.
 
 ## Running tests
 
-To run jest unit tests run `yarn test`.
-To run jest unit tests in watch mode `yarn test:watch`
+To run unit tests (Vitest) run `yarn test`.
+To run unit tests in watch mode `yarn test:watch`.
+To run the browser e2e tests (Puppeteer) run `yarn test:e2e`.
 
 ## Compiling for production
 
