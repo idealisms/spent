@@ -7,7 +7,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ```bash
 yarn start        # Dev server with hot reload (port 8080)
 yarn build        # Production build
-yarn test         # Run all tests
+yarn test         # Run unit tests (Vitest)
+yarn test:e2e     # Run Puppeteer e2e tests
 yarn test:watch   # Watch mode for tests
 yarn prettier     # Format code
 ```
@@ -80,10 +81,10 @@ Defined in `app/main/components/RoutePaths.ts`:
 
 ## Testing
 
-Tests live in `__test__/` directories. Run a single test file:
+Unit tests use Vitest with Jest-style globals (`describe`/`it`/`expect`, `vi.fn()`/`vi.mock()` for mocks) and live in `__test__/` directories. Run a single test file:
 
 ```bash
-yarn test -- app/transactions/__test__/utils.spec.ts
+yarn test app/transactions/__test__/utils.spec.ts
 ```
 
 ## Cloud Sync
