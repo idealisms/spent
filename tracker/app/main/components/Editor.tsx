@@ -498,7 +498,6 @@ class EditorInner extends React.Component<IEditorInnerProps, IEditorState> {
     });
   };
 
-  // eslint-disable-next-line @typescript-eslint/member-ordering
   private filterTransactions: filterTransactionsFunction =
     memoize<filterTransactionsFunction>(
       (transactions, startDate, endDate, tagFilters, searchQuery) => {

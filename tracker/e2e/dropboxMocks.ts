@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/naming-convention -- HTTP header names */
 import { Page } from 'puppeteer';
 
 const FAKE_ACCESS_TOKEN = 'e2e-fake-dropbox-token';
