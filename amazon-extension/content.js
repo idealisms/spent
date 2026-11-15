@@ -42,8 +42,6 @@
       problem = 'no card charges found on transactions page';
     } else if (Math.abs(sum - order.total_cents) > 1) {
       problem = `charges add up to ${dollars(sum)} but the order total is ${dollars(order.total_cents)}`;
-    } else if (charges.length > 1) {
-      problem = `example of an order split into ${charges.length} charges`;
     }
     return { charges, html, problem };
   }

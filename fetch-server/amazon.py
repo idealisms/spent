@@ -28,9 +28,13 @@ NOT_AN_ORDER = re.compile(r'prime pmts|prime membership', re.IGNORECASE)
 # Bank transaction amounts must match to within this many cents.
 AMOUNT_TOLERANCE_CENTS = 1
 
-# When the page lists individual card charges, the bank date should be close
-# to the charge date (posting lag, timezone differences).
-CHARGE_WINDOW_DAYS = (-1, 5)
+# With individual card charges from Amazon's transactions page, the bank
+# transaction can be dated anywhere from the order date (card alerts fire on
+# authorization, often days before Amazon shows the charge as completed) to a
+# few days after the charge date (posting lag). One day of slack before the
+# order for timezone differences.
+CHARGE_DAYS_BEFORE_ORDER = 1
+CHARGE_DAYS_AFTER_CHARGE = 5
 
 # Without per-charge info, charges land 0-7 days after the order date (when
 # items ship); split shipments get two charges within 14 days.
@@ -89,7 +93,8 @@ def match_order(order: dict, candidates: list) -> Optional[list]:
                 t for t in candidates
                 if t['id'] not in used
                 and _amount_matches(t, charge['amount_cents'])
-                and _in_window(charge['date'], t['date'], CHARGE_WINDOW_DAYS)
+                and _days(order['order_date'], t['date']) >= -CHARGE_DAYS_BEFORE_ORDER
+                and _days(charge['date'], t['date']) <= CHARGE_DAYS_AFTER_CHARGE
             ]
             if not options:
                 return None

@@ -2,6 +2,7 @@ import json
 import os
 import subprocess
 import threading
+import traceback
 from contextlib import asynccontextmanager
 from datetime import datetime, timedelta, timezone
 
@@ -20,10 +21,22 @@ import pipeline
 REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 _run_lock = threading.Lock()   # prevent overlapping runs
+_rerun = threading.Event()     # a run was requested while one was in progress
 _scheduler = BackgroundScheduler()
 _config = cfg.load()
-_conn = db.get_conn(_config['db_path'])
 db.init_db(_config['db_path'])
+
+# SQLite connections must not be shared between threads that write
+# concurrently (an extension POST committing in the middle of a pipeline run
+# fails with "cannot commit - no transaction is active"). Each server thread
+# (the main and LAN event loops) gets its own; each run opens a fresh one.
+_local = threading.local()
+
+
+def _db():
+    if not hasattr(_local, 'conn'):
+        _local.conn = db.get_conn(_config['db_path'])
+    return _local.conn
 
 # Last daily summary attempt: {'sent_at', 'subject', 'body'} or {'skipped_at', 'reason'}
 _last_summary: dict | None = None
@@ -69,7 +82,7 @@ def _send_daily_summary():
         return
 
     since = (datetime.now(timezone.utc) - timedelta(hours=24)).isoformat()
-    runs = db.get_runs_since(_conn, since)
+    runs = db.get_runs_since(_db(), since)
     if not runs:
         _skip('no successful runs with transactions in the past 24 hours')
         return
@@ -119,13 +132,30 @@ app = FastAPI(lifespan=lifespan)
 
 # ── Pipeline runner ────────────────────────────────────────────────────────────
 
-def _do_run():
-    if not _run_lock.acquire(blocking=False):
-        return  # already running
+def _run_once():
+    conn = db.get_conn(_config['db_path'])
     try:
-        pipeline.run(_conn, _config, print)
+        pipeline.run(conn, _config, print)
+    except Exception:
+        traceback.print_exc()  # Already logged to the run; keep the server going.
     finally:
-        _run_lock.release()
+        conn.close()
+
+
+def _do_run():
+    """Run the pipeline now; if a run is in progress, run again after it
+    (e.g. so an order posted mid-run is matched without waiting an hour)."""
+    while True:
+        if not _run_lock.acquire(blocking=False):
+            _rerun.set()
+            return
+        try:
+            _rerun.clear()
+            _run_once()
+        finally:
+            _run_lock.release()
+        if not _rerun.is_set():
+            return
 
 
 # ── Routes ────────────────────────────────────────────────────────────────────
@@ -151,18 +181,18 @@ def _duration(run: dict) -> str:
 
 @app.get('/', response_class=HTMLResponse)
 async def index(request: Request):
-    raw_runs = db.get_recent_runs(_conn)
+    raw_runs = db.get_recent_runs(_db())
     runs = [dict(r) | {'duration': _duration(dict(r))} for r in raw_runs]
     job = _scheduler.get_job('fetch')
     next_run = job.next_run_time.strftime('%Y-%m-%d %H:%M UTC') if job and job.next_run_time else '—'
     amazon_orders = [
         dict(o) | {'items': json.loads(o['items'])}
-        for o in db.get_recent_amazon_orders(_conn)
+        for o in db.get_recent_amazon_orders(_db())
     ]
     return templates.TemplateResponse(request, 'index.html', {
         'runs': runs,
         'amazon_orders': amazon_orders,
-        'amazon_debug_pages': [dict(p) for p in db.list_amazon_debug_pages(_conn)],
+        'amazon_debug_pages': [dict(p) for p in db.list_amazon_debug_pages(_db())],
         'next_run': next_run,
         'running': _is_running(),
         'git': _git,
@@ -172,8 +202,8 @@ async def index(request: Request):
 
 @app.get('/run/{run_id}', response_class=HTMLResponse)
 async def run_detail(request: Request, run_id: int):
-    run = db.get_run(_conn, run_id)
-    emails = db.get_run_emails(_conn, run_id)
+    run = db.get_run(_db(), run_id)
+    emails = db.get_run_emails(_db(), run_id)
     return templates.TemplateResponse(request, 'run.html', {
         'run': dict(run),
         'emails': [dict(e) for e in emails],
@@ -193,14 +223,14 @@ async def fetch_now():
 
 @app.post('/reparse')
 async def reparse():
-    count = db.reset_parsed_emails(_conn)
+    count = db.reset_parsed_emails(_db())
     threading.Thread(target=_do_run, daemon=True).start()
     return RedirectResponse(f'/?reparsing={count}', status_code=303)
 
 
 @app.post('/reparse/{run_id}')
 async def reparse_run(run_id: int):
-    count = db.reset_parsed_emails_for_run(_conn, run_id)
+    count = db.reset_parsed_emails_for_run(_db(), run_id)
     threading.Thread(target=_do_run, daemon=True).start()
     return RedirectResponse(f'/run/{run_id}?reparsing={count}', status_code=303)
 
@@ -228,7 +258,7 @@ async def post_amazon_order(order: AmazonOrder):
     """Called by the browser extension when an order-details page is viewed.
     (It skips in-store Whole Foods purchases, which also appear there.)"""
     status = db.upsert_amazon_order(
-        _conn, order.order_id, order.order_date, order.total_cents,
+        _db(), order.order_id, order.order_date, order.total_cents,
         order.items, [c.model_dump() for c in order.charges], order.url,
     )
     if status == 'pending':
@@ -254,7 +284,7 @@ async def post_amazon_debug(page: AmazonDebugPage):
     """Called by the extension with pages it couldn't scrape, or whose charges
     looked unusual, so the scraper can be fixed from the real HTML."""
     page_id = db.save_amazon_debug_page(
-        _conn, page.page_key, page.reason, page.url,
+        _db(), page.page_key, page.reason, page.url,
         page.order_html, page.transactions_html, page.scraped,
     )
     return {'id': page_id}
@@ -266,13 +296,13 @@ async def list_amazon_debug():
     /amazon/debug/{id}/order.html or /amazon/debug/{id}/transactions.html."""
     return [
         dict(p) | {'scraped': json.loads(p['scraped']) if p['scraped'] else None}
-        for p in db.list_amazon_debug_pages(_conn)
+        for p in db.list_amazon_debug_pages(_db())
     ]
 
 
 @app.get('/amazon/debug/{page_id}/{which}.html')
 async def get_amazon_debug_html(page_id: int, which: str):
-    page = db.get_amazon_debug_page(_conn, page_id)
+    page = db.get_amazon_debug_page(_db(), page_id)
     column = {'order': 'order_html', 'transactions': 'transactions_html'}.get(which)
     if page is None or column is None or page[column] is None:
         raise HTTPException(404)
@@ -283,7 +313,7 @@ async def get_amazon_debug_html(page_id: int, which: str):
 
 @app.post('/amazon/debug/{page_id}/delete')
 async def delete_amazon_debug(page_id: int):
-    db.delete_amazon_debug_page(_conn, page_id)
+    db.delete_amazon_debug_page(_db(), page_id)
     return RedirectResponse('/#amazon-debug', status_code=303)
 
 

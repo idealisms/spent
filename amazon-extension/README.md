@@ -18,7 +18,7 @@ different page template. The extension recognizes that template and skips
 them. (Whole Foods *deliveries* ordered on Amazon are regular orders.)
 
 Pages the extension can't read, or whose charges look unusual (none found,
-not adding up to the order total, or split into several charges), are sent to
+or not adding up to the order total), are sent to
 `<fetch-server>/amazon/debug` along with their HTML, so the scraper can be
 fixed from real pages later. They're listed in the fetch-server's web UI.
 
