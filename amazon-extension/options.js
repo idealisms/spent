@@ -1,9 +1,10 @@
 const input = document.getElementById('url');
 const status = document.getElementById('status');
 
-chrome.storage.sync.get('serverUrl').then(({ serverUrl }) => {
+(async () => {
+  const { serverUrl } = await chrome.storage.sync.get('serverUrl');
   input.value = serverUrl || '';
-});
+})();
 
 document.getElementById('save').addEventListener('click', async () => {
   let url;
