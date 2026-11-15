@@ -1,0 +1,21 @@
+{
+  "manifest_version": 3,
+  "name": "Spent: Amazon orders",
+  "version": "0.1.0",
+  "description": "Sends Amazon order details (date, total, items) to the Spent fetch-server so they can be matched to card transactions.",
+  "permissions": ["storage"],
+  "optional_host_permissions": ["https://*/*", "http://*/*"],
+  "background": { "service_worker": "background.js" },
+  "content_scripts": [
+    {
+      "matches": [
+        "https://www.amazon.com/*order-details*",
+        "https://www.amazon.com/gp/css/summary/*"
+      ],
+      "js": ["scrape.js", "content.js"],
+      "run_at": "document_idle"
+    }
+  ],
+  "action": { "default_title": "Spent: Amazon orders" },
+  "options_page": "options.html"
+}

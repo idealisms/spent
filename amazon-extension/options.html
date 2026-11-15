@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Spent: Amazon orders</title>
+  <style>
+    body { font-family: system-ui, sans-serif; margin: 1.5rem; max-width: 36rem; color: #222; }
+    input { width: 100%; padding: 0.4rem; font-size: 1rem; box-sizing: border-box; }
+    button { margin-top: 0.75rem; padding: 0.4rem 1rem; font-size: 1rem; }
+    .hint { color: #666; font-size: 0.9rem; }
+    #status { margin-top: 0.75rem; }
+  </style>
+</head>
+<body>
+  <h1>Spent: Amazon orders</h1>
+  <label for="url">Fetch-server URL</label>
+  <input id="url" type="url" placeholder="https://raspberrypi.your-tailnet.ts.net:8001">
+  <p class="hint">
+    When you open an order's details page on amazon.com, its date, total and
+    items are sent here to be matched with your card transactions.
+  </p>
+  <button id="save">Save</button>
+  <div id="status"></div>
+  <script src="options.js"></script>
+</body>
+</html>

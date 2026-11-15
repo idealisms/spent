@@ -4,7 +4,8 @@ Fetch pipeline: Gmail → SQLite → Dropbox.
 Entry point: run(conn, config, log)
   - Downloads unseen emails from Gmail into the emails table
   - Parses all pending/error emails into transactions
-  - Merges new transactions into transactions.json on Dropbox
+  - Merges new transactions into transactions.json on Dropbox, and adds notes
+    to transactions matched to Amazon orders posted by the browser extension
 
 Re-parse flow: call db.reset_parsed_emails(conn) before run() to re-parse
 all stored emails from scratch (useful after fixing a regex).
@@ -13,6 +14,7 @@ import base64
 import email as email_lib
 import json
 import os
+import posixpath
 import re
 import sqlite3
 import webbrowser
@@ -24,6 +26,7 @@ from google.oauth2.credentials import Credentials
 from google_auth_oauthlib.flow import InstalledAppFlow
 from googleapiclient.discovery import build
 
+import amazon
 import db
 
 
@@ -262,19 +265,21 @@ def _is_upload_conflict(e: Exception) -> bool:
             and e.error.get_path().reason.is_conflict())
 
 
-def sync_to_dropbox(new_transactions: list, access_token: str, dropbox_path: str, log: Log) -> list:
-    """Merge new_transactions into transactions.json on Dropbox. Returns list of added transactions.
+def update_dropbox(access_token: str, dropbox_path: str, mutate: Callable, log: Log):
+    """Download transactions.json, apply mutate(existing) -> (changed, result)
+    to it in place, and upload it if changed. Returns mutate's result.
 
     Uploads only if the file is unchanged since it was downloaded (by rev), so a
-    concurrent tracker save is never clobbered; on conflict, re-merges and retries."""
+    concurrent tracker save is never clobbered; on conflict, re-downloads and
+    calls mutate again on the fresh copy."""
     dbx = dropbox_module.Dropbox(access_token)
     for attempt in range(1, MAX_SYNC_ATTEMPTS + 1):
         metadata, response = dbx.files_download(dropbox_path)
         existing = json.loads(response.content.decode('utf-8'))
-        added = _merge(existing, new_transactions, log)
-        if not added:
-            log('No new transactions to upload')
-            return added
+        changed, result = mutate(existing)
+        if not changed:
+            log('No changes to upload')
+            return result
         try:
             dbx.files_upload(
                 json.dumps(existing).encode('utf-8'),
@@ -286,8 +291,31 @@ def sync_to_dropbox(new_transactions: list, access_token: str, dropbox_path: str
                 log('transactions.json changed during sync; retrying')
                 continue
             raise
-        log(f'Uploaded {len(added)} new transaction(s) to Dropbox')
-        return added
+        log('Uploaded transactions.json to Dropbox')
+        return result
+
+
+def sync_to_dropbox(new_transactions: list, access_token: str, dropbox_path: str, log: Log) -> list:
+    """Merge new_transactions into transactions.json on Dropbox. Returns list of added transactions."""
+    def mutate(existing):
+        added = _merge(existing, new_transactions, log)
+        return bool(added), added
+    return update_dropbox(access_token, dropbox_path, mutate, log)
+
+
+def load_anthropic_api_key(config: dict, log: Log) -> str:
+    """The Anthropic API key the tracker saves in settings.json (next to
+    transactions.json on Dropbox), falling back to config.json's
+    anthropic_api_key. Returns '' if neither has one."""
+    settings_path = posixpath.join(posixpath.dirname(config['dropbox_path']), 'settings.json')
+    try:
+        dbx = dropbox_module.Dropbox(config['dropbox_access_token'])
+        _, response = dbx.files_download(settings_path)
+        key = json.loads(response.content.decode('utf-8')).get('anthropicApiKey') or ''
+    except Exception as e:
+        log(f"Couldn't read Anthropic API key from {settings_path}: {e}")
+        key = ''
+    return key.strip() or config.get('anthropic_api_key', '')
 
 
 # ── Entry point ───────────────────────────────────────────────────────────────
@@ -311,16 +339,25 @@ def run(conn: sqlite3.Connection, config: dict, log: Log) -> dict:
 
         new_transactions = _parse_pending_emails(conn, _log)
 
-        added = sync_to_dropbox(
-            new_transactions,
-            config['dropbox_access_token'],
-            config['dropbox_path'],
-            _log,
+        if db.get_amazon_orders(conn, 'pending'):
+            config = {**config, 'anthropic_api_key': load_anthropic_api_key(config, _log)}
+
+        def mutate(existing):
+            added = _merge(existing, new_transactions, _log)
+            if added:
+                _log(f'Adding {len(added)} new transaction(s)')
+            matches = amazon.apply_matches(existing, conn, config, _log)
+            return bool(added) or matches.notes_written > 0, (added, matches)
+
+        added, matches = update_dropbox(
+            config['dropbox_access_token'], config['dropbox_path'], mutate, _log,
         )
-        # Only mark emails parsed once their transactions are in Dropbox, so a
-        # failed sync is retried on the next run. Transaction ids are Gmail ids.
+        # Only mark emails parsed (and Amazon orders matched) once the changes
+        # are in Dropbox, so a failed sync is retried on the next run.
+        # Transaction ids are Gmail ids.
         for t in new_transactions:
             db.mark_email_parsed(conn, t['id'])
+        amazon.commit(conn, matches)
 
         db.finish_run(conn, run_id, 'success',
                       emails_downloaded=downloaded,
@@ -328,7 +365,8 @@ def run(conn: sqlite3.Connection, config: dict, log: Log) -> dict:
                       transactions_added=len(added),
                       added_transactions=added)
         return {'run_id': run_id, 'status': 'success',
-                'downloaded': downloaded, 'parsed': len(new_transactions), 'added': len(added)}
+                'downloaded': downloaded, 'parsed': len(new_transactions), 'added': len(added),
+                'amazon_matched': len(matches.matched)}
 
     except Exception as e:
         _log(f'Fatal error: {e}')
