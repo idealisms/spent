@@ -20,6 +20,9 @@
     .badge-success { background: #d4edda; color: #155724; }
     .badge-error   { background: #f8d7da; color: #721c24; }
     .badge-running { background: #fff3cd; color: #856404; }
+    .badge-matched { background: #d4edda; color: #155724; }
+    .badge-pending { background: #fff3cd; color: #856404; }
+    .items { color: #666; font-size: 0.8rem; }
     a { color: #0066cc; text-decoration: none; }
     a:hover { text-decoration: underline; }
     .notice { background: #fff3cd; border: 1px solid #ffc107; border-radius: 4px; padding: 0.5rem 1rem; margin-bottom: 1rem; }
@@ -80,7 +83,7 @@
         <th>Duration</th>
       </tr>
     </thead>
-    <tbody>
+    <tbody id="runs">
       {% for run in runs %}
       <tr data-emails="{{ run.emails_downloaded }}">
         <td><a href="/run/{{ run.id }}">{{ run.started_at[:19].replace('T',' ') }}</a></td>
@@ -99,9 +102,70 @@
   <p>No runs yet.</p>
   {% endif %}
 
+  <h2>Amazon Orders</h2>
+  {% if amazon_orders %}
+  <table>
+    <thead>
+      <tr>
+        <th>Ordered</th>
+        <th>Status</th>
+        <th>Total</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for o in amazon_orders %}
+      <tr>
+        <td>{% if o.url %}<a href="{{ o.url }}">{{ o.order_date }}</a>{% else %}{{ o.order_date }}{% endif %}</td>
+        <td><span class="badge badge-{{ o.status }}">{{ o.status }}</span></td>
+        <td>${{ '%.2f' % (o.total_cents / 100) }}</td>
+        <td>
+          {{ o.summary or '' }}
+          <div class="items">{{ o['items'] | join('; ') }}</div>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <p style="color:#999;font-style:italic">No orders yet. View an order's details page on amazon.com with the extension installed.</p>
+  {% endif %}
+
+  <h2 id="amazon-debug">Amazon Pages to Debug</h2>
+  {% if amazon_debug_pages %}
+  <p class="meta">Pages the extension couldn't read, or whose charges looked unusual. JSON list: <a href="/amazon/debug">/amazon/debug</a></p>
+  <table>
+    <thead>
+      <tr>
+        <th>Received</th>
+        <th>Order</th>
+        <th>Reason</th>
+        <th>HTML</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for p in amazon_debug_pages %}
+      <tr>
+        <td>{{ p.received_at[:19].replace('T', ' ') }}</td>
+        <td>{% if p.url and p.url.startswith('https://') %}<a href="{{ p.url }}">{{ p.page_key }}</a>{% else %}{{ p.page_key }}{% endif %}</td>
+        <td>{{ p.reason }}</td>
+        <td>
+          {% if p.has_order_html %}<a href="/amazon/debug/{{ p.id }}/order.html">order</a>{% endif %}
+          {% if p.has_transactions_html %}<a href="/amazon/debug/{{ p.id }}/transactions.html">transactions</a>{% endif %}
+        </td>
+        <td><form method="post" action="/amazon/debug/{{ p.id }}/delete"><button>Delete</button></form></td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <p style="color:#999;font-style:italic">None.</p>
+  {% endif %}
+
   <script>
   document.addEventListener('DOMContentLoaded', () => {
-    const tbody = document.querySelector('tbody');
+    const tbody = document.getElementById('runs');
     if (!tbody) return;
     const rows = Array.from(tbody.querySelectorAll('tr'));
 

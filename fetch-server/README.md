@@ -7,6 +7,7 @@ FastAPI server that runs on a Raspberry Pi to fetch financial transaction emails
 1. **Fetch** — Downloads unread spending alert emails from a Gmail label using the Gmail API. Emails are stored raw in SQLite and never re-downloaded.
 2. **Parse** — Extracts transaction date, description, and amount from each email using regexes. Supports Chase, JPMorgan, and USAA email formats.
 3. **Sync** — Merges new transactions into `transactions.json` on Dropbox, deduplicating by ID and description+date.
+4. **Amazon orders** — Orders posted by the browser extension (`../amazon-extension`) to `POST /amazon/orders` are matched to Amazon card transactions: each card charge listed on Amazon's transactions page to a transaction of the same amount within a few days, or, without charge details, the order total (charged 0–7 days after the order, or two charges within 14 days for split shipments). Pages the extension couldn't scrape are kept for debugging (`POST`/`GET /amazon/debug`). Matched transactions get a short Claude-written summary of the items in `notes` (never overwriting an existing note). Unmatched orders are retried every run.
 
 The web UI (Tailscale-only, port 8001) shows a log of recent runs, lets you trigger a fetch manually, re-parse all stored emails after a regex fix, and pull the latest code from GitHub.
 
@@ -35,11 +36,14 @@ cp config.py config.json   # don't copy config.py itself — create config.json
 ```json
 {
   "dropbox_access_token": "your-token-here",
-  "summary_to": "you@example.com"
+  "summary_to": "you@example.com",
+  "lan_http_port": 8002
 }
 ```
 
-All other values default correctly. See `config.py` for the full list of keys.
+Matched Amazon orders are summarized by Claude (`anthropic_model`) using the API key saved in the tracker (`anthropicApiKey` in `settings.json` on Dropbox), or `anthropic_api_key` here if that's missing; without a key the first item title is used.
+
+`lan_http_port` is optional: it serves just the browser extension's endpoints over plain HTTP on that port (e.g. `http://pi.home:8002`) for computers on the home network without Tailscale. The web UI stays HTTPS/Tailscale-only. All other values default correctly. See `config.py` for the full list of keys.
 
 ### 3. Gmail OAuth
 
@@ -86,6 +90,7 @@ sudo chmod 440 /etc/sudoers.d/fetch-server
 |------|---------|
 | `server.py` | FastAPI app, APScheduler jobs, web UI routes |
 | `pipeline.py` | Gmail fetch, email parsing, Dropbox sync |
+| `amazon.py` | Amazon order matching and Claude summaries |
 | `db.py` | SQLite schema and helpers |
 | `config.py` | Config loader with defaults |
 | `templates/index.html` | Run list UI |
@@ -99,3 +104,7 @@ Access at `https://raspberrypi.your-tailnet.ts.net:8001`
 - **Fetch Now** — run the pipeline immediately
 - **Re-parse All Emails** — reset all stored emails to pending and re-run the parser (use after fixing a regex in `pipeline.py`)
 - **Update (git pull)** — pull latest code from GitHub and restart the service
+- **Amazon Orders** — orders received from the extension and whether they've been matched
+- **Amazon Pages to Debug** — pages the extension couldn't read, with their HTML
+
+After pulling this change on the Pi, run `pip install -r requirements.txt` to install the `anthropic` package.

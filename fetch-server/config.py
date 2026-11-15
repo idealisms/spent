@@ -14,6 +14,15 @@ DEFAULTS = {
     'fetch_interval_minutes': 60,
     'summary_to': '',
     'summary_hour': 6,
+    # Used to write short descriptions of matched Amazon orders. The key the
+    # tracker saves in settings.json on Dropbox is used first; this is the
+    # fallback. Without either, the first item title is used instead.
+    'anthropic_api_key': '',
+    'anthropic_model': 'claude-haiku-5-5',
+    # If set (e.g. 8002), the browser extension's endpoints are also served
+    # over plain HTTP on this port, for computers on the home network
+    # without Tailscale (http://pi.home:8002).
+    'lan_http_port': 0,
 }
 
 

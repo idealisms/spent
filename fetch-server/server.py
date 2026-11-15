@@ -6,9 +6,10 @@ from contextlib import asynccontextmanager
 from datetime import datetime, timedelta, timezone
 
 from apscheduler.schedulers.background import BackgroundScheduler
-from fastapi import FastAPI, Request
-from fastapi.responses import HTMLResponse, RedirectResponse
+from fastapi import FastAPI, HTTPException, Request
+from fastapi.responses import HTMLResponse, PlainTextResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
+from pydantic import BaseModel, Field
 
 import config as cfg
 import db
@@ -106,7 +107,10 @@ async def lifespan(app: FastAPI):
     _scheduler.add_job(_send_daily_summary, 'cron',
                        hour=_config['summary_hour'], minute=0, id='summary')
     _scheduler.start()
+    lan_server = _start_lan_server(_config.get('lan_http_port'))
     yield
+    if lan_server:
+        lan_server.should_exit = True
     _scheduler.shutdown()
 
 
@@ -151,8 +155,14 @@ async def index(request: Request):
     runs = [dict(r) | {'duration': _duration(dict(r))} for r in raw_runs]
     job = _scheduler.get_job('fetch')
     next_run = job.next_run_time.strftime('%Y-%m-%d %H:%M UTC') if job and job.next_run_time else '—'
+    amazon_orders = [
+        dict(o) | {'items': json.loads(o['items'])}
+        for o in db.get_recent_amazon_orders(_conn)
+    ]
     return templates.TemplateResponse(request, 'index.html', {
         'runs': runs,
+        'amazon_orders': amazon_orders,
+        'amazon_debug_pages': [dict(p) for p in db.list_amazon_debug_pages(_conn)],
         'next_run': next_run,
         'running': _is_running(),
         'git': _git,
@@ -193,6 +203,111 @@ async def reparse_run(run_id: int):
     count = db.reset_parsed_emails_for_run(_conn, run_id)
     threading.Thread(target=_do_run, daemon=True).start()
     return RedirectResponse(f'/run/{run_id}?reparsing={count}', status_code=303)
+
+
+ISO_DATE = r'^\d{4}-\d{2}-\d{2}$'
+
+
+class AmazonCharge(BaseModel):
+    date: str = Field(pattern=ISO_DATE)
+    amount_cents: int
+    payment: str | None = None  # e.g. "Prime Visa ****1234"
+
+
+class AmazonOrder(BaseModel):
+    order_id: str = Field(min_length=1, max_length=64)
+    order_date: str = Field(pattern=ISO_DATE)
+    total_cents: int
+    items: list[str] = Field(min_length=1)
+    charges: list[AmazonCharge] = []
+    url: str | None = Field(default=None, pattern=r'^https://')
+
+
+@app.post('/amazon/orders')
+async def post_amazon_order(order: AmazonOrder):
+    """Called by the browser extension when an order-details page is viewed.
+    (It skips in-store Whole Foods purchases, which also appear there.)"""
+    status = db.upsert_amazon_order(
+        _conn, order.order_id, order.order_date, order.total_cents,
+        order.items, [c.model_dump() for c in order.charges], order.url,
+    )
+    if status == 'pending':
+        # Try to match right away instead of waiting for the next scheduled run.
+        threading.Thread(target=_do_run, daemon=True).start()
+    return {'status': status}
+
+
+MAX_HTML_CHARS = 10_000_000
+
+
+class AmazonDebugPage(BaseModel):
+    page_key: str = Field(min_length=1, max_length=256)
+    reason: str = Field(max_length=1000)
+    url: str | None = None
+    order_html: str | None = Field(default=None, max_length=MAX_HTML_CHARS)
+    transactions_html: str | None = Field(default=None, max_length=MAX_HTML_CHARS)
+    scraped: dict | None = None
+
+
+@app.post('/amazon/debug')
+async def post_amazon_debug(page: AmazonDebugPage):
+    """Called by the extension with pages it couldn't scrape, or whose charges
+    looked unusual, so the scraper can be fixed from the real HTML."""
+    page_id = db.save_amazon_debug_page(
+        _conn, page.page_key, page.reason, page.url,
+        page.order_html, page.transactions_html, page.scraped,
+    )
+    return {'id': page_id}
+
+
+@app.get('/amazon/debug')
+async def list_amazon_debug():
+    """Saved debug pages (JSON, no HTML). Fetch the HTML from
+    /amazon/debug/{id}/order.html or /amazon/debug/{id}/transactions.html."""
+    return [
+        dict(p) | {'scraped': json.loads(p['scraped']) if p['scraped'] else None}
+        for p in db.list_amazon_debug_pages(_conn)
+    ]
+
+
+@app.get('/amazon/debug/{page_id}/{which}.html')
+async def get_amazon_debug_html(page_id: int, which: str):
+    page = db.get_amazon_debug_page(_conn, page_id)
+    column = {'order': 'order_html', 'transactions': 'transactions_html'}.get(which)
+    if page is None or column is None or page[column] is None:
+        raise HTTPException(404)
+    # Served as plain text: rendering Amazon's HTML (and running its scripts)
+    # on this origin would be pointless and unsafe.
+    return PlainTextResponse(page[column])
+
+
+@app.post('/amazon/debug/{page_id}/delete')
+async def delete_amazon_debug(page_id: int):
+    db.delete_amazon_debug_page(_conn, page_id)
+    return RedirectResponse('/#amazon-debug', status_code=303)
+
+
+# ── Plain-HTTP LAN server for the extension ───────────────────────────────────
+# The main server is HTTPS with a Tailscale certificate, so browsers without
+# Tailscale can't use it. With lan_http_port set in config.json, the
+# extension's endpoints (only) are also served over plain HTTP on that port,
+# e.g. http://pi.home:8002, from a second server in this process (sharing the
+# DB connection and run lock).
+
+lan_app = FastAPI()
+lan_app.add_api_route('/ping', ping, methods=['GET'])
+lan_app.add_api_route('/amazon/orders', post_amazon_order, methods=['POST'])
+lan_app.add_api_route('/amazon/debug', post_amazon_debug, methods=['POST'])
+
+
+def _start_lan_server(port):
+    if not port:
+        return None
+    import uvicorn
+    server = uvicorn.Server(uvicorn.Config(lan_app, host='0.0.0.0', port=int(port)))
+    # uvicorn leaves signal handling to the main server when run off the main thread.
+    threading.Thread(target=server.run, daemon=True, name='lan-http').start()
+    return server
 
 
 def _restarting_html(git_hash: str, changed: bool) -> str:
