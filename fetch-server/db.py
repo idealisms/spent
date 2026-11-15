@@ -71,6 +71,8 @@ def get_conn(db_path: str) -> sqlite3.Connection:
 
 def init_db(db_path: str) -> None:
     with get_conn(db_path) as conn:
+        # WAL lets the web UI and extension requests read while a run writes.
+        conn.execute("PRAGMA journal_mode=WAL")
         conn.executescript(SCHEMA)
         # Migrate existing DBs that predate the added_transactions column.
         try:

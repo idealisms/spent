@@ -54,7 +54,7 @@ uvicorn server:app --host 0.0.0.0 --port 8001
 
 Manifest V3 Chrome extension, no build step. `scrape.js` reads the order-details page via its `data-component` attributes, and the card charges from the order's "related transactions" page (`/cpe/yourpayments/transactions?transactionTag=<order id>`). In-store Whole Foods purchases (a different page template) are skipped. Tests: `npm test` (Vitest + jsdom) from `amazon-extension/`. Never commit saved Amazon pages (personal data); fixtures are hand-written to mirror the real markup.
 
-**Fixing the scraper:** pages the extension couldn't read, or whose charges looked unusual (none found, don't add up to the total, or an order split into several charges), are saved on the fetch-server. List them with `curl https://raspberrypi.<tailnet>.ts.net:8001/amazon/debug` (reason + what was scraped) and download the HTML from `/amazon/debug/<id>/order.html` and `/amazon/debug/<id>/transactions.html`. Update `scrape.js` and add a scrubbed fixture to `test/fixtures.js` for the new case.
+**Fixing the scraper:** pages the extension couldn't read, or whose charges looked unusual (none found, or not adding up to the order total), are saved on the fetch-server. List them with `curl https://raspberrypi.<tailnet>.ts.net:8001/amazon/debug` (reason + what was scraped) and download the HTML from `/amazon/debug/<id>/order.html` and `/amazon/debug/<id>/transactions.html`. Update `scrape.js` and add a scrubbed fixture to `test/fixtures.js` for the new case.
 
 ## tracker
 

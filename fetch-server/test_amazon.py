@@ -91,12 +91,36 @@ def test_charges_same_amount_use_distinct_transactions():
     assert [t['id'] for t in match_order(order, txns)] == ['a', 'b']
 
 
-def test_charge_date_window():
+def test_charge_window_runs_from_order_date_to_after_charge_date():
     order = _order('2026-11-01', 1000, [{'date': '2026-11-05', 'amount_cents': 1000}])
-    assert match_order(order, [_tx('a', '2026-11-04', 1000)]) is not None  # 1 day early
-    assert match_order(order, [_tx('a', '2026-11-03', 1000)]) is None
-    assert match_order(order, [_tx('a', '2026-11-10', 1000)]) is not None
+    assert match_order(order, [_tx('a', '2026-10-31', 1000)]) is not None  # 1 day before order
+    assert match_order(order, [_tx('a', '2026-10-30', 1000)]) is None
+    assert match_order(order, [_tx('a', '2026-11-10', 1000)]) is not None  # 5 days after charge
     assert match_order(order, [_tx('a', '2026-11-11', 1000)]) is None
+
+
+def test_card_alert_before_amazon_charge_date():
+    """Chase alerts fire on authorization, around the order date, while
+    Amazon's transactions page shows when the charge completed, days later
+    (seen: ordered 08-21, alert 08-21, Amazon charge 08-24)."""
+    order = _order('2026-08-21', 1085, [{'date': '2026-08-24', 'amount_cents': 1085}])
+    assert [t['id'] for t in match_order(order, [_tx('a', '2026-08-21', 1085)])] == ['a']
+
+
+def test_charge_prefers_date_closest_to_charge():
+    order = _order('2026-11-01', 1000, [{'date': '2026-11-05', 'amount_cents': 1000}])
+    txns = [_tx('far', '2026-11-01', 1000), _tx('near', '2026-11-06', 1000)]
+    assert [t['id'] for t in match_order(order, txns)] == ['near']
+
+
+def test_split_into_two_same_day_charges():
+    """Seen: one shipment charged as two card transactions on the same day."""
+    order = _order('2026-08-15', 10837, [
+        {'date': '2026-08-16', 'amount_cents': 5161},
+        {'date': '2026-08-16', 'amount_cents': 5676},
+    ])
+    txns = [_tx('other', '2026-08-16', 3909), _tx('a', '2026-08-16', 5676), _tx('b', '2026-08-16', 5161)]
+    assert [t['id'] for t in match_order(order, txns)] == ['b', 'a']
 
 
 # ── truncated_summary ──────────────────────────────────────────────────────────
