@@ -9,11 +9,16 @@ const BADGES = {
   setup: { text: '?', color: '#bf8700', title: 'Set the fetch-server URL in the extension options' },
 };
 
-function setBadge(tabId, kind, detail) {
+async function setBadge(tabId, kind, detail) {
   const b = BADGES[kind];
-  chrome.action.setBadgeText({ tabId, text: b.text });
-  chrome.action.setBadgeBackgroundColor({ tabId, color: b.color });
-  chrome.action.setTitle({ tabId, title: detail ? `${b.title}: ${detail}` : b.title });
+  try {
+    await chrome.action.setBadgeText({ tabId, text: b.text });
+    await chrome.action.setBadgeBackgroundColor({ tabId, color: b.color });
+    await chrome.action.setTitle({ tabId, title: detail ? `${b.title}: ${detail}` : b.title });
+  } catch (e) {
+    // The tab was closed (or navigated away) before the post finished.
+    console.debug(`Couldn't set badge on tab ${tabId}: ${e.message}`);
+  }
 }
 
 async function post(serverUrl, path, body) {
@@ -52,7 +57,10 @@ async function handle({ order, debug, wholeFoods }) {
 
 chrome.runtime.onMessage.addListener((msg, sender) => {
   if (msg.type !== 'amazon-order' || !sender.tab) return;
-  handle(msg).then(({ kind, detail }) => setBadge(sender.tab.id, kind, detail));
+  (async () => {
+    const { kind, detail } = await handle(msg);
+    await setBadge(sender.tab.id, kind, detail);
+  })();
 });
 
 chrome.action.onClicked.addListener(() => chrome.runtime.openOptionsPage());
